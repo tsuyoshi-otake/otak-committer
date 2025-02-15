@@ -5,6 +5,17 @@
 
 ---
 
+## Usage
+
+1. Stage your changes in Git  
+
+After staging your changes, you'll see the "Generate Commit Message" button in the Source Control view:
+
+![Generate Commit Message Button](images/generate-commit-message.png)
+2. Click the "Generate Commit Message" button in the SCM view (or use the command palette)  
+3. Review and optionally edit the generated message  
+4. Commit your changes
+
 ## Features
 
 otak-committer is a powerful VS Code extension that leverages AI to automatically generate Git commit messages.
@@ -63,17 +74,6 @@ This extension contributes the following settings:
 - `otakCommitter.openaiApiKey`: OpenAI API Key for generating commit messages
 - `otakCommitter.language`: Language for commit messages (default: "english")
 - `otakCommitter.messageStyle`: Style and length of generated commit messages (default: "normal")
-
-## Usage
-
-1. Stage your changes in Git
-
-After staging your changes, you'll see the "Generate Commit Message" button in the Source Control view:
-
-![Generate Commit Message Button](images/generate-commit-message.png)
-2. Click the "Generate Commit Message" button in the SCM view (or use the command palette)
-3. Review and optionally edit the generated message
-4. Commit your changes
 
 ## Commands
 
