@@ -71,7 +71,8 @@ Note: The extension uses GPT-4o model to generate commit messages. Make sure you
 
 This extension contributes the following settings:
 
-![](images\settings-otakCommitter.png)
+![Settings](images/settings-otakCommitter.png)
+
 - `otakCommitter.language`: Language for commit messages (default: "english")
 - `otakCommitter.messageStyle`: Style and length of generated commit messages (default: "normal")
 - `otakCommitter.openaiApiKey`: OpenAI API Key for generating commit messages
