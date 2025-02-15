@@ -1,73 +1,74 @@
 <p align="center">
-  <h1 align="center">vscode-scm-committer</h1>
+  <h1 align="center">otak-committer</h1>
   <p align="center">VS Code extension for intelligent SCM operations - Multilingual commit message generation with AI support (9 languages supported) and future PR management features.</p>
+</p>
 
 ---
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+otak-committer is a powerful VS Code extension that leverages AI to automatically generate Git commit messages.
 
-For example if there is an image subfolder under your extension project workspace:
+### Key Features
 
-\!\[feature X\]\(images/feature-x.png\)
+- **Multilingual Support**: Generate commit messages in 9 languages:
+  - 🇺🇸 English
+  - 🇫🇷 French (Français)
+  - 🇩🇪 German (Deutsch)
+  - 🇮🇹 Italian (Italiano)
+  - 🇯🇵 Japanese (日本語)
+  - 🇨🇳 Chinese (中文)
+  - 🇰🇷 Korean (한국어)
+  - 🇻🇳 Vietnamese (Tiếng Việt)
+  - 🇷🇺 Russian (Русский)
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+- **Flexible Message Styles**: Choose from three levels of detail for your commit messages:
+  - Simple: Concise summary (100 tokens)
+  - Normal: Standard length with context (200 tokens)
+  - Detailed: Comprehensive explanation (500 tokens)
+
+- **Git SCM Integration**: Seamlessly integrated into VS Code's Git interface with a dedicated button in the SCM view.
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- Visual Studio Code ^1.97.0
+- Git installed and configured
+- OpenAI API key
+
+## Installation
+
+1. Install the extension from the VS Code Marketplace
+2. Configure your OpenAI API key in the extension settings
+3. Select your preferred language and message style
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
 This extension contributes the following settings:
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+- `otakCommitter.openaiApiKey`: OpenAI API Key for generating commit messages
+- `otakCommitter.language`: Language for commit messages (default: "english")
+- `otakCommitter.messageStyle`: Style and length of generated commit messages (default: "normal")
 
-## Known Issues
+## Usage
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+1. Stage your changes in Git
+2. Click the "Generate Commit Message" button in the SCM view (or use the command palette)
+3. Review and optionally edit the generated message
+4. Commit your changes
 
-## Release Notes
+## Commands
 
-Users appreciate release notes as you update your extension.
+- `otak-committer.generateMessage`: Generate a commit message for staged changes
+- `otak-committer.openSettings`: Open the extension settings
 
-### 1.0.0
+## Contributing
 
-Initial release of ...
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
 
-### 1.0.1
+## License
 
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ---
 
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+For more information, visit the [GitHub repository](https://github.com/tsuyoshi-otake-system-exe-jp/otak-committer).

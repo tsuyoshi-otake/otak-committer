@@ -1,5 +1,26 @@
 import * as vscode from 'vscode';
-import axios from 'axios';
+import * as path from 'path';
+
+function convertMarkdownToPlainText(markdown: string): string {
+    return markdown
+        // Remove code blocks
+        .replace(/```[\s\S]*?```/g, '')
+        // Remove inline code
+        .replace(/`([^`]+)`/g, '$1')
+        // Remove headers but preserve issue references
+        .replace(/^#{1,6}\s+/gm, '')
+        // Remove bold/italic
+        .replace(/[*_]{1,3}([^*_]+)[*_]{1,3}/g, '$1')
+        // Remove links but keep text
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+        // Remove list markers
+        .replace(/^[-*+]\s/gm, '')
+        // Remove numbered lists
+        .replace(/^\d+\.\s/gm, '')
+        // Remove blockquotes
+        .replace(/^>\s/gm, '')
+        .trim();
+}
 
 interface GitExtension {
     getAPI(version: number): GitAPI;
@@ -17,10 +38,15 @@ interface Repository {
     };
     diff(staged: boolean): Promise<string>;
     state: {
-        indexChanges: string[];
-        workingTreeChanges: string[];
+        indexChanges: GitChange[];
+        workingTreeChanges: GitChange[];
     };
     add(paths: string[]): Promise<void>;
+}
+
+interface GitChange {
+    uri: vscode.Uri;
+    status: number;
 }
 
 interface LanguageConfig {
@@ -86,11 +112,10 @@ const LANGUAGE_CONFIGS: { [key: string]: LanguageConfig } = {
     },
     japanese: {
         name: '日本語',
-        systemPrompt: (style) => `あなたはコミットメッセージを生成する専門家です。${
-            style === 'simple' ? '変更の本質のみを簡潔に説明してください。' :
+        systemPrompt: (style) => `あなたはコミットメッセージを生成する専門家です。${style === 'simple' ? '変更の本質のみを簡潔に説明してください。' :
             style === 'normal' ? '変更内容を適度な詳しさで説明してください。' :
-            '変更の文脈、理由、影響を含めて詳しく説明してください。'
-        }以下のプレフィックスを使用してConventional Commits形式に従ってください：${COMMIT_PREFIX_GUIDE}`,
+                '変更の文脈、理由、影響を含めて詳しく説明してください。'
+            }以下のプレフィックスを使用してConventional Commits形式に従ってください：${COMMIT_PREFIX_GUIDE}`,
         diffMessage: "以下のGit diffに対するコミットメッセージを生成してください："
     },
     chinese: {
@@ -123,14 +148,14 @@ async function showSettingsPrompt(): Promise<boolean> {
     );
 
     if (response === 'Yes') {
-        await vscode.commands.executeCommand('workbench.action.openSettings', 'scmComitter.openaiApiKey');
+        await vscode.commands.executeCommand('workbench.action.openSettings', 'otakCommitter.openaiApiKey');
         return true;
     }
     return false;
 }
 
-async function generateCommitMessageWithAI(diff: string): Promise<string> {
-    const config = vscode.workspace.getConfiguration('scmComitter');
+export async function generateCommitMessageWithAI(diff: string): Promise<string> {
+    const config = vscode.workspace.getConfiguration('otakCommitter');
     const apiKey = config.get<string>('openaiApiKey');
     const language = config.get<string>('language') || 'japanese';
     const messageStyle = config.get<MessageStyle>('messageStyle') || 'normal';
@@ -142,10 +167,14 @@ async function generateCommitMessageWithAI(diff: string): Promise<string> {
     const languageConfig = LANGUAGE_CONFIGS[language];
 
     try {
-        const response = await axios.post(
-            'https://api.openai.com/v1/chat/completions',
-            {
-                model: 'chatgpt-4o-latest',  // Updated to latest model
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: 'chatgpt-4o-latest',
                 messages: [
                     {
                         role: 'system',
@@ -158,35 +187,44 @@ async function generateCommitMessageWithAI(diff: string): Promise<string> {
                 ],
                 temperature: 0.2,
                 max_tokens: MESSAGE_STYLES[messageStyle].tokens
-            },
-            {
-                headers: {
-                    'Authorization': `Bearer ${apiKey}`,
-                    'Content-Type': 'application/json'
-                }
-            }
-        );
+            }),
+        });
 
-        return response.data.choices[0].message.content.trim();
+        if (!response.ok) {
+            const error = await response.json();
+            if (error && typeof error === 'object' && 'error' in error) {
+                const apiError = error as { error: { message: string } };
+                throw new Error(`OpenAI API error: ${apiError.error.message}`);
+            }
+            throw new Error('OpenAI API error: Unknown error');
+        }
+
+        const data = await response.json() as {
+            choices: Array<{ message: { content: string } }>;
+        };
+        const rawMessage = data.choices[0]?.message?.content?.trim() ?? '';
+        return convertMarkdownToPlainText(rawMessage);
     } catch (error) {
-        if (axios.isAxiosError(error)) {
-            throw new Error(`OpenAI API error: ${error.response?.data.error.message || error.message}`);
+        if (error instanceof Error) {
+            throw error;
         }
         throw error;
     }
 }
 
-async function stageAllChanges(repository: Repository): Promise<void> {
-    const changes = repository.state.workingTreeChanges.map(change => change);
-    if (changes.length > 0) {
-        await repository.add(changes);
+export async function stageAllChanges(repository: Repository): Promise<void> {
+    const changes = repository.state.workingTreeChanges;
+    if (changes.length === 0) {
+        return;
     }
+    
+    const paths = changes.map(change => change.uri.fsPath);
+    await repository.add(paths);
 }
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('Extension "otak-committer" is now active!');
 
-    // Git拡張機能を取得
     const gitExtension = vscode.extensions.getExtension<GitExtension>('vscode.git')?.exports;
     if (!gitExtension) {
         vscode.window.showErrorMessage('Git extension not found');
@@ -194,26 +232,21 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     const git = gitExtension.getAPI(1);
-    
-    // Git リポジトリの監視を開始
+
     git.onDidChangeState(() => {
-        // リポジトリが追加されたときに設定を適用
         for (const repo of git.repositories) {
             setupRepository(repo);
         }
     });
 
-    // 既存のリポジトリに設定を適用
     git.repositories.forEach(repo => {
         setupRepository(repo);
     });
 
-    // 設定画面を開くコマンド
     const openSettingsDisposable = vscode.commands.registerCommand('otak-committer.openSettings', async () => {
         await vscode.commands.executeCommand('workbench.action.openSettings', 'otakCommitter');
     });
 
-    // コミットメッセージの生成機能
     const generateDisposable = vscode.commands.registerCommand('otak-committer.generateMessage', async () => {
         const repository = git.repositories[0];
         if (!repository) {
@@ -221,38 +254,33 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
 
-        const config = vscode.workspace.getConfiguration('scmComitter');
-        const apiKey = config.get<string>('otakCommitter.openaiApiKey');
-        const messageStyle = config.get<MessageStyle>('otakCommitter.messageStyle') || 'normal';
+        const config = vscode.workspace.getConfiguration('otakCommitter');
+        const apiKey = config.get<string>('openaiApiKey');
+        const messageStyle = config.get<MessageStyle>('messageStyle') || 'normal';
 
         if (!apiKey) {
             const shouldContinue = await showSettingsPrompt();
             if (!shouldContinue) {
                 return;
             }
-            // 設定画面を表示した後、ユーザーが設定を行うまで待機
             await new Promise(resolve => setTimeout(resolve, 1000));
-            // 設定を再取得
-            if (!config.get<string>('otakCommitter.openaiApiKey')) {
+            if (!config.get<string>('openaiApiKey')) {
                 return;
             }
         }
 
-        // プログレスバーを表示
         await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
             title: `Generating ${messageStyle} commit message...`,
             cancellable: false
         }, async () => {
             try {
-                // ステージングされた変更の差分を取得
                 let diff = await repository.diff(true);
-                
-                // ステージングされた変更がない場合、未ステージの変更を自動的にステージング
+
                 if (!diff) {
                     await stageAllChanges(repository);
                     diff = await repository.diff(true);
-                    
+
                     if (!diff) {
                         vscode.window.showWarningMessage('No changes to commit');
                         return;
@@ -261,7 +289,6 @@ export function activate(context: vscode.ExtensionContext) {
                     }
                 }
 
-                // OpenAI APIを使用してコミットメッセージを生成
                 const message = await generateCommitMessageWithAI(diff);
                 repository.inputBox.value = message;
 
@@ -279,8 +306,7 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 function setupRepository(repository: Repository) {
-    // プレースホルダーテキストを設定
     repository.inputBox.placeholder = COMMIT_PREFIX_GUIDE;
 }
 
-export function deactivate() {}
+export function deactivate() { }
