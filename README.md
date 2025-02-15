@@ -35,6 +35,15 @@ otak-committer is a powerful VS Code extension that leverages AI to automaticall
 - Git installed and configured
 - OpenAI API key
 
+### Getting OpenAI API Key
+
+To use this extension, you need an OpenAI API key. Here's how to get one:
+
+1. Go to [OpenAI API Keys page](https://platform.openai.com/api-keys)
+2. Sign in or create an OpenAI account
+3. Create a new API key
+4. Copy the API key and add it to the extension settings (`otakCommitter.openaiApiKey`)
+
 ## Installation
 
 1. Install the extension from the VS Code Marketplace

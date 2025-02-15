@@ -4,6 +4,7 @@
   "description": "VS Code extension for intelligent SCM operations - Multilingual commit message generation with AI support (9 languages supported) and future PR management features.",
   "publisher": "tsuyoshi-otake-system-exe-jp",
   "license": "MIT",
+  "icon": "icon.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/tsuyoshi-otake-system-exe-jp/otak-committer"
@@ -25,7 +26,7 @@
   "main": "./out/extension.js",
   "contributes": {
     "configuration": {
-      "title": "OTAK Committer",
+      "title": "otak-committer",
       "properties": {
         "otakCommitter.openaiApiKey": {
           "type": "string",
@@ -80,13 +81,13 @@
       {
         "command": "otak-committer.generateMessage",
         "title": "Generate Commit Message",
-        "category": "OTAK Committer",
+        "category": "otak-committer",
         "icon": "$(symbol-constant)"
       },
       {
         "command": "otak-committer.openSettings",
-        "title": "Open OTAK Committer Settings",
-        "category": "OTAK Committer"
+        "title": "Open otak-committer Settings",
+        "category": "otak-committer"
       }
     ],
     "menus": {
