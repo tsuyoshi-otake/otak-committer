@@ -1,6 +1,6 @@
 {
   "name": "otak-committer",
-  "displayName": "OTAK Committer - AI Powered Git Assistant",
+  "displayName": "otak-committer",
   "description": "VS Code extension for intelligent SCM operations - Multilingual commit message generation with AI support (9 languages supported) and future PR management features.",
   "publisher": "tsuyoshi-otake-system-exe-jp",
   "license": "MIT",
