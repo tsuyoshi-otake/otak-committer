@@ -128,7 +128,7 @@ async function showSettingsPrompt(): Promise<boolean> {
     );
 
     if (response === 'Yes') {
-        await vscode.commands.executeCommand('workbench.action.openSettings', 'otakCommitter.openaiApiKey');
+        await vscode.commands.executeCommand('workbench.action.openSettings', 'otakCommitter');
         return true;
     }
     return false;
