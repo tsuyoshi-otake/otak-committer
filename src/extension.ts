@@ -75,51 +75,48 @@ const MESSAGE_STYLES: Record<MessageStyle, MessageStyleConfig> = {
 const LANGUAGE_CONFIGS: { [key: string]: LanguageConfig } = {
     english: {
         name: 'English',
-        systemPrompt: (style) => `You are a commit message expert. ${MESSAGE_STYLES[style].description} Follow the Conventional Commits format with these prefixes:${COMMIT_PREFIX_GUIDE}`,
-        diffMessage: "Generate a commit message for the following Git diff:"
+        systemPrompt: (style) => `You are a commit message expert. ${MESSAGE_STYLES[style].description} Follow the Conventional Commits format with these prefixes:${COMMIT_PREFIX_GUIDE}\nOutput the commit message as plain text without any Markdown formatting. Use proper line breaks and make it suitable for direct use in Git commit.`,
+        diffMessage: "Generate a commit message for the following Git diff as plain text without Markdown formatting:"
     },
     french: {
         name: 'Français',
-        systemPrompt: (style) => `Vous êtes un expert en messages de commit. ${MESSAGE_STYLES[style].description} Suivez le format Conventional Commits avec ces préfixes:${COMMIT_PREFIX_GUIDE}`,
-        diffMessage: "Générez un message de commit pour le diff Git suivant :"
+        systemPrompt: (style) => `Vous êtes un expert en messages de commit. ${MESSAGE_STYLES[style].description} Suivez le format Conventional Commits avec ces préfixes:${COMMIT_PREFIX_GUIDE}\nGénérez le message de commit en texte brut sans formatage Markdown. Utilisez des sauts de ligne appropriés et rendez-le adapté pour une utilisation directe dans Git commit.`,
+        diffMessage: "Générez un message de commit pour le diff Git suivant en texte brut sans formatage Markdown :"
     },
     german: {
         name: 'Deutsch',
-        systemPrompt: (style) => `Sie sind ein Commit-Message-Experte. ${MESSAGE_STYLES[style].description} Folgen Sie dem Conventional-Commits-Format mit diesen Präfixen:${COMMIT_PREFIX_GUIDE}`,
-        diffMessage: "Generieren Sie eine Commit-Nachricht für den folgenden Git-Diff:"
+        systemPrompt: (style) => `Sie sind ein Commit-Message-Experte. ${MESSAGE_STYLES[style].description} Folgen Sie dem Conventional-Commits-Format mit diesen Präfixen:${COMMIT_PREFIX_GUIDE}\nAusgabe der Commit-Nachricht als Klartext ohne Markdown-Formatierung. Verwenden Sie geeignete Zeilenumbrüche und machen Sie sie für die direkte Verwendung in Git-Commits geeignet.`,
+        diffMessage: "Generieren Sie eine Commit-Nachricht für den folgenden Git-Diff als Klartext ohne Markdown-Formatierung:"
     },
     italian: {
         name: 'Italiano',
-        systemPrompt: (style) => `Sei un esperto di messaggi di commit. ${MESSAGE_STYLES[style].description} Segui il formato Conventional Commits con questi prefissi:${COMMIT_PREFIX_GUIDE}`,
-        diffMessage: "Genera un messaggio di commit per il seguente diff Git:"
+        systemPrompt: (style) => `Sei un esperto di messaggi di commit. ${MESSAGE_STYLES[style].description} Segui il formato Conventional Commits con questi prefissi:${COMMIT_PREFIX_GUIDE}\nGenerare il messaggio di commit come testo semplice senza formattazione Markdown. Utilizzare interruzioni di riga appropriate e renderlo adatto per l'uso diretto in Git commit.`,
+        diffMessage: "Genera un messaggio di commit per il seguente diff Git come testo semplice senza formattazione Markdown:"
     },
     japanese: {
         name: '日本語',
-        systemPrompt: (style) => `あなたはコミットメッセージを生成する専門家です。${style === 'simple' ? '変更の本質のみを簡潔に説明してください。' :
-            style === 'normal' ? '変更内容を適度な詳しさで説明してください。' :
-                '変更の文脈、理由、影響を含めて詳しく説明してください。'
-            }以下のプレフィックスを使用してConventional Commits形式に従ってください：${COMMIT_PREFIX_GUIDE}`,
-        diffMessage: "以下のGit diffに対するコミットメッセージを生成してください："
+        systemPrompt: (style) => `あなたはコミットメッセージを生成する専門家です。${MESSAGE_STYLES[style].description} 以下のプレフィックスを使用してConventional Commits形式に従ってください：${COMMIT_PREFIX_GUIDE}\nコミットメッセージはMarkdown形式を使用せず、プレーンテキストとして出力してください。適切な改行を使用し、Gitのコミットメッセージとして直接使用できる形式にしてください。`,
+        diffMessage: "以下のGit diffに対するコミットメッセージを生成してください。Markdown形式ではなくプレーンテキストで出力してください："
     },
     chinese: {
         name: '中文',
-        systemPrompt: (style) => `您是提交消息专家。${MESSAGE_STYLES[style].description} 请按照Conventional Commits格式使用以下前缀：${COMMIT_PREFIX_GUIDE}`,
-        diffMessage: "为以下Git差异生成提交消息："
+        systemPrompt: (style) => `您是提交消息专家。${MESSAGE_STYLES[style].description} 请按照Conventional Commits格式使用以下前缀：${COMMIT_PREFIX_GUIDE}\n以纯文本格式输出提交消息，不使用Markdown格式。使用适当的换行符，使其适合直接用于Git提交。`,
+        diffMessage: "为以下Git差异生成提交消息，并以纯文本（不使用Markdown格式）输出："
     },
     korean: {
         name: '한국어',
-        systemPrompt: (style) => `당신은 커밋 메시지 전문가입니다. ${MESSAGE_STYLES[style].description} Conventional Commits 형식과 다음 접두사를 사용하세요:${COMMIT_PREFIX_GUIDE}`,
-        diffMessage: "다음 Git diff에 대한 커밋 메시지를 생성하세요:"
+        systemPrompt: (style) => `당신은 커밋 메시지 전문가입니다. ${MESSAGE_STYLES[style].description} Conventional Commits 형식과 다음 접두사를 사용하세요:${COMMIT_PREFIX_GUIDE}\n커밋 메시지를 Markdown 형식 없이 일반 텍스트로 출력하세요. 적절한 줄바꿈을 사용하고 Git 커밋에 직접 사용하기 적합한 형식으로 만드세요.`,
+        diffMessage: "다음 Git diff에 대한 커밋 메시지를 생성하세요. Markdown 형식이 아닌 일반 텍스트로 출력하세요:"
     },
     vietnamese: {
         name: 'Tiếng Việt',
-        systemPrompt: (style) => `Bạn là chuyên gia về tin nhắn commit. ${MESSAGE_STYLES[style].description} Sử dụng định dạng Conventional Commits với các tiền tố sau:${COMMIT_PREFIX_GUIDE}`,
-        diffMessage: "Tạo tin nhắn commit cho Git diff sau:"
+        systemPrompt: (style) => `Bạn là chuyên gia về tin nhắn commit. ${MESSAGE_STYLES[style].description} Sử dụng định dạng Conventional Commits với các tiền tố sau:${COMMIT_PREFIX_GUIDE}\nXuất tin nhắn commit dưới dạng văn bản thuần túy không có định dạng Markdown. Sử dụng ngắt dòng phù hợp và làm cho nó phù hợp để sử dụng trực tiếp trong Git commit.`,
+        diffMessage: "Tạo tin nhắn commit cho Git diff sau, và xuất dưới dạng văn bản thuần túy (không có định dạng Markdown):"
     },
     russian: {
         name: 'Русский',
-        systemPrompt: (style) => `Вы эксперт по сообщениям коммитов. ${MESSAGE_STYLES[style].description} Используйте формат Conventional Commits с этими префиксами:${COMMIT_PREFIX_GUIDE}`,
-        diffMessage: "Сгенерируйте сообщение коммита для следующего Git diff:"
+        systemPrompt: (style) => `Вы эксперт по сообщениям коммитов. ${MESSAGE_STYLES[style].description} Используйте формат Conventional Commits с этими префиксами:${COMMIT_PREFIX_GUIDE}\nВыводите сообщение коммита в виде простого текста без форматирования Markdown. Используйте правильные переносы строк и сделайте его подходящим для прямого использования в Git commit.`,
+        diffMessage: "Сгенерируйте сообщение коммита для следующего Git diff, выводите его в виде простого текста без Markdown форматирования:"
     }
 };
 

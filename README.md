@@ -42,13 +42,19 @@ To use this extension, you need an OpenAI API key. Here's how to get one:
 1. Go to [OpenAI API Keys page](https://platform.openai.com/api-keys)
 2. Sign in or create an OpenAI account
 3. Create a new API key
-4. Copy the API key and add it to the extension settings (`otakCommitter.openaiApiKey`)
+4. Copy the API key
+5. Open VS Code Settings (File > Preferences > Settings)
+6. Search for "otakCommitter.openaiApiKey"
+7. Paste your API key into the text field
+
+Note: The extension uses GPT-4o model to generate commit messages. Make sure your OpenAI account has access to GPT-4o API.
 
 ## Installation
 
 1. Install the extension from the VS Code Marketplace
 2. Configure your OpenAI API key in the extension settings
 3. Select your preferred language and message style
+   (Default language is English)
 
 ## Extension Settings
 
@@ -61,6 +67,10 @@ This extension contributes the following settings:
 ## Usage
 
 1. Stage your changes in Git
+
+After staging your changes, you'll see the "Generate Commit Message" button in the Source Control view:
+
+![Generate Commit Message Button](images/generate-commit-message.png)
 2. Click the "Generate Commit Message" button in the SCM view (or use the command palette)
 3. Review and optionally edit the generated message
 4. Commit your changes
