@@ -2,7 +2,7 @@
   "name": "otak-committer",
   "displayName": "otak-committer",
   "description": "VS Code extension for intelligent SCM operations - Multilingual commit message generation with AI support (9 languages supported) and future PR management features.",
-  "publisher": "tsuyoshi-otake-system-exe-jp",
+  "publisher": "odangoo",
   "license": "MIT",
   "icon": "icon.png",
   "repository": {
@@ -15,7 +15,7 @@
   "homepage": "https://github.com/tsuyoshi-otake-system-exe-jp/otak-committer#readme",
   "version": "0.0.1",
   "engines": {
-    "vscode": "^1.97.0"
+    "vscode": "^1.9.0"
   },
   "categories": [
     "SCM Providers"
@@ -115,7 +115,7 @@
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
-    "@types/vscode": "^1.97.0",
+    "@types/vscode": "^1.9.0",
     "@typescript-eslint/eslint-plugin": "^8.22.0",
     "@typescript-eslint/parser": "^8.22.0",
     "@vscode/test-cli": "^0.0.10",
