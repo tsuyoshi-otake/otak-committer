@@ -42,7 +42,7 @@ otak-committer is a powerful VS Code extension that leverages AI to automaticall
 
 ## Requirements
 
-- Visual Studio Code ^1.97.0
+- Visual Studio Code ^1.9.0
 - Git installed and configured
 - OpenAI API key
 

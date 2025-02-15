@@ -4,6 +4,11 @@ All notable changes to the "otak-committer" extension will be documented in this
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.0.2] - 2025-02-16
+
+### Changed
+- 🔄 Upgraded to version 0.0.2 with improved stability and performance
+
 ## [0.0.1] - 2025-02-16
 
 ### Added
@@ -28,6 +33,6 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
   - Seamless integration with SCM view
 
 ### Requirements
-- Visual Studio Code ^1.97.0
+- Visual Studio Code ^1.9.0
 - Git installed and configured
 - OpenAI API key (GPT-4o enabled)
