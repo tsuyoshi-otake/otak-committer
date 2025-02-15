@@ -1,1 +1,3 @@
 chatgpt-4o-latest exists. it is the latest model.
+
+ npm install -g @vscode/vsce && npm run vscode:prepublish && vsce package

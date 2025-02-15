@@ -2,24 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 
 function convertMarkdownToPlainText(markdown: string): string {
-    return markdown
-        // Remove code blocks
-        .replace(/```[\s\S]*?```/g, '')
-        // Remove inline code
-        .replace(/`([^`]+)`/g, '$1')
-        // Remove headers but preserve issue references
-        .replace(/^#{1,6}\s+/gm, '')
-        // Remove bold/italic
-        .replace(/[*_]{1,3}([^*_]+)[*_]{1,3}/g, '$1')
-        // Remove links but keep text
-        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-        // Remove list markers
-        .replace(/^[-*+]\s/gm, '')
-        // Remove numbered lists
-        .replace(/^\d+\.\s/gm, '')
-        // Remove blockquotes
-        .replace(/^>\s/gm, '')
-        .trim();
+    return markdown.replace(/```/g, '').trim();
 }
 
 interface GitExtension {
