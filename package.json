@@ -1,0 +1,114 @@
+{
+  "name": "vscode-scm-comitter",
+  "displayName": "vscode-scm-comitter",
+  "description": "A VSCode extension for customizing source control commit message input",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.97.0"
+  },
+  "categories": [
+    "SCM Providers"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "SCM Comitter",
+      "properties": {
+        "scmComitter.openaiApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "OpenAI API Key for generating commit messages"
+        },
+        "scmComitter.language": {
+          "type": "string",
+          "default": "japanese",
+          "enum": [
+            "english",
+            "french",
+            "german",
+            "italian",
+            "japanese",
+            "chinese",
+            "korean",
+            "vietnamese",
+            "russian"
+          ],
+          "enumDescriptions": [
+            "English",
+            "Français",
+            "Deutsch",
+            "Italiano",
+            "日本語",
+            "中文",
+            "한국어",
+            "Tiếng Việt",
+            "Русский"
+          ],
+          "description": "Language for commit messages"
+        },
+        "scmComitter.messageStyle": {
+          "type": "string",
+          "default": "normal",
+          "enum": [
+            "simple",
+            "normal",
+            "detailed"
+          ],
+          "enumDescriptions": [
+            "Simple and concise (100 tokens)",
+            "Normal length with some context (200 tokens)",
+            "Detailed explanation (500 tokens)"
+          ],
+          "description": "Style and length of generated commit messages"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "vscode-scm-comitter.generateMessage",
+        "title": "Generate Commit Message",
+        "category": "SCM Comitter",
+        "icon": "$(symbol-constant)"
+      },
+      {
+        "command": "vscode-scm-comitter.openSettings",
+        "title": "Open SCM Comitter Settings",
+        "category": "SCM Comitter"
+      }
+    ],
+    "menus": {
+      "scm/title": [
+        {
+          "command": "vscode-scm-comitter.generateMessage",
+          "group": "navigation",
+          "when": "scmProvider == git"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.97.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "@typescript-eslint/eslint-plugin": "^8.22.0",
+    "@typescript-eslint/parser": "^8.22.0",
+    "eslint": "^9.19.0",
+    "typescript": "^5.7.3",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1"
+  },
+  "dependencies": {
+    "axios": "^1.6.7"
+  }
+}
