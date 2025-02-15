@@ -1,6 +1,8 @@
-# vscode-scm-comitter README
+<p align="center">
+  <h1 align="center">vscode-scm-committer</h1>
+  <p align="center">VS Code extension for intelligent SCM operations - Multilingual commit message generation with AI support (9 languages supported) and future PR management features.</p>
 
-This is the README for your extension "vscode-scm-comitter". After writing up a brief description, we recommend including the following sections.
+---
 
 ## Features
 

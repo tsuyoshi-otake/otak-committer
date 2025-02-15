@@ -184,7 +184,7 @@ async function stageAllChanges(repository: Repository): Promise<void> {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-    console.log('Extension "vscode-scm-comitter" is now active!');
+    console.log('Extension "otak-committer" is now active!');
 
     // Git拡張機能を取得
     const gitExtension = vscode.extensions.getExtension<GitExtension>('vscode.git')?.exports;
@@ -209,12 +209,12 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // 設定画面を開くコマンド
-    const openSettingsDisposable = vscode.commands.registerCommand('vscode-scm-comitter.openSettings', async () => {
-        await vscode.commands.executeCommand('workbench.action.openSettings', 'scmComitter');
+    const openSettingsDisposable = vscode.commands.registerCommand('otak-committer.openSettings', async () => {
+        await vscode.commands.executeCommand('workbench.action.openSettings', 'otakCommitter');
     });
 
     // コミットメッセージの生成機能
-    const generateDisposable = vscode.commands.registerCommand('vscode-scm-comitter.generateMessage', async () => {
+    const generateDisposable = vscode.commands.registerCommand('otak-committer.generateMessage', async () => {
         const repository = git.repositories[0];
         if (!repository) {
             vscode.window.showErrorMessage('No Git repository found');
@@ -222,8 +222,8 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         const config = vscode.workspace.getConfiguration('scmComitter');
-        const apiKey = config.get<string>('openaiApiKey');
-        const messageStyle = config.get<MessageStyle>('messageStyle') || 'normal';
+        const apiKey = config.get<string>('otakCommitter.openaiApiKey');
+        const messageStyle = config.get<MessageStyle>('otakCommitter.messageStyle') || 'normal';
 
         if (!apiKey) {
             const shouldContinue = await showSettingsPrompt();
@@ -233,7 +233,7 @@ export function activate(context: vscode.ExtensionContext) {
             // 設定画面を表示した後、ユーザーが設定を行うまで待機
             await new Promise(resolve => setTimeout(resolve, 1000));
             // 設定を再取得
-            if (!config.get<string>('openaiApiKey')) {
+            if (!config.get<string>('otakCommitter.openaiApiKey')) {
                 return;
             }
         }

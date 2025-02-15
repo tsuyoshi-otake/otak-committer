@@ -1,7 +1,17 @@
 {
-  "name": "vscode-scm-comitter",
-  "displayName": "vscode-scm-comitter",
-  "description": "A VSCode extension for customizing source control commit message input",
+  "name": "otak-committer",
+  "displayName": "OTAK Committer - AI Powered Git Assistant",
+  "description": "VS Code extension for intelligent SCM operations - Multilingual commit message generation with AI support (9 languages supported) and future PR management features.",
+  "publisher": "tsuyoshi-otake-system-exe-jp",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tsuyoshi-otake-system-exe-jp/otak-committer"
+  },
+  "bugs": {
+    "url": "https://github.com/tsuyoshi-otake-system-exe-jp/otak-committer/issues"
+  },
+  "homepage": "https://github.com/tsuyoshi-otake-system-exe-jp/otak-committer#readme",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.97.0"
@@ -15,14 +25,14 @@
   "main": "./out/extension.js",
   "contributes": {
     "configuration": {
-      "title": "SCM Comitter",
+      "title": "OTAK Committer",
       "properties": {
-        "scmComitter.openaiApiKey": {
+        "otakCommitter.openaiApiKey": {
           "type": "string",
           "default": "",
           "description": "OpenAI API Key for generating commit messages"
         },
-        "scmComitter.language": {
+        "otakCommitter.language": {
           "type": "string",
           "default": "japanese",
           "enum": [
@@ -49,7 +59,7 @@
           ],
           "description": "Language for commit messages"
         },
-        "scmComitter.messageStyle": {
+        "otakCommitter.messageStyle": {
           "type": "string",
           "default": "normal",
           "enum": [
@@ -68,21 +78,21 @@
     },
     "commands": [
       {
-        "command": "vscode-scm-comitter.generateMessage",
+        "command": "otak-committer.generateMessage",
         "title": "Generate Commit Message",
-        "category": "SCM Comitter",
+        "category": "OTAK Committer",
         "icon": "$(symbol-constant)"
       },
       {
-        "command": "vscode-scm-comitter.openSettings",
-        "title": "Open SCM Comitter Settings",
-        "category": "SCM Comitter"
+        "command": "otak-committer.openSettings",
+        "title": "Open OTAK Committer Settings",
+        "category": "OTAK Committer"
       }
     ],
     "menus": {
       "scm/title": [
         {
-          "command": "vscode-scm-comitter.generateMessage",
+          "command": "otak-committer.generateMessage",
           "group": "navigation",
           "when": "scmProvider == git"
         }
@@ -90,17 +100,21 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run esbuild-base -- --minify",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
+    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch"
   },
   "devDependencies": {
     "@types/vscode": "^1.97.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
+    "esbuild": "^0.20.0",
     "@typescript-eslint/eslint-plugin": "^8.22.0",
     "@typescript-eslint/parser": "^8.22.0",
     "eslint": "^9.19.0",
