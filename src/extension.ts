@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import type { Agent } from 'http';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 
 function convertMarkdownToPlainText(markdown: string): string {
     return markdown.replace(/```/g, '').trim();
@@ -20,7 +21,6 @@ function getProxyAgent(): Agent | undefined {
 
     if (httpProxy) {
         try {
-            const HttpsProxyAgent = require("https-proxy-agent");
             return new HttpsProxyAgent(httpProxy);
         } catch (error) {
             console.error("Failed to create proxy agent:", error);
@@ -222,7 +222,20 @@ export async function generateCommitMessageWithAI(diff: string): Promise<string>
         return convertMarkdownToPlainText(rawMessage);
     } catch (error) {
         if (error instanceof Error) {
-            throw error;
+            const errorMessage = error.message || 'Unknown error';
+            const proxyConfig = vscode.workspace.getConfiguration("http");
+            const proxyUrl = proxyConfig.get("proxy");
+            const proxyInfo = proxyUrl ? 
+                `Proxy settings: Enabled (${proxyUrl})` : 
+                "Proxy settings: Disabled";
+
+            throw new Error(
+                `OpenAI API Communication Error:\n` +
+                `- Error details: ${errorMessage}\n` +
+ 
+                `- ${proxyInfo}\n` +
+                `- Please check your network connection.`
+            );
         }
         throw error;
     }

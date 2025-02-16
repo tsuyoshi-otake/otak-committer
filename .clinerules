@@ -1,3 +1,38 @@
 chatgpt-4o-latest exists. it is the latest model.
 
- npm install -g @vscode/vsce && npm run vscode:prepublish && vsce package
+npm install -g @vscode/vsce && npm run vscode:prepublish && vsce package
+
+# VS Code Extension Development Rules
+
+## Package Building
+- Always use `npm run vscode:prepublish && npx @vscode/vsce package` for VSIX creation
+- Ensure all dependencies are properly listed in package.json
+
+## Version Management
+- Follow semantic versioning (MAJOR.MINOR.PATCH)
+- Update both package.json and CHANGELOG.md when changing versions
+
+## Documentation Format
+- CHANGELOG.md format:
+  ```markdown
+  ## [VERSION] - YYYY-MM-DD
+
+  ### Added
+  - New features with detailed points
+
+  ### Changed
+  - Changes and improvements
+
+  ### Requirements (if applicable)
+  - List of requirements
+  ```
+
+- GitHub Release format must match CHANGELOG.md exactly
+  - Title format: "vX.X.X"
+  - Release notes: Copy directly from CHANGELOG.md
+
+## Proxy Support Implementation
+- Use VSCode's built-in HTTP proxy settings
+- Implement using https-proxy-agent package
+- Handle proxy configuration in network requests
+- Test in both proxy and non-proxy environments
