@@ -179,8 +179,10 @@ export async function generateCommitMessageWithAI(diff: string): Promise<string>
         const requestOptions: RequestInit = {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json'
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                "x-api-key": apiKey,
+                'Authorization': `Bearer ${apiKey}`
             },
             body: JSON.stringify({
                 model: 'chatgpt-4o-latest',
