@@ -4,6 +4,12 @@ All notable changes to the "otak-committer" extension will be documented in this
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.0.1] - 2025-02-16
+
+### Changed
+- 📝 Updated README.md with improved documentation
+- 🔄 Minor version bump for documentation updates
+
 ## [1.0.0] - 2025-02-16
 
 ### Added
