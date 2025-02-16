@@ -4,6 +4,17 @@ All notable changes to the "otak-committer" extension will be documented in this
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.0.0] - 2025-02-16
+
+### Added
+- **Proxy Support**: Added support for VS Code's HTTP proxy settings
+  - Automatically detects and uses system proxy configuration
+  - Compatible with corporate proxy environments
+  - Improved network connectivity in restricted environments
+
+### Changed
+- 🔄 Upgraded to version 1.0.0, marking the first stable release
+
 ## [0.0.2] - 2025-02-16
 
 ### Changed

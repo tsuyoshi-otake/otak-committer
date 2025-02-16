@@ -1,8 +1,33 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import type { Agent } from 'http';
 
 function convertMarkdownToPlainText(markdown: string): string {
     return markdown.replace(/```/g, '').trim();
+}
+
+/**
+ * Get http.proxy value from VS Code settings and
+ * create HttpsProxyAgent if proxy is configured
+ */
+function getProxyAgent(): Agent | undefined {
+    let httpProxy: string | undefined = undefined;
+    try {
+        httpProxy = vscode.workspace.getConfiguration("http").get("proxy");
+    } catch (e) {
+        console.error("Failed to get proxy settings:", e);
+    }
+
+    if (httpProxy) {
+        try {
+            const HttpsProxyAgent = require("https-proxy-agent");
+            return new HttpsProxyAgent(httpProxy);
+        } catch (error) {
+            console.error("Failed to create proxy agent:", error);
+            return undefined;
+        }
+    }
+    return undefined;
 }
 
 interface GitExtension {
@@ -147,7 +172,11 @@ export async function generateCommitMessageWithAI(diff: string): Promise<string>
     const languageConfig = LANGUAGE_CONFIGS[language];
 
     try {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        // プロキシエージェントの取得
+        const proxyAgent = getProxyAgent();
+        
+        // リクエストオプションの設定
+        const requestOptions: RequestInit = {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${apiKey}`,
@@ -168,7 +197,14 @@ export async function generateCommitMessageWithAI(diff: string): Promise<string>
                 temperature: 0.2,
                 max_tokens: MESSAGE_STYLES[messageStyle].tokens
             }),
-        });
+        };
+
+        // プロキシエージェントが存在する場合はリクエストオプションに追加
+        if (proxyAgent) {
+            (requestOptions as any).agent = proxyAgent;
+        }
+
+        const response = await fetch('https://api.openai.com/v1/chat/completions', requestOptions);
 
         if (!response.ok) {
             const error = await response.json();
