@@ -7,11 +7,9 @@
 
 ## Usage
 
-1. Stage your changes in Git  
-
-After staging your changes, you'll see the "Generate Commit Message" button in the Source Control view:
-
 ![Generate Commit Message Button](images/generate-commit-message.png)
+
+1. Stage your changes in Git  
 2. Click the "Generate Commit Message" button in the SCM view (or use the command palette)  
 3. Review and optionally edit the generated message  
 4. Commit your changes
