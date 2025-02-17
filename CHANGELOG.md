@@ -4,6 +4,14 @@ All notable changes to the "otak-committer" extension will be documented in this
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.1.0] - 2025-02-17
+
+### Changed
+- ✨ Enhanced multilingual commit message generation
+  - Improved system prompts for all supported languages
+  - Explicitly specified output language in each prompt
+  - Affects: English, French, German, Italian, Japanese, Chinese, Korean, Vietnamese, Russian
+
 ## [1.0.1] - 2025-02-16
 
 ### Changed
