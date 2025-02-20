@@ -345,7 +345,12 @@ export function activate(context: vscode.ExtensionContext) {
                     diff = await repository.diff(true);
 
                     if (!diff) {
-                        vscode.window.showWarningMessage('No changes to commit');
+                        // 警告メッセージを表示し、7秒後に自動で閉じる
+                        void vscode.window.withProgress({
+                            location: vscode.ProgressLocation.Notification,
+                            title: 'No changes to commit',
+                            cancellable: false
+                        }, () => new Promise(resolve => setTimeout(resolve, 7000)));
                         return;
                     } else {
                         // 通知を表示し、3秒後に自動で閉じる
