@@ -26,6 +26,7 @@ index 123..456 789
             value: '',
             placeholder: ''
         },
+        rootUri: vscode.Uri.file(path.dirname(mockFilePath)),
         state: {
             workingTreeChanges: [
                 {

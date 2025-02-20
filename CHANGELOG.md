@@ -4,6 +4,15 @@ All notable changes to the "otak-committer" extension will be documented in this
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.2.0] - 2025-02-20
+
+### Added
+- ⚡ Added request timeout handling (30 seconds) to prevent hanging
+- 🔔 Added auto-dismiss for staged changes notification (3 seconds)
+
+### Fixed
+- 🔧 Improved multi-workspace support by correctly identifying active repository
+
 ## [1.1.0] - 2025-02-17
 
 ### Changed

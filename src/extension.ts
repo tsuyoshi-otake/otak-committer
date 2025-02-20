@@ -44,6 +44,7 @@ interface Repository {
         value: string;
         placeholder: string;
     };
+    rootUri: vscode.Uri;
     diff(staged: boolean): Promise<string>;
     state: {
         indexChanges: GitChange[];
@@ -177,7 +178,7 @@ async function showSettingsPrompt(): Promise<boolean> {
     return false;
 }
 
-export async function generateCommitMessageWithAI(diff: string): Promise<string> {
+export async function generateCommitMessageWithAI(diff: string, signal?: AbortSignal): Promise<string> {
     const config = vscode.workspace.getConfiguration('otakCommitter');
     const apiKey = config.get<string>('openaiApiKey');
     const language = config.get<string>('language') || 'japanese';
@@ -222,6 +223,7 @@ export async function generateCommitMessageWithAI(diff: string): Promise<string>
         // プロキシエージェントが存在する場合はリクエストオプションに追加
         if (proxyAgent) {
             (requestOptions as any).agent = proxyAgent;
+            requestOptions.signal = signal;
         }
 
         const response = await fetch('https://api.openai.com/v1/chat/completions', requestOptions);
@@ -297,7 +299,19 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const generateDisposable = vscode.commands.registerCommand('otak-committer.generateMessage', async () => {
-        const repository = git.repositories[0];
+        // アクティブなワークスペースのリポジトリを取得
+        const activeWorkspace = vscode.window.activeTextEditor?.document.uri;
+        let repository: Repository | undefined;
+        
+        if (activeWorkspace) {
+            repository = git.repositories.find(repo => 
+                activeWorkspace.fsPath.startsWith(vscode.Uri.file(path.dirname(repo.rootUri.fsPath)).fsPath)
+            );
+        }
+
+        // アクティブなワークスペースにリポジトリがない場合は最初のリポジトリを使用
+        repository = repository || git.repositories[0];
+
         if (!repository) {
             vscode.window.showErrorMessage('No Git repository found');
             return;
@@ -334,12 +348,34 @@ export function activate(context: vscode.ExtensionContext) {
                         vscode.window.showWarningMessage('No changes to commit');
                         return;
                     } else {
-                        vscode.window.showInformationMessage('Changes have been automatically staged');
+                        // 通知を表示し、3秒後に自動で閉じる
+                        void vscode.window.withProgress({
+                            location: vscode.ProgressLocation.Notification,
+                            title: 'Changes have been automatically staged',
+                            cancellable: false
+                        }, () => new Promise(resolve => setTimeout(resolve, 3000)));
+
                     }
                 }
 
-                const message = await generateCommitMessageWithAI(diff);
-                repository.inputBox.value = message;
+                // タイムアウト制御の追加
+                const TIMEOUT_DURATION = 30000; // 30秒
+                const abortController = new AbortController();
+                const timeoutId = setTimeout(() => {
+                    abortController.abort();
+                }, TIMEOUT_DURATION);
+
+                try {
+                    const message = await generateCommitMessageWithAI(diff, abortController.signal);
+                    repository.inputBox.value = message;
+                } catch (error) {
+                    if (error instanceof Error && error.name === 'AbortError') {
+                        throw new Error('リクエストがタイムアウトしました。しばらく待ってから再試行してください。');
+                    }
+                    throw error;
+                } finally {
+                    clearTimeout(timeoutId);
+                }
 
             } catch (error) {
                 if (error instanceof Error) {
