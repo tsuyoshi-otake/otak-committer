@@ -1,6 +1,8 @@
 <p align="center">
   <h1 align="center">otak-committer</h1>
-  <p align="center">VS Code extension for intelligent SCM operations - Multilingual commit message generation with AI support (9 languages supported) and future PR management features.</p>
+  <p align="center">
+    VS Code extension for intelligent SCM operations - Multilingual commit message generation with AI support (supporting 25 languages) and future PR management features.
+  </p>
 </p>
 
 ---
@@ -20,25 +22,41 @@ otak-committer is a powerful VS Code extension that leverages AI to automaticall
 
 ### Key Features
 
-- **Multilingual Support**: Generate commit messages in 9 languages:
+- **Multilingual Support**: Generate commit messages in 25 languages:
   - 🇺🇸 English
-  - 🇫🇷 French (Français)
-  - 🇩🇪 German (Deutsch)
-  - 🇮🇹 Italian (Italiano)
-  - 🇯🇵 Japanese (日本語)
-  - 🇨🇳 Chinese (中文)
-  - 🇰🇷 Korean (한국어)
-  - 🇻🇳 Vietnamese (Tiếng Việt)
-  - 🇷🇺 Russian (Русский)
+  - 🇫🇷 Français
+  - 🇩🇪 Deutsch
+  - 🇮🇹 Italiano
+  - 🇪🇸 Español
+  - 🇵🇹 Português
+  - 🇨🇿 Čeština
+  - 🇭🇺 Magyar
+  - 🇧🇬 Български
+  - 🇹🇷 Türkçe
+  - 🇵🇱 Polski
+  - 🇷🇺 Русский
+  - 🇯🇵 日本語
+  - 🇨🇳 中文
+  - 🇹🇼 繁體中文
+  - 🇰🇷 한국어
+  - 🇻🇳 Tiếng Việt
+  - 🇹🇭 ไทย
+  - 🇮🇳 हिन्दी
+  - 🇧🇩 বাংলা
+  - 🇮🇩 Basa Jawa
+  - 🇮🇳 தமிழ்
+  - 🇲🇲 မြန်မာဘာသာ
+  - 🇦🇪 العربية
+  - 🇮🇱 עברית
 
 - **Flexible Message Styles**: Choose from three levels of detail for your commit messages:
-  - Simple: Concise summary (100 tokens)
-  - Normal: Standard length with context (200 tokens)
-  - Detailed: Comprehensive explanation (500 tokens)
+  - **Simple**: Concise summary (100 tokens)
+  - **Normal**: Standard length with context (200 tokens)
+  - **Detailed**: Comprehensive explanation (500 tokens)
 
 - **Git SCM Integration**: Seamlessly integrated into VS Code's Git interface with a dedicated button in the SCM view.
 
-- **Quick Language Switching**: Change languages directly from the status bar
+- **Quick Language Switching**: Change languages directly from the status bar  
   ![Status Bar](images/statusbar.png)
   - One-click language switching
   - Current message style display in tooltip
@@ -47,14 +65,14 @@ otak-committer is a powerful VS Code extension that leverages AI to automaticall
 - **Custom System Prompt**: Add your own instructions to the AI
   - Customize the message generation process
   - Add specific requirements or guidelines
-  - Configure via `otakCommitter.customMessage` setting
+  - Configure via `otakCommitter.customMessage` setting  
   - Examples of custom messages:
     ```
     Please include JIRA ticket number [PROJ-123] at the start of the commit message
     Add a link to the related documentation at the end of the message
     Always mention performance impact for any code changes
     ```
-  Note: Custom messages are appended to the Git diff before processing, allowing you to provide additional context or requirements without overriding the core commit message generation logic.
+  *Note*: Custom messages are appended to the Git diff before processing, allowing you to provide additional context or requirements without overriding the core commit message generation logic.
 
 ## Requirements
 
@@ -71,16 +89,16 @@ To use this extension, you need an OpenAI API key. Here's how to get one:
 3. Create a new API key
 4. Copy the API key
 5. Open VS Code Settings (File > Preferences > Settings)
-6. Search for "otakCommitter.openaiApiKey"
+6. Search for `otakCommitter.openaiApiKey`
 7. Paste your API key into the text field
 
-Note: The extension uses GPT-4o model to generate commit messages. Make sure your OpenAI account has access to GPT-4o API.
+*Note*: The extension uses the GPT-4o model to generate commit messages. Make sure your OpenAI account has access to the GPT-4o API.
 
 ## Installation
 
 1. Install the extension from the VS Code Marketplace
 2. Configure your OpenAI API key in the extension settings
-3. Select your preferred language and message style
+3. Select your preferred language and message style  
    (Default language is English)
 
 ## Extension Settings
@@ -89,13 +107,77 @@ This extension contributes the following settings:
 
 ![Settings](images/settings-otakCommitter.png)
 
-- `otakCommitter.language`: Language for commit messages (default: "english")
-- `otakCommitter.messageStyle`: Style and length of generated commit messages (default: "normal")
-- `otakCommitter.openaiApiKey`: OpenAI API Key for generating commit messages
-- `otakCommitter.customMessage`: Additional instructions for commit message generation (optional)
-  - Enhances the AI's understanding of your commit requirements
-  - Gets appended to the Git diff during processing
-  - Examples:
+- **`otakCommitter.language`**: Language for commit messages (default: `"english"`).  
+  The supported languages include:
+  
+  ```json
+  "enum": [
+      "english",
+      "french",
+      "german",
+      "italian",
+      "spanish",
+      "portuguese",
+      "czech",
+      "hungarian",
+      "bulgarian",
+      "turkish",
+      "polish",
+      "russian",
+      "japanese",
+      "chinese",
+      "traditionalChinese",
+      "korean",
+      "vietnamese",
+      "thai",
+      "hindi",
+      "bengali",
+      "javanese",
+      "tamil",
+      "burmese",
+      "arabic",
+      "hebrew"
+  ],
+  "enumDescriptions": [
+      "English",
+      "Français",
+      "Deutsch",
+      "Italiano",
+      "Español",
+      "Português",
+      "Čeština",
+      "Magyar",
+      "Български",
+      "Türkçe",
+      "Polski",
+      "Русский",
+      "日本語",
+      "中文",
+      "繁體中文",
+      "한국어",
+      "Tiếng Việt",
+      "ไทย",
+      "हिन्दी",
+      "বাংলা",
+      "Basa Jawa",
+      "தமிழ்",
+      "မြန်မာဘာသာ",
+      "العربية",
+      "עברית"
+  ]
+  ```
+
+- **`otakCommitter.messageStyle`**: Style and length of generated commit messages (default: `"normal"`).  
+  Options include:
+  - Simple (concise summary)
+  - Normal (contextual details)
+  - Detailed (comprehensive explanation)
+
+- **`otakCommitter.openaiApiKey`**: OpenAI API key for generating commit messages.
+
+- **`otakCommitter.customMessage`**: Additional instructions for commit message generation (optional).  
+  Enhance the AI's understanding of your commit requirements by appending custom instructions to the Git diff.  
+  Example custom messages:
     ```
     # Project-specific conventions
     Always mention related component name in square brackets
@@ -108,10 +190,10 @@ This extension contributes the following settings:
 
 ## Commands
 
-- `otak-committer.generateMessage`: Generate a commit message for staged changes
-- `otak-committer.openSettings`: Open the extension settings
-- `otak-committer.changeLanguage`: Change commit message language (available in status bar)
-- `otak-committer.changeMessageStyle`: Change message style
+- **`otak-committer.generateMessage`**: Generate a commit message for staged changes.
+- **`otak-committer.openSettings`**: Open the extension settings.
+- **`otak-committer.changeLanguage`**: Change commit message language (available in the status bar).
+- **`otak-committer.changeMessageStyle`**: Change message style.
 
 ## Contributing
 

@@ -1,7 +1,7 @@
 {
   "name": "otak-committer",
   "displayName": "otak-committer",
-  "description": "VS Code extension for intelligent SCM operations - Multilingual commit message generation with AI support (9 languages supported) and future PR management features.",
+  "description": "VS Code extension for intelligent SCM operations - Multilingual commit message generation with AI support (25 languages supported) and future PR management features.",
   "publisher": "odangoo",
   "license": "MIT",
   "icon": "./images/icon.png",
@@ -13,15 +13,25 @@
     "url": "https://github.com/tsuyoshi-otake-system-exe-jp/otak-committer/issues"
   },
   "homepage": "https://github.com/tsuyoshi-otake-system-exe-jp/otak-committer#readme",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "engines": {
     "vscode": "^1.90.0"
   },
   "categories": [
-    "SCM Providers","AI","Programming Languages","Education"
+    "SCM Providers",
+    "AI",
+    "Programming Languages",
+    "Education"
   ],
   "tags": [
-    "dev","AI","Commit","Message","Multilingual","OpenAI","PR","cofing"
+    "dev",
+    "AI",
+    "Commit",
+    "Message",
+    "Multilingual",
+    "OpenAI",
+    "PR",
+    "cofing"
   ],
   "activationEvents": [
     "onStartupFinished"
@@ -44,22 +54,54 @@
             "french",
             "german",
             "italian",
+            "spanish",
+            "portuguese",
+            "czech",
+            "hungarian",
+            "bulgarian",
+            "turkish",
+            "polish",
+            "russian",
             "japanese",
             "chinese",
+            "traditionalChinese",
             "korean",
             "vietnamese",
-            "russian"
+            "thai",
+            "hindi",
+            "bengali",
+            "javanese",
+            "tamil",
+            "burmese",
+            "arabic",
+            "hebrew"
           ],
           "enumDescriptions": [
             "English",
             "Français",
             "Deutsch",
             "Italiano",
+            "Español",
+            "Português",
+            "Čeština",
+            "Magyar",
+            "Български",
+            "Türkçe",
+            "Polski",
+            "Русский",
             "日本語",
             "中文",
+            "繁體中文",
             "한국어",
             "Tiếng Việt",
-            "Русский"
+            "ไทย",
+            "हिन्दी",
+            "বাংলা",
+            "Basa Jawa",
+            "தமிழ்",
+            "မြန်မာဘာသာ",
+            "العربية",
+            "עברית"
           ],
           "description": "Language for commit messages"
         },
