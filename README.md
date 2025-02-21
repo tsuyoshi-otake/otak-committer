@@ -48,6 +48,13 @@ otak-committer is a powerful VS Code extension that leverages AI to automaticall
   - Customize the message generation process
   - Add specific requirements or guidelines
   - Configure via `otakCommitter.customMessage` setting
+  - Examples of custom messages:
+    ```
+    Please include JIRA ticket number [PROJ-123] at the start of the commit message
+    Add a link to the related documentation at the end of the message
+    Always mention performance impact for any code changes
+    ```
+  Note: Custom messages are appended to the Git diff before processing, allowing you to provide additional context or requirements without overriding the core commit message generation logic.
 
 ## Requirements
 
@@ -85,7 +92,19 @@ This extension contributes the following settings:
 - `otakCommitter.language`: Language for commit messages (default: "english")
 - `otakCommitter.messageStyle`: Style and length of generated commit messages (default: "normal")
 - `otakCommitter.openaiApiKey`: OpenAI API Key for generating commit messages
-- `otakCommitter.customMessage`: Custom message to append to the system prompt (optional)
+- `otakCommitter.customMessage`: Additional instructions for commit message generation (optional)
+  - Enhances the AI's understanding of your commit requirements
+  - Gets appended to the Git diff during processing
+  - Examples:
+    ```
+    # Project-specific conventions
+    Always mention related component name in square brackets
+    Include affected service names for backend changes
+
+    # Team workflow requirements
+    Add deployment notes if configuration files are modified
+    Reference related test cases when fixing bugs
+    ```
 
 ## Commands
 
