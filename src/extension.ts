@@ -464,7 +464,17 @@ export function activate(context: vscode.ExtensionContext) {
     const changeLanguageDisposable = vscode.commands.registerCommand('otak-committer.changeLanguage', async () => {
         const languages = Object.entries(LANGUAGE_CONFIGS).map(([key, config]) => ({
             label: config.name,
-            description: key === 'japanese' ? '日本語' : undefined,
+            description: {
+                english: 'English',
+                french: 'French',
+                german: 'German',
+                italian: 'Italian',
+                japanese: 'Japanese',
+                chinese: 'Chinese',
+                korean: 'Korean',
+                vietnamese: 'Vietnamese',
+                russian: 'Russian'
+            }[key],
             value: key
         }));
 
