@@ -4,6 +4,14 @@ All notable changes to the "otak-committer" extension will be documented in this
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.3.1] - 2025-02-21
+ 
+### Changed
+ - 🔄 Updated language configuration:
+   - Expanded support from 9 to 25 languages.
+   - Added new languages: Español, Português, Čeština, Magyar, Български, Türkçe, Polski, and extended Asian and Middle Eastern language support.
+   - Updated configuration enum and descriptions in settings.
+
 ## [1.3.0] - 2025-02-21
 
 ### Added
