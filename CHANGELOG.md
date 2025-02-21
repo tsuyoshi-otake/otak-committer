@@ -15,21 +15,20 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [1.3.0] - 2025-02-21
 
 ### Added
-- 🌐 Added language selection in status bar with easy switching
-- 🎨 Added message style configuration in tooltip
-- ⚙️ Added custom message support in system prompt
-  - Users can now add custom instructions after the diff message
-  - Configurable via `otakCommitter.customMessage` setting
+- 🌐 Added language selection in status bar with easy switching.
+- 🎨 Added message style configuration in tooltip.
+- ⚙️ Added custom message support in system prompt.
+  - Users can now append custom instructions after the diff message.
+  - Configurable via the `otakCommitter.customMessage` setting.
 
 ## [1.2.0] - 2025-02-20
 
 ### Added
-- ⚡ Added request timeout handling (30 seconds) to prevent hanging
-- 🔔 Added auto-dismiss for staged changes notification (3 seconds)
-- 🔔 Added auto-dismiss for "No changes to commit" warning (7 seconds)
-
+- ⚡ Implemented request timeout handling (30 seconds) to prevent hanging.
+- 🔔 Introduced auto-dismiss for staged changes notification (3 seconds).
+- 🔔 Established auto-dismiss for "No changes to commit" warning (7 seconds).
 ### Fixed
-- 🔧 Improved multi-workspace support by correctly identifying active repository
+- 🔧 Enhanced multi-workspace support by accurately identifying the active repository.
 
 ## [1.1.0] - 2025-02-17
 
