@@ -13,9 +13,9 @@
     "url": "https://github.com/tsuyoshi-otake-system-exe-jp/otak-committer/issues"
   },
   "homepage": "https://github.com/tsuyoshi-otake-system-exe-jp/otak-committer#readme",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "engines": {
-    "vscode": "^1.9.0"
+    "vscode": "^1.90.0"
   },
   "categories": [
     "SCM Providers","AI","Programming Languages","Education"
@@ -77,6 +77,11 @@
             "Detailed explanation (500 tokens)"
           ],
           "description": "Style and length of generated commit messages"
+        },
+        "otakCommitter.customMessage": {
+          "type": "string",
+          "default": "",
+          "description": "Custom message to append to the system prompt (added after the diff message)"
         }
       }
     },
@@ -90,6 +95,16 @@
       {
         "command": "otak-committer.openSettings",
         "title": "Open otak-committer Settings",
+        "category": "otak-committer"
+      },
+      {
+        "command": "otak-committer.changeLanguage",
+        "title": "Change Commit Message Language",
+        "category": "otak-committer"
+      },
+      {
+        "command": "otak-committer.changeMessageStyle",
+        "title": "Change Commit Message Style",
         "category": "otak-committer"
       }
     ],
@@ -118,7 +133,7 @@
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
-    "@types/vscode": "^1.9.0",
+    "@types/vscode": "^1.90.0",
     "@typescript-eslint/eslint-plugin": "^8.22.0",
     "@typescript-eslint/parser": "^8.22.0",
     "@vscode/test-cli": "^0.0.10",

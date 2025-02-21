@@ -38,9 +38,20 @@ otak-committer is a powerful VS Code extension that leverages AI to automaticall
 
 - **Git SCM Integration**: Seamlessly integrated into VS Code's Git interface with a dedicated button in the SCM view.
 
+- **Quick Language Switching**: Change languages directly from the status bar
+  ![Status Bar](images/statusbar.png)
+  - One-click language switching
+  - Current message style display in tooltip
+  - Quick access to settings
+
+- **Custom System Prompt**: Add your own instructions to the AI
+  - Customize the message generation process
+  - Add specific requirements or guidelines
+  - Configure via `otakCommitter.customMessage` setting
+
 ## Requirements
 
-- Visual Studio Code ^1.9.0
+- Visual Studio Code ^1.90.0
 - Git installed and configured
 - OpenAI API key
 
@@ -74,11 +85,14 @@ This extension contributes the following settings:
 - `otakCommitter.language`: Language for commit messages (default: "english")
 - `otakCommitter.messageStyle`: Style and length of generated commit messages (default: "normal")
 - `otakCommitter.openaiApiKey`: OpenAI API Key for generating commit messages
+- `otakCommitter.customMessage`: Custom message to append to the system prompt (optional)
 
 ## Commands
 
 - `otak-committer.generateMessage`: Generate a commit message for staged changes
 - `otak-committer.openSettings`: Open the extension settings
+- `otak-committer.changeLanguage`: Change commit message language (available in status bar)
+- `otak-committer.changeMessageStyle`: Change message style
 
 ## Contributing
 

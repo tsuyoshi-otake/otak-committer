@@ -4,6 +4,15 @@ All notable changes to the "otak-committer" extension will be documented in this
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.3.0] - 2025-02-21
+
+### Added
+- 🌐 Added language selection in status bar with easy switching
+- 🎨 Added message style configuration in tooltip
+- ⚙️ Added custom message support in system prompt
+  - Users can now add custom instructions after the diff message
+  - Configurable via `otakCommitter.customMessage` setting
+
 ## [1.2.0] - 2025-02-20
 
 ### Added

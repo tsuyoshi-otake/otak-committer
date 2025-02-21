@@ -7,10 +7,6 @@ function convertMarkdownToPlainText(markdown: string): string {
     return markdown.replace(/```/g, '').trim();
 }
 
-/**
- * Get http.proxy value from VS Code settings and
- * create HttpsProxyAgent if proxy is configured
- */
 function getProxyAgent(): Agent | undefined {
     let httpProxy: string | undefined = undefined;
     try {
@@ -182,6 +178,7 @@ export async function generateCommitMessageWithAI(diff: string, signal?: AbortSi
     const config = vscode.workspace.getConfiguration('otakCommitter');
     const apiKey = config.get<string>('openaiApiKey');
     const language = config.get<string>('language') || 'japanese';
+    const customMessage = config.get<string>('customMessage') || '';
     const messageStyle = config.get<MessageStyle>('messageStyle') || 'normal';
 
     if (!apiKey) {
@@ -212,7 +209,7 @@ export async function generateCommitMessageWithAI(diff: string, signal?: AbortSi
                     },
                     {
                         role: 'user',
-                        content: `${languageConfig.diffMessage}\n\n${diff}`
+                        content: `${languageConfig.diffMessage}\n${customMessage ? customMessage + '\n' : ''}\n${diff}`
                     }
                 ],
                 temperature: 0.2,
@@ -273,8 +270,53 @@ export async function stageAllChanges(repository: Repository): Promise<void> {
     await repository.add(paths);
 }
 
+let languageStatusBarItem: vscode.StatusBarItem;
+
+function updateLanguageStatusBar() {
+    const config = vscode.workspace.getConfiguration('otakCommitter');
+    const language = config.get<string>('language') || 'japanese';
+    const languageConfig = LANGUAGE_CONFIGS[language];
+    
+    if (languageConfig) {
+        languageStatusBarItem.text = `$(globe) ${languageConfig.name}`;
+
+        const tooltip = new vscode.MarkdownString();
+        tooltip.isTrusted = true;
+        tooltip.supportThemeIcons = true;
+
+        tooltip.appendMarkdown(`Configuration\n\n`);
+        tooltip.appendMarkdown(`Current Style: ${vscode.workspace.getConfiguration('otakCommitter').get<MessageStyle>('messageStyle') || 'normal'}\n\n`);
+        tooltip.appendMarkdown(`---\n\n`);
+        tooltip.appendMarkdown(`$(versions) [Change Message Style](command:otak-committer.changeMessageStyle) &nbsp;&nbsp; $(gear) [Open Settings](command:otak-committer.openSettings)`);
+
+        languageStatusBarItem.tooltip = tooltip;
+        languageStatusBarItem.command = {
+            title: 'Change Language',
+            command: 'otak-committer.changeLanguage'
+        };
+
+        languageStatusBarItem.show();
+    }
+}
+
 export function activate(context: vscode.ExtensionContext) {
     console.log('Extension "otak-committer" is now active!');
+ 
+    // ステータスバーアイテムを作成
+    languageStatusBarItem = vscode.window.createStatusBarItem(
+        vscode.StatusBarAlignment.Right,
+        100
+    );
+    context.subscriptions.push(languageStatusBarItem);
+    
+    // 設定変更時のイベントリスナーを登録
+    context.subscriptions.push(
+        vscode.workspace.onDidChangeConfiguration(e => {
+            if (e.affectsConfiguration('otakCommitter.language')) {
+                updateLanguageStatusBar();
+            }
+        })
+    );
 
     const gitExtension = vscode.extensions.getExtension<GitExtension>('vscode.git')?.exports;
     if (!gitExtension) {
@@ -392,7 +434,55 @@ export function activate(context: vscode.ExtensionContext) {
         });
     });
 
+    // 言語変更コマンドを登録
+    const changeMessageStyleDisposable = vscode.commands.registerCommand('otak-committer.changeMessageStyle', async () => {
+        const styles = Object.entries(MESSAGE_STYLES).map(([key, config]) => ({
+            label: key.charAt(0).toUpperCase() + key.slice(1),
+            description: `${config.tokens} tokens`,
+            value: key
+        }));
+
+        const selected = await vscode.window.showQuickPick(styles, {
+            placeHolder: 'Select message style',
+            title: 'Change Message Style'
+        });
+
+        if (selected) {
+            const config = vscode.workspace.getConfiguration('otakCommitter');
+            await config.update('messageStyle', selected.value, true);
+            
+            updateLanguageStatusBar();
+
+            void vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: `Message style changed to ${selected.label}`,
+                cancellable: false
+            }, () => new Promise(resolve => setTimeout(resolve, 3000)));
+        }
+    });
+
+    const changeLanguageDisposable = vscode.commands.registerCommand('otak-committer.changeLanguage', async () => {
+        const languages = Object.entries(LANGUAGE_CONFIGS).map(([key, config]) => ({
+            label: config.name,
+            description: key === 'japanese' ? '日本語' : undefined,
+            value: key
+        }));
+
+        const selected = await vscode.window.showQuickPick(languages, {
+            placeHolder: 'Select language'
+        });
+
+        if (selected) {
+            const config = vscode.workspace.getConfiguration('otakCommitter');
+            await config.update('language', selected.value, true);
+            updateLanguageStatusBar();
+        }
+    });
+
     context.subscriptions.push(generateDisposable, openSettingsDisposable);
+    context.subscriptions.push(changeLanguageDisposable, changeMessageStyleDisposable);
+    // 初期表示
+    updateLanguageStatusBar();
 }
 
 function setupRepository(repository: Repository) {
