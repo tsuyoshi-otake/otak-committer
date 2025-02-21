@@ -27,6 +27,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - ⚡ Implemented request timeout handling (30 seconds) to prevent hanging.
 - 🔔 Introduced auto-dismiss for staged changes notification (3 seconds).
 - 🔔 Established auto-dismiss for "No changes to commit" warning (7 seconds).
+
 ### Fixed
 - 🔧 Enhanced multi-workspace support by accurately identifying the active repository.
 
