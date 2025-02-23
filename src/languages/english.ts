@@ -35,14 +35,25 @@ Diff:
         prBody: `
 Based on the following diff, generate a detailed Pull Request description.
 
-Requirements:
-1. Description should include:
-   - Overview of changes
-   - Purpose of changes
-   - Scope of impact
-   - Testing instructions (if needed)
-2. Write in English
-3. Use bullet points for better readability
+# Overview
+- Brief explanation of implemented features or fixes
+- Purpose and background of changes
+- Technical approach taken
+
+# Key Review Points
+- Areas that need special attention from reviewers
+- Important design decisions
+- Performance and maintainability considerations
+
+# Change Details
+- Main changes implemented
+- Affected components and functionality
+- Dependency changes (if any)
+
+# Additional Notes
+- Deployment considerations
+- Impact on existing features
+- Required configuration or environment variables
 
 Diff:
 {{diff}}
