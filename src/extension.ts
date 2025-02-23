@@ -16,11 +16,11 @@ export function activate(context: vscode.ExtensionContext) {
 
     // コマンドの登録
     const generateCommitCommand = vscode.commands.registerCommand('otak-committer.generateCommit', () => {
-        generateCommit(context);
+        generateCommit();
     });
 
     const generatePRCommand = vscode.commands.registerCommand('otak-committer.generatePR', () => {
-        generatePR(context);
+        generatePR();
     });
 
     const changeLanguageCommand = vscode.commands.registerCommand('otak-committer.changeLanguage', async () => {

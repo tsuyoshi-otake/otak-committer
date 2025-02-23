@@ -30,13 +30,6 @@
     "openai",
     "multilingual"
   ],
-  "activationEvents": [
-    "onStartupFinished",
-    "onLanguage",
-    "onCommand:otak-committer.generateMessage",
-    "onCommand:otak-committer.generatePR",
-    "workspaceContains:.git"
-  ],
   "main": "./out/extension.js",
   "contributes": {
     "configuration": {

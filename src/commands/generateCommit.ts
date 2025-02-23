@@ -2,9 +2,7 @@ import * as vscode from 'vscode';
 import { GitService } from '../services/git';
 import { OpenAIService } from '../services/openai';
 import { MessageStyle } from '../types/messageStyle';
-import { LANGUAGE_CONFIGS } from '../languages';
-
-export async function generateCommit(context: vscode.ExtensionContext): Promise<void> {
+export async function generateCommit(): Promise<void> {
     try {
         // Git差分の取得
         const git = await GitService.initialize();

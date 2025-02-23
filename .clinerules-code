@@ -4,105 +4,146 @@
 ```
 src/
 ├── commands/       # コマンド実装
-│   ├── generateCommit.ts
-│   └── generatePR.ts
-├── constants/      # 定数定義
-├── languages/      # 多言語サポート
-│   ├── asian.ts
-│   ├── european.ts
-│   ├── index.ts
-│   └── middleEastern.ts
+│   ├── generateCommit.ts  # コミットメッセージ生成
+│   └── generatePR.ts      # PR生成
 ├── services/       # サービス層
-│   ├── git.ts
-│   ├── github.ts
-│   └── openai.ts
-├── types/         # 型定義
-│   ├── git.ts
-│   ├── github.ts
-│   ├── language.ts
-│   └── messageStyle.ts
-├── test/          # テストコード
-└── extension.ts   # エントリーポイント
+│   ├── git.ts     # Git操作
+│   ├── github.ts  # GitHub API
+│   └── openai.ts  # OpenAI API
+├── languages/      # 多言語サポート
+│   ├── asian.ts          # アジア言語
+│   ├── european.ts       # 欧米言語
+│   ├── middleEastern.ts  # 中東言語
+│   └── index.ts          # 言語設定
+└── types/         # 型定義
+    ├── git.ts     # Git関連の型
+    ├── github.ts  # GitHub関連の型
+    ├── language.ts # 言語関連の型
+    └── messageStyle.ts # メッセージスタイル
 ```
 
 ## 2. コーディング規則
 
-### 2.1 一般規則
-- TypeScript Strict Modeを使用
-- インターフェースと型定義の明示的な作成
-- async/awaitを使用した非同期処理
-- エラーハンドリングの徹底
+### 2.1 TypeScript設定
+- strict: true
+- noImplicitAny: true
+- esModuleInterop: true
+- skipLibCheck: true
 
-### 2.2 命名規則
-- ファイル名: キャメルケース（例: generateCommit.ts）
-- クラス名: パスカルケース（例: GitService）
-- インターフェース名: パスカルケース、接頭辞Iなし
-- メソッド名: キャメルケース
-- 変数名: キャメルケース
-- 定数: アッパースネークケース
+### 2.2 APIサービス実装
+```typescript
+export class APIService {
+    private client: Client;
+    
+    constructor(config: Config) {
+        this.client = new Client(config);
+    }
+    
+    static async initialize(): Promise<APIService | undefined> {
+        // 初期化ロジック
+    }
+    
+    async operation(): Promise<Result> {
+        try {
+            // 操作実行
+        } catch (error: any) {
+            throw new Error(`Failed: ${error.message}`);
+        }
+    }
+}
+```
 
-### 2.3 エラーハンドリング
-- サービスレベルでの詳細なエラー情報
-- ユーザーレベルでの分かりやすいメッセージ
-- カスタムエラークラスの使用
-- エラーの伝播と適切なキャッチ
+### 2.3 多言語サポート
+```typescript
+export const getPrompt = (type: PromptType): string => {
+    const prompts = {
+        system: `...`,
+        commit: `...`,
+        pr: `...`
+    };
+    return prompts[type] || '';
+};
+```
 
-### 2.4 VS Code API利用
-- VS Code APIの型定義の活用
-- 設定値の型安全な取得
-- UI要素の一貫性（QuickPick, Progress等）
-- コマンドの適切な登録と解放
+### 2.4 エラーハンドリング
+```typescript
+try {
+    await operation();
+} catch (error: any) {
+    vscode.window.showErrorMessage(`エラー: ${error.message}`);
+    return undefined;
+}
+```
 
-### 2.5 外部API通信
-- エラーハンドリングの実装
-- タイムアウト設定（30秒）
-- プロキシ対応
-- レスポンス型の定義
+## 3. 機能実装
 
-### 2.6 多言語対応
-- 言語設定の型安全な実装
-- システムプロンプトの分離
-- 言語固有の設定の集約
-- UIの国際化対応
+### 3.1 コミットメッセージ生成
+1. Git差分の取得
+2. OpenAI APIによる生成
+3. スタイル適用
+4. コミット実行
 
-### 2.7 Git操作
-- VS Code Git APIの使用
-- 変更の自動ステージング
-- エラー時の適切なロールバック
-- コミットメッセージの検証
+### 3.2 PR生成
+1. 差分情報の収集
+2. Issue連携（オプション）
+3. タイトル・説明の自動生成
+4. PR作成
 
-### 2.8 OpenAI API
-- APIキーの安全な管理
-- プロンプトの言語別管理
-- トークン制限の実装
-- 生成結果の検証
+### 3.3 設定管理
+```typescript
+const config = vscode.workspace.getConfiguration('otakCommitter');
+const language = config.get<string>('language') || 'japanese';
+const messageStyle = config.get<MessageStyle>('messageStyle') || 'normal';
+```
 
-### 2.9 テスト規約
-- ユニットテストの必須化
-- モックの適切な使用
-- テストケースの網羅
-- CI/CD環境での実行
+## 4. テスト規約
 
-## 3. コメント規則
-- 関数の説明はJSDoc形式
-- 複雑なロジックへの説明コメント
-- TODO/FIXMEの使用と追跡
-- 非自明な実装への説明
+### 4.1 ユニットテスト
+```typescript
+suite('Component Test', () => {
+    test('should behave correctly', () => {
+        // テストケース
+    });
+});
+```
 
-## 4. セキュリティ
-- APIキーの安全な保存
-- プロキシ設定の適切な処理
-- 機密情報の適切な取り扱い
-- エラーメッセージでの機密情報の除外
+### 4.2 設定テスト
+```typescript
+test('Configuration loads', () => {
+    const config = vscode.workspace.getConfiguration('otakCommitter');
+    assert.ok(config.get('setting'));
+});
+```
 
-## 5. パフォーマンス
-- 非同期処理の適切な実装
-- メモリリークの防止
-- リソースの適切な解放
-- 大規模リポジトリでの動作考慮
+## 5. ビルド・パッケージング
+```bash
+npm run vscode:prepublish && npx @vscode/vsce package
+```
 
-## 6. メンテナンス
-- CHANGELOG.mdの更新
-- バージョン管理の徹底
-- 依存関係の最新化
-- 技術的負債の管理
+## 6. 環境変数
+- OPENAI_API_KEY: OpenAI APIキー
+- GITHUB_TOKEN: GitHub個人アクセストークン
+
+## 7. 依存関係管理
+- simple-git: Gitクライアント
+- openai: OpenAI API SDK
+- @types/*: 型定義ファイル
+
+## 8. コードレビュー基準
+1. 型安全性の確保
+2. エラーハンドリングの徹底
+3. 設定値の適切な利用
+4. インターフェースの一貫性
+5. パフォーマンスへの配慮
+
+## 9. パフォーマンス考慮事項
+1. 非同期処理の適切な利用
+2. メモリ使用量の最適化
+3. API呼び出しの制御
+4. キャッシュの活用
+
+## 10. セキュリティ
+1. APIキーの安全な管理
+2. トークンの適切な取り扱い
+3. 機密情報の保護
+4. 入力値の検証

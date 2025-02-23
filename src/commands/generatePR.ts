@@ -3,7 +3,7 @@ import { GitHubService } from '../services/github';
 import { IssueInfo } from '../types/github';
 import { OpenAIService } from '../services/openai';
 
-export async function generatePR(context: vscode.ExtensionContext): Promise<void> {
+export async function generatePR(): Promise<void> {
     try {
         // ブランチ選択
         const branches = await GitHubService.selectBranches();
