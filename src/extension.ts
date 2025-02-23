@@ -7,6 +7,8 @@ import { MessageStyle } from './types/messageStyle';
 let languageStatusBarItem: vscode.StatusBarItem;
 
 export function activate(context: vscode.ExtensionContext) {
+    console.log('Activating otak-committer extension...');
+
     // ステータスバーアイテムの初期化
     languageStatusBarItem = vscode.window.createStatusBarItem(
         vscode.StatusBarAlignment.Right,
@@ -14,9 +16,17 @@ export function activate(context: vscode.ExtensionContext) {
     );
     context.subscriptions.push(languageStatusBarItem);
 
+    console.log('Registering commands...');
+
     // コマンドの登録
-    const generateCommitCommand = vscode.commands.registerCommand('otak-committer.generateCommit', () => {
-        generateCommit();
+    const generateCommitCommand = vscode.commands.registerCommand('otak-committer.generateMessage', async () => {
+        console.log('Executing generateMessage command...');
+        try {
+            await generateCommit();
+        } catch (error) {
+            console.error('Error in generateMessage command:', error);
+            vscode.window.showErrorMessage(`Command execution error: ${error}`);
+        }
     });
 
     const generatePRCommand = vscode.commands.registerCommand('otak-committer.generatePR', () => {
@@ -91,11 +101,14 @@ export function activate(context: vscode.ExtensionContext) {
         })
     );
 
+    console.log('Initializing language status bar...');
     // 初期表示
     updateLanguageStatusBar();
+    console.log('Extension activation completed.');
 }
 
 function updateLanguageStatusBar() {
+    console.log('Updating language status bar...');
     const config = vscode.workspace.getConfiguration('otakCommitter');
     const language = config.get<string>('language') || 'japanese';
     const languageConfig = LANGUAGE_CONFIGS[language];

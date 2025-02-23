@@ -1,8 +1,5 @@
 import * as vscode from 'vscode';
 import OpenAI from 'openai';
-import { getAsianPrompt } from '../languages/asian';
-import { getEuropeanPrompt } from '../languages/european';
-import { getMiddleEasternPrompt } from '../languages/middleEastern';
 import { PromptType } from '../types/language';
 import { MessageStyle } from '../types/messageStyle';
 import { PullRequestDiff } from '../types/github';
@@ -51,21 +48,47 @@ export class OpenAIService {
             vscode.window.showErrorMessage(`OpenAI API Error: ${error.message}`);
             return undefined;
         }
-
-        return new OpenAIService(apiKey);
     }
 
-    private getPromptForLanguage(language: string): (type: PromptType) => string {
-        switch (language) {
-            case 'japanese':
-            case 'korean':
-            case 'chinese':
-                return getAsianPrompt;
-            case 'arabic':
-            case 'hebrew':
-                return getMiddleEasternPrompt;
-            default:
-                return getEuropeanPrompt;
+    private async getPromptForLanguage(language: string): Promise<(type: PromptType) => string> {
+        try {
+            switch (language) {
+                case 'japanese': {
+                    const { getJapanesePrompt } = await import('../languages/japanese.js');
+                    return getJapanesePrompt;
+                }
+                case 'korean': {
+                    const { getKoreanPrompt } = await import('../languages/korean.js');
+                    return getKoreanPrompt;
+                }
+                case 'chinese': {
+                    const { getChinesePrompt } = await import('../languages/chinese.js');
+                    return getChinesePrompt;
+                }
+                case 'arabic': {
+                    const { getArabicPrompt } = await import('../languages/arabic.js');
+                    return getArabicPrompt;
+                }
+                case 'hebrew': {
+                    const { getHebrewPrompt } = await import('../languages/hebrew.js');
+                    return getHebrewPrompt;
+                }
+                default: {
+                    const { getEnglishPrompt } = await import('../languages/english.js');
+                    return getEnglishPrompt;
+                }
+            }
+        } catch (error) {
+            console.error('Error loading language module:', error);
+            vscode.window.showErrorMessage(`Failed to load language module: ${error}`);
+            try {
+                const { getEnglishPrompt } = await import('../languages/english.js');
+                return getEnglishPrompt;
+            } catch (fallbackError) {
+                console.error('Error loading fallback language module:', fallbackError);
+                vscode.window.showErrorMessage(`Failed to load fallback language module: ${fallbackError}`);
+                throw fallbackError;
+            }
         }
     }
 
@@ -74,11 +97,11 @@ export class OpenAIService {
         language: string,
         messageStyle: MessageStyle
     ): Promise<string | undefined> {
-        const getPrompt = this.getPromptForLanguage(language);
-        const systemPrompt = getPrompt('system');
-        const userPrompt = getPrompt('commit').replace('{{style}}', messageStyle).replace('{{diff}}', diff);
-
         try {
+            const getPrompt = await this.getPromptForLanguage(language);
+            const systemPrompt = getPrompt('system');
+            const userPrompt = getPrompt('commit').replace('{{style}}', messageStyle).replace('{{diff}}', diff);
+
             const response = await this.openai.chat.completions.create({
                 model: 'gpt-4o',
                 messages: [
@@ -91,7 +114,9 @@ export class OpenAIService {
 
             return response.choices[0].message.content || undefined;
         } catch (error: any) {
-            throw new Error(`Failed to generate commit message: ${error.message}`);
+            vscode.window.showErrorMessage(`Failed to generate commit message: ${error.message}`);
+            console.error('Error generating commit message:', error);
+            return undefined;
         }
     }
 
@@ -101,11 +126,12 @@ export class OpenAIService {
         initialTitle?: string,
         initialBody?: string
     ): Promise<{ title: string; body: string } | undefined> {
-        const getPrompt = this.getPromptForLanguage(language);
-        const systemPrompt = getPrompt('system');
+        try {
+            const getPrompt = await this.getPromptForLanguage(language);
+            const systemPrompt = getPrompt('system');
 
-        // PRの差分情報を文字列化
-        const diffSummary = `
+            // PRの差分情報を文字列化
+            const diffSummary = `
 変更ファイル:
 ${diff.files.map(file => `- ${file.filename} (追加: ${file.additions}, 削除: ${file.deletions})`).join('\n')}
 
@@ -115,8 +141,7 @@ ${diff.files.map(file => `
 ${file.patch}`).join('\n')}
 `;
 
-        // タイトルと本文を別々に生成
-        try {
+            // タイトルと本文を別々に生成
             const [titleResponse, bodyResponse] = await Promise.all([
                 this.openai.chat.completions.create({
                     model: 'gpt-4o',
@@ -203,7 +228,9 @@ ${file.patch}`).join('\n')}
                 body: finalBody
             };
         } catch (error: any) {
-            throw new Error(`Failed to generate PR content: ${error.message}`);
+            vscode.window.showErrorMessage(`Failed to generate PR content: ${error.message}`);
+            console.error('Error generating PR content:', error);
+            return undefined;
         }
     }
 }
