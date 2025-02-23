@@ -54,32 +54,20 @@ export class OpenAIService {
 
     private async getPromptForLanguage(language: string): Promise<(type: PromptType) => string> {
         try {
-            switch (language) {
-                case 'japanese': {
-                    const { getJapanesePrompt } = await import('../languages/japanese.js');
-                    return getJapanesePrompt;
+            // 動的に言語モジュールをインポート
+            try {
+                const module = await import(`../languages/${language}.js`);
+                const promptFunction = module[`get${language.charAt(0).toUpperCase() + language.slice(1)}Prompt`];
+                if (promptFunction) {
+                    return promptFunction;
                 }
-                case 'korean': {
-                    const { getKoreanPrompt } = await import('../languages/korean.js');
-                    return getKoreanPrompt;
-                }
-                case 'chinese': {
-                    const { getChinesePrompt } = await import('../languages/chinese.js');
-                    return getChinesePrompt;
-                }
-                case 'arabic': {
-                    const { getArabicPrompt } = await import('../languages/arabic.js');
-                    return getArabicPrompt;
-                }
-                case 'hebrew': {
-                    const { getHebrewPrompt } = await import('../languages/hebrew.js');
-                    return getHebrewPrompt;
-                }
-                default: {
-                    const { getEnglishPrompt } = await import('../languages/english.js');
-                    return getEnglishPrompt;
-                }
+            } catch (importError) {
+                console.warn(`Language module not found for ${language}, falling back to English:`, importError);
             }
+
+            // フォールバック：英語
+            const { getEnglishPrompt } = await import('../languages/english.js');
+            return getEnglishPrompt;
         } catch (error) {
             console.error('Error loading language module:', error);
             vscode.window.showErrorMessage(`Failed to load language module: ${error}`);
@@ -156,8 +144,8 @@ Please provide a clear and ${messageStyle} commit message following the format a
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: userPrompt }
                 ],
-                temperature: 0.2,
-                max_tokens: 70
+                temperature: 0.1,
+                max_tokens: 100
             });
 
             let message = response.choices[0].message.content;
@@ -174,29 +162,124 @@ Please provide a clear and ${messageStyle} commit message following the format a
         }
     }
 
-    async generatePRContent(
-        diff: PullRequestDiff,
-        language: string,
-        template?: TemplateInfo,
-        initialBody?: string
-    ): Promise<{ title: string; body: string } | undefined> {
-        try {
-            const getPrompt = await this.getPromptForLanguage(language);
-            const systemPrompt = getPrompt('system');
-
-            // PRの差分情報を文字列化
-            const diffSummary = `
-Changed files:
+    private async generateDiffSummary(diff: PullRequestDiff): Promise<string> {
+        return `Changed files:
 ${diff.files.map(file => `- ${file.filename} (additions: ${file.additions}, deletions: ${file.deletions})`).join('\n')}
 
 Detailed changes:
 ${diff.files.map(file => `
 [${file.filename}]
 ${file.patch}`).join('\n')}`;
+    }
 
-            let userPrompt;
-            if (template) {
-                userPrompt = `Based on the following template and Git diff, generate a pull request:
+    private formatPRBody(body: string): string {
+        const lines = body.split('\n');
+        const formattedLines: string[] = [];
+        let inList = false;
+        let hasStartedContent = false;
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            const nextLine = i < lines.length - 1 ? lines[i + 1].trim() : '';
+
+            if (!hasStartedContent && line !== '' && !line.startsWith('##') && !line.startsWith('*') && !line.startsWith('-')) {
+                continue;
+            }
+
+            if (!hasStartedContent && (line.startsWith('#') || line.startsWith('*') || line.startsWith('-'))) {
+                hasStartedContent = true;
+            }
+
+            if (line.startsWith('#')) {
+                if (formattedLines.length > 0) {
+                    formattedLines.push('');
+                }
+                formattedLines.push(line);
+                formattedLines.push('');
+                continue;
+            }
+
+            if (line.startsWith('*') || line.startsWith('-')) {
+                if (!inList && formattedLines.length > 0) {
+                    formattedLines.push('');
+                }
+                formattedLines.push(line);
+                inList = true;
+                
+                if (!(nextLine.startsWith('*') || nextLine.startsWith('-'))) {
+                    formattedLines.push('');
+                    inList = false;
+                }
+                continue;
+            }
+
+            if (hasStartedContent && line !== '') {
+                if (formattedLines.length > 0 && formattedLines[formattedLines.length - 1] !== '') {
+                    formattedLines.push('');
+                }
+                formattedLines.push(line);
+                if (nextLine !== '') {
+                    formattedLines.push('');
+                }
+            }
+        }
+
+        return formattedLines.join('\n').replace(/\n{3,}/g, '\n\n').trim() + '\n\n';
+    }
+
+    private cleanMarkdown(text: string): string {
+        return text
+            .replace(/\*\*/g, '')
+            .replace(/\*/g, '')
+            .replace(/`/g, '')
+            .replace(/#/g, '')
+            .trim();
+    }
+
+    async generatePRTitle(
+        diff: PullRequestDiff,
+        language: string
+    ): Promise<string | undefined> {
+        try {
+            const getPrompt = await this.getPromptForLanguage(language);
+            const systemPrompt = getPrompt('system');
+            const diffSummary = await this.generateDiffSummary(diff);
+
+            const titleResponse = await this.openai.chat.completions.create({
+                model: 'chatgpt-4o-latest',
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: getPrompt('prTitle').replace('{{diff}}', diffSummary) }
+                ],
+                temperature: 0.1,
+                max_tokens: 100
+            });
+
+            const title = titleResponse.choices[0].message.content?.trim();
+            if (!title) {
+                throw new Error('Generated title is empty');
+            }
+
+            return this.cleanMarkdown(title);
+        } catch (error: any) {
+            vscode.window.showErrorMessage(`Failed to generate PR title: ${error.message}`);
+            console.error('Error generating PR title:', error);
+            return undefined;
+        }
+    }
+
+    async generatePRBody(
+        diff: PullRequestDiff,
+        language: string,
+        template?: TemplateInfo
+    ): Promise<string | undefined> {
+        try {
+            const getPrompt = await this.getPromptForLanguage(language);
+            const systemPrompt = getPrompt('system');
+            const diffSummary = await this.generateDiffSummary(diff);
+
+            const userPrompt = template
+                ? `Based on the following template and Git diff, generate a pull request:
 
 Template:
 ${template.content}
@@ -204,104 +287,51 @@ ${template.content}
 Git diff:
 ${diffSummary}
 
-Please follow the template format strictly.`;
-            } else {
-                userPrompt = getPrompt('prBody').replace('{{diff}}', diffSummary);
+Please follow the template format strictly.`
+                : getPrompt('prBody').replace('{{diff}}', diffSummary);
+
+            const bodyResponse = await this.openai.chat.completions.create({
+                model: 'chatgpt-4o-latest',
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userPrompt }
+                ],
+                temperature: 0.1,
+                max_tokens: 1000
+            });
+
+            let body = bodyResponse.choices[0].message.content?.trim();
+            if (!body) {
+                throw new Error('Generated body is empty');
             }
 
-            // タイトルと本文を別々に生成
-            const [titleResponse, bodyResponse] = await Promise.all([
-                this.openai.chat.completions.create({
-                    model: 'chatgpt-4o-latest',
-                    messages: [
-                        { role: 'system', content: systemPrompt },
-                        { role: 'user', content: getPrompt('prTitle').replace('{{diff}}', diffSummary) }
-                    ],
-                    temperature: 0.2,
-                    max_tokens: 100
-                }),
-                this.openai.chat.completions.create({
-                    model: 'chatgpt-4o-latest',
-                    messages: [
-                        { role: 'system', content: systemPrompt },
-                        { role: 'user', content: userPrompt }
-                    ],
-                    temperature: 0.2,
-                    max_tokens: 1000
-                })
+            body = this.formatPRBody(body);
+            return body;
+        } catch (error: any) {
+            vscode.window.showErrorMessage(`Failed to generate PR body: ${error.message}`);
+            console.error('Error generating PR body:', error);
+            return undefined;
+        }
+    }
+
+    async generatePRContent(
+        diff: PullRequestDiff,
+        language: string,
+        template?: TemplateInfo
+    ): Promise<{ title: string; body: string } | undefined> {
+        try {
+            const [title, body] = await Promise.all([
+                this.generatePRTitle(diff, language),
+                this.generatePRBody(diff, language, template)
             ]);
 
-            const title = titleResponse.choices[0].message.content?.trim();
-            let body = bodyResponse.choices[0].message.content?.trim();
-
             if (!title || !body) {
-                throw new Error('Generated title or body is empty');
+                throw new Error('Failed to generate PR content');
             }
-
-            // タイトルからMarkdown記法を削除
-            const cleanTitle = title
-                .replace(/\*\*/g, '')  // **bold**を削除
-                .replace(/\*/g, '')    // *italic*を削除
-                .replace(/`/g, '')     // `code`を削除
-                .replace(/#/g, '')     // #見出しを削除
-                .trim();
-
-            // 本文を行に分割して処理
-            const lines = body.split('\n');
-            const formattedLines: string[] = [];
-            let inList = false;
-
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i].trim();
-                const nextLine = i < lines.length - 1 ? lines[i + 1].trim() : '';
-                
-                // 見出しの処理
-                if (line.startsWith('#')) {
-                    if (formattedLines.length > 0) {
-                        formattedLines.push('');  // 見出し前の空行
-                    }
-                    formattedLines.push(line);
-                    formattedLines.push('');  // 見出し後の空行
-                    continue;
-                }
-
-                // 箇条書きの処理
-                if (line.startsWith('*') || line.startsWith('-')) {
-                    if (!inList && formattedLines.length > 0) {
-                        formattedLines.push('');  // リスト開始前の空行
-                    }
-                    formattedLines.push(line);
-                    inList = true;
-                    
-                    // リストが終わる場合は空行を追加
-                    if (!(nextLine.startsWith('*') || nextLine.startsWith('-'))) {
-                        formattedLines.push('');
-                        inList = false;
-                    }
-                    continue;
-                }
-
-                // 通常の段落の処理
-                if (line !== '') {
-                    if (formattedLines.length > 0 && formattedLines[formattedLines.length - 1] !== '') {
-                        formattedLines.push('');  // 段落間の空行
-                    }
-                    formattedLines.push(line);
-                    if (nextLine !== '') {
-                        formattedLines.push('');  // 段落後の空行
-                    }
-                }
-            }
-
-            // 行を結合して余分な空行を削除
-            body = formattedLines.join('\n').replace(/\n{3,}/g, '\n\n').trim() + '\n\n';
-
-            // Issue関連付けがある場合は説明文の先頭に追加
-            const finalBody = initialBody ? `${initialBody}\n\n${body}` : body;
 
             return {
-                title: cleanTitle.trimStart(),
-                body: finalBody.trimStart()
+                title: title.trimStart(),
+                body: body.trimStart()
             };
         } catch (error: any) {
             vscode.window.showErrorMessage(`Failed to generate PR content: ${error.message}`);

@@ -4,9 +4,31 @@ import { OpenAIService } from '../services/openai';
 import { GitService } from '../services/git';
 import * as os from 'os';
 import * as path from 'path';
+import * as crypto from 'crypto';
 
 const PREVIEW_DIR = path.join(os.tmpdir(), 'otak-committer');
-const PREVIEW_FILE = 'pr-preview.md';
+
+// 一時ディレクトリのクリーンアップ
+export async function cleanupPreviewFiles() {
+    try {
+        const stats = await vscode.workspace.fs.stat(vscode.Uri.file(PREVIEW_DIR));
+        if (stats) {
+            await vscode.workspace.fs.delete(vscode.Uri.file(PREVIEW_DIR), { recursive: true });
+        }
+    } catch (error) {
+        // ディレクトリが存在しない場合は無視
+        if (error instanceof vscode.FileSystemError && error.code !== 'FileNotFound') {
+            console.error('Error cleaning up preview directory:', error);
+        }
+    }
+}
+
+// ランダムなファイル名を生成
+function generateRandomFileName(): string {
+    const timestamp = Date.now();
+    const random = crypto.randomBytes(4).toString('hex');
+    return `pr-preview-${timestamp}-${random}.md`;
+}
 
 async function closePreviewTabs() {
     const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs);
@@ -21,9 +43,12 @@ async function closePreviewTabs() {
 
 async function showMarkdownPreview(content: string): Promise<{ uri: vscode.Uri, document: vscode.TextDocument } | undefined> {
     try {
-        // 一時ディレクトリが存在しない場合は作成
-        const tempUri = vscode.Uri.file(path.join(PREVIEW_DIR, PREVIEW_FILE));
+        // 一時ディレクトリをクリーンアップして再作成
+        await cleanupPreviewFiles();
         await vscode.workspace.fs.createDirectory(vscode.Uri.file(PREVIEW_DIR));
+
+        // ランダムなファイル名で一時ファイルを作成
+        const tempUri = vscode.Uri.file(path.join(PREVIEW_DIR, generateRandomFileName()));
 
         // まず以前のプレビューを閉じる
         await closePreviewTabs();
@@ -120,8 +145,7 @@ export async function generatePR(): Promise<void> {
                 const result = await openai.generatePRContent(
                     diff,
                     language,
-                    templates.pr,
-                    issueBody
+                    templates.pr
                 );
                 progress.report({ message: 'Content generated successfully' });
                 return result;
@@ -238,8 +262,12 @@ export async function generatePR(): Promise<void> {
                 }
             });
 
-            // 成功した場合のみブラウザでの表示オプションを提供
+            // PR作成成功後、プレビューを閉じてブラウザでの表示オプションを提供
             if (result && result.number) {
+                // プレビューを閉じてクリーンアップ
+                await closePreviewTabs();
+                await cleanupPreviewFiles();
+
                 const prTypeStr = result.draft ? 'Draft PR' : 'Pull Request';
                 const action = await vscode.window.showInformationMessage(
                     `${prTypeStr} #${result.number} created successfully!`,
@@ -249,6 +277,8 @@ export async function generatePR(): Promise<void> {
                 if (action === 'Open in Browser') {
                     await vscode.env.openExternal(vscode.Uri.parse(result.html_url));
                 }
+                // プレビューファイルの参照をクリア
+                previewFile = undefined;
             } else {
                 throw new Error('PR creation failed: No PR details received');
             }
@@ -273,12 +303,13 @@ export async function generatePR(): Promise<void> {
 
         vscode.window.showErrorMessage(`Failed to generate PR: ${error.message}`);
     } finally {
-        // クリーンアップは不要（プレビューは次回の表示時に上書きされる）
+        // プレビューが終了したらファイルをクリーンアップ
         if (previewFile) {
             try {
-                // プレビューファイルは残しておく（次回の上書き用）
+                await closePreviewTabs();
+                await cleanupPreviewFiles();
             } catch (error) {
-                console.error('Error cleaning up preview file:', error);
+                console.error('Error cleaning up preview files:', error);
             }
         }
     }
