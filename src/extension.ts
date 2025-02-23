@@ -1,129 +1,129 @@
 import * as vscode from 'vscode';
 import { generateCommit } from './commands/generateCommit';
 import { generatePR } from './commands/generatePR';
-import { showLanguageQuickPick } from './languages';
-import { MESSAGE_STYLES } from './types/messageStyle';
+import { LANGUAGE_CONFIGS } from './languages';
+import { MessageStyle } from './types/messageStyle';
 
-let statusBarItem: vscode.StatusBarItem;
+let languageStatusBarItem: vscode.StatusBarItem;
 
-export async function activate(context: vscode.ExtensionContext) {
+export function activate(context: vscode.ExtensionContext) {
     // ステータスバーアイテムの初期化
-    statusBarItem = vscode.window.createStatusBarItem(
+    languageStatusBarItem = vscode.window.createStatusBarItem(
         vscode.StatusBarAlignment.Right,
         100
     );
-    statusBarItem.command = 'otak-committer.changeLanguage';
-    statusBarItem.tooltip = 'Click to change commit message language';
-
-    // 現在の言語を表示
-    const updateStatusBar = () => {
-        const config = vscode.workspace.getConfiguration('otakCommitter');
-        const language = config.get<string>('language') || 'english';
-        const messageStyle = config.get<string>('messageStyle') || 'normal';
-        statusBarItem.text = `$(globe) ${language}`;
-        statusBarItem.tooltip = `Click to change language\nCurrent style: ${messageStyle}`;
-    };
-
-    // Gitリポジトリの有無を確認してステータスバーを表示
-    const checkGitRepository = async () => {
-        try {
-            let gitExtension;
-            // Git拡張機能が有効になるまで待機
-            for (let i = 0; i < 10; i++) {
-                gitExtension = vscode.extensions.getExtension('vscode.git')?.exports;
-                if (gitExtension) break;
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-
-            if (gitExtension) {
-                const api = gitExtension.getAPI(1);
-                if (api.repositories.length > 0) {
-                    updateStatusBar();
-                    statusBarItem.show();
-                } else {
-                    statusBarItem.hide();
-                }
-            }
-        } catch (error) {
-            console.error('Failed to check Git repository:', error);
-            statusBarItem.hide();
-        }
-    };
+    context.subscriptions.push(languageStatusBarItem);
 
     // コマンドの登録
-    const disposables = [
-        vscode.commands.registerCommand(
-            'otak-committer.generateMessage',
-            () => generateCommit(context)
-        ),
-        vscode.commands.registerCommand(
-            'otak-committer.generatePR',
-            () => generatePR(context)
-        ),
-        vscode.commands.registerCommand(
-            'otak-committer.openSettings',
-            () => vscode.commands.executeCommand('workbench.action.openSettings', 'otakCommitter')
-        ),
-        vscode.commands.registerCommand(
-            'otak-committer.changeLanguage',
-            async () => {
-                const language = await showLanguageQuickPick();
-                if (language) {
-                    await vscode.workspace.getConfiguration('otakCommitter').update(
-                        'language',
-                        language,
-                        vscode.ConfigurationTarget.Global
-                    );
-                    updateStatusBar();
-                }
-            }
-        ),
-        vscode.commands.registerCommand(
-            'otak-committer.changeMessageStyle',
-            async () => {
-                const styles = Object.entries(MESSAGE_STYLES).map(([id, config]) => ({
-                    label: id.charAt(0).toUpperCase() + id.slice(1),
-                    description: config.description
-                }));
+    const generateCommitCommand = vscode.commands.registerCommand('otak-committer.generateCommit', () => {
+        generateCommit(context);
+    });
 
-                const selected = await vscode.window.showQuickPick(styles, {
-                    placeHolder: 'Select commit message style'
-                });
+    const generatePRCommand = vscode.commands.registerCommand('otak-committer.generatePR', () => {
+        generatePR(context);
+    });
 
-                if (selected) {
-                    await vscode.workspace.getConfiguration('otakCommitter').update(
-                        'messageStyle',
-                        selected.label.toLowerCase(),
-                        vscode.ConfigurationTarget.Global
-                    );
-                    updateStatusBar();
-                }
+    const changeLanguageCommand = vscode.commands.registerCommand('otak-committer.changeLanguage', async () => {
+        const languages = Object.entries(LANGUAGE_CONFIGS).map(([key, config]) => ({
+            label: config.name,
+            description: key
+        }));
+
+        const selected = await vscode.window.showQuickPick(languages, {
+            placeHolder: 'Select commit message language'
+        });
+
+        if (selected) {
+            await vscode.workspace.getConfiguration('otakCommitter').update(
+                'language',
+                selected.description,
+                vscode.ConfigurationTarget.Global
+            );
+            updateLanguageStatusBar();
+        }
+    });
+
+    const changeMessageStyleCommand = vscode.commands.registerCommand('otak-committer.changeMessageStyle', async () => {
+        const styles: { [key: string]: string } = {
+            'normal': 'Normal',
+            'emoji': 'Emoji',
+            'kawaii': 'Kawaii'
+        };
+
+        const selected = await vscode.window.showQuickPick(
+            Object.entries(styles).map(([key, label]) => ({
+                label,
+                description: key
+            })),
+            {
+                placeHolder: 'Select commit message style'
             }
-        ),
-        // 設定変更の監視
+        );
+
+        if (selected) {
+            await vscode.workspace.getConfiguration('otakCommitter').update(
+                'messageStyle',
+                selected.description as MessageStyle,
+                vscode.ConfigurationTarget.Global
+            );
+            updateLanguageStatusBar();
+        }
+    });
+
+    const openSettingsCommand = vscode.commands.registerCommand('otak-committer.openSettings', () => {
+        vscode.commands.executeCommand('workbench.action.openSettings', 'otakCommitter');
+    });
+
+    context.subscriptions.push(
+        generateCommitCommand,
+        generatePRCommand,
+        changeLanguageCommand,
+        changeMessageStyleCommand,
+        openSettingsCommand
+    );
+
+    // 設定変更のイベントハンドラ
+    context.subscriptions.push(
         vscode.workspace.onDidChangeConfiguration(e => {
-            if (e.affectsConfiguration('otakCommitter.language') ||
-                e.affectsConfiguration('otakCommitter.messageStyle')) {
-                updateStatusBar();
+            if (e.affectsConfiguration('otakCommitter')) {
+                updateLanguageStatusBar();
             }
-        }),
-        // Gitリポジトリの変更を監視
-        vscode.workspace.onDidChangeWorkspaceFolders(() => {
-            void checkGitRepository();
-        }),
-        // ステータスバーアイテムの登録
-        statusBarItem
-    ];
+        })
+    );
 
-    // 全てのdisposableをコンテキストに登録
-    context.subscriptions.push(...disposables);
+    // 初期表示
+    updateLanguageStatusBar();
+}
 
-    // 初期化時のGitリポジトリチェック
-    await checkGitRepository();
+function updateLanguageStatusBar() {
+    const config = vscode.workspace.getConfiguration('otakCommitter');
+    const language = config.get<string>('language') || 'japanese';
+    const languageConfig = LANGUAGE_CONFIGS[language];
+
+    if (languageConfig) {
+        languageStatusBarItem.text = `$(globe) ${languageConfig.name}`;
+
+        const tooltip = new vscode.MarkdownString();
+        tooltip.isTrusted = true;
+        tooltip.supportThemeIcons = true;
+
+        tooltip.appendMarkdown(`Configuration\n\n`);
+        tooltip.appendMarkdown(`Current Style: ${vscode.workspace.getConfiguration('otakCommitter').get<MessageStyle>('messageStyle') || 'normal'}\n\n`);
+        tooltip.appendMarkdown(`---\n\n`);
+        tooltip.appendMarkdown(`$(versions) [Change Message Style](command:otak-committer.changeMessageStyle) &nbsp;&nbsp; $(gear) [Open Settings](command:otak-committer.openSettings)`);
+
+        languageStatusBarItem.tooltip = tooltip;
+        languageStatusBarItem.command = {
+            title: 'Change Language',
+            command: 'otak-committer.changeLanguage'
+        };
+
+        languageStatusBarItem.show();
+    }
 }
 
 export function deactivate() {
-    if (statusBarItem) {
-        statusBarItem.dispose();
+    if (languageStatusBarItem) {
+        languageStatusBarItem.dispose();
     }
 }
