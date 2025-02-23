@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import simpleGit, { SimpleGit, StatusResult as GitStatusResult } from 'simple-git';
+import * as path from 'path';
+import * as fs from 'fs/promises';
 
 interface StatusResult {
     current: string;
@@ -11,10 +13,18 @@ interface StatusResult {
     }>;
 }
 
+export interface TemplateInfo {
+    type: 'commit' | 'pr';
+    content: string;
+    path: string;
+}
+
 export class GitService {
     private git: SimpleGit;
+    private workspaceRoot: string;
 
     constructor(workspaceRoot: string) {
+        this.workspaceRoot = workspaceRoot;
         this.git = simpleGit(workspaceRoot);
     }
 
@@ -89,5 +99,65 @@ export class GitService {
             console.error('Error getting status:', error);
             throw new Error(`Failed to get status: ${error.message}`);
         }
+    }
+
+    async findTemplates(): Promise<{ commit?: TemplateInfo; pr?: TemplateInfo }> {
+        const templates: { commit?: TemplateInfo; pr?: TemplateInfo } = {};
+        const possiblePaths = [
+            // コミットメッセージのテンプレート
+            {
+                type: 'commit' as const,
+                paths: [
+                    '.gitmessage',
+                    '.github/commit_template',
+                    '.github/templates/commit_template.md',
+                    'docs/templates/commit_template.md'
+                ]
+            },
+            // PRのテンプレート
+            {
+                type: 'pr' as const,
+                paths: [
+                    '.github/pull_request_template.md',
+                    '.github/templates/pull_request_template.md',
+                    'docs/templates/pull_request_template.md'
+                ]
+            }
+        ];
+
+        try {
+            for (const template of possiblePaths) {
+                for (const templatePath of template.paths) {
+                    const fullPath = path.join(this.workspaceRoot, templatePath);
+                    try {
+                        const content = await fs.readFile(fullPath, 'utf-8');
+                        if (content) {
+                            if (template.type === 'commit') {
+                                templates.commit = {
+                                    type: 'commit',
+                                    content: content,
+                                    path: templatePath
+                                };
+                                break; // コミットテンプレートが見つかったら他は探さない
+                            } else {
+                                templates.pr = {
+                                    type: 'pr',
+                                    content: content,
+                                    path: templatePath
+                                };
+                                break; // PRテンプレートが見つかったら他は探さない
+                            }
+                        }
+                    } catch (err) {
+                        // ファイルが存在しない場合は次のパスを試す
+                        continue;
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error finding templates:', error);
+        }
+
+        return templates;
     }
 }

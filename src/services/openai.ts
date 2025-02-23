@@ -3,6 +3,8 @@ import OpenAI from 'openai';
 import { PromptType } from '../types/language';
 import { MessageStyle } from '../types/messageStyle';
 import { PullRequestDiff } from '../types/github';
+import { COMMIT_PREFIXES, CommitPrefix } from '../constants/commitGuide';
+import { TemplateInfo } from './git';
 
 export class OpenAIService {
     private openai: OpenAI;
@@ -92,15 +94,63 @@ export class OpenAIService {
         }
     }
 
+    private async createCommitPrompt(
+        diff: string,
+        language: string,
+        messageStyle: MessageStyle,
+        template?: TemplateInfo
+    ): Promise<string> {
+        // テンプレートがある場合はそれを基に生成
+        if (template) {
+            return `
+Based on the following template and Git diff, generate a commit message:
+
+Template:
+${template.content}
+
+Git diff:
+${diff}
+
+Please follow the template format strictly.`;
+        }
+
+        // テンプレートがない場合はPrefixを使用
+        const prefixDescriptions = COMMIT_PREFIXES.map(prefix => {
+            const desc = prefix.description[language as keyof CommitPrefix['description']] || prefix.description.english;
+            return `${prefix.prefix}: ${desc}`;
+        }).join('\n');
+
+        return `
+Generate a commit message in ${language} for the following Git diff.
+Use one of these prefixes:
+
+${prefixDescriptions}
+
+The commit message should follow this format:
+<prefix>: <subject>
+
+<body>
+
+The subject line should be under 50 characters.
+The body should be wrapped at 72 characters.
+The style should be: ${messageStyle}
+
+Git diff:
+${diff}
+
+Please provide a clear and ${messageStyle} commit message following the format above.`;
+    }
+
     async generateCommitMessage(
         diff: string,
         language: string,
-        messageStyle: MessageStyle
+        messageStyle: MessageStyle,
+        template?: TemplateInfo
     ): Promise<string | undefined> {
         try {
             const getPrompt = await this.getPromptForLanguage(language);
             const systemPrompt = getPrompt('system');
-            const userPrompt = getPrompt('commit').replace('{{style}}', messageStyle).replace('{{diff}}', diff);
+            const userPrompt = await this.createCommitPrompt(diff, language, messageStyle, template);
 
             const response = await this.openai.chat.completions.create({
                 model: 'gpt-4o',
@@ -123,6 +173,7 @@ export class OpenAIService {
     async generatePRContent(
         diff: PullRequestDiff,
         language: string,
+        template?: TemplateInfo,
         initialTitle?: string,
         initialBody?: string
     ): Promise<{ title: string; body: string } | undefined> {
@@ -141,13 +192,29 @@ ${diff.files.map(file => `
 ${file.patch}`).join('\n')}
 `;
 
+            let userPrompt;
+            if (template) {
+                userPrompt = `
+Based on the following template and Git diff, generate a pull request:
+
+Template:
+${template.content}
+
+Git diff:
+${diffSummary}
+
+Please follow the template format strictly.`;
+            } else {
+                userPrompt = getPrompt('prBody').replace('{{diff}}', diffSummary);
+            }
+
             // タイトルと本文を別々に生成
             const [titleResponse, bodyResponse] = await Promise.all([
                 this.openai.chat.completions.create({
                     model: 'gpt-4o',
                     messages: [
                         { role: 'system', content: systemPrompt },
-                        { role: 'user', content: getPrompt('prTitle').replace('{{diff}}', diffSummary) }
+                        { role: 'user', content: template ? userPrompt : getPrompt('prTitle').replace('{{diff}}', diffSummary) }
                     ],
                     temperature: 0.2,
                     max_tokens: 100
@@ -156,7 +223,7 @@ ${file.patch}`).join('\n')}
                     model: 'gpt-4o',
                     messages: [
                         { role: 'system', content: systemPrompt },
-                        { role: 'user', content: getPrompt('prBody').replace('{{diff}}', diffSummary) }
+                        { role: 'user', content: userPrompt }
                     ],
                     temperature: 0.2,
                     max_tokens: 1000

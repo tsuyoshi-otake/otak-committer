@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { GitHubService } from '../services/github';
 import { OpenAIService } from '../services/openai';
+import { GitService } from '../services/git';
 
 export async function generatePR(): Promise<void> {
     try {
@@ -43,6 +44,15 @@ export async function generatePR(): Promise<void> {
             }
         }
 
+        // GitServiceの初期化
+        const gitService = await GitService.initialize();
+        if (!gitService) {
+            return;
+        }
+
+        // テンプレートを探す
+        const templates = await gitService.findTemplates();
+
         // 差分を取得
         const diff = await github.getBranchDiffDetails(branches.base, branches.compare);
         
@@ -63,7 +73,7 @@ export async function generatePR(): Promise<void> {
                 cancellable: false
             }, async (progress) => {
                 progress.report({ message: 'Generating content using AI...' });
-                const result = await openai.generatePRContent(diff, language, initialTitle, initialBody);
+                const result = await openai.generatePRContent(diff, language, templates.pr, initialTitle, initialBody);
                 progress.report({ message: 'Content generated successfully' });
                 return result;
             });
