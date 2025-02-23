@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { GitHubService } from '../services/github';
-import { IssueInfo } from '../types/github';
 import { OpenAIService } from '../services/openai';
 
 export async function generatePR(): Promise<void> {
@@ -41,7 +40,6 @@ export async function generatePR(): Promise<void> {
             if (selectedIssue) {
                 issueNumber = selectedIssue.issue.number;
                 initialTitle = selectedIssue.issue.title;
-                initialBody = `Closes #${issueNumber}\n\n${selectedIssue.issue.body}`;
             }
         }
 
@@ -57,85 +55,133 @@ export async function generatePR(): Promise<void> {
         const language = vscode.workspace.getConfiguration('otakCommitter').get<string>('language') || 'japanese';
         
         // GPT-4oでタイトルと説明を生成
-        const generatedPR = await vscode.window.withProgress({
-            location: vscode.ProgressLocation.Notification,
-            title: 'Generating PR content...',
-            cancellable: false
-        }, async () => {
-            return await openai.generatePRContent(diff, language, initialTitle, initialBody);
-        });
+        let generatedPR;
+        try {
+            generatedPR = await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: 'Generate Pull Request - Analyzing changes...',
+                cancellable: false
+            }, async (progress) => {
+                progress.report({ message: 'Generating content using AI...' });
+                const result = await openai.generatePRContent(diff, language, initialTitle, initialBody);
+                progress.report({ message: 'Content generated successfully' });
+                return result;
+            });
 
-        if (!generatedPR) {
+            if (!generatedPR) {
+                vscode.window.showErrorMessage('Failed to generate PR content. Please try again.');
+                return;
+            }
+        } catch (error: any) {
+            vscode.window.showErrorMessage(`Error generating PR content: ${error.message}`);
+            console.error('PR generation error:', error);
             return;
         }
 
-        // タイトル入力（自動生成されたタイトルをデフォルトに）
-        const title = await vscode.window.showInputBox({
-            prompt: 'Enter pull request title',
-            placeHolder: 'Feature: Add new functionality',
-            value: generatedPR.title
-        });
+        // PR種別の選択（DraftかRegularか）
+        const prType = await vscode.window.showQuickPick(
+            [
+                { label: 'Draft Pull Request', description: 'Create as draft PR (review required)', value: true },
+                { label: 'Regular Pull Request', description: 'Create as regular PR (ready for review)', value: false }
+            ],
+            {
+                placeHolder: 'Select PR type',
+                ignoreFocusOut: true
+            }
+        );
 
-        if (!title) {
+        if (!prType) {
             return;
         }
 
-        // 説明入力（自動生成された説明をデフォルトに）
-        const description = await vscode.window.showInputBox({
-            prompt: 'Enter pull request description (optional)',
-            placeHolder: 'Describe your changes here...',
-            value: generatedPR.body
-        });
+        // 生成されたタイトルと説明をそのまま使用
+        const title = generatedPR.title;
+        const description = generatedPR.body;
 
-        if (description === undefined) {
-            return;
-        }
+        try {
+            // PR作成の進行状況表示
+            const result = await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: `Creating ${prType.value ? 'Draft' : 'Regular'} Pull Request...`,
+                cancellable: false
+            }, async (progress) => {
+                // まずブランチの変更を再確認
+                progress.report({ message: 'Validating branch changes...' });
+                const changes = await github.getBranchDiffDetails(branches.base, branches.compare);
+                if (!changes.files.length) {
+                    throw new Error('No changes to create a pull request');
+                }
 
-        // PR作成の進行状況表示
-        const result = await vscode.window.withProgress({
-            location: vscode.ProgressLocation.Notification,
-            title: 'Creating Pull Request...',
-            cancellable: false
-        }, async () => {
-            // まずDraftで試行
-            try {
-                return await github.createPullRequest({
-                    base: branches.base,
-                    compare: branches.compare,
-                    title,
-                    body: description,
-                    issueNumber,
-                    draft: true
-                });
-            } catch (error: any) {
-                // Draft PRがサポートされていない場合は通知して通常のPRを作成
-                if (error.message?.includes('Draft pull requests are not supported')) {
-                    // 情報通知を表示
-                    await vscode.window.showInformationMessage(
-                        'Draft PRs are only available in GitHub Team and Enterprise. Creating a regular PR instead.'
-                    );
-                    
-                    return await github.createPullRequest({
+                try {
+                    progress.report({ message: 'Creating PR on GitHub...' });
+                    console.log('Creating PR with params:', {
+                        base: branches.base,
+                        compare: branches.compare,
+                        title,
+                        issueNumber,
+                        draft: prType.value
+                    });
+
+                    const pr = await github.createPullRequest({
                         base: branches.base,
                         compare: branches.compare,
                         title,
                         body: description,
                         issueNumber,
-                        draft: false
+                        draft: prType.value
                     });
+
+                    if (!pr || !pr.number) {
+                        throw new Error('Failed to create PR: Invalid response from GitHub');
+                    }
+
+                    progress.report({ message: `PR #${pr.number} created successfully!` });
+                    return pr;
+
+                } catch (error: any) {
+                    // Draft PRがサポートされていない場合は通常のPRを試行
+                    if (prType.value && error.message?.includes('Draft pull requests are not supported')) {
+                        progress.report({ message: 'Draft PR not supported, creating regular PR...' });
+                        await vscode.window.showInformationMessage(
+                            'Draft PRs are only available in GitHub Team and Enterprise. Creating a regular PR instead.'
+                        );
+                        
+                        const regularPr = await github.createPullRequest({
+                            base: branches.base,
+                            compare: branches.compare,
+                            title,
+                            body: description,
+                            issueNumber,
+                            draft: false
+                        });
+
+                        if (!regularPr || !regularPr.number) {
+                            throw new Error('Failed to create regular PR: Invalid response from GitHub');
+                        }
+
+                        progress.report({ message: `Regular PR #${regularPr.number} created successfully!` });
+                        return regularPr;
+                    }
+                    throw error;
                 }
-                throw error;
+            });
+
+            // 成功した場合のみブラウザでの表示オプションを提供
+            if (result && result.number) {
+                const prTypeStr = result.draft ? 'Draft PR' : 'Pull Request';
+                const action = await vscode.window.showInformationMessage(
+                    `${prTypeStr} #${result.number} created successfully!`,
+                    'Open in Browser'
+                );
+
+                if (action === 'Open in Browser') {
+                    await vscode.env.openExternal(vscode.Uri.parse(result.html_url));
+                }
+            } else {
+                throw new Error('PR creation failed: No PR details received');
             }
-        });
-
-        // PR作成成功通知とブラウザで開くボタン
-        const action = await vscode.window.showInformationMessage(
-            `Pull Request #${result.number} created successfully!`,
-            'Open in Browser'
-        );
-
-        if (action === 'Open in Browser') {
-            await vscode.env.openExternal(vscode.Uri.parse(result.html_url));
+        } catch (error) {
+            throw error; // エラーを上位のハンドラに渡す
         }
 
     } catch (error: any) {

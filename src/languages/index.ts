@@ -4,43 +4,43 @@ export const LANGUAGE_CONFIGS: { [key: string]: LanguageConfig } = {
     japanese: {
         name: '日本語',
         async getPrompt(type: PromptType) {
-            const { getAsianPrompt } = await import('./asian.js');
-            return getAsianPrompt(type);
+            const { getJapanesePrompt } = await import('./japanese.js');
+            return getJapanesePrompt(type);
         }
     },
     english: {
         name: 'English',
         async getPrompt(type: PromptType) {
-            const { getEuropeanPrompt } = await import('./european.js');
-            return getEuropeanPrompt(type);
+            const { getEnglishPrompt } = await import('./english.js');
+            return getEnglishPrompt(type);
         }
     },
     korean: {
         name: '한국어',
         async getPrompt(type: PromptType) {
-            const { getAsianPrompt } = await import('./asian.js');
-            return getAsianPrompt(type);
+            const { getKoreanPrompt } = await import('./korean.js');
+            return getKoreanPrompt(type);
         }
     },
     chinese: {
         name: '中文',
         async getPrompt(type: PromptType) {
-            const { getAsianPrompt } = await import('./asian.js');
-            return getAsianPrompt(type);
+            const { getChinesePrompt } = await import('./chinese.js');
+            return getChinesePrompt(type);
         }
     },
     arabic: {
         name: 'العربية',
         async getPrompt(type: PromptType) {
-            const { getMiddleEasternPrompt } = await import('./middleEastern.js');
-            return getMiddleEasternPrompt(type);
+            const { getArabicPrompt } = await import('./arabic.js');
+            return getArabicPrompt(type);
         }
     },
     hebrew: {
         name: 'עברית',
         async getPrompt(type: PromptType) {
-            const { getMiddleEasternPrompt } = await import('./middleEastern.js');
-            return getMiddleEasternPrompt(type);
+            const { getHebrewPrompt } = await import('./hebrew.js');
+            return getHebrewPrompt(type);
         }
     }
 };

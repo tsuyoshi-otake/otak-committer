@@ -10,9 +10,12 @@ import { PullRequestDiff } from '../types/github';
 export class OpenAIService {
     private openai: OpenAI;
 
-    constructor(private apiKey: string) {
+    constructor(apiKey: string | undefined) {
+        if (!apiKey || apiKey.trim() === '') {
+            throw new Error('OpenAI API key is required');
+        }
         this.openai = new OpenAI({
-            apiKey: this.apiKey
+            apiKey: apiKey
         });
     }
 
@@ -31,11 +34,21 @@ export class OpenAIService {
     }
 
     static async initialize(): Promise<OpenAIService | undefined> {
-        const config = vscode.workspace.getConfiguration('otakCommitter.openai');
-        const apiKey = config.get<string>('apiKey');
+        const config = vscode.workspace.getConfiguration('otakCommitter');
+        const apiKey = config.get<string>('openaiApiKey');
 
-        if (!apiKey) {
+        if (!apiKey || apiKey.trim() === '') {
             await OpenAIService.showAPIKeyPrompt();
+            return undefined;
+        }
+
+        try {
+            const service = new OpenAIService(apiKey);
+            // APIキーの有効性を確認
+            await service.openai.models.list();
+            return service;
+        } catch (error: any) {
+            vscode.window.showErrorMessage(`OpenAI API Error: ${error.message}`);
             return undefined;
         }
 
@@ -67,12 +80,12 @@ export class OpenAIService {
 
         try {
             const response = await this.openai.chat.completions.create({
-                model: 'gpt-4',
+                model: 'gpt-4o',
                 messages: [
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: userPrompt }
                 ],
-                temperature: 0.7,
+                temperature: 0.2,
                 max_tokens: 500
             });
 
@@ -102,42 +115,93 @@ ${diff.files.map(file => `
 ${file.patch}`).join('\n')}
 `;
 
-        const userPrompt = getPrompt('pr').replace('{{diff}}', diffSummary);
-
+        // タイトルと本文を別々に生成
         try {
-            const response = await this.openai.chat.completions.create({
-                model: 'gpt-4',
-                messages: [
-                    { role: 'system', content: systemPrompt },
-                    { role: 'user', content: userPrompt }
-                ],
-                temperature: 0.7,
-                max_tokens: 1000
-            });
+            const [titleResponse, bodyResponse] = await Promise.all([
+                this.openai.chat.completions.create({
+                    model: 'gpt-4o',
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: getPrompt('prTitle').replace('{{diff}}', diffSummary) }
+                    ],
+                    temperature: 0.2,
+                    max_tokens: 100
+                }),
+                this.openai.chat.completions.create({
+                    model: 'gpt-4o',
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: getPrompt('prBody').replace('{{diff}}', diffSummary) }
+                    ],
+                    temperature: 0.2,
+                    max_tokens: 1000
+                })
+            ]);
 
-            const content = response.choices[0].message.content;
-            if (!content) {
-                return undefined;
+            const title = titleResponse.choices[0].message.content?.trim();
+            let body = bodyResponse.choices[0].message.content?.trim();
+
+            if (!title || !body) {
+                throw new Error('Generated title or body is empty');
             }
 
-            // タイトルと説明文を抽出
-            const titleMatch = content.match(/Title:\s*(.+?)(?=\n\nBody:|$)/s);
-            const bodyMatch = content.match(/Body:\s*(.+?)$/s);
+            // 本文を行に分割して処理
+            const lines = body.split('\n');
+            const formattedLines: string[] = [];
+            let inList = false;
 
-            if (titleMatch && bodyMatch) {
-                const title = titleMatch[1].trim();
-                const body = bodyMatch[1].trim();
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                const nextLine = i < lines.length - 1 ? lines[i + 1].trim() : '';
+                
+                // 見出しの処理
+                if (line.startsWith('#')) {
+                    if (formattedLines.length > 0) {
+                        formattedLines.push('');  // 見出し前の空行
+                    }
+                    formattedLines.push(line);
+                    formattedLines.push('');  // 見出し後の空行
+                    continue;
+                }
 
-                // Issue関連付けがある場合は説明文の先頭に追加
-                const finalBody = initialBody ? `${initialBody}\n\n${body}` : body;
+                // 箇条書きの処理
+                if (line.startsWith('*') || line.startsWith('-')) {
+                    if (!inList && formattedLines.length > 0) {
+                        formattedLines.push('');  // リスト開始前の空行
+                    }
+                    formattedLines.push(line);
+                    inList = true;
+                    
+                    // リストが終わる場合は空行を追加
+                    if (!(nextLine.startsWith('*') || nextLine.startsWith('-'))) {
+                        formattedLines.push('');
+                        inList = false;
+                    }
+                    continue;
+                }
 
-                return {
-                    title: initialTitle || title,
-                    body: finalBody
-                };
+                // 通常の段落の処理
+                if (line !== '') {
+                    if (formattedLines.length > 0 && formattedLines[formattedLines.length - 1] !== '') {
+                        formattedLines.push('');  // 段落間の空行
+                    }
+                    formattedLines.push(line);
+                    if (nextLine !== '') {
+                        formattedLines.push('');  // 段落後の空行
+                    }
+                }
             }
 
-            return undefined;
+            // 行を結合して余分な空行を削除
+            body = formattedLines.join('\n').replace(/\n{3,}/g, '\n\n').trim() + '\n\n';
+
+            // Issue関連付けがある場合は説明文の先頭に追加
+            const finalBody = initialBody ? `${initialBody}\n\n${body}` : body;
+
+            return {
+                title: initialTitle || title,
+                body: finalBody
+            };
         } catch (error: any) {
             throw new Error(`Failed to generate PR content: ${error.message}`);
         }

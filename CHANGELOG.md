@@ -4,6 +4,20 @@ All notable changes to the "otak-committer" extension will be documented in this
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.4.1] - 2025-02-23
+
+### Added
+- ✨ PR Type Selection
+  - Added UI for choosing between Draft and Regular PR
+  - Improved visibility of PR creation process
+  - Enhanced progress notifications with detailed status
+
+### Changed
+- 🔄 Improved PR Generation UI
+  - Updated progress messages for better clarity
+  - Added step-by-step status updates during PR creation
+  - Enhanced error handling and feedback
+
 ## [1.4.0] - 2025-02-23
 
 ### Added

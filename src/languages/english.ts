@@ -1,13 +1,12 @@
-import { MessageStyle } from '../types/messageStyle';
 import { PromptType } from '../types/language';
 
-export const getMiddleEasternPrompt = (type: PromptType): string => {
-    const prompts = {
+export const getEnglishPrompt = (type: PromptType): string => {
+    const prompts: Record<PromptType, string> = {
         system: `
 You are an experienced software engineer assisting with project commit messages and PR creation.
 Your output has the following characteristics:
 
-- Clear RTL language writing
+- Clear and concise English
 - Technically accurate expressions
 - Appropriate summarization of changes
 `,
@@ -22,17 +21,28 @@ Style description:
 Diff:
 {{diff}}
 `,
-        pr: `
-Based on the following diff, generate a Pull Request title and description.
+        prTitle: `
+Based on the following diff, generate a Pull Request title.
 
-Please consider:
+Requirements:
 1. Title should be concise and accurately represent the changes
-2. Description should include:
+2. Include a prefix (e.g., "Feature:", "Fix:", "Improvement:", etc.)
+3. Write in English
+
+Diff:
+{{diff}}
+`,
+        prBody: `
+Based on the following diff, generate a detailed Pull Request description.
+
+Requirements:
+1. Description should include:
    - Overview of changes
    - Purpose of changes
    - Scope of impact
    - Testing instructions (if needed)
-3. Write with proper RTL support
+2. Write in English
+3. Use bullet points for better readability
 
 Diff:
 {{diff}}

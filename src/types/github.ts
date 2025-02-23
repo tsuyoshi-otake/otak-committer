@@ -36,6 +36,7 @@ export interface GitHubDiffFile {
 export interface CreatePullRequestResponse {
     number: number;
     html_url: string;
+    draft?: boolean;
 }
 
 export interface GitHubError {

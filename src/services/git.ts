@@ -31,12 +31,17 @@ export class GitService {
 
     async getDiff(): Promise<string> {
         const status = await this.git.status();
-        const stagedFiles = status.staged;
-        const modifiedFiles = status.modified;
+        const staged = status.staged || [];
+        const modified = status.modified || [];
 
         // ステージされていない変更があればステージング
-        if (modifiedFiles.length > 0) {
-            await this.git.add(modifiedFiles);
+        if (modified.length > 0) {
+            await this.git.add(modified);
+        }
+
+        // ステージされた変更がない場合はエラー
+        if (staged.length === 0 && modified.length === 0) {
+            throw new Error('No changes to commit');
         }
 
         // 差分を取得

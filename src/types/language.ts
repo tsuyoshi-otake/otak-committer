@@ -1,6 +1,6 @@
 export type Language = string;
 
-export type PromptType = 'system' | 'commit' | 'pr';
+export type PromptType = 'system' | 'commit' | 'prTitle' | 'prBody';
 
 export interface LanguageConfig {
     name: string;
@@ -10,5 +10,6 @@ export interface LanguageConfig {
 export interface LanguagePrompt {
     system: string;
     commit: string;
-    pr: string;
+    prTitle: string;
+    prBody: string;
 }

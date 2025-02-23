@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import {
-    GitHubConfig,
     GitHubAPI,
     PullRequestParams,
     IssueInfo,
@@ -24,7 +23,7 @@ export class GitHubService {
     constructor(private token: string) {}
 
     private async ensureInitialized(): Promise<void> {
-        if (this.initialized) return;
+        if (this.initialized) {return;}
 
         // プロキシ設定の取得
         const proxyUrl = vscode.workspace.getConfiguration('http').get<string>('proxy');
@@ -173,8 +172,8 @@ export class GitHubService {
                 description: branch === currentBranch ? '(current)' : undefined
             }))
             .sort((a, b) => {
-                if (a.label === currentBranch) return -1;
-                if (b.label === currentBranch) return 1;
+                if (a.label === currentBranch) {return -1;}
+                if (b.label === currentBranch) {return 1;}
                 return a.label.localeCompare(b.label);
             });
 
@@ -324,7 +323,8 @@ export class GitHubService {
 
             return {
                 number: response.data.number,
-                html_url: response.data.html_url
+                html_url: response.data.html_url,
+                draft: params.draft || false
             };
         } catch (error: any) {
             if (error.message === 'No changes to create a pull request') {
