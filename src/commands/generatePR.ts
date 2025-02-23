@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { GitHubService } from '../services/github';
+import { IssueInfo } from '../types/github';
 
 export async function generatePR(context: vscode.ExtensionContext): Promise<void> {
     try {
@@ -15,10 +16,39 @@ export async function generatePR(context: vscode.ExtensionContext): Promise<void
             return;
         }
 
+        // Issue選択（オプション）
+        let issueNumber: number | undefined;
+        let initialTitle: string | undefined;
+        let initialBody: string | undefined;
+
+        const issues = await github.getIssues();
+        if (issues.length > 0) {
+            const issueItems = issues.map(issue => ({
+                label: `#${issue.number} ${issue.title}`,
+                description: issue.labels.join(', '),
+                issue
+            }));
+
+            const selectedIssue = await vscode.window.showQuickPick(
+                issueItems,
+                {
+                    placeHolder: 'Select related issue (optional)',
+                    ignoreFocusOut: true
+                }
+            );
+
+            if (selectedIssue) {
+                issueNumber = selectedIssue.issue.number;
+                initialTitle = selectedIssue.issue.title;
+                initialBody = `Closes #${issueNumber}\n\n${selectedIssue.issue.body}`;
+            }
+        }
+
         // タイトル入力
         const title = await vscode.window.showInputBox({
             prompt: 'Enter pull request title',
-            placeHolder: 'Feature: Add new functionality'
+            placeHolder: 'Feature: Add new functionality',
+            value: initialTitle
         });
 
         if (!title) {
@@ -28,26 +58,13 @@ export async function generatePR(context: vscode.ExtensionContext): Promise<void
         // 説明入力
         const description = await vscode.window.showInputBox({
             prompt: 'Enter pull request description (optional)',
-            placeHolder: 'Describe your changes here...'
+            placeHolder: 'Describe your changes here...',
+            value: initialBody
         });
 
         if (description === undefined) {
             return;
         }
-
-        // Issue番号入力（オプション）
-        const issueInput = await vscode.window.showInputBox({
-            prompt: 'Enter issue number (optional)',
-            placeHolder: 'e.g. 123',
-            validateInput: (value) => {
-                if (value && !/^\d+$/.test(value)) {
-                    return 'Please enter a valid issue number';
-                }
-                return null;
-            }
-        });
-
-        const issueNumber = issueInput ? parseInt(issueInput, 10) : undefined;
 
         // 進行状況表示
         const result = await vscode.window.withProgress({
@@ -66,8 +83,13 @@ export async function generatePR(context: vscode.ExtensionContext): Promise<void
                     draft: true
                 });
             } catch (error: any) {
-                // Draft PRがサポートされていない場合は通常のPRとして作成
+                // Draft PRがサポートされていない場合は通知して通常のPRを作成
                 if (error.message?.includes('Draft pull requests are not supported')) {
+                    // 情報通知を表示
+                    await vscode.window.showInformationMessage(
+                        'Draft PRs are only available in GitHub Team and Enterprise. Creating a regular PR instead.'
+                    );
+                    
                     return await github.createPullRequest({
                         base: branches.base,
                         compare: branches.compare,
@@ -81,7 +103,7 @@ export async function generatePR(context: vscode.ExtensionContext): Promise<void
             }
         });
 
-        // PR作成成功通知
+        // PR作成成功通知とブラウザで開くボタン
         const action = await vscode.window.showInformationMessage(
             `Pull Request #${result.number} created successfully!`,
             'Open in Browser'

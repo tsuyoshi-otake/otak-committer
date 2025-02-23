@@ -12,11 +12,14 @@ import {
     GitHubLabel
 } from '../types/github';
 
+const DEFAULT_BASE_BRANCHES = ['develop', 'main', 'master'];
+
 export class GitHubService {
     private octokit?: GitHubAPI;
     private owner: string = '';
     private repo: string = '';
     private initialized: boolean = false;
+    private gitApi: any;
 
     constructor(private token: string) {}
 
@@ -37,6 +40,13 @@ export class GitHubService {
             } : {})
         }) as unknown as GitHubAPI;
 
+        // Git APIの初期化
+        const gitExtension = vscode.extensions.getExtension('vscode.git')?.exports;
+        if (!gitExtension) {
+            throw new Error('Git extension not found');
+        }
+        this.gitApi = gitExtension.getAPI(1);
+
         // リポジトリ情報の自動検出
         await this.detectRepositoryInfo();
         
@@ -47,13 +57,7 @@ export class GitHubService {
      * Git設定からリポジトリ情報を検出
      */
     private async detectRepositoryInfo(): Promise<void> {
-        const gitExtension = vscode.extensions.getExtension('vscode.git')?.exports;
-        if (!gitExtension) {
-            throw new Error('Git extension not found');
-        }
-
-        const api = gitExtension.getAPI(1);
-        const repo = api.repositories[0];
+        const repo = this.gitApi.repositories[0];
         if (!repo) {
             throw new Error('No Git repository found');
         }
@@ -70,6 +74,18 @@ export class GitHubService {
         }
 
         [, this.owner, this.repo] = match;
+    }
+
+    /**
+     * 現在のブランチ名を取得
+     */
+    async getCurrentBranch(): Promise<string | undefined> {
+        await this.ensureInitialized();
+        const repo = this.gitApi.repositories[0];
+        if (!repo) {
+            return undefined;
+        }
+        return repo.state.HEAD?.name;
     }
 
     /**
@@ -105,6 +121,26 @@ export class GitHubService {
     }
 
     /**
+     * ブランチをソート（develop, main, master を優先）
+     */
+    private static sortBranches(branches: string[], currentBranch?: string): vscode.QuickPickItem[] {
+        return branches
+            .map(branch => ({
+                label: branch,
+                description: branch === currentBranch ? '(current)' : undefined,
+                // デフォルトブランチの優先度を設定
+                sortOrder: DEFAULT_BASE_BRANCHES.indexOf(branch)
+            }))
+            .sort((a, b) => {
+                // デフォルトブランチを優先
+                if (a.sortOrder !== -1 || b.sortOrder !== -1) {
+                    return (a.sortOrder === -1 ? 999 : a.sortOrder) - (b.sortOrder === -1 ? 999 : b.sortOrder);
+                }
+                return a.label.localeCompare(b.label);
+            });
+    }
+
+    /**
      * ブランチ選択UI
      */
     static async selectBranches(): Promise<{ base: string; compare: string } | undefined> {
@@ -114,27 +150,46 @@ export class GitHubService {
         }
 
         const branches = await github.getBranches();
+        const currentBranch = await github.getCurrentBranch();
+
+        // baseブランチの選択（develop, main, masterを優先）
+        const baseItems = this.sortBranches(
+            branches.filter(b => b !== currentBranch)
+        );
         
-        const base = await vscode.window.showQuickPick(branches, {
+        const baseItem = await vscode.window.showQuickPick(baseItems, {
             placeHolder: 'Select base branch'
         });
 
-        if (!base) {
+        if (!baseItem) {
             return undefined;
         }
 
-        const compare = await vscode.window.showQuickPick(
-            branches.filter(b => b !== base),
-            {
-                placeHolder: 'Select compare branch'
-            }
-        );
+        // compareブランチの選択（現在のブランチを優先）
+        const compareItems = branches
+            .filter(branch => branch !== baseItem.label)
+            .map(branch => ({
+                label: branch,
+                description: branch === currentBranch ? '(current)' : undefined
+            }))
+            .sort((a, b) => {
+                if (a.label === currentBranch) return -1;
+                if (b.label === currentBranch) return 1;
+                return a.label.localeCompare(b.label);
+            });
 
-        if (!compare) {
+        const compareItem = await vscode.window.showQuickPick(compareItems, {
+            placeHolder: 'Select compare branch'
+        });
+
+        if (!compareItem) {
             return undefined;
         }
 
-        return { base, compare };
+        return {
+            base: baseItem.label,
+            compare: compareItem.label
+        };
     }
 
     /**
