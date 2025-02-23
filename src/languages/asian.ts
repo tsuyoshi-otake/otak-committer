@@ -1,97 +1,159 @@
-import type { LanguageConfig } from '../types/language';
-import type { MessageStyle } from '../types/messageStyle';
-import { COMMIT_PREFIX_GUIDE } from '../constants/commitGuide';
+import { LanguageConfig } from '../types/language';
+import { MessageStyle } from '../types/messageStyle';
 
-export const asianLanguages: Record<string, LanguageConfig> = {
+export const asianLanguages: { [key: string]: LanguageConfig } = {
     japanese: {
         name: '日本語',
-        systemPrompt: (style: MessageStyle) => `あなたはコミットメッセージを生成する専門家です。${style} 以下のプレフィックスを使用してConventional Commits形式に従ってください：${COMMIT_PREFIX_GUIDE}
-コミットメッセージはMarkdown形式を使用せず、プレーンテキストとして出力してください。適切な改行を使用し、Gitのコミットメッセージとして直接使用できる形式にしてください。
-日本語で生成してください。`,
-        diffMessage: "以下のGit diffに対するコミットメッセージを生成してください。Markdown形式ではなくプレーンテキストで出力してください："
+        description: 'コミットメッセージを日本語で生成します',
+        systemPrompt: (style: MessageStyle) => `
+コミットメッセージを日本語で生成してください。
+以下のルールに従ってください：
+1. 簡潔で分かりやすい日本語を使用
+2. 技術的な用語は必要に応じて英語を使用
+3. 敬体（です・ます調）は使用しない
+4. ${style === 'simple' ? '核となる変更のみを記述' : 
+    style === 'normal' ? '変更の概要と主要な影響を記述' : 
+    '変更の詳細な説明と影響範囲を記述'}`,
+        diffMessage: 'この変更の内容は以下の通りです：'
     },
     chinese: {
         name: '中文',
-        systemPrompt: (style: MessageStyle) => `您是提交消息专家。${style} 请按照Conventional Commits格式使用以下前缀：${COMMIT_PREFIX_GUIDE}
-以纯文本格式输出提交消息，不使用Markdown格式。使用适当的换行符，使其适合直接用于Git提交。
-请使用中文生成。`,
-        diffMessage: "为以下Git差异生成提交消息，并以纯文本（不使用Markdown格式）输出："
+        description: '用中文生成提交消息',
+        systemPrompt: (style: MessageStyle) => `
+请用中文生成提交消息。
+请遵循以下规则：
+1. 使用简洁明了的中文
+2. 技术术语可以使用英文
+3. 保持专业性
+4. ${style === 'simple' ? '仅描述核心更改' : 
+    style === 'normal' ? '描述更改概要和主要影响' : 
+    '详细说明更改内容和影响范围'}`,
+        diffMessage: '变更内容如下：'
     },
     traditionalChinese: {
         name: '繁體中文',
-        systemPrompt: (style: MessageStyle) => `您是提交訊息專家。${style} 請按照Conventional Commits格式使用以下前綴：${COMMIT_PREFIX_GUIDE}
-以純文字格式輸出提交訊息，不使用Markdown格式。使用適當的換行符，使其適合直接用於Git提交。
-請使用繁體中文生成。`,
-        diffMessage: "為以下Git差異生成提交訊息，並以純文字（不使用Markdown格式）輸出："
+        description: '用繁體中文生成提交消息',
+        systemPrompt: (style: MessageStyle) => `
+請用繁體中文生成提交消息。
+請遵循以下規則：
+1. 使用簡潔明瞭的繁體中文
+2. 技術術語可以使用英文
+3. 保持專業性
+4. ${style === 'simple' ? '僅描述核心更改' : 
+    style === 'normal' ? '描述更改概要和主要影響' : 
+    '詳細說明更改內容和影響範圍'}`,
+        diffMessage: '變更內容如下：'
     },
     korean: {
         name: '한국어',
-        systemPrompt: (style: MessageStyle) => `당신은 커밋 메시지 전문가입니다. ${style} Conventional Commits 형식과 다음 접두사를 사용하세요:${COMMIT_PREFIX_GUIDE}
-커밋 메시지를 Markdown 형식 없이 일반 텍스트로 출력하세요. 적절한 줄바꿈을 사용하고 Git 커밋에 직접 사용하기 적합한 형식으로 만드세요.
-한국어로 생성해 주세요.`,
-        diffMessage: "다음 Git diff에 대한 커밋 메시지를 생성하세요. Markdown 형식이 아닌 일반 텍스트로 출력하세요:"
+        description: '커밋 메시지를 한국어로 생성',
+        systemPrompt: (style: MessageStyle) => `
+커밋 메시지를 한국어로 생성해 주세요.
+다음 규칙을 따라 주세요:
+1. 간결하고 명확한 한국어 사용
+2. 기술 용어는 필요한 경우 영어 사용
+3. 전문성 유지
+4. ${style === 'simple' ? '핵심 변경사항만 기술' : 
+    style === 'normal' ? '변경사항 개요와 주요 영향 기술' : 
+    '변경사항과 영향 범위 상세 기술'}`,
+        diffMessage: '변경 내용은 다음과 같습니다:'
     },
     vietnamese: {
         name: 'Tiếng Việt',
-        systemPrompt: (style: MessageStyle) => `Bạn là chuyên gia về tin nhắn commit. ${style} Sử dụng định dạng Conventional Commits với các tiền tố sau:${COMMIT_PREFIX_GUIDE}
-Xuất tin nhắn commit dưới dạng văn bản thuần túy không có định dạng Markdown. Sử dụng ngắt dòng phù hợp và làm cho nó phù hợp để sử dụng trực tiếp trong Git commit.
-Vui lòng tạo bằng Tiếng Việt.`,
-        diffMessage: "Tạo tin nhắn commit cho Git diff sau, và xuất dưới dạng văn bản thuần túy (không có định dạng Markdown):"
+        description: 'Tạo thông điệp commit bằng tiếng Việt',
+        systemPrompt: (style: MessageStyle) => `
+Vui lòng tạo thông điệp commit bằng tiếng Việt.
+Tuân thủ các quy tắc sau:
+1. Sử dụng tiếng Việt rõ ràng và súc tích
+2. Sử dụng thuật ngữ kỹ thuật bằng tiếng Anh khi cần
+3. Duy trì tính chuyên nghiệp
+4. ${style === 'simple' ? 'Chỉ mô tả thay đổi cốt lõi' : 
+    style === 'normal' ? 'Mô tả tổng quan và tác động chính' : 
+    'Mô tả chi tiết thay đổi và phạm vi ảnh hưởng'}`,
+        diffMessage: 'Nội dung thay đổi như sau:'
     },
     thai: {
         name: 'ไทย',
-        systemPrompt: (style: MessageStyle) => `คุณเป็นผู้เชี่ยวชาญด้านข้อความคอมมิต ${style} ใช้รูปแบบ Conventional Commits ด้วยคำนำหน้าเหล่านี้:${COMMIT_PREFIX_GUIDE}
-สร้างข้อความคอมมิตเป็นข้อความธรรมดาโดยไม่มีการจัดรูปแบบ Markdown ใช้การขึ้นบรรทัดใหม่ที่เหมาะสมและทำให้เหมาะสำหรับการใช้งานโดยตรงใน Git commit
-กรุณาสร้างเป็นภาษาไทย`,
-        diffMessage: "สร้างข้อความคอมมิตสำหรับ Git diff ต่อไปนี้เป็นข้อความธรรมดา (ไม่มีการจัดรูปแบบ Markdown):"
+        description: 'สร้างข้อความ commit ในภาษาไทย',
+        systemPrompt: (style: MessageStyle) => `
+กรุณาสร้างข้อความ commit เป็นภาษาไทย
+กรุณาปฏิบัติตามกฎต่อไปนี้:
+1. ใช้ภาษาไทยที่กระชับและชัดเจน
+2. ใช้คำศัพท์ทางเทคนิคเป็นภาษาอังกฤษเมื่อจำเป็น
+3. รักษาความเป็นมืออาชีพ
+4. ${style === 'simple' ? 'อธิบายเฉพาะการเปลี่ยนแปลงหลัก' : 
+    style === 'normal' ? 'อธิบายภาพรวมและผลกระทบหลัก' : 
+    'อธิบายรายละเอียดการเปลี่ยนแปลงและขอบเขตผลกระทบ'}`,
+        diffMessage: 'การเปลี่ยนแปลงมีดังนี้:'
     },
     hindi: {
         name: 'हिन्दी',
-        systemPrompt: (style: MessageStyle) => `आप एक कमिट संदेश विशेषज्ञ हैं। ${style} इन प्रीफ़िक्स के साथ Conventional Commits प्रारूप का उपयोग करें:${COMMIT_PREFIX_GUIDE}
-कमिट संदेश को मार्कडाउन फ़ॉर्मेटिंग के बिना प्लेन टेक्स्ट के रूप में आउटपुट करें। उचित लाइन ब्रेक का उपयोग करें और इसे Git कमिट में सीधे उपयोग के लिए उपयुक्त बनाएं।
-कृपया हिन्दी में जनरेट करें।`,
-        diffMessage: "निम्नलिखित Git diff के लिए एक कमिट संदेश जनरेट करें, प्लेन टेक्स्ट के रूप में (मार्कडाउन फ़ॉर्मेटिंग के बिना):"
+        description: 'कमिट संदेश हिंदी में तैयार करें',
+        systemPrompt: (style: MessageStyle) => `
+कृपया कमिट संदेश हिंदी में तैयार करें।
+कृपया निम्नलिखित नियमों का पालन करें:
+1. स्पष्ट और संक्षिप्त हिंदी का प्रयोग करें
+2. आवश्यकतानुसार तकनीकी शब्दों के लिए अंग्रेजी का प्रयोग करें
+3. व्यावसायिकता बनाए रखें
+4. ${style === 'simple' ? 'केवल मुख्य परिवर्तनों का वर्णन करें' : 
+    style === 'normal' ? 'परिवर्तनों का सारांश और प्रमुख प्रभाव बताएं' : 
+    'परिवर्तनों और प्रभाव क्षेत्र का विस्तृत विवरण दें'}`,
+        diffMessage: 'परिवर्तन निम्नलिखित हैं:'
     },
     bengali: {
         name: 'বাংলা',
-        systemPrompt: (style: MessageStyle) => `আপনি একজন কমিট মেসেজ বিশেষজ্ঞ। ${style} এই প্রিফিক্সগুলির সাথে Conventional Commits ফরম্যাট ব্যবহার করুন:${COMMIT_PREFIX_GUIDE}
-কমিট মেসেজটি মার্কডাউন ফরম্যাটিং ছাড়া প্লেইন টেক্সট হিসাবে আউটপুট করুন। উপযুক্ত লাইন ব্রেক ব্যবহার করুন এবং এটিকে Git কমিটে সরাসরি ব্যবহারের জন্য উপযুক্ত করুন।
-অনুগ্রহ করে বাংলায় জেনারেট করুন।`,
-        diffMessage: "নিম্নলিখিত Git diff-এর জন্য একটি কমিট মেসেজ জেনারেট করুন, প্লেইন টেক্সট হিসাবে (মার্কডাউন ফরম্যাটিং ছাড়া):"
+        description: 'কমিট বার্তা বাংলায় তৈরি করুন',
+        systemPrompt: (style: MessageStyle) => `
+অনুগ্রহ করে কমিট বার্তা বাংলায় তৈরি করুন।
+অনুগ্রহ করে নিম্নলিখিত নিয়মগুলি অনুসরণ করুন:
+1. পরিষ্কার এবং সংক্ষিপ্ত বাংলা ব্যবহার করুন
+2. প্রয়োজনে কারিগরি শব্দের জন্য ইংরেজি ব্যবহার করুন
+3. পেশাদারিত্ব বজায় রাখুন
+4. ${style === 'simple' ? 'শুধুমাত্র মূল পরিবর্তনগুলি বর্ণনা করুন' : 
+    style === 'normal' ? 'পরিবর্তনের সারাংশ এবং প্রধান প্রভাব বর্ণনা করুন' : 
+    'পরিবর্তন এবং প্রভাবের পরিধি বিস্তারিতভাবে বর্ণনা করুন'}`,
+        diffMessage: 'পরিবর্তনগুলি নিম্নরূপ:'
     },
     javanese: {
         name: 'Basa Jawa',
-        systemPrompt: (style: MessageStyle) => `Sampeyan ahli pesen commit. ${style} Gunakake format Conventional Commits karo prefix iki:${COMMIT_PREFIX_GUIDE}
-Output pesen commit minangka teks biasa tanpa formatting Markdown. Gunakake garis anyar sing cocok lan dadekake cocog kanggo langsung digunakake ing Git commit.
-Mangga generasi ing basa Jawa.`,
-        diffMessage: "Generasi pesen commit kanggo Git diff ing ngisor iki minangka teks biasa (tanpa formatting Markdown):"
+        description: 'Nggawe pesen commit nganggo basa Jawa',
+        systemPrompt: (style: MessageStyle) => `
+Mangga nggawe pesen commit nganggo basa Jawa.
+Mangga nuruti aturan ing ngisor iki:
+1. Nggunakake basa Jawa sing cetha lan ringkes
+2. Nggunakake tembung teknis ing basa Inggris menawa perlu
+3. Njaga profesionalitas
+4. ${style === 'simple' ? 'Mung nerangake owahan utama' : 
+    style === 'normal' ? 'Nerangake ringkesan lan pangaruh utama' : 
+    'Nerangake owahan lan jangkauan pangaruh kanthi detail'}`,
+        diffMessage: 'Owahan-owahan kasebut yaiku:'
     },
     tamil: {
         name: 'தமிழ்',
-        systemPrompt: (style: MessageStyle) => `நீங்கள் ஒரு கமிட் செய்தி நிபுணர். ${style} இந்த முன்னொட்டுகளுடன் Conventional Commits வடிவத்தைப் பயன்படுத்தவும்:${COMMIT_PREFIX_GUIDE}
-கமிட் செய்தியை மார்க்டவுன் வடிவமைப்பு இல்லாமல் சாதாரண உரையாக வெளியிடவும். பொருத்தமான வரி முறிவுகளைப் பயன்படுத்தி, Git கமிட்டில் நேரடியாகப் பயன்படுத்த ஏற்றதாக மாற்றவும்.
-தயவுசெய்து தமிழில் உருவாக்கவும்.`,
-        diffMessage: "பின்வரும் Git diff-க்கான கமிட் செய்தியை சாதாரண உரையாக உருவாக்கவும் (மார்க்டவுன் வடிவமைப்பு இல்லாமல்):"
+        description: 'கமிட் செய்தியை தமிழில் உருவாக்கவும்',
+        systemPrompt: (style: MessageStyle) => `
+கமிட் செய்தியை தமிழில் உருவாக்கவும்.
+பின்வரும் விதிகளை பின்பற்றவும்:
+1. தெளிவான மற்றும் சுருக்கமான தமிழைப் பயன்படுத்தவும்
+2. தேவைப்படும்போது தொழில்நுட்ப சொற்களுக்கு ஆங்கிலத்தைப் பயன்படுத்தவும்
+3. தொழில்முறை தன்மையை பராமரிக்கவும்
+4. ${style === 'simple' ? 'முக்கிய மாற்றங்களை மட்டும் விவரிக்கவும்' : 
+    style === 'normal' ? 'மாற்றங்களின் சுருக்கம் மற்றும் முக்கிய தாக்கங்களை விவரிக்கவும்' : 
+    'மாற்றங்கள் மற்றும் தாக்கத்தின் அளவை விரிவாக விவரிக்கவும்'}`,
+        diffMessage: 'மாற்றங்கள் பின்வருமாறு:'
     },
     burmese: {
         name: 'မြန်မာဘာသာ',
-        systemPrompt: (style: MessageStyle) => `သင်သည် commit message ကျွမ်းကျင်သူတစ်ဦးဖြစ်သည်။ ${style} အောက်ပါ prefix များဖြင့် Conventional Commits ပုံစံကို အသုံးပြုပါ:${COMMIT_PREFIX_GUIDE}
-Commit message ကို Markdown formatting မပါဘဲ plain text အနေဖြင့် ထုတ်ပေးပါ။ သင့်လျော်သော line break များသုံး၍ Git commit တွင် တိုက်ရိုက်အသုံးပြုရန် သင့်လျော်အောင် ပြုလုပ်ပါ။
-ကျေးဇူးပြု၍ မြန်မာဘာသာဖြင့် ဖန်တီးပေးပါ။`,
-        diffMessage: "အောက်ပါ Git diff အတွက် commit message တစ်ခုကို plain text အနေဖြင့် ဖန်တီးပေးပါ (Markdown formatting မပါဘဲ):"
+        description: 'ကော်မစ်မက်ဆေ့ချ်အား မြန်မာဘာသာဖြင့်ဖန်တီးပါ',
+        systemPrompt: (style: MessageStyle) => `
+ကော်မစ်မက်ဆေ့ချ်အား မြန်မာဘာသာဖြင့် ဖန်တီးပေးပါ။
+အောက်ပါစည်းမျဉ်းများကို လိုက်နာပါ:
+1. ရှင်းလင်းပြီး တိုတောင်းသော မြန်မာစာကို အသုံးပြုပါ
+2. လိုအပ်ပါက နည်းပညာဝေါဟာရများအတွက် အင်္ဂလိပ်လို အသုံးပြုပါ
+3. ပညာရှင်ဆန်မှုကို ထိန်းသိမ်းပါ
+4. ${style === 'simple' ? 'အဓိက ပြောင်းလဲမှုများကိုသာ ဖော်ပြပါ' : 
+    style === 'normal' ? 'ပြောင်းလဲမှုများ၏ အကျဉ်းချုပ်နှင့် အဓိက သက်ရောက်မှုများကို ဖော်ပြပါ' : 
+    'ပြောင်းလဲမှုများနှင့် သက်ရောက်မှု အတိုင်းအတာကို အသေးစိတ် ဖော်ပြပါ'}`,
+        diffMessage: 'ပြောင်းလဲမှုများမှာ အောက်ပါအတိုင်းဖြစ်သည်:'
     }
-};
-
-export const asianLanguageDescriptions: Record<string, string> = {
-    japanese: 'Japanese',
-    chinese: 'Chinese',
-    traditionalChinese: 'Traditional Chinese',
-    korean: 'Korean',
-    vietnamese: 'Vietnamese',
-    thai: 'Thai',
-    hindi: 'Hindi',
-    bengali: 'Bengali',
-    javanese: 'Javanese',
-    tamil: 'Tamil',
-    burmese: 'Burmese'
 };

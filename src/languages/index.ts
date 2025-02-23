@@ -1,31 +1,52 @@
-import type { LanguageConfig } from '../types/language';
-import { asianLanguages, asianLanguageDescriptions } from './asian';
-import { europeanLanguages, europeanLanguageDescriptions } from './european';
-import { middleEasternLanguages, middleEasternLanguageDescriptions } from './middleEastern';
+import * as vscode from 'vscode';
+import { asianLanguages } from './asian';
+import { europeanLanguages } from './european';
+import { middleEasternLanguages } from './middleEastern';
+import { LanguageConfig } from '../types/language';
 
-// 全言語設定をマージ
-export const LANGUAGE_CONFIGS: Record<string, LanguageConfig> = {
-    ...europeanLanguages,
+export const LANGUAGE_CONFIGS: { [key: string]: LanguageConfig } = {
     ...asianLanguages,
+    ...europeanLanguages,
     ...middleEasternLanguages
 };
 
-// 全言語の説明をマージ
-export const LANGUAGE_DESCRIPTIONS: Record<string, string> = {
-    ...europeanLanguageDescriptions,
-    ...asianLanguageDescriptions,
-    ...middleEasternLanguageDescriptions
-};
+/**
+ * 現在の言語設定を取得
+ */
+export function getCurrentLanguageConfig(): LanguageConfig {
+    const config = vscode.workspace.getConfiguration('otakCommitter');
+    const currentLanguage = config.get<string>('language') || 'english';
+    return LANGUAGE_CONFIGS[currentLanguage] || LANGUAGE_CONFIGS.english;
+}
 
-// デフォルト言語
-export const DEFAULT_LANGUAGE = 'japanese';
+/**
+ * 言語選択UIを表示
+ */
+export async function showLanguageQuickPick(): Promise<string | undefined> {
+    const languages = Object.entries(LANGUAGE_CONFIGS).map(([id, config]) => ({
+        label: config.name,
+        description: id,
+        detail: config.description
+    }));
 
-// 言語グループの定義（表示順序用）
-export const LANGUAGE_GROUPS = {
-    european: Object.keys(europeanLanguages),
-    asian: Object.keys(asianLanguages),
-    middleEastern: Object.keys(middleEasternLanguages)
-} as const;
+    const selected = await vscode.window.showQuickPick(languages, {
+        placeHolder: 'Select commit message language'
+    });
 
-// 合計サポート言語数
-export const SUPPORTED_LANGUAGE_COUNT = Object.keys(LANGUAGE_CONFIGS).length;
+    return selected?.description;
+}
+
+/**
+ * システムプロンプトを生成
+ */
+export function generateSystemPrompt(language: LanguageConfig): string {
+    return `You are a helpful assistant that generates commit messages in ${language.name}.
+Please follow these rules:
+1. Write messages in ${language.name}
+2. Use appropriate grammar and tone for the selected language
+3. Follow conventional commit message format
+4. Be clear and concise
+5. Focus on the changes made in the code
+
+${language.systemPrompt || ''}`;
+}

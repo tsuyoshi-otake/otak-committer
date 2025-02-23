@@ -1,144 +1,69 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
-import { generateCommitMessageWithAI, stageAllChanges } from '../extension';
-import * as path from 'path';
-import { before } from 'mocha';
+import { GitService } from '../services/git';
+import { OpenAIService } from '../services/openai';
+import { GitHubService } from '../services/github';
+import { getCurrentLanguageConfig } from '../languages';
 
-suite('OTAK Committer Extension', () => {
-    const mockDiff = `
-diff --git a/src/example.ts b/src/example.ts
-index 123..456 789
---- a/src/example.ts
-+++ b/src/example.ts
-@@ -1,3 +1,4 @@
-+import { newFeature } from './utils';
- function existingFunction() {
--  return 'old';
-+  return 'new';
- }
-`;
+suite('Extension Test Suite', () => {
+    vscode.window.showInformationMessage('Starting all tests.');
 
-    const mockFilePath = path.normalize('src/example.ts');
-
-    // モックリポジトリ
-    const mockRepository = {
-        inputBox: {
-            value: '',
-            placeholder: ''
-        },
-        rootUri: vscode.Uri.file(path.dirname(mockFilePath)),
-        state: {
-            workingTreeChanges: [
-                {
-                    uri: vscode.Uri.file(mockFilePath),
-                    status: 1
-                }
-            ],
-            indexChanges: []
-        },
-        diff: async () => mockDiff,
-        add: async (_paths: string[]) => {
-            // モックメソッドなので何もしない
-        }
-    };
-
-    let originalGetConfiguration: typeof vscode.workspace.getConfiguration;
-    let originalFetch: typeof global.fetch;
-
-    suiteSetup(() => {
-        // 設定のモック
-        originalGetConfiguration = vscode.workspace.getConfiguration;
-        originalFetch = global.fetch;
-
-        vscode.workspace.getConfiguration = () => ({
-            get: (key: string) => {
-                switch (key) {
-                    case 'openaiApiKey':
-                        return 'test-api-key';
-                    case 'language':
-                        return 'japanese';
-                    case 'messageStyle':
-                        return 'normal';
-                    default:
-                        return undefined;
-                }
-            },
-            update: () => Promise.resolve(),
-            has: () => false,
-            inspect: () => undefined
-        } as vscode.WorkspaceConfiguration);
+    test('getCurrentLanguageConfig returns default language', () => {
+        const config = getCurrentLanguageConfig();
+        assert.strictEqual(config.name, 'English');
     });
 
-    suiteTeardown(() => {
-        // 元の設定を復元
-        vscode.workspace.getConfiguration = originalGetConfiguration;
-        global.fetch = originalFetch;
+    test('Git service initialization', async () => {
+        const git = await GitService.initialize();
+        assert.ok(git instanceof GitService);
     });
 
-    test('generateCommitMessageWithAI should generate commit message', async () => {
-        const expectedMessage = 'feat: implement new feature and update return value';
+    test('OpenAI service initialization fails without API key', async () => {
+        // 設定をクリア
+        await vscode.workspace.getConfiguration('otakCommitter').update('openaiApiKey', '', vscode.ConfigurationTarget.Global);
         
-        // fetchをモック化
-        global.fetch = async () => Promise.resolve({
-            ok: true,
-            json: async () => ({
-                choices: [{ message: { content: expectedMessage } }]
-            })
-        } as Response);
-
-        const message = await generateCommitMessageWithAI(mockDiff);
-        assert.strictEqual(message, expectedMessage);
+        const openai = await OpenAIService.initialize();
+        assert.strictEqual(openai, undefined);
     });
 
-    test('generateCommitMessageWithAI should throw error when API key is not configured', async () => {
-        // 設定を一時的に変更
-        vscode.workspace.getConfiguration = () => ({
-            get: () => undefined,
-            update: () => Promise.resolve(),
-            has: () => false,
-            inspect: () => undefined
-        } as vscode.WorkspaceConfiguration);
-
-        try {
-            await generateCommitMessageWithAI(mockDiff);
-            assert.fail('Should throw error');
-        } catch (error) {
-            assert.strictEqual(
-                (error as Error).message,
-                'OpenAI API key is not configured'
-            );
-        }
+    test('GitHub service initialization fails without token', async () => {
+        // 設定をクリア
+        await vscode.workspace.getConfiguration('otakCommitter.github').update('token', '', vscode.ConfigurationTarget.Global);
+        
+        const github = await GitHubService.initializeGitHubClient();
+        assert.strictEqual(github, undefined);
     });
 
-    test('stageAllChanges should stage unstaged changes', async () => {
-        let addCalled = false;
-        const testRepo = {
-            ...mockRepository,
-            add: async (paths: string[]) => {
-                addCalled = true;
-                assert.deepStrictEqual(
-                    paths,
-                    [mockFilePath]
-                );
-            }
-        };
-
-        await stageAllChanges(testRepo);
-        assert.strictEqual(addCalled, true);
+    test('Package.json contains all required scripts', () => {
+        const packageJson = require('../../package.json');
+        assert.ok(packageJson.scripts['vscode:prepublish']);
+        assert.ok(packageJson.scripts.compile);
+        assert.ok(packageJson.scripts.watch);
+        assert.ok(packageJson.scripts.lint);
+        assert.ok(packageJson.scripts.test);
     });
 
-    test('stageAllChanges should do nothing when no changes', async () => {
-        const emptyRepo = {
-            ...mockRepository,
-            state: {
-                workingTreeChanges: [],
-                indexChanges: []
-            },
-            add: async () => {
-                assert.fail('Should not call add');
-            }
-        };
+    test('Package.json contains all required configurations', () => {
+        const packageJson = require('../../package.json');
+        const config = packageJson.contributes.configuration.properties;
+        
+        assert.ok(config['otakCommitter.openaiApiKey']);
+        assert.ok(config['otakCommitter.language']);
+        assert.ok(config['otakCommitter.messageStyle']);
+        assert.ok(config['otakCommitter.customMessage']);
+        assert.ok(config['otakCommitter.github.token']);
+        assert.ok(config['otakCommitter.github.owner']);
+        assert.ok(config['otakCommitter.github.repo']);
+    });
 
-        await stageAllChanges(emptyRepo);
+    test('Package.json contains all required commands', () => {
+        const packageJson = require('../../package.json');
+        const commands = packageJson.contributes.commands.map((c: any) => c.command);
+        
+        assert.ok(commands.includes('otak-committer.generateMessage'));
+        assert.ok(commands.includes('otak-committer.generatePR'));
+        assert.ok(commands.includes('otak-committer.openSettings'));
+        assert.ok(commands.includes('otak-committer.changeLanguage'));
+        assert.ok(commands.includes('otak-committer.changeMessageStyle'));
     });
 });

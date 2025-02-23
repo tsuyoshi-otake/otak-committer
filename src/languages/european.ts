@@ -1,105 +1,173 @@
-import type { LanguageConfig } from '../types/language';
-import type { MessageStyle } from '../types/messageStyle';
-import { COMMIT_PREFIX_GUIDE } from '../constants/commitGuide';
+import { LanguageConfig } from '../types/language';
+import { MessageStyle } from '../types/messageStyle';
 
-export const europeanLanguages: Record<string, LanguageConfig> = {
+export const europeanLanguages: { [key: string]: LanguageConfig } = {
     english: {
         name: 'English',
-        systemPrompt: (style: MessageStyle) => `You are a commit message expert. ${style} Follow the Conventional Commits format with these prefixes:${COMMIT_PREFIX_GUIDE}
-Output the commit message as plain text without any Markdown formatting. Use proper line breaks and make it suitable for direct use in Git commit.
-Generate the commit message in English.`,
-        diffMessage: "Generate a commit message for the following Git diff as plain text without Markdown formatting:"
+        description: 'Generate commit messages in English',
+        systemPrompt: (style: MessageStyle) => `
+Please generate commit messages in English.
+Follow these rules:
+1. Use clear and concise English
+2. Follow conventional commit format
+3. Maintain professional tone
+4. ${style === 'simple' ? 'Describe only core changes' : 
+    style === 'normal' ? 'Describe summary and main impacts' : 
+    'Provide detailed explanation of changes and their scope'}`,
+        diffMessage: 'The changes are as follows:'
     },
     french: {
         name: 'Français',
-        systemPrompt: (style: MessageStyle) => `Vous êtes un expert en messages de commit. ${style} Suivez le format Conventional Commits avec ces préfixes:${COMMIT_PREFIX_GUIDE}
-Générez le message de commit en texte brut sans formatage Markdown. Utilisez des sauts de ligne appropriés et rendez-le adapté pour une utilisation directe dans Git commit.
-Générez le message de commit en français.`,
-        diffMessage: "Générez un message de commit pour le diff Git suivant en texte brut sans formatage Markdown :"
+        description: 'Générer des messages de commit en français',
+        systemPrompt: (style: MessageStyle) => `
+Veuillez générer des messages de commit en français.
+Suivez ces règles:
+1. Utilisez un français clair et concis
+2. Suivez le format de commit conventionnel
+3. Maintenez un ton professionnel
+4. ${style === 'simple' ? 'Décrivez uniquement les changements principaux' : 
+    style === 'normal' ? 'Décrivez le résumé et les impacts principaux' : 
+    'Fournissez une explication détaillée des changements et leur portée'}`,
+        diffMessage: 'Les changements sont les suivants:'
     },
     german: {
         name: 'Deutsch',
-        systemPrompt: (style: MessageStyle) => `Sie sind ein Commit-Message-Experte. ${style} Folgen Sie dem Conventional-Commits-Format mit diesen Präfixen:${COMMIT_PREFIX_GUIDE}
-Ausgabe der Commit-Nachricht als Klartext ohne Markdown-Formatierung. Verwenden Sie geeignete Zeilenumbrüche und machen Sie sie für die direkte Verwendung in Git-Commits geeignet.
-Generieren Sie die Commit-Nachricht auf Deutsch.`,
-        diffMessage: "Generieren Sie eine Commit-Nachricht für den folgenden Git-Diff als Klartext ohne Markdown-Formatierung:"
+        description: 'Commit-Nachrichten auf Deutsch generieren',
+        systemPrompt: (style: MessageStyle) => `
+Bitte generieren Sie Commit-Nachrichten auf Deutsch.
+Befolgen Sie diese Regeln:
+1. Verwenden Sie klares und präzises Deutsch
+2. Folgen Sie dem konventionellen Commit-Format
+3. Behalten Sie einen professionellen Ton bei
+4. ${style === 'simple' ? 'Beschreiben Sie nur die Kernänderungen' : 
+    style === 'normal' ? 'Beschreiben Sie Zusammenfassung und Hauptauswirkungen' : 
+    'Liefern Sie eine detaillierte Erklärung der Änderungen und ihrer Reichweite'}`,
+        diffMessage: 'Die Änderungen sind wie folgt:'
     },
     italian: {
         name: 'Italiano',
-        systemPrompt: (style: MessageStyle) => `Sei un esperto di messaggi di commit. ${style} Segui il formato Conventional Commits con questi prefissi:${COMMIT_PREFIX_GUIDE}
-Generare il messaggio di commit come testo semplice senza formattazione Markdown. Utilizzare interruzioni di riga appropriate e renderlo adatto per l'uso diretto in Git commit.
-Genera il messaggio di commit in italiano.`,
-        diffMessage: "Genera un messaggio di commit per il seguente diff Git come testo semplice senza formattazione Markdown:"
+        description: 'Generare messaggi di commit in italiano',
+        systemPrompt: (style: MessageStyle) => `
+Per favore genera messaggi di commit in italiano.
+Segui queste regole:
+1. Usa un italiano chiaro e conciso
+2. Segui il formato convenzionale dei commit
+3. Mantieni un tono professionale
+4. ${style === 'simple' ? 'Descrivi solo le modifiche principali' : 
+    style === 'normal' ? 'Descrivi il riepilogo e gli impatti principali' : 
+    'Fornisci una spiegazione dettagliata delle modifiche e del loro ambito'}`,
+        diffMessage: 'Le modifiche sono le seguenti:'
     },
     spanish: {
         name: 'Español',
-        systemPrompt: (style: MessageStyle) => `Eres un experto en mensajes de commit. ${style} Utiliza el formato Conventional Commits con estos prefijos:${COMMIT_PREFIX_GUIDE}
-Genera el mensaje de commit como texto sin formato, sin formato Markdown. Utiliza saltos de línea apropiados y hazlo adecuado para su uso directo en Git commit.
-Por favor, genera en español.`,
-        diffMessage: "Genera un mensaje de commit para el siguiente Git diff como texto sin formato (sin formato Markdown):"
+        description: 'Generar mensajes de commit en español',
+        systemPrompt: (style: MessageStyle) => `
+Por favor, genera mensajes de commit en español.
+Sigue estas reglas:
+1. Usa español claro y conciso
+2. Sigue el formato convencional de commits
+3. Mantén un tono profesional
+4. ${style === 'simple' ? 'Describe solo los cambios principales' : 
+    style === 'normal' ? 'Describe el resumen y los impactos principales' : 
+    'Proporciona una explicación detallada de los cambios y su alcance'}`,
+        diffMessage: 'Los cambios son los siguientes:'
     },
     portuguese: {
         name: 'Português',
-        systemPrompt: (style: MessageStyle) => `Você é um especialista em mensagens de commit. ${style} Siga o formato Conventional Commits com estes prefixos:${COMMIT_PREFIX_GUIDE}
-Gere a mensagem de commit como texto simples sem formatação Markdown. Use quebras de linha apropriadas e torne-a adequada para uso direto no Git commit.
-Por favor, gere em português.`,
-        diffMessage: "Gere uma mensagem de commit para o seguinte diff Git como texto simples (sem formatação Markdown):"
+        description: 'Gerar mensagens de commit em português',
+        systemPrompt: (style: MessageStyle) => `
+Por favor, gere mensagens de commit em português.
+Siga estas regras:
+1. Use português claro e conciso
+2. Siga o formato convencional de commit
+3. Mantenha um tom profissional
+4. ${style === 'simple' ? 'Descreva apenas as mudanças principais' : 
+    style === 'normal' ? 'Descreva o resumo e os impactos principais' : 
+    'Forneça uma explicação detalhada das mudanças e seu escopo'}`,
+        diffMessage: 'As mudanças são as seguintes:'
     },
     czech: {
         name: 'Čeština',
-        systemPrompt: (style: MessageStyle) => `Jste expertem na commit zprávy. ${style} Následujte formát Conventional Commits s těmito prefixy:${COMMIT_PREFIX_GUIDE}
-Vytvořte commit zprávu jako prostý text bez formátování Markdown. Použijte vhodné zalomení řádků a učiňte ji vhodnou pro přímé použití v Git commitu.
-Prosím, generujte v češtině.`,
-        diffMessage: "Vygenerujte commit zprávu pro následující Git diff jako prostý text (bez formátování Markdown):"
+        description: 'Generovat commit zprávy v češtině',
+        systemPrompt: (style: MessageStyle) => `
+Prosím, generujte commit zprávy v češtině.
+Dodržujte tato pravidla:
+1. Používejte jasnou a stručnou češtinu
+2. Dodržujte konvenční formát commitu
+3. Udržujte profesionální tón
+4. ${style === 'simple' ? 'Popište pouze hlavní změny' : 
+    style === 'normal' ? 'Popište shrnutí a hlavní dopady' : 
+    'Poskytněte detailní vysvětlení změn a jejich rozsahu'}`,
+        diffMessage: 'Změny jsou následující:'
     },
     hungarian: {
         name: 'Magyar',
-        systemPrompt: (style: MessageStyle) => `Ön egy commit üzenet szakértő. ${style} Kövesse a Conventional Commits formátumot ezekkel az előtagokkal:${COMMIT_PREFIX_GUIDE}
-Generálja a commit üzenetet egyszerű szövegként Markdown formázás nélkül. Használjon megfelelő sortöréseket, és tegye alkalmassá közvetlen Git commit használatra.
-Kérem, generálja magyar nyelven.`,
-        diffMessage: "Generáljon commit üzenetet a következő Git diffhez egyszerű szövegként (Markdown formázás nélkül):"
+        description: 'Commit üzenetek generálása magyarul',
+        systemPrompt: (style: MessageStyle) => `
+Kérem, generáljon commit üzeneteket magyarul.
+Kövesse ezeket a szabályokat:
+1. Használjon világos és tömör magyar nyelvet
+2. Kövesse a konvencionális commit formátumot
+3. Tartsa meg a szakmai hangnemet
+4. ${style === 'simple' ? 'Csak a fő változásokat írja le' : 
+    style === 'normal' ? 'Írja le az összefoglalót és a fő hatásokat' : 
+    'Adjon részletes magyarázatot a változásokról és azok hatóköréről'}`,
+        diffMessage: 'A változások a következők:'
     },
     bulgarian: {
         name: 'Български',
-        systemPrompt: (style: MessageStyle) => `Вие сте експерт по commit съобщения. ${style} Следвайте формата Conventional Commits с тези префикси:${COMMIT_PREFIX_GUIDE}
-Генерирайте commit съобщението като обикновен текст без Markdown форматиране. Използвайте подходящи нови редове и го направете подходящо за директно използване в Git commit.
-Моля, генерирайте на български.`,
-        diffMessage: "Генерирайте commit съобщение за следния Git diff като обикновен текст (без Markdown форматиране):"
+        description: 'Генериране на commit съобщения на български',
+        systemPrompt: (style: MessageStyle) => `
+Моля, генерирайте commit съобщения на български.
+Следвайте тези правила:
+1. Използвайте ясен и кратък български език
+2. Следвайте конвенционалния формат за commit
+3. Поддържайте професионален тон
+4. ${style === 'simple' ? 'Опишете само основните промени' : 
+    style === 'normal' ? 'Опишете обобщението и основните въздействия' : 
+    'Предоставете подробно обяснение на промените и техния обхват'}`,
+        diffMessage: 'Промените са следните:'
     },
     turkish: {
         name: 'Türkçe',
-        systemPrompt: (style: MessageStyle) => `Siz bir commit mesajı uzmanısınız. ${style} Bu öneklerle Conventional Commits formatını kullanın:${COMMIT_PREFIX_GUIDE}
-Commit mesajını Markdown biçimlendirmesi olmadan düz metin olarak oluşturun. Uygun satır sonları kullanın ve Git commit'te doğrudan kullanım için uygun hale getirin.
-Lütfen Türkçe olarak oluşturun.`,
-        diffMessage: "Aşağıdaki Git diff için düz metin olarak bir commit mesajı oluşturun (Markdown biçimlendirmesi olmadan):"
+        description: 'Commit mesajlarını Türkçe olarak oluştur',
+        systemPrompt: (style: MessageStyle) => `
+Lütfen commit mesajlarını Türkçe olarak oluşturun.
+Bu kuralları takip edin:
+1. Net ve özlü Türkçe kullanın
+2. Geleneksel commit formatını takip edin
+3. Profesyonel bir ton koruyun
+4. ${style === 'simple' ? 'Yalnızca temel değişiklikleri açıklayın' : 
+    style === 'normal' ? 'Özet ve ana etkileri açıklayın' : 
+    'Değişikliklerin ve kapsamlarının detaylı açıklamasını verin'}`,
+        diffMessage: 'Değişiklikler şu şekildedir:'
     },
     polish: {
         name: 'Polski',
-        systemPrompt: (style: MessageStyle) => `Jesteś ekspertem od wiadomości commit. ${style} Użyj formatu Conventional Commits z tymi prefiksami:${COMMIT_PREFIX_GUIDE}
-Wygeneruj wiadomość commit jako zwykły tekst bez formatowania Markdown. Użyj odpowiednich podziałów wierszy i dostosuj ją do bezpośredniego użycia w Git commit.
-Proszę generować po polsku.`,
-        diffMessage: "Wygeneruj wiadomość commit dla następującego Git diff jako zwykły tekst (bez formatowania Markdown):"
+        description: 'Generowanie komunikatów commit po polsku',
+        systemPrompt: (style: MessageStyle) => `
+Proszę generować komunikaty commit po polsku.
+Przestrzegaj następujących zasad:
+1. Używaj jasnego i zwięzłego języka polskiego
+2. Przestrzegaj konwencjonalnego formatu commit
+3. Zachowaj profesjonalny ton
+4. ${style === 'simple' ? 'Opisz tylko główne zmiany' : 
+    style === 'normal' ? 'Opisz podsumowanie i główne skutki' : 
+    'Przedstaw szczegółowe wyjaśnienie zmian i ich zakresu'}`,
+        diffMessage: 'Zmiany są następujące:'
     },
     russian: {
         name: 'Русский',
-        systemPrompt: (style: MessageStyle) => `Вы эксперт по сообщениям коммитов. ${style} Используйте формат Conventional Commits с этими префиксами:${COMMIT_PREFIX_GUIDE}
-Выводите сообщение коммита в виде простого текста без форматирования Markdown. Используйте правильные переносы строк и сделайте его подходящим для прямого использования в Git commit.
-Пожалуйста, сгенерируйте на русском.`,
-        diffMessage: "Сгенерируйте сообщение коммита для следующего Git diff, выводите его в виде простого текста без Markdown форматирования:"
+        description: 'Генерация сообщений commit на русском языке',
+        systemPrompt: (style: MessageStyle) => `
+Пожалуйста, создавайте сообщения commit на русском языке.
+Следуйте этим правилам:
+1. Используйте ясный и лаконичный русский язык
+2. Следуйте общепринятому формату commit
+3. Сохраняйте профессиональный тон
+4. ${style === 'simple' ? 'Опишите только основные изменения' : 
+    style === 'normal' ? 'Опишите сводку и основные воздействия' : 
+    'Предоставьте подробное объяснение изменений и их области действия'}`,
+        diffMessage: 'Изменения следующие:'
     }
-};
-
-export const europeanLanguageDescriptions: Record<string, string> = {
-    english: 'English',
-    french: 'French',
-    german: 'German',
-    italian: 'Italian',
-    spanish: 'Spanish',
-    portuguese: 'Portuguese',
-    czech: 'Czech',
-    hungarian: 'Hungarian',
-    bulgarian: 'Bulgarian',
-    turkish: 'Turkish',
-    polish: 'Polish',
-    russian: 'Russian'
 };

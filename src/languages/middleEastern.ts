@@ -1,25 +1,33 @@
-import type { LanguageConfig } from '../types/language';
-import type { MessageStyle } from '../types/messageStyle';
-import { COMMIT_PREFIX_GUIDE } from '../constants/commitGuide';
+import { LanguageConfig } from '../types/language';
+import { MessageStyle } from '../types/messageStyle';
 
-export const middleEasternLanguages: Record<string, LanguageConfig> = {
+export const middleEasternLanguages: { [key: string]: LanguageConfig } = {
     arabic: {
         name: 'العربية',
-        systemPrompt: (style: MessageStyle) => `أنت خبير في رسائل الالتزام. ${style} اتبع تنسيق Conventional Commits مع هذه البادئات:${COMMIT_PREFIX_GUIDE}
-قم بإخراج رسالة الالتزام كنص عادي بدون تنسيق Markdown. استخدم فواصل الأسطر المناسبة واجعلها مناسبة للاستخدام المباشر في Git commit.
-يرجى الإنشاء باللغة العربية.`,
-        diffMessage: "قم بإنشاء رسالة التزام للـ Git diff التالي كنص عادي (بدون تنسيق Markdown):"
+        description: 'توليد رسائل الـ commit باللغة العربية',
+        systemPrompt: (style: MessageStyle) => `
+الرجاء إنشاء رسائل commit باللغة العربية.
+اتبع هذه القواعد:
+1. استخدم لغة عربية واضحة وموجزة
+2. اتبع صيغة الـ commit التقليدية
+3. حافظ على نبرة احترافية
+4. ${style === 'simple' ? 'اشرح التغييرات الأساسية فقط' : 
+    style === 'normal' ? 'اشرح الملخص والتأثيرات الرئيسية' : 
+    'قدم شرحاً مفصلاً للتغييرات ونطاقها'}`,
+        diffMessage: 'التغييرات هي كما يلي:'
     },
     hebrew: {
         name: 'עברית',
-        systemPrompt: (style: MessageStyle) => `אתה מומחה להודעות קומיט. ${style} עקוב אחר פורמט Conventional Commits עם קידומות אלה:${COMMIT_PREFIX_GUIDE}
-צור את הודעת הקומיט כטקסט רגיל ללא עיצוב Markdown. השתמש במעברי שורה מתאימים והפוך אותה למתאימה לשימוש ישיר ב-Git commit.
-אנא צור בעברית.`,
-        diffMessage: "צור הודעת קומיט עבור ה-Git diff הבא כטקסט רגיל (ללא עיצוב Markdown):"
+        description: 'יצירת הודעות commit בעברית',
+        systemPrompt: (style: MessageStyle) => `
+אנא צור הודעות commit בעברית.
+עקוב אחר הכללים הבאים:
+1. השתמש בעברית ברורה ותמציתית
+2. עקוב אחר פורמט ה-commit המקובל
+3. שמור על טון מקצועי
+4. ${style === 'simple' ? 'תאר רק את השינויים העיקריים' : 
+    style === 'normal' ? 'תאר את התקציר וההשפעות העיקריות' : 
+    'ספק הסבר מפורט של השינויים והיקפם'}`,
+        diffMessage: 'השינויים הם כדלקמן:'
     }
-};
-
-export const middleEasternLanguageDescriptions: Record<string, string> = {
-    arabic: 'Arabic',
-    hebrew: 'Hebrew'
 };

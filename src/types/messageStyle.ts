@@ -1,21 +1,50 @@
 export type MessageStyle = 'simple' | 'normal' | 'detailed';
+export type MessageType = 'commit' | 'pr';
 
 export interface MessageStyleConfig {
-    tokens: number;
+    tokens: {
+        commit: number;
+        pr: number;
+    };
     description: string;
 }
 
 export const MESSAGE_STYLES: Record<MessageStyle, MessageStyleConfig> = {
     simple: {
-        tokens: 100,
-        description: "Generate a very concise commit message focusing only on the core change."
+        tokens: {
+            commit: 100,
+            pr: 400
+        },
+        description: "Generate a very concise message focusing only on the core changes."
     },
     normal: {
-        tokens: 200,
-        description: "Generate a commit message with a brief explanation of the changes."
+        tokens: {
+            commit: 200,
+            pr: 800
+        },
+        description: "Generate a message with a brief explanation of the changes."
     },
     detailed: {
-        tokens: 500,
-        description: "Generate a detailed commit message including context, reasoning, and impact of the changes."
+        tokens: {
+            commit: 500,
+            pr: 2000
+        },
+        description: "Generate a detailed message including context, reasoning, and impact of the changes."
     }
 };
+
+export interface EmojiConfig {
+    enabled: boolean;
+    style: 'github' | 'unicode';
+}
+
+export const EMOJI_CATEGORIES = {
+    feature: ['✨', ':sparkles:'],
+    bugfix: ['🐛', ':bug:'],
+    docs: ['📚', ':books:'],
+    style: ['💎', ':gem:'],
+    refactor: ['♻️', ':recycle:'],
+    performance: ['⚡', ':zap:'],
+    test: ['🧪', ':test_tube:'],
+    chore: ['🔧', ':wrench:']
+} as const;

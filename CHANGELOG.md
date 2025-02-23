@@ -4,32 +4,54 @@ All notable changes to the "otak-committer" extension will be documented in this
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.4.0] - 2025-02-23
+
+### Added
+- 🚀 PR Generation Feature
+  - Smart PR description generation using AI
+  - Automatic issue linking and references
+  - Branch selection interface
+  - Diff analysis for better context
+  - Multilingual PR descriptions
+- 🔒 GitHub Integration
+  - Repository-aware PR creation
+  - Issue information retrieval
+  - Branch comparison support
+
+### Fixed
+- 🔧 Status bar visibility and behavior
+  - Improved Git extension detection
+  - Better workspace change handling
+- 📦 Enhanced type definitions for GitHub API
+  - Fixed ES Module compatibility
+  - Improved type safety
+
 ## [1.3.1] - 2025-02-21
  
 ### Changed
- - 🔄 Updated language configuration:
-   - Expanded support from 9 to 25 languages.
-   - Added new languages: Español, Português, Čeština, Magyar, Български, Türkçe, Polski, and extended Asian and Middle Eastern language support.
-   - Updated configuration enum and descriptions in settings.
+- 🔄 Updated language configuration:
+  - Expanded support from 9 to 25 languages
+  - Added new languages: Español, Português, Čeština, Magyar, Български, Türkçe, Polski, and extended Asian and Middle Eastern language support
+  - Updated configuration enum and descriptions in settings
 
 ## [1.3.0] - 2025-02-21
 
 ### Added
-- 🌐 Added language selection in status bar with easy switching.
-- 🎨 Added message style configuration in tooltip.
-- ⚙️ Added custom message support in system prompt.
-  - Users can now append custom instructions after the diff message.
-  - Configurable via the `otakCommitter.customMessage` setting.
+- 🌐 Added language selection in status bar with easy switching
+- 🎨 Added message style configuration in tooltip
+- ⚙️ Added custom message support in system prompt
+  - Users can now append custom instructions after the diff message
+  - Configurable via the `otakCommitter.customMessage` setting
 
 ## [1.2.0] - 2025-02-20
 
 ### Added
-- ⚡ Implemented request timeout handling (30 seconds) to prevent hanging.
-- 🔔 Introduced auto-dismiss for staged changes notification (3 seconds).
-- 🔔 Established auto-dismiss for "No changes to commit" warning (7 seconds).
+- ⚡ Implemented request timeout handling (30 seconds) to prevent hanging
+- 🔔 Introduced auto-dismiss for staged changes notification (3 seconds)
+- 🔔 Established auto-dismiss for "No changes to commit" warning (7 seconds)
 
 ### Fixed
-- 🔧 Enhanced multi-workspace support by accurately identifying the active repository.
+- 🔧 Enhanced multi-workspace support by accurately identifying the active repository
 
 ## [1.1.0] - 2025-02-17
 
