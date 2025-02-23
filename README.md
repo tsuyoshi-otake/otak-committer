@@ -1,245 +1,154 @@
-<ppalign="cenaer">
-p <h1 llign="cenaer">otli-c="center</h1>">
-g <p align="center">  <h1 align="center">=tak-co"cenaer</h1>">
- g     <p a n="cenner"forhin= alin="t SCM opcent>onst- Mtiingualak-commiter</1gener>tiowithAI ppor(upport25<languag) and PR managpmen fe>    V.S Code extension for intelligent SCM operations - Multilingual commit message generation with AI support (supporting 25 languages) and PR management features.
- </>    VS Cde extnsion fo intelligent SCM oprations - Multilingualwth-s(suppting25languag) and PR manemntfur.
-</p>
+# Otak Committer
 
---
-
- <Us>
-</>
-![GenerateCmmiMsagButto](ima/get cgme>t-.ng)
-
--pAuomtedPllRquego Messi n wtthod](cripeiers
--aEasy laeguage-swiccosnggfnomgsttusbr
--Con Stag ysofrcmet  uppo t Commit Message" button in the SCM view (or use the command palette) -
-3. Review and optionally edit the generated message 
-4. Prerequisites
-mmit your#changes
-3.rOeaAIPキーを設定（設定画面から）
-
-##使い方
-3. Reveew nhe AI-generaeed PR drscaiptionmessage  
-4. tコミットメッセージの生成ll requestanges
-
-1.変更をステージング
-1. Click the "Generate Pull Request" button in the SCM view
-2. Select base and compare branches
-3. Review the AI-generated PR description
-4. Create the pull request
+A VSCode extension that helps generate Git commit messages and Pull Requests using AI.
 
 ## Features
 
-otak-committer is a powerful VS Code extension that leverages AI to automatically generate Git commit messages and pull requests.
+- AI-powered commit message generation using OpenAI API
+- Support for commit message templates
+- Extensive multi-language support
+- Customizable message styles (Normal, Emoji, Kawaii)
+- Automated Pull Request generation with descriptions
+- Easy language switching from the status bar
+- Conventional Commits format support
 
-### Key Features
+## Prerequisites
 
-- **Intelligent PR Generation**:
-  - AI-powered PR descriptions
-  - Automatic issue linking
-  - Smart diff analysis
-  - Branch selection interface
-  - Multilingual support
-  - Repository information auto-detection
-
-- **Multilingual Support**: Generate commit messages and PR descriptions in 25 languages:
-  - 🇺🇸 English
-  - 🇫🇷 Français
-  - 🇩🇪 Deutsch
-  - 🇮🇹 Italiano
-  - 🇪🇸 Español
-  - 🇵🇹 Português
-  - 🇨🇿 Čeština
-  - 🇭🇺 Magyar
-  - 🇧🇬 Български
-  - 🇹🇷 Türkçe
-  - 🇵🇱 Polski
-  - 🇷🇺 Русский
-  - 🇯🇵 日本語
-  - 🇨🇳 中文
-  - 🇹🇼 繁體中文
-  - 🇰🇷 한국어
-  - 🇻🇳 Tiếng Việt
-  - 🇹🇭 ไทย
-  - 🇮🇳 हिन्दी
-  - 🇧🇩 বাংলা
-  - 🇮🇩 Basa Jawa
-  - 🇮🇳 தமிழ்
-  - 🇲🇲 မြန်မာဘာသာ
-  - 🇦🇪 العربية
-  - 🇮🇱 עברית
-
-- **Flexible Message Styles**: Choose from three levels of detail for your commit messages:
-  - **Simple**: Concise summary (100 tokens)
-  - **Normal**: Standard length with context (200 tokens)
-  - **Detailed**: Comprehensive explanation (500 tokens)
-
-- **Git SCM Integration**: Seamlessly integrated into VS Code's Git interface with dedicated buttons in the SCM view.
-
-- **Quick Language Switching**: Change languages directly from the status bar  
-  ![Status Bar](images/statusbar.png)
-  - One-click language switching
-  - Current message style display in tooltip
-  - Quick access to settings
-
-- **Custom System Prompt**: Add your own instructions to the AI
-  - Customize the message generation process
-  - Add specific requirements or guidelines
-  - Configure via `otakCommitter.customMessage` setting  
-  - Examples of custom messages:
-    ```
-    Please include JIRA ticket number [PROJ-123] at the start of the commit message
-    Add a link to the related documentation at the end of the message
-    Always mention performance impact for any code changes
-    ```
-  *Note*: Custom messages are appended to the Git diff before processing, allowing you to provide additional context or requirements without overriding the core message generation logic.
-
-## Requirements
-
-- Visual Studio Code ^1.90.0
+- Visual Studio Code 1.76.0 or higher
 - Git installed and configured
 - OpenAI API key
-- GitHub Personal Access Token (for PR features)
-
-### Getting OpenAI API Key
-
-To use this extension, you need an OpenAI API key. Here's how to get one:
-
-1. Go to [OpenAI API Keys page](https://platform.openai.com/api-keys)
-2. Sign in or create an OpenAI account
-3. Create a new API key
-4. Copy the API key
-5. Open VS Code Settings (File > Preferences > Settings)
-6. Search for `otakCommitter.openaiApiKey`
-7. Paste your API key into the text field
-
-*Note*: The extension uses the GPT-4o model to generate messages. Make sure your OpenAI account has access to the GPT-4o API.
-
-### Setting up GitHub Integration
-
-For PR features, you need a GitHub Personal Access Token (Classic) with the `repo` scope:
-
-1. Go to GitHub Settings > Developer settings > Personal access tokens > Tokens (classic)
-2. Generate a new token with the `repo` scope
-3. Open VS Code Settings
-4. Configure `otakCommitter.github.token` with your GitHub token
-
-The extension will automatically detect your repository information from the Git configuration.
 
 ## Installation
 
-1. Install the extension from the VS Code Marketplace
+1. Install the extension from VSCode Marketplace
 2. Configure your OpenAI API key in the extension settings
-3. Set up GitHub token for PR features (optional)
-4. Select your preferred language and message style  
-   (Default language is English)
+3. Select your preferred language from the status bar
 
-## Extension Settings
+## Usage
 
-This extension contributes the following settings:
+### Generate Commit Message
 
-![Settings](images/settings-otakCommitter.png)
+1. Stage your changes in Git
+2. Click the "Generate Commit Message" button in the Source Control view, or:
+3. Open Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`)
+4. Run "Otak Committer: Generate Commit Message"
+5. The generated message will appear in the commit message input box
+6. Review and edit if needed, then commit manually
 
-- **`otakCommitter.language`**: Language for messages (default: `"english"`).  
-  The supported languages include:
-  
-  ```json
-  "enum": [
-      "english",
-      "french",
-      "german",
-      "italian",
-      "spanish",
-      "portuguese",
-      "czech",
-      "hungarian",
-      "bulgarian",
-      "turkish",
-      "polish",
-      "russian",
-      "japanese",
-      "chinese",
-      "traditionalChinese",
-      "korean",
-      "vietnamese",
-      "thai",
-      "hindi",
-      "bengali",
-      "javanese",
-      "tamil",
-      "burmese",
-      "arabic",
-      "hebrew"
-  ],
-  "enumDescriptions": [
-      "English",
-      "Français",
-      "Deutsch",
-      "Italiano",
-      "Español",
-      "Português",
-      "Čeština",
-      "Magyar",
-      "Български",
-      "Türkçe",
-      "Polski",
-      "Русский",
-      "日本語",
-      "中文",
-      "繁體中文",
-      "한국어",
-      "Tiếng Việt",
-      "ไทย",
-      "हिन्दी",
-      "বাংলা",
-      "Basa Jawa",
-      "தமிழ்",
-      "မြန်မာဘာသာ",
-      "العربية",
-      "עברית"
-  ]
-  ```
+### Generate Pull Request
 
-- **`otakCommitter.messageStyle`**: Style and length of generated messages (default: `"normal"`).  
-  Options include:
-  - Simple (concise summary)
-  - Normal (contextual details)
-  - Detailed (comprehensive explanation)
+1. Open Command Palette
+2. Run "Otak Committer: Generate Pull Request"
+3. Select base and target branches
+4. Optionally link to an existing issue
+5. Choose between Draft or Regular PR
+6. Review the generated content and submit
 
-- **`otakCommitter.openaiApiKey`**: OpenAI API key for generating messages.
+## Commit Message Format
 
-- **`otakCommitter.github.token`**: GitHub personal access token for PR operations.
+The extension supports two formats:
 
-- **`otakCommitter.customMessage`**: Additional instructions for message generation (optional).  
-  Enhance the AI's understanding of your requirements by appending custom instructions to the Git diff.  
-  Example custom messages:
-    ```
-    # Project-specific conventions
-    Always mention related component name in square brackets
-    Include affected service names for backend changes
+1. Template-based: If a commit message template exists (`.gitmessage`, `.github/commit_template`, etc.), it will be used as the base format.
 
-    # Team workflow requirements
-    Add deployment notes if configuration files are modified
-    Reference related test cases when fixing bugs
-    ```
+2. Conventional Commits: When no template exists, messages follow this format:
+```
+<type>: <subject>
 
-## Commands
+<body>
+```
 
-- **`otak-committer.generateMessage`**: Generate a commit message for staged changes.
-- **`otak-committer.generatePR`**: Generate and create a pull request.
-- **`otak-committer.openSettings`**: Open the extension settings.
-- **`otak-committer.changeLanguage`**: Change message language (available in the status bar).
-- **`otak-committer.changeMessageStyle`**: Change message style.
+Available types:
+- `fix`: Bug fixes
+- `feat`: New features
+- `docs`: Documentation changes
+- `style`: Code style changes (formatting, etc.)
+- `refactor`: Code refactoring
+- `perf`: Performance improvements
+- `test`: Test updates
+- `chore`: Build/tool changes
+
+## Configuration
+
+### Settings
+
+- `otakCommitter.openaiApiKey`: Your OpenAI API key
+- `otakCommitter.language`: Message language (default: `japanese`)
+- `otakCommitter.messageStyle`: Message style (default: `normal`)
+  - `normal`: Standard commit messages
+  - `emoji`: Messages with emoji
+  - `kawaii`: Cute style messages
+
+### Language Support
+
+The extension supports the following languages:
+
+#### European Languages
+- English (English)
+- Français (French)
+- Deutsch (German)
+- Italiano (Italian)
+- Español (Spanish)
+- Português (Portuguese)
+- Čeština (Czech)
+- Magyar (Hungarian)
+- Български (Bulgarian)
+- Türkçe (Turkish)
+- Polski (Polish)
+- Русский (Russian)
+
+#### East Asian Languages
+- 日本語 (Japanese)
+- 简体中文 (Simplified Chinese)
+- 繁體中文 (Traditional Chinese)
+- 한국어 (Korean)
+- Tiếng Việt (Vietnamese)
+- ไทย (Thai)
+
+#### South Asian Languages
+- हिन्दी (Hindi)
+- বাংলা (Bengali)
+- Basa Jawa (Javanese)
+- தமிழ் (Tamil)
+- မြန်မာစာ (Burmese)
+
+#### Middle Eastern Languages
+- العربية (Arabic)
+- עברית (Hebrew)
+
+You can switch languages anytime using the language selector in the status bar.
+
+## Message Styles
+
+### Normal Style
+```
+feat: Add user authentication feature
+
+Implement JWT-based authentication system with the following features:
+- User registration and login
+- Password encryption
+- Session management
+```
+
+### Emoji Style
+```
+✨ feat: Add user authentication feature
+
+🔒 Implement JWT-based authentication system with:
+- 📝 User registration and login
+- 🔐 Password encryption
+- ⏲️ Session management
+```
+
+### Kawaii Style
+```
+(｡♥‿♥｡) feat: Add kawaii user authentication~!
+
+(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧ Implement super secure authentication:
+♪(^∇^*) User registration and login
+(｡◕‿◕｡) Password encryption
+(★‿★) Session management
+```
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
----
-
-For more information, visit the [GitHub repository](https://github.com/tsuyoshi-otake-system-exe-jp/otak-committer).
+Contributions are welcome! Please feel free to submit a Pull Request.
