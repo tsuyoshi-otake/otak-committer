@@ -1,48 +1,39 @@
 import * as vscode from 'vscode';
-import axios, { AxiosInstance } from 'axios';
-import { HttpsProxyAgent } from 'https-proxy-agent';
+import { Configuration, OpenAIApi } from 'openai';
+import { getAsianPrompt } from '../languages/asian';
+import { getEuropeanPrompt } from '../languages/european';
+import { getMiddleEasternPrompt } from '../languages/middleEastern';
+import { PromptType } from '../types/language';
+import { MessageStyle } from '../types/messageStyle';
+import { PullRequestDiff } from '../types/github';
 
 export class OpenAIService {
-    private client: AxiosInstance;
+    private openai: OpenAIApi;
 
     constructor(private apiKey: string) {
-        // プロキシ設定の取得
-        const proxyUrl = vscode.workspace.getConfiguration('http').get<string>('proxy');
-        
-        this.client = axios.create({
-            baseURL: 'https://api.openai.com/v1',
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json'
-            },
-            timeout: 30000, // 30秒
-            ...(proxyUrl ? { httpsAgent: new HttpsProxyAgent(proxyUrl) } : {})
+        const configuration = new Configuration({
+            apiKey: this.apiKey
         });
+        this.openai = new OpenAIApi(configuration);
     }
 
-    /**
-     * OpenAI APIキーの設定を促す
-     */
     static async showAPIKeyPrompt(): Promise<boolean> {
         const response = await vscode.window.showWarningMessage(
-            'OpenAI API Key is not configured. Would you like to configure it now?',
+            'OpenAI API key is not configured. Would you like to configure it now?',
             'Yes',
             'No'
         );
 
         if (response === 'Yes') {
-            await vscode.commands.executeCommand('workbench.action.openSettings', 'otakCommitter.openaiApiKey');
+            await vscode.commands.executeCommand('workbench.action.openSettings', 'otakCommitter.openai');
             return true;
         }
         return false;
     }
 
-    /**
-     * OpenAIサービスのインスタンスを初期化
-     */
     static async initialize(): Promise<OpenAIService | undefined> {
-        const config = vscode.workspace.getConfiguration('otakCommitter');
-        const apiKey = config.get<string>('openaiApiKey');
+        const config = vscode.workspace.getConfiguration('otakCommitter.openai');
+        const apiKey = config.get<string>('apiKey');
 
         if (!apiKey) {
             await OpenAIService.showAPIKeyPrompt();
@@ -52,37 +43,104 @@ export class OpenAIService {
         return new OpenAIService(apiKey);
     }
 
-    /**
-     * メッセージを生成
-     */
-    async createMessage(prompt: string, maxTokens: number): Promise<string | undefined> {
+    private getPromptForLanguage(language: string): (type: PromptType) => string {
+        switch (language) {
+            case 'japanese':
+            case 'korean':
+            case 'chinese':
+                return getAsianPrompt;
+            case 'arabic':
+            case 'hebrew':
+                return getMiddleEasternPrompt;
+            default:
+                return getEuropeanPrompt;
+        }
+    }
+
+    async generateCommitMessage(
+        diff: string,
+        language: string,
+        messageStyle: MessageStyle
+    ): Promise<string | undefined> {
+        const getPrompt = this.getPromptForLanguage(language);
+        const systemPrompt = getPrompt('system');
+        const userPrompt = getPrompt('commit').replace('{{style}}', messageStyle).replace('{{diff}}', diff);
+
         try {
-            const response = await this.client.post('/chat/completions', {
+            const response = await this.openai.createChatCompletion({
                 model: 'gpt-4',
                 messages: [
-                    {
-                        role: 'system',
-                        content: 'You are a helpful assistant that creates commit messages and pull request descriptions.'
-                    },
-                    {
-                        role: 'user',
-                        content: prompt
-                    }
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userPrompt }
                 ],
-                max_tokens: maxTokens,
-                temperature: 0.2,
-                top_p: 0.95,
-                presence_penalty: 0,
-                frequency_penalty: 0
+                temperature: 0.7,
+                max_tokens: 500
             });
 
-            return response.data.choices[0]?.message?.content;
+            return response.data.choices[0].message?.content;
         } catch (error: any) {
-            if (axios.isAxiosError(error)) {
-                const message = error.response?.data?.error?.message || error.message;
-                throw new Error(`OpenAI API Error: ${message}`);
+            throw new Error(`Failed to generate commit message: ${error.message}`);
+        }
+    }
+
+    async generatePRContent(
+        diff: PullRequestDiff,
+        language: string,
+        initialTitle?: string,
+        initialBody?: string
+    ): Promise<{ title: string; body: string } | undefined> {
+        const getPrompt = this.getPromptForLanguage(language);
+        const systemPrompt = getPrompt('system');
+
+        // PRの差分情報を文字列化
+        const diffSummary = `
+変更ファイル:
+${diff.files.map(file => `- ${file.filename} (追加: ${file.additions}, 削除: ${file.deletions})`).join('\n')}
+
+詳細な変更:
+${diff.files.map(file => `
+[${file.filename}]
+${file.patch}`).join('\n')}
+`;
+
+        const userPrompt = getPrompt('pr').replace('{{diff}}', diffSummary);
+
+        try {
+            const response = await this.openai.createChatCompletion({
+                model: 'gpt-4',
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userPrompt }
+                ],
+                temperature: 0.7,
+                max_tokens: 1000
+            });
+
+            const content = response.data.choices[0].message?.content;
+            if (!content) {
+                return undefined;
             }
-            throw error;
+
+            // タイトルと説明文を抽出
+            const titleMatch = content.match(/Title:\s*(.+?)(?=\n\nBody:|$)/s);
+            const bodyMatch = content.match(/Body:\s*(.+?)$/s);
+
+            if (titleMatch && bodyMatch) {
+                const title = titleMatch[1].trim();
+                const body = bodyMatch[1].trim();
+
+                // Issue関連付けがある場合は説明文の先頭に追加
+                const finalBody = initialBody ? `${initialBody}\n\n${body}` : body;
+
+                return {
+                    title: initialTitle || title,
+                    body: finalBody
+                };
+            }
+
+            return undefined;
+        } catch (error: any) {
+            throw new Error(`Failed to generate PR content: ${error.message}`);
         }
     }
 }

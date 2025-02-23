@@ -1,31 +1,23 @@
-import type { MessageStyle } from './messageStyle';
+import * as vscode from 'vscode';
+import { LANGUAGE_CONFIGS } from '../languages';
+
+export type Language = string;
+
+export type PromptType = 'system' | 'commit' | 'pr';
 
 export interface LanguageConfig {
     name: string;
-    description: string;
-    systemPrompt: (style: MessageStyle) => string;
-    diffMessage: string;
+    getPrompt: (type: PromptType) => Promise<string>;
 }
 
-export interface LanguageDescriptions {
-    [key: string]: {
-        name: string;
-        description: string;
-    };
+export interface LanguagePrompt {
+    system: string;
+    commit: string;
+    pr: string;
 }
 
-export const LANGUAGE_DESCRIPTIONS: LanguageDescriptions = {
-    english: {
-        name: "English",
-        description: "Generate commit messages in English"
-    },
-    japanese: {
-        name: "日本語",
-        description: "コミットメッセージを日本語で生成"
-    },
-    chinese: {
-        name: "中文",
-        description: "用中文生成提交消息"
-    }
-    // 他の言語も同様に追加
-};
+export async function getCurrentLanguageConfig(): Promise<LanguageConfig> {
+    const config = vscode.workspace.getConfiguration('otakCommitter');
+    const language = config.get<string>('language') || 'japanese';
+    return LANGUAGE_CONFIGS[language];
+}

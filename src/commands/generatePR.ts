@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { GitHubService } from '../services/github';
 import { IssueInfo } from '../types/github';
+import { OpenAIService } from '../services/openai';
 
 export async function generatePR(context: vscode.ExtensionContext): Promise<void> {
     try {
@@ -16,7 +17,7 @@ export async function generatePR(context: vscode.ExtensionContext): Promise<void
             return;
         }
 
-        // Issue選択（オプション）
+        // Issue選択（オプション、Escapeでスキップ可能）
         let issueNumber: number | undefined;
         let initialTitle: string | undefined;
         let initialBody: string | undefined;
@@ -32,7 +33,7 @@ export async function generatePR(context: vscode.ExtensionContext): Promise<void
             const selectedIssue = await vscode.window.showQuickPick(
                 issueItems,
                 {
-                    placeHolder: 'Select related issue (optional)',
+                    placeHolder: 'Select related issue (optional, press Escape to skip)',
                     ignoreFocusOut: true
                 }
             );
@@ -44,29 +45,53 @@ export async function generatePR(context: vscode.ExtensionContext): Promise<void
             }
         }
 
-        // タイトル入力
+        // 差分を取得
+        const diff = await github.getBranchDiffDetails(branches.base, branches.compare);
+        
+        // GPT-4oを使用してPRの内容を自動生成
+        const openai = await OpenAIService.initialize();
+        if (!openai) {
+            return;
+        }
+
+        const language = vscode.workspace.getConfiguration('otakCommitter').get<string>('language') || 'japanese';
+        
+        // GPT-4oでタイトルと説明を生成
+        const generatedPR = await vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: 'Generating PR content...',
+            cancellable: false
+        }, async () => {
+            return await openai.generatePRContent(diff, language, initialTitle, initialBody);
+        });
+
+        if (!generatedPR) {
+            return;
+        }
+
+        // タイトル入力（自動生成されたタイトルをデフォルトに）
         const title = await vscode.window.showInputBox({
             prompt: 'Enter pull request title',
             placeHolder: 'Feature: Add new functionality',
-            value: initialTitle
+            value: generatedPR.title
         });
 
         if (!title) {
             return;
         }
 
-        // 説明入力
+        // 説明入力（自動生成された説明をデフォルトに）
         const description = await vscode.window.showInputBox({
             prompt: 'Enter pull request description (optional)',
             placeHolder: 'Describe your changes here...',
-            value: initialBody
+            value: generatedPR.body
         });
 
         if (description === undefined) {
             return;
         }
 
-        // 進行状況表示
+        // PR作成の進行状況表示
         const result = await vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
             title: 'Creating Pull Request...',

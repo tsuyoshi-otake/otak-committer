@@ -193,9 +193,9 @@ export class GitHubService {
     }
 
     /**
-     * 指定されたブランチ間の差分を取得
+     * 指定されたブランチ間の詳細な差分を取得
      */
-    async getBranchDiff(base: string, compare: string): Promise<PullRequestDiff> {
+    async getBranchDiffDetails(base: string, compare: string): Promise<PullRequestDiff> {
         await this.ensureInitialized();
         if (!this.octokit) {
             throw new Error('GitHub client not initialized');
@@ -300,7 +300,7 @@ export class GitHubService {
             }
 
             // 差分の確認
-            const diff = await this.getBranchDiff(params.base, params.compare);
+            const diff = await this.getBranchDiffDetails(params.base, params.compare);
             if (diff.files.length === 0) {
                 throw new Error('No changes to create a pull request');
             }
