@@ -1,10 +1,7 @@
 import * as vscode from 'vscode';
 import { GitHubService } from '../services/github';
-import { OpenAIService } from '../services/openai';
-import { MESSAGE_STYLES } from '../types/messageStyle';
-import { getCurrentLanguageConfig } from '../languages';
 
-export async function generatePR(_context: vscode.ExtensionContext) {
+export async function generatePR(context: vscode.ExtensionContext): Promise<void> {
     try {
         // ブランチ選択
         const branches = await GitHubService.selectBranches();
@@ -12,82 +9,103 @@ export async function generatePR(_context: vscode.ExtensionContext) {
             return;
         }
 
-        // 差分取得
+        // PR作成
         const github = await GitHubService.initializeGitHubClient();
         if (!github) {
             return;
         }
 
-        const diff = await github.getBranchDiff(branches.base, branches.compare);
-        
-        // OpenAI APIキーの確認
-        const openai = await OpenAIService.initialize();
-        if (!openai) {
+        // タイトル入力
+        const title = await vscode.window.showInputBox({
+            prompt: 'Enter pull request title',
+            placeHolder: 'Feature: Add new functionality'
+        });
+
+        if (!title) {
             return;
         }
 
-        // メッセージスタイルの取得
-        const messageStyle = vscode.workspace.getConfiguration('otakCommitter').get<string>('messageStyle') || 'normal';
-        const tokenLimit = MESSAGE_STYLES[messageStyle as keyof typeof MESSAGE_STYLES].tokens.pr;
+        // 説明入力
+        const description = await vscode.window.showInputBox({
+            prompt: 'Enter pull request description (optional)',
+            placeHolder: 'Describe your changes here...'
+        });
 
-        // 言語設定の取得
-        const language = getCurrentLanguageConfig();
+        if (description === undefined) {
+            return;
+        }
 
-        // プログレス表示
-        await vscode.window.withProgress({
-            location: vscode.ProgressLocation.Notification,
-            title: 'Generating PR description...',
-            cancellable: false
-        }, async () => {
-            // PR説明の生成
-            const prompt = `
-以下の変更に基づいて、${language.name}でPull Requestのタイトルと説明を生成してください。
-説明には以下の内容を含めてください：
-- 変更の概要
-- 変更の詳細
-- 影響範囲
-- テスト項目
-
-変更内容：
-${diff.files.map(file => `
-${file.filename}:
-${file.patch || 'Binary file changed'}
-`).join('\n')}
-
-Stats:
-- Additions: ${diff.stats.additions}
-- Deletions: ${diff.stats.deletions}
-`;
-
-            const response = await openai.createMessage(prompt, tokenLimit);
-            if (!response) {
-                return;
-            }
-
-            // PRの作成
-            const lines = response.split('\n');
-            const title = lines[0];
-            const body = lines.slice(1).join('\n').trim();
-
-            const pr = await github.createPullRequest({
-                base: branches.base,
-                compare: branches.compare,
-                title,
-                body
-            });
-
-            // 結果の表示
-            const viewButton = 'View PR';
-            const result = await vscode.window.showInformationMessage(
-                `Pull Request #${pr.number} created successfully!`,
-                viewButton
-            );
-
-            if (result === viewButton) {
-                await vscode.env.openExternal(vscode.Uri.parse(pr.html_url));
+        // Issue番号入力（オプション）
+        const issueInput = await vscode.window.showInputBox({
+            prompt: 'Enter issue number (optional)',
+            placeHolder: 'e.g. 123',
+            validateInput: (value) => {
+                if (value && !/^\d+$/.test(value)) {
+                    return 'Please enter a valid issue number';
+                }
+                return null;
             }
         });
+
+        const issueNumber = issueInput ? parseInt(issueInput, 10) : undefined;
+
+        // 進行状況表示
+        const result = await vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: 'Creating Pull Request...',
+            cancellable: false
+        }, async () => {
+            // まずDraftで試行
+            try {
+                return await github.createPullRequest({
+                    base: branches.base,
+                    compare: branches.compare,
+                    title,
+                    body: description,
+                    issueNumber,
+                    draft: true
+                });
+            } catch (error: any) {
+                // Draft PRがサポートされていない場合は通常のPRとして作成
+                if (error.message?.includes('Draft pull requests are not supported')) {
+                    return await github.createPullRequest({
+                        base: branches.base,
+                        compare: branches.compare,
+                        title,
+                        body: description,
+                        issueNumber,
+                        draft: false
+                    });
+                }
+                throw error;
+            }
+        });
+
+        // PR作成成功通知
+        const action = await vscode.window.showInformationMessage(
+            `Pull Request #${result.number} created successfully!`,
+            'Open in Browser'
+        );
+
+        if (action === 'Open in Browser') {
+            await vscode.env.openExternal(vscode.Uri.parse(result.html_url));
+        }
+
     } catch (error: any) {
+        if (error.message === 'No changes to create a pull request') {
+            vscode.window.showErrorMessage(
+                'No changes found between selected branches. Please make some changes before creating a PR.'
+            );
+            return;
+        }
+
+        // GitHubApiError
+        if (error.response?.errors) {
+            const messages = error.response.errors.map((e: any) => e.message).join(', ');
+            vscode.window.showErrorMessage(`Failed to generate PR: ${messages}`);
+            return;
+        }
+
         vscode.window.showErrorMessage(`Failed to generate PR: ${error.message}`);
     }
 }

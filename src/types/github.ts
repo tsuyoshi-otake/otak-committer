@@ -8,6 +8,7 @@ export interface PullRequestParams {
     title?: string;
     body?: string;
     issueNumber?: number;
+    draft?: boolean;
 }
 
 export interface IssueInfo {
@@ -147,6 +148,7 @@ export interface GitHubAPI {
             head: string;
             title: string;
             body: string;
+            draft?: boolean;
         }) => Promise<GitHubCreatePRResponse>;
     };
 }

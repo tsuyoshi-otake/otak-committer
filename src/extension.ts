@@ -6,7 +6,7 @@ import { MESSAGE_STYLES } from './types/messageStyle';
 
 let statusBarItem: vscode.StatusBarItem;
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
     // ステータスバーアイテムの初期化
     statusBarItem = vscode.window.createStatusBarItem(
         vscode.StatusBarAlignment.Right,
@@ -19,20 +19,34 @@ export function activate(context: vscode.ExtensionContext) {
     const updateStatusBar = () => {
         const config = vscode.workspace.getConfiguration('otakCommitter');
         const language = config.get<string>('language') || 'english';
+        const messageStyle = config.get<string>('messageStyle') || 'normal';
         statusBarItem.text = `$(globe) ${language}`;
+        statusBarItem.tooltip = `Click to change language\nCurrent style: ${messageStyle}`;
     };
 
     // Gitリポジトリの有無を確認してステータスバーを表示
     const checkGitRepository = async () => {
-        const gitExtension = vscode.extensions.getExtension('vscode.git')?.exports;
-        if (gitExtension) {
-            const api = gitExtension.getAPI(1);
-            if (api.repositories.length > 0) {
-                updateStatusBar();
-                statusBarItem.show();
-            } else {
-                statusBarItem.hide();
+        try {
+            let gitExtension;
+            // Git拡張機能が有効になるまで待機
+            for (let i = 0; i < 10; i++) {
+                gitExtension = vscode.extensions.getExtension('vscode.git')?.exports;
+                if (gitExtension) break;
+                await new Promise(resolve => setTimeout(resolve, 1000));
             }
+
+            if (gitExtension) {
+                const api = gitExtension.getAPI(1);
+                if (api.repositories.length > 0) {
+                    updateStatusBar();
+                    statusBarItem.show();
+                } else {
+                    statusBarItem.hide();
+                }
+            }
+        } catch (error) {
+            console.error('Failed to check Git repository:', error);
+            statusBarItem.hide();
         }
     };
 
@@ -82,18 +96,20 @@ export function activate(context: vscode.ExtensionContext) {
                         selected.label.toLowerCase(),
                         vscode.ConfigurationTarget.Global
                     );
+                    updateStatusBar();
                 }
             }
         ),
         // 設定変更の監視
         vscode.workspace.onDidChangeConfiguration(e => {
-            if (e.affectsConfiguration('otakCommitter.language')) {
+            if (e.affectsConfiguration('otakCommitter.language') ||
+                e.affectsConfiguration('otakCommitter.messageStyle')) {
                 updateStatusBar();
             }
         }),
         // Gitリポジトリの変更を監視
         vscode.workspace.onDidChangeWorkspaceFolders(() => {
-            checkGitRepository();
+            void checkGitRepository();
         }),
         // ステータスバーアイテムの登録
         statusBarItem
@@ -103,7 +119,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(...disposables);
 
     // 初期化時のGitリポジトリチェック
-    checkGitRepository();
+    await checkGitRepository();
 }
 
 export function deactivate() {

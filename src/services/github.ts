@@ -13,15 +13,16 @@ import {
 } from '../types/github';
 
 export class GitHubService {
-    private octokit!: GitHubAPI;
+    private octokit?: GitHubAPI;
     private owner: string = '';
     private repo: string = '';
+    private initialized: boolean = false;
 
-    constructor(private token: string) {
-        void this.initialize();
-    }
+    constructor(private token: string) {}
 
-    private async initialize() {
+    private async ensureInitialized(): Promise<void> {
+        if (this.initialized) return;
+
         // プロキシ設定の取得
         const proxyUrl = vscode.workspace.getConfiguration('http').get<string>('proxy');
         
@@ -38,6 +39,8 @@ export class GitHubService {
 
         // リポジトリ情報の自動検出
         await this.detectRepositoryInfo();
+        
+        this.initialized = true;
     }
 
     /**
@@ -138,6 +141,11 @@ export class GitHubService {
      * 指定されたブランチ間の差分を取得
      */
     async getBranchDiff(base: string, compare: string): Promise<PullRequestDiff> {
+        await this.ensureInitialized();
+        if (!this.octokit) {
+            throw new Error('GitHub client not initialized');
+        }
+
         try {
             const response = await this.octokit.repos.compareCommits({
                 owner: this.owner,
@@ -180,6 +188,11 @@ export class GitHubService {
      * Issue情報を取得
      */
     async getIssue(number: number): Promise<IssueInfo> {
+        await this.ensureInitialized();
+        if (!this.octokit) {
+            throw new Error('GitHub client not initialized');
+        }
+
         try {
             const response = await this.octokit.issues.get({
                 owner: this.owner,
@@ -215,6 +228,11 @@ export class GitHubService {
      * PRを作成
      */
     async createPullRequest(params: PullRequestParams): Promise<CreatePullRequestResponse> {
+        await this.ensureInitialized();
+        if (!this.octokit) {
+            throw new Error('GitHub client not initialized');
+        }
+
         try {
             // Issue関連付けがある場合は、タイトルと本文を取得
             let title = params.title;
@@ -226,13 +244,20 @@ export class GitHubService {
                 body = body || `Closes #${issue.number}\n\n${issue.body}`;
             }
 
+            // 差分の確認
+            const diff = await this.getBranchDiff(params.base, params.compare);
+            if (diff.files.length === 0) {
+                throw new Error('No changes to create a pull request');
+            }
+
             const response = await this.octokit.pulls.create({
                 owner: this.owner,
                 repo: this.repo,
                 base: params.base,
                 head: params.compare,
                 title: title || 'Pull Request',
-                body: body || ''
+                body: body || '',
+                draft: params.draft || false
             });
 
             if (response.status !== 201) {
@@ -247,6 +272,9 @@ export class GitHubService {
                 html_url: response.data.html_url
             };
         } catch (error: any) {
+            if (error.message === 'No changes to create a pull request') {
+                throw new Error(error.message);
+            }
             throw new GitHubApiError(
                 `Failed to create pull request: ${error.message}`,
                 error.status,
@@ -259,6 +287,11 @@ export class GitHubService {
      * リポジトリのブランチ一覧を取得
      */
     async getBranches(): Promise<string[]> {
+        await this.ensureInitialized();
+        if (!this.octokit) {
+            throw new Error('GitHub client not initialized');
+        }
+
         try {
             const response = await this.octokit.repos.listBranches({
                 owner: this.owner,
@@ -287,6 +320,11 @@ export class GitHubService {
      * リポジトリのIssue一覧を取得
      */
     async getIssues(): Promise<IssueInfo[]> {
+        await this.ensureInitialized();
+        if (!this.octokit) {
+            throw new Error('GitHub client not initialized');
+        }
+
         try {
             const response = await this.octokit.issues.listForRepo({
                 owner: this.owner,
