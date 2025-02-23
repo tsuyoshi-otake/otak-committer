@@ -30,6 +30,9 @@
     "openai",
     "multilingual"
   ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "configuration": {

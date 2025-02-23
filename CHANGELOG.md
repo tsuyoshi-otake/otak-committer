@@ -4,20 +4,6 @@ All notable changes to the "otak-committer" extension will be documented in this
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [1.4.1] - 2025-02-23
-
-### Added
-- ✨ PR Type Selection
-  - Added UI for choosing between Draft and Regular PR
-  - Improved visibility of PR creation process
-  - Enhanced progress notifications with detailed status
-
-### Changed
-- 🔄 Improved PR Generation UI
-  - Updated progress messages for better clarity
-  - Added step-by-step status updates during PR creation
-  - Enhanced error handling and feedback
-
 ## [1.4.0] - 2025-02-23
 
 ### Added
@@ -27,13 +13,27 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
   - Branch selection interface
   - Diff analysis for better context
   - Multilingual PR descriptions
+  - Draft/Regular PR type selection
+  - Preview and confirmation workflow
+  - Enhanced progress notifications
 - 🔒 GitHub Integration
   - Repository-aware PR creation
   - Issue information retrieval
   - Branch comparison support
 
+### Changed
+- 🔄 Extension Initialization
+  - Added automatic activation on VS Code startup
+  - Enhanced status bar initialization
+  - Improved user experience with immediate availability
+- 🌟 PR Generation UI
+  - Updated progress messages for better clarity
+  - Added step-by-step status updates
+  - Enhanced error handling and feedback
+
 ### Fixed
 - 🔧 Status bar visibility and behavior
+  - Fixed status bar not showing until command execution
   - Improved Git extension detection
   - Better workspace change handling
 - 📦 Enhanced type definitions for GitHub API

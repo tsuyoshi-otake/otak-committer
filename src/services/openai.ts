@@ -187,10 +187,10 @@ Please provide a clear and ${messageStyle} commit message following the format a
 
             // PRの差分情報を文字列化
             const diffSummary = `
-変更ファイル:
-${diff.files.map(file => `- ${file.filename} (追加: ${file.additions}, 削除: ${file.deletions})`).join('\n')}
+Changed files:
+${diff.files.map(file => `- ${file.filename} (additions: ${file.additions}, deletions: ${file.deletions})`).join('\n')}
 
-詳細な変更:
+Detailed changes:
 ${diff.files.map(file => `
 [${file.filename}]
 ${file.patch}`).join('\n')}`;
@@ -216,7 +216,7 @@ Please follow the template format strictly.`;
                     model: 'gpt-4o',
                     messages: [
                         { role: 'system', content: systemPrompt },
-                        { role: 'user', content: template ? userPrompt : getPrompt('prTitle').replace('{{diff}}', diffSummary) }
+                        { role: 'user', content: getPrompt('prTitle').replace('{{diff}}', diffSummary) }
                     ],
                     temperature: 0.2,
                     max_tokens: 100

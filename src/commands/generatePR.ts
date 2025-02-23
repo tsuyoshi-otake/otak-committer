@@ -2,8 +2,49 @@ import * as vscode from 'vscode';
 import { GitHubService } from '../services/github';
 import { OpenAIService } from '../services/openai';
 import { GitService } from '../services/git';
+import * as os from 'os';
+import * as path from 'path';
+
+const PREVIEW_DIR = path.join(os.tmpdir(), 'otak-committer');
+const PREVIEW_FILE = 'pr-preview.md';
+
+async function closePreviewTabs() {
+    const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs);
+    const closeTasks = tabs
+        .filter(tab => 
+            (tab.label.includes('Preview') || tab.label.includes('プレビュー')) &&
+            tab.input instanceof vscode.TabInputWebview
+        )
+        .map(tab => vscode.window.tabGroups.close(tab));
+    await Promise.all(closeTasks);
+}
+
+async function showMarkdownPreview(content: string): Promise<{ uri: vscode.Uri, document: vscode.TextDocument } | undefined> {
+    try {
+        // 一時ディレクトリが存在しない場合は作成
+        const tempUri = vscode.Uri.file(path.join(PREVIEW_DIR, PREVIEW_FILE));
+        await vscode.workspace.fs.createDirectory(vscode.Uri.file(PREVIEW_DIR));
+
+        // ファイルを書き込む
+        const encoder = new TextEncoder();
+        await vscode.workspace.fs.writeFile(tempUri, encoder.encode(content));
+
+        // ドキュメントを開く（表示はしない）
+        const document = await vscode.workspace.openTextDocument(tempUri);
+
+        // プレビューを表示
+        await vscode.commands.executeCommand('markdown.showPreview', tempUri);
+
+        return { uri: tempUri, document };
+    } catch (error) {
+        console.error('Error showing markdown preview:', error);
+        return undefined;
+    }
+}
 
 export async function generatePR(): Promise<void> {
+    let previewFile: { uri: vscode.Uri, document: vscode.TextDocument } | undefined;
+
     try {
         // ブランチ選択
         const branches = await GitHubService.selectBranches();
@@ -88,14 +129,22 @@ export async function generatePR(): Promise<void> {
             return;
         }
 
+        // Markdownプレビューを表示
+        const previewContent = `# ${generatedPR.title}\n\n${generatedPR.body}`;
+        previewFile = await showMarkdownPreview(previewContent);
+        if (!previewFile) {
+            vscode.window.showErrorMessage('Failed to show preview');
+            return;
+        }
+
         // PR種別の選択（DraftかRegularか）
         const prType = await vscode.window.showQuickPick(
             [
-                { label: 'Draft Pull Request', description: 'Create as draft PR (review required)', value: true },
-                { label: 'Regular Pull Request', description: 'Create as regular PR (ready for review)', value: false }
+                { label: 'Draft Pull Request', description: 'Review required before merge', value: true },
+                { label: 'Regular Pull Request', description: 'Ready for review and merge', value: false }
             ],
             {
-                placeHolder: 'Select PR type',
+                placeHolder: 'Select PR type (press Escape to skip)',
                 ignoreFocusOut: true
             }
         );
@@ -191,7 +240,7 @@ export async function generatePR(): Promise<void> {
                 throw new Error('PR creation failed: No PR details received');
             }
         } catch (error) {
-            throw error; // エラーを上位のハンドラに渡す
+            throw error;
         }
 
     } catch (error: any) {
@@ -210,5 +259,16 @@ export async function generatePR(): Promise<void> {
         }
 
         vscode.window.showErrorMessage(`Failed to generate PR: ${error.message}`);
+    } finally {
+        // プレビューを閉じてクリーンアップ
+        await closePreviewTabs();
+        if (previewFile) {
+            try {
+                // 一時ファイルは残しておく（次回の上書き用）
+                // await vscode.workspace.fs.delete(previewFile.uri);
+            } catch (error) {
+                console.error('Error cleaning up preview file:', error);
+            }
+        }
     }
 }
