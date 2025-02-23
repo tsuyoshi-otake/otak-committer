@@ -372,7 +372,7 @@ export class GitHubService {
     }
 
     /**
-     * リポジトリのIssue一覧を取得
+     * リポジトリのIssue一覧を取得（PRは除外）
      */
     async getIssues(): Promise<IssueInfo[]> {
         await this.ensureInitialized();
@@ -397,14 +397,17 @@ export class GitHubService {
                 );
             }
 
-            return response.data.map(issue => ({
-                number: issue.number,
-                title: issue.title,
-                body: issue.body || '',
-                labels: (issue.labels || []).map((label: string | GitHubLabel) => 
-                    typeof label === 'string' ? label : label.name || ''
-                )
-            }));
+            // pull_requestフィールドを持つものを除外（PRs）
+            return response.data
+                .filter(item => !('pull_request' in item))
+                .map(issue => ({
+                    number: issue.number,
+                    title: issue.title,
+                    body: issue.body || '',
+                    labels: (issue.labels || []).map((label: string | GitHubLabel) => 
+                        typeof label === 'string' ? label : label.name || ''
+                    )
+                }));
         } catch (error: any) {
             throw new GitHubApiError(
                 `Failed to get issues: ${error.message}`,
