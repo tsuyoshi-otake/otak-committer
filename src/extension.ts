@@ -6,15 +6,30 @@ import { MessageStyle } from './types/messageStyle';
 
 let languageStatusBarItem: vscode.StatusBarItem;
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
     console.log('Activating otak-committer extension...');
 
-    // ステータスバーアイテムの初期化
+    // ステータスバーアイテムの初期化を最優先で行う
+    console.log('Initializing status bar item...');
     languageStatusBarItem = vscode.window.createStatusBarItem(
         vscode.StatusBarAlignment.Right,
         100
     );
     context.subscriptions.push(languageStatusBarItem);
+
+    // 初期設定の読み込みとステータスバーの更新
+    console.log('Loading initial configuration...');
+    const config = vscode.workspace.getConfiguration('otakCommitter');
+    if (!config.get('language')) {
+        await config.update('language', 'japanese', vscode.ConfigurationTarget.Global);
+    }
+    if (!config.get('messageStyle')) {
+        await config.update('messageStyle', 'normal', vscode.ConfigurationTarget.Global);
+    }
+
+    // ステータスバーを即時表示
+    updateLanguageStatusBar();
+    languageStatusBarItem.show();
 
     console.log('Registering commands...');
 
@@ -101,9 +116,6 @@ export function activate(context: vscode.ExtensionContext) {
         })
     );
 
-    console.log('Initializing language status bar...');
-    // 初期表示
-    updateLanguageStatusBar();
     console.log('Extension activation completed.');
 }
 
@@ -121,7 +133,7 @@ function updateLanguageStatusBar() {
         tooltip.supportThemeIcons = true;
 
         tooltip.appendMarkdown(`Configuration\n\n`);
-        tooltip.appendMarkdown(`Current Style: ${vscode.workspace.getConfiguration('otakCommitter').get<MessageStyle>('messageStyle') || 'normal'}\n\n`);
+        tooltip.appendMarkdown(`Current Style: ${config.get<MessageStyle>('messageStyle') || 'normal'}\n\n`);
         tooltip.appendMarkdown(`---\n\n`);
         tooltip.appendMarkdown(`$(versions) [Change Message Style](command:otak-committer.changeMessageStyle) &nbsp;&nbsp; $(gear) [Open Settings](command:otak-committer.openSettings)`);
 
@@ -132,6 +144,7 @@ function updateLanguageStatusBar() {
         };
 
         languageStatusBarItem.show();
+        console.log('Language status bar updated successfully');
     }
 }
 

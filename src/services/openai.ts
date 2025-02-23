@@ -102,8 +102,7 @@ export class OpenAIService {
     ): Promise<string> {
         // テンプレートがある場合はそれを基に生成
         if (template) {
-            return `
-Based on the following template and Git diff, generate a commit message:
+            return `Based on the following template and Git diff, generate a commit message:
 
 Template:
 ${template.content}
@@ -111,7 +110,7 @@ ${template.content}
 Git diff:
 ${diff}
 
-Please follow the template format strictly.`;
+Please follow the template format strictly without any leading newlines.`;
         }
 
         // テンプレートがない場合はPrefixを使用
@@ -120,13 +119,12 @@ Please follow the template format strictly.`;
             return `${prefix.prefix}: ${desc}`;
         }).join('\n');
 
-        return `
-Generate a commit message in ${language} for the following Git diff.
+        return `Generate a commit message in ${language} for the following Git diff.
 Use one of these prefixes:
 
 ${prefixDescriptions}
 
-The commit message should follow this format:
+The commit message should follow this format without any leading newlines:
 <prefix>: <subject>
 
 <body>
@@ -162,7 +160,13 @@ Please provide a clear and ${messageStyle} commit message following the format a
                 max_tokens: 500
             });
 
-            return response.choices[0].message.content || undefined;
+            let message = response.choices[0].message.content;
+            if (message) {
+                // 先頭の空行を削除
+                message = message.trimStart();
+                return message;
+            }
+            return undefined;
         } catch (error: any) {
             vscode.window.showErrorMessage(`Failed to generate commit message: ${error.message}`);
             console.error('Error generating commit message:', error);
@@ -189,13 +193,11 @@ ${diff.files.map(file => `- ${file.filename} (追加: ${file.additions}, 削除:
 詳細な変更:
 ${diff.files.map(file => `
 [${file.filename}]
-${file.patch}`).join('\n')}
-`;
+${file.patch}`).join('\n')}`;
 
             let userPrompt;
             if (template) {
-                userPrompt = `
-Based on the following template and Git diff, generate a pull request:
+                userPrompt = `Based on the following template and Git diff, generate a pull request:
 
 Template:
 ${template.content}
@@ -291,8 +293,8 @@ Please follow the template format strictly.`;
             const finalBody = initialBody ? `${initialBody}\n\n${body}` : body;
 
             return {
-                title: initialTitle || title,
-                body: finalBody
+                title: initialTitle || title.trimStart(),
+                body: finalBody.trimStart()
             };
         } catch (error: any) {
             vscode.window.showErrorMessage(`Failed to generate PR content: ${error.message}`);

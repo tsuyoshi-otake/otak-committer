@@ -1,22 +1,29 @@
-<p align="center">
-  <h1 align="center">otak-committer</h1>
-  <p align="center">
-    VS Code extension for intelligent SCM operations - Multilingual commit message generation with AI support (supporting 25 languages) and PR management features.
-  </p>
+<ppalign="cenaer">
+p <h1 llign="cenaer">otli-c="center</h1>">
+g <p align="center">  <h1 align="center">=tak-co"cenaer</h1>">
+ g     <p a n="cenner"forhin= alin="t SCM opcent>onst- Mtiingualak-commiter</1gener>tiowithAI ppor(upport25<languag) and PR managpmen fe>    V.S Code extension for intelligent SCM operations - Multilingual commit message generation with AI support (supporting 25 languages) and PR management features.
+ </>    VS Cde extnsion fo intelligent SCM oprations - Multilingualwth-s(suppting25languag) and PR manemntfur.
 </p>
 
----
+--
 
-## Usage
+ <Us>
+</>
+![GenerateCmmiMsagButto](ima/get cgme>t-.ng)
 
-![Generate Commit Message Button](images/generate-commit-message.png)
+-pAuomtedPllRquego Messi n wtthod](cripeiers
+-aEasy laeguage-swiccosnggfnomgsttusbr
+-Con Stag ysofrcmet  uppo t Commit Message" button in the SCM view (or use the command palette) -
+3. Review and optionally edit the generated message 
+4. Prerequisites
+mmit your#changes
+3.rOeaAIPキーを設定（設定画面から）
 
-1. Stage your changes in Git  
-2. Click the "Generate Commit Message" button in the SCM view (or use the command palette)  
-3. Review and optionally edit the generated message  
-4. Commit your changes
+##使い方
+3. Reveew nhe AI-generaeed PR drscaiptionmessage  
+4. tコミットメッセージの生成ll requestanges
 
-For Pull Requests:
+1.変更をステージング
 1. Click the "Generate Pull Request" button in the SCM view
 2. Select base and compare branches
 3. Review the AI-generated PR description

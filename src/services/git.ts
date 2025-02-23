@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import simpleGit, { SimpleGit, StatusResult as GitStatusResult } from 'simple-git';
+import simpleGit, { SimpleGit } from 'simple-git';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 
