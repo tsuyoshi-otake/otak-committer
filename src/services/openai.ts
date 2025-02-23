@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { Configuration, OpenAIApi } from 'openai';
+import OpenAI from 'openai';
 import { getAsianPrompt } from '../languages/asian';
 import { getEuropeanPrompt } from '../languages/european';
 import { getMiddleEasternPrompt } from '../languages/middleEastern';
@@ -8,13 +8,12 @@ import { MessageStyle } from '../types/messageStyle';
 import { PullRequestDiff } from '../types/github';
 
 export class OpenAIService {
-    private openai: OpenAIApi;
+    private openai: OpenAI;
 
     constructor(private apiKey: string) {
-        const configuration = new Configuration({
+        this.openai = new OpenAI({
             apiKey: this.apiKey
         });
-        this.openai = new OpenAIApi(configuration);
     }
 
     static async showAPIKeyPrompt(): Promise<boolean> {
@@ -67,7 +66,7 @@ export class OpenAIService {
         const userPrompt = getPrompt('commit').replace('{{style}}', messageStyle).replace('{{diff}}', diff);
 
         try {
-            const response = await this.openai.createChatCompletion({
+            const response = await this.openai.chat.completions.create({
                 model: 'gpt-4',
                 messages: [
                     { role: 'system', content: systemPrompt },
@@ -77,7 +76,7 @@ export class OpenAIService {
                 max_tokens: 500
             });
 
-            return response.data.choices[0].message?.content;
+            return response.choices[0].message.content || undefined;
         } catch (error: any) {
             throw new Error(`Failed to generate commit message: ${error.message}`);
         }
@@ -106,7 +105,7 @@ ${file.patch}`).join('\n')}
         const userPrompt = getPrompt('pr').replace('{{diff}}', diffSummary);
 
         try {
-            const response = await this.openai.createChatCompletion({
+            const response = await this.openai.chat.completions.create({
                 model: 'gpt-4',
                 messages: [
                     { role: 'system', content: systemPrompt },
@@ -116,7 +115,7 @@ ${file.patch}`).join('\n')}
                 max_tokens: 1000
             });
 
-            const content = response.data.choices[0].message?.content;
+            const content = response.choices[0].message.content;
             if (!content) {
                 return undefined;
             }
