@@ -151,13 +151,13 @@ Please provide a clear and ${messageStyle} commit message following the format a
             const userPrompt = await this.createCommitPrompt(diff, language, messageStyle, template);
 
             const response = await this.openai.chat.completions.create({
-                model: 'gpt-4o',
+                model: 'chatgpt-4o-latest',
                 messages: [
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: userPrompt }
                 ],
                 temperature: 0.2,
-                max_tokens: 500
+                max_tokens: 70
             });
 
             let message = response.choices[0].message.content;
@@ -178,7 +178,6 @@ Please provide a clear and ${messageStyle} commit message following the format a
         diff: PullRequestDiff,
         language: string,
         template?: TemplateInfo,
-        initialTitle?: string,
         initialBody?: string
     ): Promise<{ title: string; body: string } | undefined> {
         try {
@@ -213,7 +212,7 @@ Please follow the template format strictly.`;
             // タイトルと本文を別々に生成
             const [titleResponse, bodyResponse] = await Promise.all([
                 this.openai.chat.completions.create({
-                    model: 'gpt-4o',
+                    model: 'chatgpt-4o-latest',
                     messages: [
                         { role: 'system', content: systemPrompt },
                         { role: 'user', content: getPrompt('prTitle').replace('{{diff}}', diffSummary) }
@@ -222,7 +221,7 @@ Please follow the template format strictly.`;
                     max_tokens: 100
                 }),
                 this.openai.chat.completions.create({
-                    model: 'gpt-4o',
+                    model: 'chatgpt-4o-latest',
                     messages: [
                         { role: 'system', content: systemPrompt },
                         { role: 'user', content: userPrompt }
@@ -238,6 +237,14 @@ Please follow the template format strictly.`;
             if (!title || !body) {
                 throw new Error('Generated title or body is empty');
             }
+
+            // タイトルからMarkdown記法を削除
+            const cleanTitle = title
+                .replace(/\*\*/g, '')  // **bold**を削除
+                .replace(/\*/g, '')    // *italic*を削除
+                .replace(/`/g, '')     // `code`を削除
+                .replace(/#/g, '')     // #見出しを削除
+                .trim();
 
             // 本文を行に分割して処理
             const lines = body.split('\n');
@@ -293,7 +300,7 @@ Please follow the template format strictly.`;
             const finalBody = initialBody ? `${initialBody}\n\n${body}` : body;
 
             return {
-                title: initialTitle || title.trimStart(),
+                title: cleanTitle.trimStart(),
                 body: finalBody.trimStart()
             };
         } catch (error: any) {

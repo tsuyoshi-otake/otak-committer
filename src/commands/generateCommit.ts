@@ -43,13 +43,21 @@ export async function generateCommit(): Promise<void> {
         }, async () => {
             // 設定を取得
             const config = vscode.workspace.getConfiguration('otakCommitter');
-            const language = config.get<string>('language') || 'japanese';
+            const language = config.get<string>('language') || 'english';
             const messageStyle = config.get<MessageStyle>('messageStyle') || 'normal';
 
             console.log(`Using language: ${language}, style: ${messageStyle}`);
 
             // コミットメッセージを生成
-            return await openai.generateCommitMessage(diff, language, messageStyle, templates.commit);
+            const generatedMessage = await openai.generateCommitMessage(diff, language, messageStyle, templates.commit);
+            
+            // generatedMessageがundefinedの場合は空文字列を返す
+            if (!generatedMessage) {
+                return '';
+            }
+
+            // ```を削除
+            return generatedMessage.replace(/^```[\s\S]*?\n/, '').replace(/\n```$/, '').trim();
         });
 
         if (!message) {

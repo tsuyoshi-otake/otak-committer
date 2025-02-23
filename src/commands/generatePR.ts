@@ -25,6 +25,9 @@ async function showMarkdownPreview(content: string): Promise<{ uri: vscode.Uri, 
         const tempUri = vscode.Uri.file(path.join(PREVIEW_DIR, PREVIEW_FILE));
         await vscode.workspace.fs.createDirectory(vscode.Uri.file(PREVIEW_DIR));
 
+        // まず以前のプレビューを閉じる
+        await closePreviewTabs();
+
         // ファイルを書き込む
         const encoder = new TextEncoder();
         await vscode.workspace.fs.writeFile(tempUri, encoder.encode(content));
@@ -60,8 +63,7 @@ export async function generatePR(): Promise<void> {
 
         // Issue選択（オプション、Escapeでスキップ可能）
         let issueNumber: number | undefined;
-        let initialTitle: string | undefined;
-        let initialBody: string | undefined;
+        let issueBody: string | undefined;
 
         const issues = await github.getIssues();
         if (issues.length > 0) {
@@ -81,7 +83,7 @@ export async function generatePR(): Promise<void> {
 
             if (selectedIssue) {
                 issueNumber = selectedIssue.issue.number;
-                initialTitle = selectedIssue.issue.title;
+                issueBody = selectedIssue.issue.body;
             }
         }
 
@@ -103,7 +105,7 @@ export async function generatePR(): Promise<void> {
             return;
         }
 
-        const language = vscode.workspace.getConfiguration('otakCommitter').get<string>('language') || 'japanese';
+        const language = vscode.workspace.getConfiguration('otakCommitter').get<string>('language') || 'english';
         
         // GPT-4oでタイトルと説明を生成
         let generatedPR;
@@ -114,7 +116,13 @@ export async function generatePR(): Promise<void> {
                 cancellable: false
             }, async (progress) => {
                 progress.report({ message: 'Generating content using AI...' });
-                const result = await openai.generatePRContent(diff, language, templates.pr, initialTitle, initialBody);
+                // Issue情報を含めて生成
+                const result = await openai.generatePRContent(
+                    diff,
+                    language,
+                    templates.pr,
+                    issueBody
+                );
                 progress.report({ message: 'Content generated successfully' });
                 return result;
             });
@@ -130,7 +138,10 @@ export async function generatePR(): Promise<void> {
         }
 
         // Markdownプレビューを表示
-        const previewContent = `# ${generatedPR.title}\n\n${generatedPR.body}`;
+        let previewContent = `${generatedPR.title}\n\n---\n\n${generatedPR.body}`;
+        if (issueNumber) {
+            previewContent += `\n\nResolves #${issueNumber}`;
+        }
         previewFile = await showMarkdownPreview(previewContent);
         if (!previewFile) {
             vscode.window.showErrorMessage('Failed to show preview');
@@ -153,9 +164,11 @@ export async function generatePR(): Promise<void> {
             return;
         }
 
-        // 生成されたタイトルと説明をそのまま使用
+        // 生成されたタイトルと説明を使用
         const title = generatedPR.title;
-        const description = generatedPR.body;
+        const description = issueNumber 
+            ? `${generatedPR.body}\n\nResolves #${issueNumber}`
+            : generatedPR.body;
 
         try {
             // PR作成の進行状況表示
@@ -260,12 +273,10 @@ export async function generatePR(): Promise<void> {
 
         vscode.window.showErrorMessage(`Failed to generate PR: ${error.message}`);
     } finally {
-        // プレビューを閉じてクリーンアップ
-        await closePreviewTabs();
+        // クリーンアップは不要（プレビューは次回の表示時に上書きされる）
         if (previewFile) {
             try {
-                // 一時ファイルは残しておく（次回の上書き用）
-                // await vscode.workspace.fs.delete(previewFile.uri);
+                // プレビューファイルは残しておく（次回の上書き用）
             } catch (error) {
                 console.error('Error cleaning up preview file:', error);
             }

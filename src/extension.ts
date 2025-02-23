@@ -21,7 +21,7 @@ export async function activate(context: vscode.ExtensionContext) {
     console.log('Loading initial configuration...');
     const config = vscode.workspace.getConfiguration('otakCommitter');
     if (!config.get('language')) {
-        await config.update('language', 'japanese', vscode.ConfigurationTarget.Global);
+        await config.update('language', 'english', vscode.ConfigurationTarget.Global);
     }
     if (!config.get('messageStyle')) {
         await config.update('messageStyle', 'normal', vscode.ConfigurationTarget.Global);
@@ -122,7 +122,7 @@ export async function activate(context: vscode.ExtensionContext) {
 function updateLanguageStatusBar() {
     console.log('Updating language status bar...');
     const config = vscode.workspace.getConfiguration('otakCommitter');
-    const language = config.get<string>('language') || 'japanese';
+    const language = config.get<string>('language') || 'english';
     const languageConfig = LANGUAGE_CONFIGS[language];
 
     if (languageConfig) {
