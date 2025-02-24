@@ -16,16 +16,48 @@ For Commit Message:
 1. Stage your changes in Git  
 2. Click the "Generate Commit Message" button in the SCM view (or use the command palette)  
 3. Review and optionally edit the generated message  
-4. Commit your changes
+4. The extension will:
+   - Check for commit message templates in the following locations:
+     - `.gitmessage`
+     - `.github/commit_template`
+     - `.github/templates/commit_template.md`
+     - `docs/templates/commit_template.md`
+   - If multiple templates exist, the first found template will be used
+     (in the order listed above)
+   - If found, use these templates as the base structure for the message
+   - Generate content following your project's commit conventions
+5. Commit your changes
 
 For Pull Requests:
 
 ![Generate Commit Message Button](images/generate-pull-request.png)
 
 1. Click the "Generate Pull Request" button in the SCM view
-2. Select base and target branches
-3. Optionally link to an existing issue
-4. Review the generated content and submit
+ or use the command palette (`otak-committer.generatePR`)
+2. Link to an existing issue:
+   - Select from a list of open issues in your repository
+   - The selected issue's title and description will be used as context for PR generation
+   - The extension checks for PR templates in:
+     - `.github/pull_request_template.md`
+     - `.github/templates/pull_request_template.md`
+     - `docs/templates/pull_request_template.md`
+   - If a template is found:
+     - It will be used as the base structure
+ for the PR
+     - AI will intelligently fill in each section based on your changes and the linked issue
+   - Issue labels and milestones will be automatically applied to the PR
+3. Select base and target branches:
+   - Choose the branch you want to merge into (base)
+   - Choose your feature branch (target)
+4. Review and customize the generated content:
+   - AI generates a PR description based on your changes and linked issue
+   - Reference any related issues or documentation
+   - Choose between Draft or Regular PR
+5. Submit your pull request:
+   - Confirm the settings and submit
+   - The PR will be created with the linked issue reference
+
+*Note*: Make sure you have configured your GitHub token with `repo` scope to enable issue linking and PR creation features.
 
 ## Features
 
@@ -111,6 +143,26 @@ To use this extension, you need an OpenAI API key. Here's how to get one:
 7. Paste your API key into the text field
 
 *Note*: The extension uses the GPT-4o model to generate commit messages. Make sure your OpenAI account has access to the GPT-4o API.
+
+### Getting GitHub Access Token
+
+For pull request operations, you'll need a GitHub personal access token. Here's how to get one:
+
+1. Go to [GitHub Personal Access Tokens page](https://github.com/settings/tokens)
+2. Click "Generate new token" and select "Generate new token (classic)"
+3. Give your token a descriptive name (e.g., "otak-committer")
+4. Select only the `repo` scope (required for creating pull requests and accessing issues)
+5. Click "Generate token"
+6. Copy the generated token
+7. Open VS Code Settings (File > Preferences > Settings)
+8. Search for `otakCommitter.github.token`
+9. Paste your token into the text field
+
+*Note*: Store your token securely. Once you leave the token creation page, you won't be able to see it again.
+*Note*: The `repo` scope is required to:
+- Create and manage pull requests with automated descriptions
+- Access and link to existing issues in your repositories
+- Apply issue labels and milestones automatically to your PRs
 
 ## Installation
 
