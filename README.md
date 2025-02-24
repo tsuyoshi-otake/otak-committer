@@ -9,6 +9,8 @@
 
 ## Usage
 
+For Commit Message:
+
 ![Generate Commit Message Button](images/generate-commit-message.png)
 
 1. Stage your changes in Git  
@@ -16,9 +18,18 @@
 3. Review and optionally edit the generated message  
 4. Commit your changes
 
+For Pull Requests:
+
+![Generate Commit Message Button](images/generate-pull-request.png)
+
+1. Click the "Generate Pull Request" button in the SCM view
+2. Select base and target branches
+3. Optionally link to an existing issue
+4. Review the generated content and submit
+
 ## Features
 
-otak-committer is a powerful VS Code extension that leverages AI to automatically generate Git commit messages.
+otak-committer is a powerful VS Code extension that leverages AI to automatically generate Git commit messages and pull requests.
 
 ### Key Features
 
@@ -54,13 +65,20 @@ otak-committer is a powerful VS Code extension that leverages AI to automaticall
   - **Normal**: Standard length with context (200 tokens)
   - **Detailed**: Comprehensive explanation (500 tokens)
 
-- **Git SCM Integration**: Seamlessly integrated into VS Code's Git interface with a dedicated button in the SCM view.
+- **Git SCM Integration**: Seamlessly integrated into VS Code's Git interface with dedicated buttons in the SCM view.
 
 - **Quick Language Switching**: Change languages directly from the status bar  
   ![Status Bar](images/statusbar.png)
   - One-click language switching
   - Current message style display in tooltip
   - Quick access to settings
+
+- **Pull Request Generation**
+  - AI-powered PR description generation
+  - Automatic issue linking
+  - Branch selection interface
+  - Preview and confirmation workflow
+  - Draft/Regular PR options
 
 - **Custom System Prompt**: Add your own instructions to the AI
   - Customize the message generation process
@@ -98,7 +116,8 @@ To use this extension, you need an OpenAI API key. Here's how to get one:
 
 1. Install the extension from the VS Code Marketplace
 2. Configure your OpenAI API key in the extension settings
-3. Select your preferred language and message style  
+3. The extension will automatically initialize and show in the status bar
+4. Select your preferred language and message style  
    (Default language is English)
 
 ## Extension Settings
@@ -175,6 +194,8 @@ This extension contributes the following settings:
 
 - **`otakCommitter.openaiApiKey`**: OpenAI API key for generating commit messages.
 
+- **`otakCommitter.github.token`**: GitHub personal access token for PR operations.
+
 - **`otakCommitter.customMessage`**: Additional instructions for commit message generation (optional).  
   Enhance the AI's understanding of your commit requirements by appending custom instructions to the Git diff.  
   Example custom messages:
@@ -191,6 +212,7 @@ This extension contributes the following settings:
 ## Commands
 
 - **`otak-committer.generateMessage`**: Generate a commit message for staged changes.
+- **`otak-committer.generatePR`**: Generate a pull request with AI-powered description.
 - **`otak-committer.openSettings`**: Open the extension settings.
 - **`otak-committer.changeLanguage`**: Change commit message language (available in the status bar).
 - **`otak-committer.changeMessageStyle`**: Change message style.

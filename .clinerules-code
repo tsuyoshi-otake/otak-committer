@@ -1,0 +1,149 @@
+# コード規約
+
+## 1. プロジェクト構造
+```
+src/
+├── commands/       # コマンド実装
+│   ├── generateCommit.ts  # コミットメッセージ生成
+│   └── generatePR.ts      # PR生成
+├── services/       # サービス層
+│   ├── git.ts     # Git操作
+│   ├── github.ts  # GitHub API
+│   └── openai.ts  # OpenAI API
+├── languages/      # 多言語サポート
+│   ├── asian.ts          # アジア言語
+│   ├── european.ts       # 欧米言語
+│   ├── middleEastern.ts  # 中東言語
+│   └── index.ts          # 言語設定
+└── types/         # 型定義
+    ├── git.ts     # Git関連の型
+    ├── github.ts  # GitHub関連の型
+    ├── language.ts # 言語関連の型
+    └── messageStyle.ts # メッセージスタイル
+```
+
+## 2. コーディング規則
+
+### 2.1 TypeScript設定
+- strict: true
+- noImplicitAny: true
+- esModuleInterop: true
+- skipLibCheck: true
+
+### 2.2 APIサービス実装
+```typescript
+export class APIService {
+    private client: Client;
+    
+    constructor(config: Config) {
+        this.client = new Client(config);
+    }
+    
+    static async initialize(): Promise<APIService | undefined> {
+        // 初期化ロジック
+    }
+    
+    async operation(): Promise<Result> {
+        try {
+            // 操作実行
+        } catch (error: any) {
+            throw new Error(`Failed: ${error.message}`);
+        }
+    }
+}
+```
+
+### 2.3 多言語サポート
+```typescript
+export const getPrompt = (type: PromptType): string => {
+    const prompts = {
+        system: `...`,
+        commit: `...`,
+        pr: `...`
+    };
+    return prompts[type] || '';
+};
+```
+
+### 2.4 エラーハンドリング
+```typescript
+try {
+    await operation();
+} catch (error: any) {
+    vscode.window.showErrorMessage(`エラー: ${error.message}`);
+    return undefined;
+}
+```
+
+## 3. 機能実装
+
+### 3.1 コミットメッセージ生成
+1. Git差分の取得
+2. OpenAI APIによる生成
+3. スタイル適用
+4. コミット実行
+
+### 3.2 PR生成
+1. 差分情報の収集
+2. Issue連携（オプション）
+3. タイトル・説明の自動生成
+4. PR作成
+
+### 3.3 設定管理
+```typescript
+const config = vscode.workspace.getConfiguration('otakCommitter');
+const language = config.get<string>('language') || 'japanese';
+const messageStyle = config.get<MessageStyle>('messageStyle') || 'normal';
+```
+
+## 4. テスト規約
+
+### 4.1 ユニットテスト
+```typescript
+suite('Component Test', () => {
+    test('should behave correctly', () => {
+        // テストケース
+    });
+});
+```
+
+### 4.2 設定テスト
+```typescript
+test('Configuration loads', () => {
+    const config = vscode.workspace.getConfiguration('otakCommitter');
+    assert.ok(config.get('setting'));
+});
+```
+
+## 5. ビルド・パッケージング
+```bash
+npm run vscode:prepublish && npx @vscode/vsce package
+```
+
+## 6. 環境変数
+- OPENAI_API_KEY: OpenAI APIキー
+- GITHUB_TOKEN: GitHub個人アクセストークン
+
+## 7. 依存関係管理
+- simple-git: Gitクライアント
+- openai: OpenAI API SDK
+- @types/*: 型定義ファイル
+
+## 8. コードレビュー基準
+1. 型安全性の確保
+2. エラーハンドリングの徹底
+3. 設定値の適切な利用
+4. インターフェースの一貫性
+5. パフォーマンスへの配慮
+
+## 9. パフォーマンス考慮事項
+1. 非同期処理の適切な利用
+2. メモリ使用量の最適化
+3. API呼び出しの制御
+4. キャッシュの活用
+
+## 10. セキュリティ
+1. APIキーの安全な管理
+2. トークンの適切な取り扱い
+3. 機密情報の保護
+4. 入力値の検証

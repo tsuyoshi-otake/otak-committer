@@ -13,7 +13,7 @@
     "url": "https://github.com/tsuyoshi-otake-system-exe-jp/otak-committer/issues"
   },
   "homepage": "https://github.com/tsuyoshi-otake-system-exe-jp/otak-committer#readme",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -23,15 +23,12 @@
     "Programming Languages",
     "Education"
   ],
-  "tags": [
-    "dev",
+  "keywords": [
+    "git",
+    "commit",
     "AI",
-    "Commit",
-    "Message",
-    "Multilingual",
-    "OpenAI",
-    "PR",
-    "cofing"
+    "openai",
+    "multilingual"
   ],
   "activationEvents": [
     "onStartupFinished"
@@ -124,6 +121,29 @@
           "type": "string",
           "default": "",
           "description": "Custom message to append to the system prompt (added after the diff message)"
+        },
+        "otakCommitter.github.token": {
+          "type": "string",
+          "default": "",
+          "description": "GitHub personal access token for PR operations"
+        },
+        "otakCommitter.useEmoji": {
+          "type": "boolean",
+          "default": false,
+          "description": "Use emoji in commit messages and PR descriptions"
+        },
+        "otakCommitter.emojiStyle": {
+          "type": "string",
+          "default": "github",
+          "enum": [
+            "github",
+            "unicode"
+          ],
+          "enumDescriptions": [
+            "GitHub style emoji codes (:smile:)",
+            "Unicode emoji characters (😊)"
+          ],
+          "description": "Style of emoji to use in messages"
         }
       }
     },
@@ -133,6 +153,12 @@
         "title": "Generate Commit Message",
         "category": "otak-committer",
         "icon": "$(symbol-constant)"
+      },
+      {
+        "command": "otak-committer.generatePR",
+        "title": "Generate Pull Request",
+        "category": "otak-committer",
+        "icon": "$(git-pull-request)"
       },
       {
         "command": "otak-committer.openSettings",
@@ -156,19 +182,41 @@
           "command": "otak-committer.generateMessage",
           "group": "navigation",
           "when": "scmProvider == git"
+        },
+        {
+          "command": "otak-committer.generatePR",
+          "group": "navigation",
+          "when": "scmProvider == git"
+        }
+      ],
+      "scm/resourceState/context": [
+        {
+          "command": "otak-committer.generateMessage",
+          "group": "inline",
+          "when": "scmProvider == git"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "otak-committer.generateMessage",
+          "when": "scmProvider == git"
+        },
+        {
+          "command": "otak-committer.generatePR",
+          "when": "scmProvider == git"
         }
       ]
     }
   },
   "scripts": {
     "vscode:prepublish": "npm run esbuild-base -- --minify",
-    "compile": "tsc -p ./",
+    "compile": "tsc -p ./ --noEmit",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src",
     "test": "node ./out/test/runTest.js",
-    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
-    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --loader:.ts=tsx",
+    "esbuild": "npm run esbuild-base -- --sourcemap --tsconfig=tsconfig.json",
     "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch"
   },
   "devDependencies": {
@@ -187,7 +235,10 @@
     "typescript": "^5.7.3"
   },
   "dependencies": {
+    "@octokit/rest": "^21.1.1",
     "axios": "^1.6.7",
-    "https-proxy-agent": "^7.0.2"
+    "https-proxy-agent": "^7.0.2",
+    "openai": "^4.85.4",
+    "simple-git": "^3.27.0"
   }
 }
