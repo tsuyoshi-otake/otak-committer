@@ -6,6 +6,13 @@ import * as os from 'os';
 import * as path from 'path';
 import * as crypto from 'crypto';
 
+interface Issue {
+    number: number;
+    title: string;
+    labels: string[];
+    html_url?: string;
+}
+
 const PREVIEW_DIR = path.join(os.tmpdir(), 'otak-committer');
 
 // 一時ディレクトリのクリーンアップ
@@ -88,11 +95,10 @@ export async function generatePR(): Promise<void> {
 
         // Issue選択（オプション、Escapeでスキップ可能）
         let issueNumber: number | undefined;
-        let issueBody: string | undefined;
 
         const issues = await github.getIssues();
         if (issues.length > 0) {
-            const issueItems = issues.map(issue => ({
+            const issueItems = issues.map((issue: Issue) => ({
                 label: `#${issue.number} ${issue.title}`,
                 description: issue.labels.join(', '),
                 issue
@@ -108,7 +114,6 @@ export async function generatePR(): Promise<void> {
 
             if (selectedIssue) {
                 issueNumber = selectedIssue.issue.number;
-                issueBody = selectedIssue.issue.body;
             }
         }
 
@@ -296,7 +301,7 @@ export async function generatePR(): Promise<void> {
 
         // GitHubApiError
         if (error.response?.errors) {
-            const messages = error.response.errors.map((e: any) => e.message).join(', ');
+            const messages = error.response.errors.map((e: { message: string }) => e.message).join(', ');
             vscode.window.showErrorMessage(`Failed to generate PR: ${messages}`);
             return;
         }

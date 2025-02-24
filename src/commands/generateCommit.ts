@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import { GitService } from '../services/git';
-import { OpenAIService } from '../services/openai';
-import { MessageStyle } from '../types/messageStyle';
+import { GitService } from '../services/git.js';
+import { OpenAIService } from '../services/openai.js';
+import { MessageStyle } from '../types/messageStyle.js';
 
 export async function generateCommit(): Promise<void> {
     try {

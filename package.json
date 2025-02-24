@@ -188,18 +188,35 @@
           "group": "navigation",
           "when": "scmProvider == git"
         }
+      ],
+      "scm/resourceState/context": [
+        {
+          "command": "otak-committer.generateMessage",
+          "group": "inline",
+          "when": "scmProvider == git"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "otak-committer.generateMessage",
+          "when": "scmProvider == git"
+        },
+        {
+          "command": "otak-committer.generatePR",
+          "when": "scmProvider == git"
+        }
       ]
     }
   },
   "scripts": {
     "vscode:prepublish": "npm run esbuild-base -- --minify",
-    "compile": "tsc -p ./",
+    "compile": "tsc -p ./ --noEmit",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src",
     "test": "node ./out/test/runTest.js",
-    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=esm --platform=node",
-    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --loader:.ts=tsx",
+    "esbuild": "npm run esbuild-base -- --sourcemap --tsconfig=tsconfig.json",
     "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch"
   },
   "devDependencies": {

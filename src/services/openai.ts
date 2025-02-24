@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
 import OpenAI from 'openai';
-import { PromptType } from '../types/language';
-import { MessageStyle } from '../types/messageStyle';
-import { PullRequestDiff } from '../types/github';
-import { COMMIT_PREFIXES, CommitPrefix } from '../constants/commitGuide';
-import { TemplateInfo } from './git';
+import { PromptType } from '../types/language.js';
+import { MessageStyle } from '../types/messageStyle.js';
+import { PullRequestDiff, GitHubDiffFile } from '../types/github.js';
+import { COMMIT_PREFIXES, CommitPrefix } from '../constants/commitGuide.js';
+import { TemplateInfo } from './git.js';
 
 export class OpenAIService {
     private openai: OpenAI;
@@ -56,7 +56,7 @@ export class OpenAIService {
         try {
             // 動的に言語モジュールをインポート
             try {
-                const module = await import(`../languages/${language}.js`);
+                const module = await import(`../languages/${language}`);
                 const promptFunction = module[`get${language.charAt(0).toUpperCase() + language.slice(1)}Prompt`];
                 if (promptFunction) {
                     return promptFunction;
@@ -66,13 +66,13 @@ export class OpenAIService {
             }
 
             // フォールバック：英語
-            const { getEnglishPrompt } = await import('../languages/english.js');
+            const { getEnglishPrompt } = await import('../languages/english');
             return getEnglishPrompt;
         } catch (error) {
             console.error('Error loading language module:', error);
             vscode.window.showErrorMessage(`Failed to load language module: ${error}`);
             try {
-                const { getEnglishPrompt } = await import('../languages/english.js');
+                const { getEnglishPrompt } = await import('../languages/english');
                 return getEnglishPrompt;
             } catch (fallbackError) {
                 console.error('Error loading fallback language module:', fallbackError);
@@ -164,10 +164,10 @@ Please provide a clear and ${messageStyle} commit message following the format a
 
     private async generateDiffSummary(diff: PullRequestDiff): Promise<string> {
         return `Changed files:
-${diff.files.map(file => `- ${file.filename} (additions: ${file.additions}, deletions: ${file.deletions})`).join('\n')}
+${diff.files.map((file: GitHubDiffFile) => `- ${file.filename} (additions: ${file.additions}, deletions: ${file.deletions})`).join('\n')}
 
 Detailed changes:
-${diff.files.map(file => `
+${diff.files.map((file: GitHubDiffFile) => `
 [${file.filename}]
 ${file.patch}`).join('\n')}`;
     }

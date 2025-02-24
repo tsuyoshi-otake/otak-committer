@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import { generateCommit } from './commands/generateCommit';
-import { generatePR } from './commands/generatePR';
-import { LANGUAGE_CONFIGS } from './languages';
-import { MessageStyle } from './types/messageStyle';
+import { generateCommit } from './commands/generateCommit.js';
+import { generatePR } from './commands/generatePR.js';
+import { LANGUAGE_CONFIGS } from './languages/index.js';
+import { MessageStyle } from './types/messageStyle.js';
 
 let languageStatusBarItem: vscode.StatusBarItem;
 
@@ -19,11 +19,14 @@ export async function activate(context: vscode.ExtensionContext) {
 
     // 初期設定の読み込みとステータスバーの更新
     console.log('Loading initial configuration...');
-    const config = vscode.workspace.getConfiguration('otakCommitter');
-    if (!config.get('language')) {
+    const config = vscode.workspace.getConfiguration('otakCommitter') as {
+        get: <T>(key: string) => T | undefined;
+        update: (key: string, value: any, target: vscode.ConfigurationTarget) => Thenable<void>;
+    };
+    if (!config.get<string>('language')) {
         await config.update('language', 'english', vscode.ConfigurationTarget.Global);
     }
-    if (!config.get('messageStyle')) {
+    if (!config.get<MessageStyle>('messageStyle')) {
         await config.update('messageStyle', 'normal', vscode.ConfigurationTarget.Global);
     }
 

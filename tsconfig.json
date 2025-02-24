@@ -1,9 +1,10 @@
 {
     "compilerOptions": {
-        "module": "NodeNext",
+        "module": "CommonJS",
         "target": "ES2022",
         "outDir": "out",
         "lib": ["ES2020"],
+        "moduleResolution": "node",
         "sourceMap": true,
         "rootDir": "src",
         "strict": true,
@@ -11,9 +12,10 @@
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
         "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "esModuleInterop": true,
-        "skipLibCheck": true
+        "noUnusedParameters": false,
+        "noEmit": true,
+        "skipLibCheck": true,
+        "esModuleInterop": true
     },
     "exclude": ["node_modules", ".vscode-test"]
 }
