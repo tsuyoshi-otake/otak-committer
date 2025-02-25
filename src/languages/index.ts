@@ -3,6 +3,7 @@ import { getEuropeanPrompt } from './european';
 import { getAsianPrompt } from './asian';
 import { getMiddleEasternPrompt } from './middleEastern';
 import { getEnglishPrompt } from './english';
+import { getJapanesePrompt } from './japanese';
 
 type EuropeanLanguages = 
     | 'french'
@@ -34,6 +35,7 @@ type MiddleEasternLanguages =
 
 export type SupportedLanguage = 
     | 'english'
+    | 'japanese'
     | EuropeanLanguages
     | AsianLanguages
     | MiddleEasternLanguages;
@@ -47,6 +49,9 @@ export interface LanguageConfig {
 
 export const LANGUAGE_CONFIGS: Record<SupportedLanguage, LanguageConfig> = {
     english: { name: 'English', label: 'English', description: 'English' },
+    
+    // Japanese
+    japanese: { name: 'Japanese', label: '日本語', description: 'Japanese' },
     
     // European languages
     french: { name: 'French', label: 'Français', description: 'French' },
@@ -85,11 +90,19 @@ export const LANGUAGE_CONFIGS: Record<SupportedLanguage, LanguageConfig> = {
  */
 export const getPrompt = (language: SupportedLanguage, type: PromptType): string => {
     // 言語グループの判定
+    if (language === 'japanese') {
+        return getJapanesePrompt(type);
+    }
+
+    if (language === 'english') {
+        return getEnglishPrompt(type);
+    }
+
     const europeanLanguages: EuropeanLanguages[] = [
         'french', 'german', 'italian', 'spanish', 'portuguese',
         'czech', 'hungarian', 'bulgarian', 'turkish', 'russian'
     ];
-    const asianLanguages: AsianLanguages[] = [
+    const asianLanguages: string[] = [
         'chinese', 'traditionalChinese', 'korean', 'vietnamese', 'thai',
         'hindi', 'bengali', 'javanese', 'tamil', 'burmese'
     ];
@@ -98,11 +111,9 @@ export const getPrompt = (language: SupportedLanguage, type: PromptType): string
     ];
 
     // 言語グループに基づいて適切なプロンプト生成関数を選択
-    if (language === 'english') {
-        return getEnglishPrompt(type);
-    } else if (europeanLanguages.includes(language as EuropeanLanguages)) {
+    if (europeanLanguages.includes(language as EuropeanLanguages)) {
         return getEuropeanPrompt(language as EuropeanLanguages, type);
-    } else if (asianLanguages.includes(language as AsianLanguages)) {
+    } else if (asianLanguages.includes(language)) {
         return getAsianPrompt(language as AsianLanguages, type);
     } else if (middleEasternLanguages.includes(language as MiddleEasternLanguages)) {
         return getMiddleEasternPrompt(language as MiddleEasternLanguages, type);

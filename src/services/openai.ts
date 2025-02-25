@@ -56,7 +56,7 @@ export class OpenAIService {
         try {
             // 動的に言語モジュールをインポート
             try {
-                const module = await import(`../languages/${language}.js`);
+                const module = await import(`../languages/${language}`);
                 const promptFunction = module[`get${language.charAt(0).toUpperCase() + language.slice(1)}Prompt`];
                 if (promptFunction) {
                     return promptFunction;
@@ -66,7 +66,7 @@ export class OpenAIService {
             }
 
             // フォールバック：英語
-            const { getEnglishPrompt } = await import('../languages/english.js');
+            const { getEnglishPrompt } = await import('../languages/english');
             return getEnglishPrompt;
         } catch (error) {
             console.error('Error loading language module:', error);
