@@ -1,15 +1,21 @@
-export type Language = string;
+export type PromptType = 
+    | 'system'
+    | 'commit'
+    | 'prTitle'
+    | 'prBody';
 
-export type PromptType = 'system' | 'commit' | 'prTitle' | 'prBody';
+export interface LanguageSettings {
+    language: string;
+    messageStyle: string;
+}
 
 export interface LanguageConfig {
     name: string;
-    getPrompt: (type: PromptType) => Promise<string>;
+    label: string;
+    description: string;
+    isRTL?: boolean;
 }
 
-export interface LanguagePrompt {
-    system: string;
-    commit: string;
-    prTitle: string;
-    prBody: string;
-}
+export type LanguageConfigType = {
+    readonly [key: string]: LanguageConfig;
+};
