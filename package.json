@@ -161,6 +161,12 @@
         "icon": "$(git-pull-request)"
       },
       {
+        "command": "otak-committer.generateIssue",
+        "title": "Generate Issue",
+        "category": "otak-committer",
+        "icon": "$(issue-opened)"
+      },
+      {
         "command": "otak-committer.openSettings",
         "title": "Open otak-committer Settings",
         "category": "otak-committer"
@@ -187,6 +193,11 @@
           "command": "otak-committer.generatePR",
           "group": "navigation",
           "when": "scmProvider == git"
+        },
+        {
+          "command": "otak-committer.generateIssue",
+          "group": "navigation",
+          "when": "scmProvider == git"
         }
       ],
       "scm/resourceState/context": [
@@ -203,6 +214,10 @@
         },
         {
           "command": "otak-committer.generatePR",
+          "when": "scmProvider == git"
+        },
+        {
+          "command": "otak-committer.generateIssue",
           "when": "scmProvider == git"
         }
       ]

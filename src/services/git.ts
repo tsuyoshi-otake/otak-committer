@@ -83,6 +83,20 @@ export class GitService {
         }
     }
 
+    async getTrackedFiles(): Promise<string[]> {
+        try {
+            // git ls-files を使用して追跡されているファイルの一覧を取得
+            const result = await this.git.raw(['ls-files']);
+            return result
+                .split('\n')
+                .filter(file => file.trim() !== '')
+                .map(file => path.join(this.workspaceRoot, file.trim()));
+        } catch (error: any) {
+            console.error('Error getting tracked files:', error);
+            throw new Error(`Failed to get tracked files: ${error.message}`);
+        }
+    }
+
     async getStatus(): Promise<StatusResult> {
         try {
             const status = await this.git.status();

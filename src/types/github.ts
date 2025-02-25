@@ -18,6 +18,20 @@ export interface IssueInfo {
     labels: string[];
 }
 
+export interface IssueParams {
+    title: string;
+    body: string;
+    labels?: string[];
+}
+
+interface GitHubCreateIssueResponse {
+    status: number;
+    data: {
+        number: number;
+        html_url: string;
+    };
+}
+
 export interface PullRequestDiff {
     files: GitHubDiffFile[];
     stats: {
@@ -140,6 +154,13 @@ export interface GitHubAPI {
             direction?: string;
             per_page?: number;
         }) => Promise<GitHubIssueListResponse>;
+        create: (params: {
+            owner: string;
+            repo: string;
+            title: string;
+            body: string;
+            labels?: string[];
+        }) => Promise<GitHubCreateIssueResponse>;
     };
     pulls: {
         create: (params: {

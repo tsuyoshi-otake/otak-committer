@@ -7,7 +7,7 @@ import { COMMIT_PREFIXES, CommitPrefix } from '../constants/commitGuide';
 import { TemplateInfo } from './git';
 
 export class OpenAIService {
-    private openai: OpenAI;
+    public readonly openai: OpenAI;
 
     constructor(apiKey: string | undefined) {
         if (!apiKey || apiKey.trim() === '') {

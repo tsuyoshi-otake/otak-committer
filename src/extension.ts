@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { generateCommit } from './commands/generateCommit.js';
 import { generatePR } from './commands/generatePR.js';
+import { generateIssue } from './commands/generateIssue.js';
 import { LANGUAGE_CONFIGS, SupportedLanguage } from './languages/index.js';
 import { MessageStyle } from './types/messageStyle.js';
 
@@ -44,6 +45,29 @@ export async function activate(context: vscode.ExtensionContext) {
     const generatePRCommand = vscode.commands.registerCommand('otak-committer.generatePR', () => {
         generatePR();
     });
+
+    // Generate Issueコマンドの登録
+    const generateIssueCommand = vscode.commands.registerCommand('otak-committer.generateIssue', () => {
+        generateIssue();
+    });
+
+    // SCMビューへのボタン追加
+    context.subscriptions.push(
+        vscode.window.registerWebviewViewProvider('scm', {
+            resolveWebviewView(webviewView) {
+                // "Generate Issue"ボタンを追加
+                const generateIssueButton = vscode.window.createStatusBarItem(
+                    vscode.StatusBarAlignment.Left,
+                    100
+                );
+                generateIssueButton.text = "$(issues) Generate Issue";
+                generateIssueButton.command = 'otak-committer.generateIssue';
+                generateIssueButton.tooltip = 'リポジトリの内容を分析してIssueを生成';
+                generateIssueButton.show();
+                context.subscriptions.push(generateIssueButton);
+            }
+        })
+    );
 
     const changeLanguageCommand = vscode.commands.registerCommand('otak-committer.changeLanguage', async () => {
         const languages = Object.entries(LANGUAGE_CONFIGS).map(([key, config]) => ({
@@ -93,6 +117,7 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         generateCommitCommand,
         generatePRCommand,
+        generateIssueCommand,
         changeLanguageCommand,
         changeMessageStyleCommand,
         openSettingsCommand
