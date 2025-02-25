@@ -88,7 +88,14 @@ export async function generateCommit(): Promise<void> {
         repository.inputBox.value = message;
 
         console.log('Successfully set commit message');
-        vscode.window.showInformationMessage('Commit message has been generated');
+        void vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: 'Commit message has been generated'
+        }, async () => {
+            return new Promise<void>(resolve => {
+                setTimeout(resolve, 3000);
+            });
+        });
     } catch (error: any) {
         console.error('Error in generateCommit:', error);
         vscode.window.showErrorMessage(`Failed to generate commit: ${error.message}`);
