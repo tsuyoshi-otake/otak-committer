@@ -1,67 +1,89 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
 
 interface FileQuickPickItem extends vscode.QuickPickItem {
     file: string;
-    selected: boolean;
 }
 
 export async function selectFiles(files: string[]): Promise<string[]> {
+    // Get workspace root
+    const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    if (!workspaceRoot) {
+        throw new Error('No workspace folder found');
+    }
+
     const quickPick = vscode.window.createQuickPick<FileQuickPickItem>();
-    const items = files.map(file => ({
-        label: `${file}`,
-        file,
-        selected: false,
-        description: '',
-        picked: false
+    const selectedFiles = new Set<string>();
+
+    // Convert full paths to relative paths
+    const relativePaths = files.map(file => {
+        const relativePath = path.relative(workspaceRoot, file);
+        return relativePath.replace(/\\/g, '/'); // Normalize to forward slashes
+    });
+
+    const createItems = () => relativePaths.map(file => ({
+        label: selectedFiles.has(file) ? '$(check) ' + file : file,
+        description: selectedFiles.has(file) ? 'Selected' : '',
+        file
     }));
 
-    quickPick.items = items;
-    quickPick.canSelectMany = true;
+    quickPick.items = createItems();
     quickPick.title = 'Select files to include in analysis';
-    quickPick.placeholder = 'Type to search files, Space to select/deselect';
+    quickPick.placeholder = 'Type to search files, Space to select/deselect, Enter to confirm';
 
     // Filter functionality
     quickPick.onDidChangeValue(value => {
         const searchValue = value.toLowerCase();
-        quickPick.items = items.filter(item => 
-            item.file.toLowerCase().includes(searchValue) ||
-            (item.picked && 'Selected'.toLowerCase().includes(searchValue))
-        ).map(item => ({
-            ...item,
-            description: item.picked ? '$(check) Selected' : ''
-        }));
+        quickPick.items = relativePaths
+            .filter(file => 
+                file.toLowerCase().includes(searchValue) ||
+                selectedFiles.has(file)
+            )
+            .map(file => ({
+                label: selectedFiles.has(file) ? '$(check) ' + file : file,
+                description: selectedFiles.has(file) ? 'Selected' : '',
+                file
+            }));
     });
 
-    // Track selected items
-    const selectedFiles = new Set<string>();
-    quickPick.onDidChangeSelection(items => {
-        items.forEach(item => {
-            if (!selectedFiles.has(item.file)) {
-                selectedFiles.add(item.file);
-                item.picked = true;
-                item.description = '$(check) Selected';
+    // Handle selection changes
+    quickPick.onDidAccept(async () => {
+        const selected = quickPick.activeItems[0];
+        if (selected) {
+            if (selectedFiles.has(selected.file)) {
+                selectedFiles.delete(selected.file);
             } else {
-                selectedFiles.delete(item.file);
-                item.picked = false;
-                item.description = '';
+                selectedFiles.add(selected.file);
             }
-        });
-        quickPick.items = [...quickPick.items];
+            quickPick.items = createItems();
+
+            // フォーカスを維持
+            const currentValue = quickPick.value;
+            quickPick.value = '';
+            quickPick.value = currentValue;
+        }
     });
 
     return new Promise<string[]>(resolve => {
-        quickPick.onDidAccept(() => {
-            const selected = quickPick.items
-                .filter(item => item.picked)
-                .map(item => item.file);
-            quickPick.dispose();
-            resolve(selected);
-        });
+        // Handle final selection
+        const disposables: vscode.Disposable[] = [];
 
-        quickPick.onDidHide(() => {
-            quickPick.dispose();
-            resolve([]);
-        });
+        disposables.push(
+            quickPick.onDidHide(() => {
+                disposables.forEach(d => d.dispose());
+                // Convert back to full paths when returning
+                resolve([...selectedFiles].map(relativePath => 
+                    path.join(workspaceRoot, relativePath)
+                ));
+            })
+        );
+
+        // Ctrl+Enter to confirm
+        disposables.push(
+            vscode.commands.registerCommand('workbench.action.acceptSelectedQuickOpenItem', () => {
+                quickPick.hide();
+            })
+        );
 
         quickPick.show();
     });

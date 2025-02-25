@@ -77,14 +77,14 @@ export async function generateIssue() {
                     // Quick pick menu for actions
                     const action = await vscode.window.showQuickPick([
                         {
+                            label: '$(arrow-right) Next',
+                            description: 'Proceed to create issue',
+                            action: 'create'
+                        },
+                        {
                             label: '$(edit) Modify Content',
                             description: 'Provide feedback to improve the content',
                             action: 'modify'
-                        },
-                        {
-                            label: '$(check) Create Issue',
-                            description: 'Create issue with current content',
-                            action: 'create'
                         },
                         {
                             label: '$(close) Cancel',
@@ -92,7 +92,7 @@ export async function generateIssue() {
                             action: 'cancel'
                         }
                     ], {
-                        placeHolder: 'Choose an action (↑↓ to navigate, Enter to select)',
+                        placeHolder: 'Review content and choose an action (↑↓ to navigate, Enter to select)',
                         matchOnDescription: true,
                         ignoreFocusOut: true
                     });
