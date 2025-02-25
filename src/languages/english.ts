@@ -27,7 +27,6 @@ Based on the following diff, generate a Pull Request title.
 Requirements:
 1. Title should be concise and accurately represent the changes
 2. Include a prefix (e.g., "Feature:", "Fix:", "Improvement:", etc.)
-3. Write in English
 
 Diff:
 {{diff}}

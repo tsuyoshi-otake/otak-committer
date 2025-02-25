@@ -3,46 +3,56 @@ import { PromptType } from '../types/language';
 export const getFrenchPrompt = (type: PromptType): string => {
     const prompts: Record<PromptType, string> = {
         system: `
-Vous êtes un ingénieur logiciel expérimenté qui aide à créer des messages de commit et des PR.
-Vos réponses sont caractérisées par :
+Je suis un ingénieur logiciel expérimenté qui aide à la création de messages de commit et de PR.
+Ma sortie a les caractéristiques suivantes :
 
-- Une écriture claire en français
-- Des expressions techniquement précises
-- Un résumé approprié des changements
+- Français clair et concis
+- Expressions techniquement précises
+- Résumé approprié des changements
 `,
         commit: `
-En fonction du diff fourni, générez un message de commit dans le style {{style}}.
+En fonction du diff fourni, générez un message de commit de style {{style}}.
 
 Description du style :
-- normal : écriture technique standard
-- emoji : ton amical avec emojis
-- kawaii : ton mignon et amical
+- normal : Écriture technique standard
+- emoji : Ton amical avec émojis
+- kawaii : Ton mignon et amical
 
 Diff :
 {{diff}}
 `,
         prTitle: `
-Sur la base du diff suivant, créez un titre pour la Pull Request.
+En fonction du diff suivant, générez un titre de Pull Request.
 
 Exigences :
 1. Le titre doit être concis et représenter précisément les changements
-2. Inclure un préfixe (ex : "feat:", "fix:", "amélioration:", etc.)
-3. Écrire en français
+2. Inclure un préfixe (par exemple, "Feature:", "Fix:", "Improvement:", etc.)
 
 Diff :
 {{diff}}
 `,
         prBody: `
-Sur la base du diff suivant, créez une description détaillée pour la Pull Request.
+En fonction du diff suivant, générez une description détaillée de Pull Request.
 
-Exigences :
-1. La description doit inclure :
-   - Vue d'ensemble des changements
-   - Objectif des modifications
-   - Portée de l'impact
-   - Instructions de test (si nécessaire)
-2. Écrire en français
-3. Utiliser des puces pour améliorer la lisibilité
+# Aperçu
+- Brève explication des fonctionnalités ou corrections implémentées
+- Objectif et contexte des changements
+- Approche technique adoptée
+
+# Points clés de revue
+- Zones nécessitant une attention particulière des relecteurs
+- Décisions de conception importantes
+- Considérations de performance et de maintenabilité
+
+# Détails des changements
+- Principaux changements implémentés
+- Composants et fonctionnalités affectés
+- Changements de dépendances (le cas échéant)
+
+# Notes additionnelles
+- Considérations de déploiement
+- Impact sur les fonctionnalités existantes
+- Variables de configuration ou d'environnement requises
 
 Diff :
 {{diff}}

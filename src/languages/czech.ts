@@ -3,46 +3,56 @@ import { PromptType } from '../types/language';
 export const getCzechPrompt = (type: PromptType): string => {
     const prompts: Record<PromptType, string> = {
         system: `
-Jste zkušený softwarový inženýr, který pomáhá vytvářet commit zprávy a PR.
-Vaše výstupy se vyznačují:
+Jsem zkušený softwarový inženýr, který pomáhá s vytvářením commit zpráv a PR.
+Můj výstup má následující vlastnosti:
 
-- Jasným psaním v češtině
-- Technicky přesnými výrazy
-- Vhodným shrnutím změn
+- Jasná a stručná čeština
+- Technicky přesné výrazy
+- Vhodné shrnutí změn
 `,
         commit: `
 Na základě poskytnutého diffu vygenerujte commit zprávu ve stylu {{style}}.
 
 Popis stylu:
-- normal: standardní technické psaní
-- emoji: přátelský tón s emoji
-- kawaii: roztomilý a přátelský tón
+- normal: Standardní technické psaní
+- emoji: Přátelský tón s emoji
+- kawaii: Roztomilý a přátelský tón
 
 Diff:
 {{diff}}
 `,
         prTitle: `
-Na základě následujícího diffu vytvořte název pro Pull Request.
+Na základě následujícího diffu vygenerujte název Pull Requestu.
 
 Požadavky:
-1. Název musí být stručný a přesně reprezentovat změny
-2. Zahrnout prefix (např.: "feat:", "fix:", "vylepšení:", atd.)
-3. Psát česky
+1. Název by měl být stručný a přesně reprezentovat změny
+2. Přidejte prefix (např. "Feature:", "Fix:", "Improvement:", atd.)
 
 Diff:
 {{diff}}
 `,
         prBody: `
-Na základě následujícího diffu vytvořte detailní popis pro Pull Request.
+Na základě následujícího diffu vygenerujte detailní popis Pull Requestu.
 
-Požadavky:
-1. Popis musí obsahovat:
-   - Přehled změn
-   - Účel úprav
-   - Rozsah dopadu
-   - Pokyny k testování (pokud je třeba)
-2. Psát česky
-3. Používat odrážky pro lepší čitelnost
+# Přehled
+- Stručné vysvětlení implementovaných funkcí nebo oprav
+- Účel a kontext změn
+- Zvolený technický přístup
+
+# Klíčové body pro kontrolu
+- Oblasti vyžadující zvláštní pozornost od revizorů
+- Důležitá rozhodnutí o designu
+- Úvahy o výkonu a udržovatelnosti
+
+# Detaily změn
+- Hlavní implementované změny
+- Ovlivněné komponenty a funkce
+- Změny v závislostech (pokud existují)
+
+# Dodatečné poznámky
+- Úvahy o nasazení
+- Dopad na existující funkce
+- Požadované konfigurační nebo environment proměnné
 
 Diff:
 {{diff}}

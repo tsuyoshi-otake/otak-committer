@@ -3,15 +3,15 @@ import { PromptType } from '../types/language';
 export const getGermanPrompt = (type: PromptType): string => {
     const prompts: Record<PromptType, string> = {
         system: `
-Sie sind ein erfahrener Software-Ingenieur, der bei der Erstellung von Commit-Nachrichten und PRs hilft.
-Ihre Ausgaben zeichnen sich aus durch:
+Ich bin ein erfahrener Softwareentwickler, der bei der Erstellung von Commit-Nachrichten und PRs unterstützt.
+Meine Ausgabe hat folgende Eigenschaften:
 
-- Klare Formulierung auf Deutsch
-- Technisch präzise Ausdrucksweise
+- Klares und präzises Deutsch
+- Technisch akkurate Ausdrücke
 - Angemessene Zusammenfassung der Änderungen
 `,
         commit: `
-Basierend auf dem bereitgestellten Diff, erstellen Sie eine Commit-Nachricht im Stil {{style}}.
+Basierend auf dem bereitgestellten Diff, generieren Sie eine {{style}} Commit-Nachricht.
 
 Stilbeschreibung:
 - normal: Standard technische Schreibweise
@@ -22,27 +22,37 @@ Diff:
 {{diff}}
 `,
         prTitle: `
-Basierend auf dem folgenden Diff, erstellen Sie einen Titel für den Pull Request.
+Basierend auf dem folgenden Diff, generieren Sie einen Pull Request Titel.
 
 Anforderungen:
 1. Der Titel sollte prägnant sein und die Änderungen genau darstellen
-2. Ein Präfix einschließen (z.B.: "Feature:", "Fix:", "Verbesserung:", usw.)
-3. Auf Deutsch schreiben
+2. Fügen Sie ein Präfix hinzu (z.B. "Feature:", "Fix:", "Improvement:", etc.)
 
 Diff:
 {{diff}}
 `,
         prBody: `
-Basierend auf dem folgenden Diff, erstellen Sie eine detaillierte Beschreibung für den Pull Request.
+Basierend auf dem folgenden Diff, generieren Sie eine detaillierte Pull Request Beschreibung.
 
-Anforderungen:
-1. Die Beschreibung sollte enthalten:
-   - Überblick über die Änderungen
-   - Zweck der Änderungen
-   - Umfang der Auswirkungen
-   - Testanweisungen (falls erforderlich)
-2. Auf Deutsch schreiben
-3. Aufzählungszeichen zur besseren Lesbarkeit verwenden
+# Überblick
+- Kurze Erklärung der implementierten Funktionen oder Korrekturen
+- Zweck und Hintergrund der Änderungen
+- Gewählter technischer Ansatz
+
+# Wichtige Überprüfungspunkte
+- Bereiche, die besondere Aufmerksamkeit der Reviewer erfordern
+- Wichtige Design-Entscheidungen
+- Überlegungen zu Leistung und Wartbarkeit
+
+# Änderungsdetails
+- Hauptsächlich implementierte Änderungen
+- Betroffene Komponenten und Funktionalitäten
+- Änderungen an Abhängigkeiten (falls vorhanden)
+
+# Zusätzliche Hinweise
+- Überlegungen zur Bereitstellung
+- Auswirkungen auf bestehende Funktionen
+- Erforderliche Konfigurations- oder Umgebungsvariablen
 
 Diff:
 {{diff}}

@@ -3,46 +3,56 @@ import { PromptType } from '../types/language';
 export const getItalianPrompt = (type: PromptType): string => {
     const prompts: Record<PromptType, string> = {
         system: `
-Sei un ingegnere software esperto che aiuta a creare messaggi di commit e PR.
-Le tue risposte sono caratterizzate da:
+Sono un ingegnere software esperto che assiste nella creazione di messaggi di commit e PR.
+Il mio output ha le seguenti caratteristiche:
 
-- Scrittura chiara in italiano
-- Espressioni tecnicamente precise
-- Riassunto appropriato delle modifiche
+- Italiano chiaro e conciso
+- Espressioni tecnicamente accurate
+- Sintesi appropriata delle modifiche
 `,
         commit: `
-In base al diff fornito, genera un messaggio di commit nello stile {{style}}.
+In base al diff fornito, genera un messaggio di commit in stile {{style}}.
 
 Descrizione dello stile:
-- normal: scrittura tecnica standard
-- emoji: tono amichevole con emoji
-- kawaii: tono carino e amichevole
+- normal: Scrittura tecnica standard
+- emoji: Tono amichevole con emoji
+- kawaii: Tono carino e amichevole
 
 Diff:
 {{diff}}
 `,
         prTitle: `
-In base al seguente diff, crea un titolo per la Pull Request.
+In base al seguente diff, genera un titolo per la Pull Request.
 
 Requisiti:
 1. Il titolo deve essere conciso e rappresentare accuratamente le modifiche
-2. Includere un prefisso (es.: "feat:", "fix:", "miglioramento:", ecc.)
-3. Scrivere in italiano
+2. Includi un prefisso (es. "Feature:", "Fix:", "Improvement:", ecc.)
 
 Diff:
 {{diff}}
 `,
         prBody: `
-In base al seguente diff, crea una descrizione dettagliata per la Pull Request.
+In base al seguente diff, genera una descrizione dettagliata della Pull Request.
 
-Requisiti:
-1. La descrizione deve includere:
-   - Panoramica delle modifiche
-   - Scopo delle modifiche
-   - Portata dell'impatto
-   - Istruzioni per il test (se necessario)
-2. Scrivere in italiano
-3. Utilizzare elenchi puntati per migliorare la leggibilità
+# Panoramica
+- Breve spiegazione delle funzionalità o correzioni implementate
+- Scopo e contesto delle modifiche
+- Approccio tecnico adottato
+
+# Punti chiave per la revisione
+- Aree che richiedono particolare attenzione dai revisori
+- Decisioni importanti di progettazione
+- Considerazioni su prestazioni e manutenibilità
+
+# Dettagli delle modifiche
+- Principali modifiche implementate
+- Componenti e funzionalità interessate
+- Modifiche alle dipendenze (se presenti)
+
+# Note aggiuntive
+- Considerazioni sul deployment
+- Impatto sulle funzionalità esistenti
+- Variabili di configurazione o ambiente richieste
 
 Diff:
 {{diff}}

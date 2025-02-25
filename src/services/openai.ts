@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
 import OpenAI from 'openai';
-import { PromptType } from '../types/language.js';
-import { MessageStyle } from '../types/messageStyle.js';
-import { PullRequestDiff, GitHubDiffFile } from '../types/github.js';
-import { COMMIT_PREFIXES, CommitPrefix } from '../constants/commitGuide.js';
-import { TemplateInfo } from './git.js';
+import { PromptType } from '../types/language';
+import { MessageStyle } from '../types/messageStyle';
+import { PullRequestDiff, GitHubDiffFile } from '../types/github';
+import { COMMIT_PREFIXES, CommitPrefix } from '../constants/commitGuide';
+import { TemplateInfo } from './git';
 
 export class OpenAIService {
     private openai: OpenAI;
@@ -56,7 +56,7 @@ export class OpenAIService {
         try {
             // 動的に言語モジュールをインポート
             try {
-                const module = await import(`../languages/${language}`);
+                const module = await import(`../languages/${language}.js`);
                 const promptFunction = module[`get${language.charAt(0).toUpperCase() + language.slice(1)}Prompt`];
                 if (promptFunction) {
                     return promptFunction;
@@ -66,7 +66,7 @@ export class OpenAIService {
             }
 
             // フォールバック：英語
-            const { getEnglishPrompt } = await import('../languages/english');
+            const { getEnglishPrompt } = await import('../languages/english.js');
             return getEnglishPrompt;
         } catch (error) {
             console.error('Error loading language module:', error);
@@ -249,7 +249,13 @@ ${file.patch}`).join('\n')}`;
                 model: 'chatgpt-4o-latest',
                 messages: [
                     { role: 'system', content: systemPrompt },
-                    { role: 'user', content: getPrompt('prTitle').replace('{{diff}}', diffSummary) }
+                    { role: 'user', content: `Generate a Pull Request title in ${language}.
+
+Requirements:
+1. Title should be concise and accurately represent the changes
+2. Include a prefix (e.g., "Feature:", "Fix:", "Improvement:", etc.)
+
+Git diff: ${diffSummary}` }
                 ],
                 temperature: 0.1,
                 max_tokens: 100
@@ -281,14 +287,41 @@ ${file.patch}`).join('\n')}`;
             const userPrompt = template
                 ? `Based on the following template and Git diff, generate a pull request:
 
+NOTE: Generate the content in ${language}.
+
 Template:
 ${template.content}
 
 Git diff:
 ${diffSummary}
 
-Please follow the template format strictly.`
-                : getPrompt('prBody').replace('{{diff}}', diffSummary);
+Please follow the template format strictly and ensure all content is in ${language}.`
+                : `Generate a detailed Pull Request description in ${language} for the following changes.
+
+# Overview
+- Brief explanation of implemented features or fixes
+- Purpose and background of changes
+- Technical approach taken
+
+# Key Review Points
+- Areas that need special attention from reviewers
+- Important design decisions
+- Performance and maintainability considerations
+
+# Change Details
+- Main changes implemented
+- Affected components and functionality
+- Dependency changes (if any)
+
+# Additional Notes
+- Deployment considerations
+- Impact on existing features
+- Required configuration or environment variables
+
+Git diff:
+${diffSummary}
+
+Note: Please ensure all content is written in ${language}.`;
 
             const bodyResponse = await this.openai.chat.completions.create({
                 model: 'chatgpt-4o-latest',
