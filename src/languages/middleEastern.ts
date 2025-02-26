@@ -1,28 +1,37 @@
 import { PromptType } from '../types/language';
 import { getArabicPrompt } from './arabic';
 import { getHebrewPrompt } from './hebrew';
-
-type MiddleEasternLanguages = 
-    | 'arabic'
-    | 'hebrew';
+import { getTurkishPrompt } from './turkish';
 
 /**
- * 中東言語のプロンプトを取得する関数
- * 注: これらの言語は右から左に読む（RTL）特性を持つ
+ * 中東言語グループのプロンプト管理
+ * 各言語の設定とローカライズされたプロンプトを提供します
+ * RTL（右から左）言語のサポートを含みます
  */
-export const getMiddleEasternPrompt = (language: MiddleEasternLanguages, type: PromptType): string => {
-    const promptMap = {
-        arabic: getArabicPrompt,
-        hebrew: getHebrewPrompt
+
+export type MiddleEasternLanguageCode =
+    | 'ar'    // アラビア語
+    | 'he'    // ヘブライ語
+    | 'tr';   // トルコ語
+
+export const getMiddleEasternPrompt = (
+    language: MiddleEasternLanguageCode,
+    type: PromptType
+): string => {
+    const promptMap: Record<MiddleEasternLanguageCode, (type: PromptType) => string> = {
+        'ar': getArabicPrompt,
+        'he': getHebrewPrompt,
+        'tr': getTurkishPrompt
     };
 
-    // RTL言語のため、必要に応じてRTLマーカー（\u202B）を追加
-    const prompt = promptMap[language](type);
-    const isRtlContent = true; // 将来的に言語ごとにRTLかどうかを判定する場合に備えて
-
-    if (isRtlContent) {
-        return `\u202B${prompt}`;
-    }
-
-    return prompt;
+    return promptMap[language]?.(type) || '';
 };
+
+export const middleEasternLanguages: Record<MiddleEasternLanguageCode, string> = {
+    'ar': 'العربية',
+    'he': 'עברית',
+    'tr': 'Türkçe'
+};
+
+// RTL言語のリスト
+export const rtlLanguages: MiddleEasternLanguageCode[] = ['ar', 'he'];

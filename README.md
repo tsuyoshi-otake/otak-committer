@@ -30,7 +30,7 @@ For Commit Message:
 
 For Pull Requests:
 
-![Generate Commit Message Button](images/generate-pull-request.png)
+![Generate Pull Request Button](images/generate-pull-request.png)
 
 1. Click the "Generate Pull Request" button in the SCM view
  or use the command palette (`otak-committer.generatePR`)
@@ -42,8 +42,7 @@ For Pull Requests:
      - `.github/templates/pull_request_template.md`
      - `docs/templates/pull_request_template.md`
    - If a template is found:
-     - It will be used as the base structure
- for the PR
+     - It will be used as the base structure for the PR
      - AI will intelligently fill in each section based on your changes and the linked issue
    - Issue labels and milestones will be automatically applied to the PR
 3. Select base and target branches:
@@ -59,7 +58,63 @@ For Pull Requests:
 
 *Note*: Make sure you have configured your GitHub token with `repo` scope to enable issue linking and PR creation features.
 
-For Issue
+For Issues:
+
+![Generate Issue Button](images/generate-issue.png)
+
+1. Click the "Generate Issue" button in the SCM view or use the command palette (`otak-committer.generateIssue`)
+
+2. Select issue type:
+   - Task: General tasks or improvements
+   - Bug Report: For reporting bugs
+   - Feature Request: For new feature requests
+   - Documentation: Documentation improvements
+   - Refactoring: Code improvements
+
+3. Select relevant files (optional):
+   - Choose files related to the issue
+   - The AI will analyze selected files for context
+   - Skip file selection to focus on general description
+
+4. Enter issue description:
+   - Describe the task, bug, or feature
+   - Provide any relevant context
+   - AI will enhance and structure your description
+
+5. Review and customize:
+   - AI generates a structured issue description
+   - Preview the content before creation
+   - Make modifications if needed:
+     - Edit title
+     - Adjust description
+     - Add or remove sections
+
+6. Create the issue:
+   - Choose between:
+     - Create immediately
+     - Modify content
+     - Cancel creation
+   - Issue will be created with:
+     - AI-generated title
+     - Structured description
+     - Selected files context
+     - Appropriate labels
+
+Key Features:
+- Intelligent context analysis
+- File-aware issue generation
+- Structured templates by type
+- Multi-language support
+- Interactive preview and editing
+- Integration with GitHub
+
+The generated issues follow best practices:
+- Clear and concise titles
+- Structured descriptions
+- Contextual information
+- Technical details when relevant
+- Related file references
+- Actionable next steps
 
 
 ## Features
