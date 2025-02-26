@@ -3,59 +3,115 @@ import { PromptType } from '../types/language';
 export const getJavanesePrompt = (type: PromptType): string => {
     const prompts: Record<PromptType, string> = {
         system: `
-Kula minangka insinyur piranti lunak sing duwe pengalaman, mbiyantu nggawe pesen commit lan PR.
-Output kula nduweni karakteristik kaya mangkene:
+Minangka insinyur perangkat lunak senior, nyedhiani tuntunan tingkat dhuwur kanggo owahan kode.
+Feedback sampeyan kudu nduweni karakteristik ing ngisor iki:
 
-- Basa Jawa sing cetha lan ringkes
-- Ekspresi sing bener sacara teknis
-- Ringkesan sing trep babagan owah-owahan
+- Fokus ing dampak arsitektur lan desain
+- Nyaranake pangundhakan tinimbang implementasi spesifik
+- Nimbang kualitas perawatan lan skalabilitas
 `,
         commit: `
-Adhedhasar diff sing diwenehake, gawe pesen commit nganggo gaya {{style}}.
+Analisis owahan sing diwenehake lan nyaranake poin utama kanggo pesen commit.
+Nimbang:
 
-Katrangan gaya:
-- normal: Panulisan teknis standar
-- emoji: Nada sing grapyak nganggo emoji
-- kawaii: Nada sing lucu lan grapyak
+Konteks gaya:
+- normal: Tinjauan teknis profesional
+- emoji: Tuntunan sing ramah
+- kawaii: Feedback santai
 
-Diff:
+Owahan sing kudu ditinjau:
 {{diff}}
 `,
         prTitle: `
-Adhedhasar diff ing ngisor iki, gawe judul Pull Request.
+Analisis owahan ing ngisor iki lan nyaranake poin penting kanggo judul PR.
+Nimbang:
 
-Syarat:
-1. Judul kudu ringkes lan nggambarake owah-owahan kanthi tepat
-2. Tambahake awalan (kayata "Feature:", "Fix:", "Improvement:", lan liya-liyane)
+- Apa dampak utama saka owahan iki?
+- Wilayah endi sing paling kena dampak?
+- Iki jinis owahan apa? (fitur, perbaikan, pangundhakan)
 
-Diff:
+Owahan sing kudu ditinjau:
 {{diff}}
 `,
         prBody: `
-Adhedhasar diff ing ngisor iki, gawe deskripsi Pull Request sing jangkep.
+Tinjau owahan iki lan nyedhiani tuntunan kanggo deskripsi Pull Request.
+Nimbang aspek iki:
 
-# Gambaran
-- Katrangan ringkes babagan fitur utawa benahan sing ditindakake
-- Tujuan lan konteks owah-owahan
-- Pendekatan teknis sing dipilih
+# Tinjauan Strategis
+- Iki ngatasi masalah apa?
+- Kenapa milih pendekatan iki?
+- Apa keputusan teknis utama?
 
-# Poin Penting kanggo Ditinjau
-- Wilayah sing mbutuhake kawigaten khusus saka reviewer
-- Kaputusan desain sing penting
-- Pertimbangan kinerja lan pemeliharaan
+# Poin Tinjauan
+- Wilayah endi sing butuh kawigaten khusus?
+- Apa risiko potensial?
+- Apa pertimbangan kinerja?
 
-# Detail Owah-owahan
-- Owah-owahan utama sing ditindakake
-- Komponen lan fungsi sing kena dampak
-- Owah-owahan ketergantungan (yen ana)
+# Tinjauan Implementasi
+- Apa owahan utama?
+- Kepiye dampake ing sistem?
+- Dependensi apa sing kudu ditimbang?
 
-# Cathetan Tambahan
-- Pertimbangan deployment
-- Dampak marang fitur sing wis ana
-- Variabel konfigurasi utawa lingkungan sing dibutuhake
+# Syarat Tinjauan
+- Apa sing kudu diuji?
+- Apa pertimbangan deployment?
+- Dokumentasi apa sing dibutuhake?
 
-Diff:
+Owahan sing kudu ditinjau:
 {{diff}}
+`,
+        'issue.task': `
+Analisis tugas lan nyaranake poin utama sing kudu ditimbang:
+
+### Tujuan
+- Masalah apa sing kudu diatasi?
+- Kenapa iki penting saiki?
+
+### Panduan Implementasi
+- Wilayah endi sing kudu ditimbang?
+- Pendekatan apa sing bisa dilakoni?
+
+### Kriteria Sukses
+- Kepiye verifikasi rampunge?
+- Apa syarat kualitas?
+
+### Pertimbangan Strategis
+- Apa sing bisa kena dampak?
+- Dependensi apa sing kudu ditimbang?
+- Tingkat prioritase apa?
+- Jadwal sing wajar apa?
+
+### Cathetan Perencanaan
+- Sumber daya apa sing dibutuhake?
+- Risiko apa sing kudu ditimbang?
+`,
+        'issue.standard': `
+Analisis masalah iki lan nyedhiani tuntunan babagan poin utama.
+Nimbang:
+
+### Analisis Masalah
+- Apa masalah inti?
+- Konteks apa sing penting?
+
+### Tinjauan Teknis
+- Bagean sistem endi sing terlibat?
+- Pendekatan apa sing kudu ditimbang?
+- Solusi sing mungkin apa?
+
+### Panduan Implementasi
+- Langkah apa sing dibutuhake?
+- Apa sing kudu diuji?
+- Apa batasan teknis?
+
+### Evaluasi Dampak
+- Wilayah endi sing bakal kena dampak?
+- Efek samping apa sing kudu ditimbang?
+- Tindakan pencegahan apa sing dibutuhake?
+
+### Syarat Tinjauan
+- Dokumentasi apa sing dibutuhake?
+- Apa sing kudu diuji?
+- Apa ana owahan radikal?
 `
     };
 

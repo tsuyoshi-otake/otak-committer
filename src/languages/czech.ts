@@ -3,59 +3,115 @@ import { PromptType } from '../types/language';
 export const getCzechPrompt = (type: PromptType): string => {
     const prompts: Record<PromptType, string> = {
         system: `
-Jsem zkušený softwarový inženýr, který pomáhá s vytvářením commit zpráv a PR.
-Můj výstup má následující vlastnosti:
+Jako zkušený softwarový inženýr poskytněte pokyny vysoké úrovně pro změny kódu.
+Vaše zpětná vazba by měla mít následující charakteristiky:
 
-- Jasná a stručná čeština
-- Technicky přesné výrazy
-- Vhodné shrnutí změn
+- Zaměření na architektonické a designové důsledky
+- Navrhovat vylepšení místo konkrétních implementací
+- Zvažovat udržovatelnost a škálovatelnost
 `,
         commit: `
-Na základě poskytnutého diffu vygenerujte commit zprávu ve stylu {{style}}.
+Analyzujte poskytnuté změny a navrhněte klíčové body pro commit zprávu.
+Zvažte:
 
-Popis stylu:
-- normal: Standardní technické psaní
-- emoji: Přátelský tón s emoji
-- kawaii: Roztomilý a přátelský tón
+Kontext stylu:
+- normal: Profesionální technická revize
+- emoji: Přátelské vedení
+- kawaii: Neformální zpětná vazba
 
-Diff:
+Změny k revizi:
 {{diff}}
 `,
         prTitle: `
-Na základě následujícího diffu vygenerujte název Pull Requestu.
+Analyzujte následující změny a navrhněte důležité body pro název PR.
+Zvažte:
 
-Požadavky:
-1. Název by měl být stručný a přesně reprezentovat změny
-2. Přidejte prefix (např. "Feature:", "Fix:", "Improvement:", atd.)
+- Jaký je hlavní dopad těchto změn?
+- Která oblast je nejvíce ovlivněna?
+- O jaký typ změny se jedná? (funkce, oprava, vylepšení)
 
-Diff:
+Změny k revizi:
 {{diff}}
 `,
         prBody: `
-Na základě následujícího diffu vygenerujte detailní popis Pull Requestu.
+Zkontrolujte tyto změny a poskytněte pokyny pro popis Pull Requestu.
+Zvažte tyto aspekty:
 
-# Přehled
-- Stručné vysvětlení implementovaných funkcí nebo oprav
-- Účel a kontext změn
-- Zvolený technický přístup
+# Strategický přehled
+- Jaký problém to řeší?
+- Proč byl zvolen tento přístup?
+- Jaká jsou klíčová technická rozhodnutí?
 
-# Klíčové body pro kontrolu
-- Oblasti vyžadující zvláštní pozornost od revizorů
-- Důležitá rozhodnutí o designu
-- Úvahy o výkonu a udržovatelnosti
+# Body k revizi
+- Které oblasti vyžadují zvláštní pozornost?
+- Jaká jsou potenciální rizika?
+- Jaké jsou výkonnostní aspekty?
 
-# Detaily změn
-- Hlavní implementované změny
-- Ovlivněné komponenty a funkce
-- Změny v závislostech (pokud existují)
+# Revize implementace
+- Jaké jsou hlavní změny?
+- Jak to ovlivňuje systém?
+- Jaké závislosti je třeba zvážit?
 
-# Dodatečné poznámky
-- Úvahy o nasazení
-- Dopad na existující funkce
-- Požadované konfigurační nebo environment proměnné
+# Požadavky na revizi
+- Co je třeba otestovat?
+- Jaké jsou aspekty nasazení?
+- Jaká dokumentace je potřeba?
 
-Diff:
+Změny k revizi:
 {{diff}}
+`,
+        'issue.task': `
+Analyzujte úkol a navrhněte klíčové body k zvážení:
+
+### Účel
+- Jaký problém je třeba vyřešit?
+- Proč je to nyní důležité?
+
+### Průvodce implementací
+- Které oblasti je třeba zvážit?
+- Jaké přístupy jsou možné?
+
+### Kritéria úspěchu
+- Jak ověřit dokončení?
+- Jaké jsou požadavky na kvalitu?
+
+### Strategické úvahy
+- Co může být ovlivněno?
+- Jaké závislosti je třeba zvážit?
+- Jaká je úroveň priority?
+- Jaký je rozumný časový rámec?
+
+### Poznámky k plánování
+- Jaké zdroje jsou potřeba?
+- Jaká rizika je třeba zvážit?
+`,
+        'issue.standard': `
+Analyzujte tento problém a poskytněte pokyny ke klíčovým bodům.
+Zvažte:
+
+### Analýza problému
+- Jaký je základní problém?
+- Jaký kontext je důležitý?
+
+### Technická revize
+- Které části systému jsou zapojeny?
+- Jaké přístupy by měly být zváženy?
+- Jaká jsou možná řešení?
+
+### Průvodce implementací
+- Jaké kroky jsou potřeba?
+- Co by mělo být testováno?
+- Jaká jsou technická omezení?
+
+### Hodnocení dopadu
+- Které oblasti budou ovlivněny?
+- Jaké vedlejší účinky je třeba zvážit?
+- Jaká bezpečnostní opatření jsou potřeba?
+
+### Požadavky na revizi
+- Jaká dokumentace je potřeba?
+- Co je třeba otestovat?
+- Jsou zde nějaké breaking changes?
 `
     };
 

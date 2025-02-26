@@ -3,59 +3,115 @@ import { PromptType } from '../types/language';
 export const getSpanishPrompt = (type: PromptType): string => {
     const prompts: Record<PromptType, string> = {
         system: `
-Soy un ingeniero de software experimentado que ayuda en la creación de mensajes de commit y PR.
-Mi salida tiene las siguientes características:
+Como ingeniero de software senior, proporcione orientación de alto nivel para los cambios de código.
+El feedback debe tener las siguientes características:
 
-- Español claro y conciso
-- Expresiones técnicamente precisas
-- Resumen apropiado de los cambios
+- Enfoque en implicaciones arquitectónicas y de diseño
+- Sugerir mejoras en lugar de implementaciones específicas
+- Considerar la mantenibilidad y escalabilidad
 `,
         commit: `
-Basado en el diff proporcionado, genera un mensaje de commit en estilo {{style}}.
+Analice los cambios proporcionados y sugiera puntos clave para el mensaje de commit.
+Considere:
 
-Descripción del estilo:
-- normal: Escritura técnica estándar
-- emoji: Tono amigable con emojis
-- kawaii: Tono lindo y amigable
+Contexto de estilo:
+- normal: Revisión técnica profesional
+- emoji: Orientación amigable
+- kawaii: Feedback casual
 
-Diff:
+Cambios a revisar:
 {{diff}}
 `,
         prTitle: `
-Basado en el siguiente diff, genera un título para el Pull Request.
+Analice los siguientes cambios y sugiera puntos importantes para el título del PR.
+Considere:
 
-Requisitos:
-1. El título debe ser conciso y representar con precisión los cambios
-2. Incluye un prefijo (ej. "Feature:", "Fix:", "Improvement:", etc.)
+- ¿Cuál es el impacto principal de estos cambios?
+- ¿Qué área es la más afectada?
+- ¿Qué tipo de cambio es? (función, corrección, mejora)
 
-Diff:
+Cambios a revisar:
 {{diff}}
 `,
         prBody: `
-Basado en el siguiente diff, genera una descripción detallada del Pull Request.
+Revise estos cambios y proporcione orientación para la descripción del Pull Request.
+Considere estos aspectos:
 
-# Resumen
-- Breve explicación de las funcionalidades o correcciones implementadas
-- Propósito y contexto de los cambios
-- Enfoque técnico adoptado
+# Visión Estratégica
+- ¿Qué problema resuelve?
+- ¿Por qué se eligió este enfoque?
+- ¿Cuáles son las decisiones técnicas clave?
 
-# Puntos clave para revisión
-- Áreas que requieren atención especial de los revisores
-- Decisiones importantes de diseño
-- Consideraciones de rendimiento y mantenibilidad
+# Puntos de Revisión
+- ¿Qué áreas necesitan atención especial?
+- ¿Cuáles son los riesgos potenciales?
+- ¿Qué consideraciones de rendimiento hay?
 
-# Detalles de los cambios
-- Principales cambios implementados
-- Componentes y funcionalidades afectadas
-- Cambios en dependencias (si los hay)
+# Revisión de Implementación
+- ¿Cuáles son los cambios principales?
+- ¿Cómo afecta al sistema?
+- ¿Qué dependencias hay que considerar?
 
-# Notas adicionales
-- Consideraciones de despliegue
-- Impacto en funcionalidades existentes
-- Variables de configuración o entorno requeridas
+# Requisitos de Revisión
+- ¿Qué debe probarse?
+- ¿Qué consideraciones de despliegue hay?
+- ¿Qué documentación se necesita?
 
-Diff:
+Cambios a revisar:
 {{diff}}
+`,
+        'issue.task': `
+Analice la tarea y sugiera puntos clave a considerar:
+
+### Propósito
+- ¿Qué problema necesita resolverse?
+- ¿Por qué es importante ahora?
+
+### Guía de Implementación
+- ¿Qué áreas deben considerarse?
+- ¿Qué enfoques son posibles?
+
+### Criterios de Éxito
+- ¿Cómo verificar la finalización?
+- ¿Cuáles son los requisitos de calidad?
+
+### Consideraciones Estratégicas
+- ¿Qué podría verse afectado?
+- ¿Qué dependencias hay que considerar?
+- ¿Cuál es el nivel de prioridad?
+- ¿Cuál es un cronograma razonable?
+
+### Notas de Planificación
+- ¿Qué recursos se necesitan?
+- ¿Qué riesgos hay que considerar?
+`,
+        'issue.standard': `
+Analice este problema y proporcione orientación sobre puntos clave a abordar.
+Considere:
+
+### Análisis del Problema
+- ¿Cuál es el problema central?
+- ¿Qué contexto es importante?
+
+### Revisión Técnica
+- ¿Qué partes del sistema están involucradas?
+- ¿Qué enfoques deberían considerarse?
+- ¿Cuáles son las posibles soluciones?
+
+### Guía de Implementación
+- ¿Qué pasos son necesarios?
+- ¿Qué debe probarse?
+- ¿Cuáles son las restricciones técnicas?
+
+### Evaluación de Impacto
+- ¿Qué áreas se verán afectadas?
+- ¿Qué efectos secundarios hay que considerar?
+- ¿Qué precauciones son necesarias?
+
+### Requisitos de Revisión
+- ¿Qué documentación se necesita?
+- ¿Qué debe probarse?
+- ¿Hay cambios disruptivos?
 `
     };
 

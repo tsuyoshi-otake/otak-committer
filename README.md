@@ -59,6 +59,9 @@ For Pull Requests:
 
 *Note*: Make sure you have configured your GitHub token with `repo` scope to enable issue linking and PR creation features.
 
+For Issue
+
+
 ## Features
 
 otak-committer is a powerful VS Code extension that leverages AI to automatically generate Git commit messages and pull requests.
