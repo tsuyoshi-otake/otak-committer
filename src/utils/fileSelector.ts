@@ -28,8 +28,16 @@ export async function selectFiles(files: string[]): Promise<string[]> {
     }));
 
     quickPick.items = createItems();
-    quickPick.title = 'Select files to include in analysis';
-    quickPick.placeholder = 'Type to search files, Space to select/deselect, Enter to confirm';
+    quickPick.title = 'Select files to include in analysis (Enter to select/deselect)';
+    quickPick.placeholder = 'Type to search files';
+
+    // Add buttons
+    quickPick.buttons = [
+        {
+            iconPath: new vscode.ThemeIcon('arrow-right'),
+            tooltip: 'Next'
+        }
+    ];
 
     // Filter functionality
     quickPick.onDidChangeValue(value => {
@@ -64,6 +72,10 @@ export async function selectFiles(files: string[]): Promise<string[]> {
         }
     });
 
+    quickPick.onDidTriggerButton(() => {
+        quickPick.hide();
+    });
+
     return new Promise<string[]>(resolve => {
         // Handle final selection
         const disposables: vscode.Disposable[] = [];
@@ -75,13 +87,6 @@ export async function selectFiles(files: string[]): Promise<string[]> {
                 resolve([...selectedFiles].map(relativePath => 
                     path.join(workspaceRoot, relativePath)
                 ));
-            })
-        );
-
-        // Ctrl+Enter to confirm
-        disposables.push(
-            vscode.commands.registerCommand('workbench.action.acceptSelectedQuickOpenItem', () => {
-                quickPick.hide();
             })
         );
 
