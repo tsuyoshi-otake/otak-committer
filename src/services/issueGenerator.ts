@@ -177,15 +177,20 @@ export class IssueGeneratorService extends BaseService {
                 : [];
             
             const analysisResult = this.formatAnalysisResult(fileAnalyses);
+            const useEmoji = this.config.useEmoji || false;
+            const emojiInstruction = useEmoji ? 'Use emojis for section headers and key points.' : 'DO NOT use any emojis in the content.';
+            const customMessage = vscode.workspace.getConfiguration('otakCommitter').get<string>('customMessage') || '';
+            const customInstruction = customMessage ? `\n\nAdditional requirements: ${customMessage}` : '';
 
             const prompt = `${params.type.type === 'task' ? 'issue.task' : 'issue.standard'}`;
             const body = await this.openai.createChatCompletion({
-                prompt: `${prompt}\n\nRepository Analysis:\n${analysisResult}\n\nUser Description: ${params.description}`,
+                prompt: `Generate a GitHub issue in recommended format for the following analysis and description. Include appropriate sections like Background, Problem Statement, Expected Behavior, Steps to Reproduce (if applicable), and Additional Context. Keep the technical details but organize them well.\n\n${emojiInstruction}${customInstruction}\n\nRepository Analysis:\n${analysisResult}\n\nUser Description: ${params.description}`,
                 maxTokens: 1000,
                 temperature: 0.1
             });
 
             if (!body) throw new Error('Failed to generate content');
+
             const title = await this.generateTitle(params.type.type, params.description);
 
             return { title, body };

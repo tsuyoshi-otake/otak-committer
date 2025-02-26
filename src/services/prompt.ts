@@ -35,6 +35,11 @@ export class PromptService {
         messageStyle: MessageStyle,
         template?: TemplateInfo
     ): Promise<string> {
+        const useEmoji = vscode.workspace.getConfiguration('otakCommitter').get<boolean>('useEmoji') || false;
+        const customMessage = vscode.workspace.getConfiguration('otakCommitter').get<string>('customMessage') || '';
+        const emojiInstruction = useEmoji ? 'Feel free to use emojis for emphasis and key points.' : 'DO NOT use any emojis in the content.';
+        const customInstruction = customMessage ? `\nAdditional requirements: ${customMessage}` : '';
+
         // テンプレートがある場合はそれを基に生成
         if (template) {
             return `Based on the following template and Git diff, generate a commit message:
@@ -71,7 +76,8 @@ The style should be: ${messageStyle}
 Git diff:
 ${diff}
 
-Please provide a clear and ${messageStyle} commit message following the format above.`;
+Please provide a clear and ${messageStyle} commit message following the format above.
+${emojiInstruction}${customInstruction}`;
     }
 
     async generateDiffSummary(diff: PullRequestDiff): Promise<string> {
@@ -90,14 +96,18 @@ ${file.patch}`).join('\n')}`;
         template?: TemplateInfo
     ): Promise<{ title: string; body: string }> {
         const diffSummary = await this.generateDiffSummary(diff);
+        const useEmoji = vscode.workspace.getConfiguration('otakCommitter').get<boolean>('useEmoji') || false;
+        const customMessage = vscode.workspace.getConfiguration('otakCommitter').get<string>('customMessage') || '';
+        const emojiInstruction = useEmoji ? '' : 'DO NOT use any emojis in the content. ';
+        const customInstruction = customMessage ? `Additional requirements: ${customMessage}\n\n` : '';
 
         const titlePrompt = `Generate a Pull Request title in ${language}.
 
 Requirements:
 1. Title should be concise and accurately represent the changes
-2. Include a prefix (e.g., "Feature:", "Fix:", "Improvement:", etc.)
+2. Include a prefix (e.g., "Feature:", "Fix:", "Improvement:", etc.) ${useEmoji ? 'with appropriate emoji prefix' : 'without emoji'}
 
-Git diff: ${diffSummary}`;
+${customInstruction}Git diff: ${diffSummary}`;
 
         const bodyPrompt = template
             ? `Based on the following template and Git diff, generate a pull request:
@@ -110,7 +120,7 @@ ${template.content}
 Git diff:
 ${diffSummary}
 
-Please follow the template format strictly and ensure all content is in ${language}.`
+Please follow the template format strictly and ensure all content is in ${language}. ${emojiInstruction}${customInstruction}`
             : `Generate a detailed Pull Request description in ${language} for the following changes.
 
 # Overview
@@ -136,7 +146,7 @@ Please follow the template format strictly and ensure all content is in ${langua
 Git diff:
 ${diffSummary}
 
-Note: Please ensure all content is written in ${language}.`;
+Note: Please ensure all content is written in ${language}. ${emojiInstruction}${customInstruction}`;
 
         return {
             title: titlePrompt,
