@@ -1,7 +1,10 @@
 import * as vscode from 'vscode';
 import simpleGit, { SimpleGit } from 'simple-git';
 import * as path from 'path';
-import * as fs from 'fs/promises';
+import { readFile } from 'fs/promises';
+import { BaseService, BaseServiceFactory } from './base';
+import { ServiceConfig, TemplateInfo } from '../types';
+import { cleanPath, isSourceFile } from '../utils';
 
 interface StatusResult {
     current: string;
@@ -13,41 +16,14 @@ interface StatusResult {
     }>;
 }
 
-export interface TemplateInfo {
-    type: 'commit' | 'pr';
-    content: string;
-    path: string;
-}
-
-export class GitService {
-    private git: SimpleGit;
+export class GitService extends BaseService {
+    protected git: SimpleGit;
     private workspaceRoot: string;
 
-    constructor(workspaceRoot: string) {
+    constructor(workspaceRoot: string, config?: Partial<ServiceConfig>) {
+        super(config);
         this.workspaceRoot = workspaceRoot;
         this.git = simpleGit(workspaceRoot);
-    }
-
-    static async initialize(): Promise<GitService | undefined> {
-        // ワークスペースのルートパスを取得
-        const workspaceFolders = vscode.workspace.workspaceFolders;
-        if (!workspaceFolders || workspaceFolders.length === 0) {
-            vscode.window.showErrorMessage('No workspace folder found');
-            return undefined;
-        }
-
-        const workspaceRoot = workspaceFolders[0].uri.fsPath;
-        const git = new GitService(workspaceRoot);
-
-        try {
-            // Gitリポジトリかどうかを確認
-            await git.git.checkIsRepo();
-            return git;
-        } catch (error) {
-            console.error('Git repository check failed:', error);
-            vscode.window.showErrorMessage('No Git repository found in the current workspace');
-            return undefined;
-        }
     }
 
     async getDiff(): Promise<string> {
@@ -77,9 +53,8 @@ export class GitService {
             // 差分を取得
             const diff = await this.git.diff(['--cached']);
             return diff;
-        } catch (error: any) {
-            console.error('Error getting diff:', error);
-            throw error;
+        } catch (error) {
+            this.handleError(error);
         }
     }
 
@@ -90,10 +65,10 @@ export class GitService {
             return result
                 .split('\n')
                 .filter(file => file.trim() !== '')
-                .map(file => path.join(this.workspaceRoot, file.trim()));
-        } catch (error: any) {
-            console.error('Error getting tracked files:', error);
-            throw new Error(`Failed to get tracked files: ${error.message}`);
+                .map(file => cleanPath(path.join(this.workspaceRoot, file.trim())))
+                .filter(isSourceFile);
+        } catch (error) {
+            this.handleError(error);
         }
     }
 
@@ -109,9 +84,8 @@ export class GitService {
                     working_dir: file.working_dir
                 }))
             };
-        } catch (error: any) {
-            console.error('Error getting status:', error);
-            throw new Error(`Failed to get status: ${error.message}`);
+        } catch (error) {
+            this.handleError(error);
         }
     }
 
@@ -144,7 +118,7 @@ export class GitService {
                 for (const templatePath of template.paths) {
                     const fullPath = path.join(this.workspaceRoot, templatePath);
                     try {
-                        const content = await fs.readFile(fullPath, 'utf-8');
+                        const content = await readFile(fullPath, 'utf-8');
                         if (content) {
                             if (template.type === 'commit') {
                                 templates.commit = {
@@ -169,9 +143,51 @@ export class GitService {
                 }
             }
         } catch (error) {
-            console.error('Error finding templates:', error);
+            this.showError('Error finding templates', error);
         }
 
         return templates;
+    }
+
+    async checkIsRepo(): Promise<boolean> {
+        try {
+            await this.git.checkIsRepo();
+            return true;
+        } catch {
+            return false;
+        }
+    }
+}
+
+export class GitServiceFactory extends BaseServiceFactory<GitService> {
+    async create(config?: Partial<ServiceConfig>): Promise<GitService> {
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (!workspaceFolders || workspaceFolders.length === 0) {
+            throw new Error('No workspace folder found');
+        }
+
+        const workspaceRoot = workspaceFolders[0].uri.fsPath;
+        const service = new GitService(workspaceRoot, config);
+
+        if (!await service.checkIsRepo()) {
+            throw new Error('No Git repository found in the current workspace');
+        }
+
+        return service;
+    }
+
+    static async initialize(config?: Partial<ServiceConfig>): Promise<GitService | undefined> {
+        try {
+            const factory = new GitServiceFactory();
+            return await factory.create(config);
+        } catch (error) {
+            console.error('Git repository check failed:', error);
+            vscode.window.showErrorMessage(
+                error instanceof Error 
+                    ? error.message 
+                    : 'Failed to initialize Git service'
+            );
+            return undefined;
+        }
     }
 }

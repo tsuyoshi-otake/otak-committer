@@ -1,13 +1,11 @@
 import * as vscode from 'vscode';
-import { IssueGeneratorService } from '../services/issueGenerator';
-import { showMarkdownPreview, closePreviewTabs, cleanupPreviewFiles } from '../utils/preview';
-import { selectFiles } from '../utils/fileSelector';
+import { IssueGeneratorService, IssueGeneratorServiceFactory } from '../services/issueGenerator';
 
 export async function generateIssue() {
     let previewFile: { uri: vscode.Uri, document: vscode.TextDocument } | undefined;
 
     try {
-        const service = await IssueGeneratorService.initialize();
+        const service = await IssueGeneratorServiceFactory.initialize();
         if (!service) {
             return;
         }
@@ -68,8 +66,7 @@ export async function generateIssue() {
                 while (!isContentFinalized) {
                     // Show preview in markdown
                     const previewContent = `# Preview of ${issueType.label}\n\nTitle: ${preview.title}\n\n${preview.body}`;
-                    previewFile = await showMarkdownPreview(previewContent, 'issue');
-
+                    previewFile = await showMarkdownPreview(previewContent);
                     if (!previewFile) {
                         throw new Error('Failed to show preview');
                     }
@@ -176,4 +173,94 @@ export async function generateIssue() {
             }
         }
     }
+}
+
+// プレビュー表示用の関数
+async function showMarkdownPreview(content: string): Promise<{ uri: vscode.Uri, document: vscode.TextDocument } | undefined> {
+    try {
+        // 一時ディレクトリをクリーンアップして再作成
+        await cleanupPreviewFiles();
+        const previewDir = await getTempDir();
+        await vscode.workspace.fs.createDirectory(vscode.Uri.file(previewDir));
+
+        // ランダムなファイル名で一時ファイルを作成
+        const tempUri = vscode.Uri.file(getPreviewFilePath());
+
+        // まず以前のプレビューを閉じる
+        await closePreviewTabs();
+
+        // ファイルを書き込む
+        const encoder = new TextEncoder();
+        await vscode.workspace.fs.writeFile(tempUri, encoder.encode(content));
+
+        // ドキュメントを開く（表示はしない）
+        const document = await vscode.workspace.openTextDocument(tempUri);
+
+        // プレビューを表示
+        await vscode.commands.executeCommand('markdown.showPreview', tempUri);
+
+        return { uri: tempUri, document };
+    } catch (error) {
+        console.error('Error showing markdown preview:', error);
+        return undefined;
+    }
+}
+
+// プレビュータブを閉じる
+async function closePreviewTabs() {
+    const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs);
+    const closeTasks = tabs
+        .filter(tab => 
+            (tab.label.includes('Preview') || tab.label.includes('プレビュー')) &&
+            tab.input instanceof vscode.TabInputWebview
+        )
+        .map(tab => vscode.window.tabGroups.close(tab));
+    await Promise.all(closeTasks);
+}
+
+// プレビューファイルをクリーンアップ
+async function cleanupPreviewFiles() {
+    const previewDir = await getTempDir();
+    try {
+        const stats = await vscode.workspace.fs.stat(vscode.Uri.file(previewDir));
+        if (stats) {
+            await vscode.workspace.fs.delete(vscode.Uri.file(previewDir), { recursive: true });
+        }
+    } catch (error) {
+        // ディレクトリが存在しない場合は無視
+        if (error instanceof vscode.FileSystemError && error.code !== 'FileNotFound') {
+            console.error('Error cleaning up preview directory:', error);
+        }
+    }
+}
+
+// ファイル選択ダイアログ
+async function selectFiles(files: string[]): Promise<string[]> {
+    const items = files.map(file => ({
+        label: file,
+        picked: true
+    }));
+
+    const selectedItems = await vscode.window.showQuickPick(items, {
+        canPickMany: true,
+        placeHolder: 'Select files to include in analysis (Space to toggle selection)',
+        ignoreFocusOut: true
+    });
+
+    return selectedItems ? selectedItems.map(item => item.label) : [];
+}
+
+// 一時ディレクトリのパスを取得
+function getTempDir(): string {
+    return vscode.Uri.joinPath(vscode.Uri.file(require('os').tmpdir()), 'otak-committer').fsPath;
+}
+
+// プレビューファイルのパスを生成
+function getPreviewFilePath(): string {
+    const timestamp = Date.now();
+    const random = require('crypto').randomBytes(4).toString('hex');
+    return vscode.Uri.joinPath(
+        vscode.Uri.file(getTempDir()),
+        `issue-preview-${timestamp}-${random}.md`
+    ).fsPath;
 }

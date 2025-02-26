@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+import { BaseService, BaseServiceFactory } from './base';
 import {
+    ServiceConfig,
     GitHubAPI,
     PullRequestParams,
     IssueParams,
@@ -10,28 +12,38 @@ import {
     CreatePullRequestResponse,
     GitHubDiffFile,
     GitHubLabel
-} from '../types/github';
+} from '../types';
 
-const DEFAULT_BASE_BRANCHES = ['develop', 'main', 'master'];
+import { BranchManager, BranchSelector, BranchSelection } from './branch';
 
-export class GitHubService {
+export class GitHubService extends BaseService implements BranchManager {
     private octokit?: GitHubAPI;
     private owner: string = '';
     private repo: string = '';
     private initialized: boolean = false;
     private gitApi: any;
 
-    constructor(private token: string) {}
+    constructor(config?: Partial<ServiceConfig>) {
+        super(config);
+    }
 
     private async ensureInitialized(): Promise<void> {
         if (this.initialized) {return;}
+
+        const hasToken = await this.ensureConfig(
+            'githubToken',
+            'GitHub token is not configured. Would you like to configure it now?'
+        );
+        if (!hasToken) {
+            throw new Error('GitHub token is required');
+        }
 
         // プロキシ設定の取得
         const proxyUrl = vscode.workspace.getConfiguration('http').get<string>('proxy');
         
         const { Octokit } = await import('@octokit/rest');
         this.octokit = new Octokit({
-            auth: this.token,
+            auth: this.config.githubToken,
             userAgent: 'otak-committer',
             ...(proxyUrl ? {
                 request: {
@@ -82,99 +94,14 @@ export class GitHubService {
         return repo.state.HEAD?.name;
     }
 
-    static async showGitHubTokenPrompt(): Promise<boolean> {
-        const response = await vscode.window.showWarningMessage(
-            'GitHub token is not configured. Would you like to configure it now?',
-            'Yes',
-            'No'
-        );
-
-        if (response === 'Yes') {
-            await vscode.commands.executeCommand('workbench.action.openSettings', 'otakCommitter.github');
-            return true;
-        }
-        return false;
-    }
-
-    static async initializeGitHubClient(): Promise<GitHubService | undefined> {
-        const config = vscode.workspace.getConfiguration('otakCommitter.github');
-        const token = config.get<string>('token');
-
-        if (!token) {
-            await GitHubService.showGitHubTokenPrompt();
-            return undefined;
-        }
-
-        return new GitHubService(token);
-    }
-
-    private static sortBranches(branches: string[], currentBranch?: string): vscode.QuickPickItem[] {
-        return branches
-            .map(branch => ({
-                label: branch,
-                description: branch === currentBranch ? '(current)' : undefined,
-                sortOrder: DEFAULT_BASE_BRANCHES.indexOf(branch)
-            }))
-            .sort((a, b) => {
-                if (a.sortOrder !== -1 || b.sortOrder !== -1) {
-                    return (a.sortOrder === -1 ? 999 : a.sortOrder) - (b.sortOrder === -1 ? 999 : b.sortOrder);
-                }
-                return a.label.localeCompare(b.label);
-            });
-    }
-
-    static async selectBranches(): Promise<{ base: string; compare: string } | undefined> {
-        const github = await GitHubService.initializeGitHubClient();
-        if (!github) {
-            return undefined;
-        }
-
-        const branches = await github.getBranches();
-        const currentBranch = await github.getCurrentBranch();
-
-        const baseItems = this.sortBranches(
-            branches.filter(b => b !== currentBranch)
-        );
-        
-        const baseItem = await vscode.window.showQuickPick(baseItems, {
-            placeHolder: 'Select base branch'
-        });
-
-        if (!baseItem) {
-            return undefined;
-        }
-
-        const compareItems = branches
-            .filter(branch => branch !== baseItem.label)
-            .map(branch => ({
-                label: branch,
-                description: branch === currentBranch ? '(current)' : undefined
-            }))
-            .sort((a, b) => {
-                if (a.label === currentBranch) {return -1;}
-                if (b.label === currentBranch) {return 1;}
-                return a.label.localeCompare(b.label);
-            });
-
-        const compareItem = await vscode.window.showQuickPick(compareItems, {
-            placeHolder: 'Select compare branch'
-        });
-
-        if (!compareItem) {
-            return undefined;
-        }
-
-        return {
-            base: baseItem.label,
-            compare: compareItem.label
-        };
+    static async selectBranches(): Promise<BranchSelection | undefined> {
+        const service = await GitHubServiceFactory.initialize();
+        return service ? BranchSelector.selectBranches(service) : undefined;
     }
 
     async getBranchDiffDetails(base: string, compare: string): Promise<PullRequestDiff> {
         await this.ensureInitialized();
-        if (!this.octokit) {
-            throw new Error('GitHub client not initialized');
-        }
+        this.validateState(!!this.octokit, 'GitHub client not initialized');
 
         try {
             const response = await this.octokit.repos.compareCommits({
@@ -205,20 +132,14 @@ export class GitHubService {
                     deletions: files.reduce((sum: number, file: GitHubDiffFile) => sum + file.deletions, 0)
                 }
             };
-        } catch (error: any) {
-            throw new GitHubApiError(
-                `Failed to get diff: ${error.message}`,
-                error.status,
-                error.response?.data
-            );
+        } catch (error) {
+            this.handleError(error);
         }
     }
 
     async getIssue(number: number): Promise<IssueInfo> {
         await this.ensureInitialized();
-        if (!this.octokit) {
-            throw new Error('GitHub client not initialized');
-        }
+        this.validateState(!!this.octokit, 'GitHub client not initialized');
 
         try {
             const response = await this.octokit.issues.get({
@@ -228,10 +149,7 @@ export class GitHubService {
             });
 
             if (response.status !== 200) {
-                throw new GitHubApiError(
-                    'Failed to get issue',
-                    response.status
-                );
+                throw new GitHubApiError('Failed to get issue', response.status);
             }
 
             return {
@@ -242,20 +160,14 @@ export class GitHubService {
                     typeof label === 'string' ? label : label.name || ''
                 )
             };
-        } catch (error: any) {
-            throw new GitHubApiError(
-                `Failed to get issue: ${error.message}`,
-                error.status,
-                error.response?.data
-            );
+        } catch (error) {
+            this.handleError(error);
         }
     }
 
     async createPullRequest(params: PullRequestParams): Promise<CreatePullRequestResponse> {
         await this.ensureInitialized();
-        if (!this.octokit) {
-            throw new Error('GitHub client not initialized');
-        }
+        this.validateState(!!this.octokit, 'GitHub client not initialized');
 
         try {
             let title = params.title;
@@ -283,10 +195,7 @@ export class GitHubService {
             });
 
             if (response.status !== 201) {
-                throw new GitHubApiError(
-                    'Failed to create pull request',
-                    response.status
-                );
+                throw new GitHubApiError('Failed to create pull request', response.status);
             }
 
             return {
@@ -294,23 +203,17 @@ export class GitHubService {
                 html_url: response.data.html_url,
                 draft: params.draft || false
             };
-        } catch (error: any) {
-            if (error.message === 'No changes to create a pull request') {
-                throw new Error(error.message);
+        } catch (error) {
+            if (error instanceof Error && error.message === 'No changes to create a pull request') {
+                throw error;
             }
-            throw new GitHubApiError(
-                `Failed to create pull request: ${error.message}`,
-                error.status,
-                error.response?.data
-            );
+            this.handleError(error);
         }
     }
 
     async createIssue(params: IssueParams): Promise<{ number: number; html_url: string }> {
         await this.ensureInitialized();
-        if (!this.octokit) {
-            throw new Error('GitHub client not initialized');
-        }
+        this.validateState(!!this.octokit, 'GitHub client not initialized');
 
         try {
             const response = await this.octokit.issues.create({
@@ -322,30 +225,21 @@ export class GitHubService {
             });
 
             if (response.status !== 201) {
-                throw new GitHubApiError(
-                    'Failed to create issue',
-                    response.status
-                );
+                throw new GitHubApiError('Failed to create issue', response.status);
             }
 
             return {
                 number: response.data.number,
                 html_url: response.data.html_url
             };
-        } catch (error: any) {
-            throw new GitHubApiError(
-                `Failed to create issue: ${error.message}`,
-                error.status,
-                error.response?.data
-            );
+        } catch (error) {
+            this.handleError(error);
         }
     }
 
     async getBranches(): Promise<string[]> {
         await this.ensureInitialized();
-        if (!this.octokit) {
-            throw new Error('GitHub client not initialized');
-        }
+        this.validateState(!!this.octokit, 'GitHub client not initialized');
 
         try {
             const response = await this.octokit.repos.listBranches({
@@ -355,27 +249,18 @@ export class GitHubService {
             });
 
             if (response.status !== 200) {
-                throw new GitHubApiError(
-                    'Failed to get branches',
-                    response.status
-                );
+                throw new GitHubApiError('Failed to get branches', response.status);
             }
 
             return response.data.map(branch => branch.name);
-        } catch (error: any) {
-            throw new GitHubApiError(
-                `Failed to get branches: ${error.message}`,
-                error.status,
-                error.response?.data
-            );
+        } catch (error) {
+            this.handleError(error);
         }
     }
 
     async getIssues(): Promise<IssueInfo[]> {
         await this.ensureInitialized();
-        if (!this.octokit) {
-            throw new Error('GitHub client not initialized');
-        }
+        this.validateState(!!this.octokit, 'GitHub client not initialized');
 
         try {
             const response = await this.octokit.issues.listForRepo({
@@ -388,10 +273,7 @@ export class GitHubService {
             });
 
             if (response.status !== 200) {
-                throw new GitHubApiError(
-                    'Failed to get issues',
-                    response.status
-                );
+                throw new GitHubApiError('Failed to get issues', response.status);
             }
 
             return response.data
@@ -404,12 +286,29 @@ export class GitHubService {
                         typeof label === 'string' ? label : label.name || ''
                     )
                 }));
-        } catch (error: any) {
-            throw new GitHubApiError(
-                `Failed to get issues: ${error.message}`,
-                error.status,
-                error.response?.data
+        } catch (error) {
+            this.handleError(error);
+        }
+    }
+}
+
+export class GitHubServiceFactory extends BaseServiceFactory<GitHubService> {
+    async create(config?: Partial<ServiceConfig>): Promise<GitHubService> {
+        return new GitHubService(config);
+    }
+
+    static async initialize(config?: Partial<ServiceConfig>): Promise<GitHubService | undefined> {
+        try {
+            const factory = new GitHubServiceFactory();
+            return await factory.create(config);
+        } catch (error) {
+            console.error('Failed to initialize GitHub service:', error);
+            vscode.window.showErrorMessage(
+                error instanceof Error 
+                    ? error.message 
+                    : 'Failed to initialize GitHub service'
             );
+            return undefined;
         }
     }
 }

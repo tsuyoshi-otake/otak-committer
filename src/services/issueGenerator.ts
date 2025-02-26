@@ -1,60 +1,38 @@
 import * as vscode from 'vscode';
-import { OpenAIService } from './openai';
-import { GitService } from './git';
-import { GitHubService } from './github';
+import { OpenAIService, OpenAIServiceFactory } from './openai';
+import { GitService, GitServiceFactory } from './git';
+import { GitHubService, GitHubServiceFactory } from './github';
+import { BaseService, BaseServiceFactory } from './base';
+import { ServiceConfig } from '../types';
+import {
+    IssueType,
+    IssueGenerationParams,
+    GeneratedIssueContent
+} from '../types/issue';
 
-interface IssueType {
-    label: string;
-    description: string;
-    type: 'task' | 'bug' | 'feature' | 'docs' | 'refactor';
+interface FileAnalysis {
+    path: string;
+    content?: string;
+    type?: string;
+    error?: string;
 }
 
-interface IssueGenerationParams {
-    type: IssueType;
-    description: string;
-    files?: string[];
-}
-
-export interface GeneratedIssueContent {
-    title: string;
-    body: string;
-}
-
-export class IssueGeneratorService {
-    protected git: GitService;
-
+export class IssueGeneratorService extends BaseService {
     constructor(
-        private openai: OpenAIService,
-        private github: GitHubService,
-        git: GitService
+        private readonly openai: OpenAIService,
+        private readonly github: GitHubService,
+        private readonly git: GitService,
+        config?: Partial<ServiceConfig>
     ) {
-        this.git = git;
-    }
-
-    static async initialize(): Promise<IssueGeneratorService | undefined> {
-        try {
-            const git = await GitService.initialize();
-            const github = await GitHubService.initializeGitHubClient();
-            const openai = await OpenAIService.initialize();
-
-            if (!git || !github || !openai) {
-                return undefined;
-            }
-
-            return new IssueGeneratorService(openai, github, git);
-        } catch (error: any) {
-            vscode.window.showErrorMessage(`Failed to initialize Issue Generator: ${error.message}`);
-            return undefined;
-        }
+        super(config);
     }
 
     async getTrackedFiles(): Promise<string[]> {
-        return await this.git.getTrackedFiles();
+        return this.git.getTrackedFiles();
     }
 
     getAvailableTypes(): IssueType[] {
-        const config = vscode.workspace.getConfiguration('otakCommitter');
-        const useEmoji = config.get<boolean>('useEmoji') || false;
+        const useEmoji = this.config.useEmoji || false;
 
         return [
             {
@@ -86,159 +64,139 @@ export class IssueGeneratorService {
     }
 
     private async generateTitle(type: string, description: string): Promise<string> {
-        const response = await this.openai.openai.chat.completions.create({
-            model: 'chatgpt-4o-latest',
-            messages: [{
-                role: 'user',
-                content: `Create a concise English title (maximum 50 characters) for this ${type} based on the following description:\n\n${description}\n\nRequirements:\n- Must be in English\n- Maximum 50 characters\n- Clear and descriptive\n- No technical jargon unless necessary`
-            }],
-            temperature: 0.1,
-            max_tokens: 50
-        });
-
-        return response.choices[0].message.content?.trim() || description.slice(0, 50);
-    }
-
-    private async analyzeRepository(selectedFiles?: string[]): Promise<string> {
-        const files = selectedFiles || await this.git.getTrackedFiles();
-
-        // Create directory structure
-        const directoryStructure: { [key: string]: string[] } = {};
-        files
-            .filter(file => !file.includes('node_modules') && 
-                          !file.includes('dist') && 
-                          !file.includes('build') &&
-                          !file.includes('.git'))
-            .forEach(file => {
-                const parts = file.split('/');
-                if (parts.length > 1) {
-                    const topDir = parts[0];
-                    if (parts.length === 2) {
-                        if (!directoryStructure[topDir]) {
-                            directoryStructure[topDir] = [];
-                        }
-                        directoryStructure[topDir].push(parts[1]);
-                    } else if (parts.length > 2) {
-                        const subDir = `${parts[0]}/${parts[1]}`;
-                        if (!directoryStructure[subDir]) {
-                            directoryStructure[subDir] = [];
-                        }
-                        if (parts.length === 3) {
-                            directoryStructure[subDir].push(parts[2]);
-                        }
-                    }
-                }
+        try {
+            const title = await this.openai.createChatCompletion({
+                prompt: `Create a concise title (maximum 50 characters) in ${this.config.language || 'english'} for this ${type} based on the following description:\n\n${description}\n\nRequirements:\n- Must be in ${this.config.language || 'english'}\n- Maximum 50 characters\n- Clear and descriptive\n- No technical jargon unless necessary`,
+                temperature: 0.1,
+                maxTokens: 50
             });
 
-        return Object.entries(directoryStructure)
-            .map(([dir, files]) => `${dir}/\n${files.map(f => `  - ${f}`).join('\n')}`)
-            .join('\n\n');
+            return title || description.slice(0, 50);
+        } catch (error) {
+            this.showError('Failed to generate title', error);
+            return description.slice(0, 50);
+        }
     }
 
-    private getTemplateForType(type: string): string {
-        return type === 'task' 
-            ? this.getTaskTemplate() 
-            : this.getStandardTemplate();
+    private async analyzeFiles(files: string[]): Promise<FileAnalysis[]> {
+        const analyses: FileAnalysis[] = [];
+        const maxPreviewLength = 1000; // ファイルごとのプレビュー最大文字数
+
+        for (const file of files) {
+            try {
+                const fileUri = vscode.Uri.file(file);
+                const fileContent = await vscode.workspace.fs.readFile(fileUri);
+                const decoder = new TextDecoder();
+                let content = decoder.decode(fileContent);
+
+                // ファイル拡張子から種類を判定
+                const extension = file.split('.').pop()?.toLowerCase();
+                const type = this.getFileType(extension);
+
+                // ファイルの内容を要約（最初の1000文字まで）
+                if (content.length > maxPreviewLength) {
+                    content = content.substring(0, maxPreviewLength) + '\n... (content truncated)';
+                }
+
+                analyses.push({
+                    path: file,
+                    content: content,
+                    type: type
+                });
+            } catch (error) {
+                analyses.push({
+                    path: file,
+                    error: error instanceof Error ? error.message : 'Unknown error'
+                });
+            }
+        }
+
+        return analyses;
     }
 
-    private getTaskTemplate(): string {
-        return `Please provide output in the following format:
+    private getFileType(extension: string | undefined): string {
+        const typeMap: { [key: string]: string } = {
+            ts: 'TypeScript',
+            js: 'JavaScript',
+            jsx: 'React JavaScript',
+            tsx: 'React TypeScript',
+            css: 'CSS',
+            scss: 'SCSS',
+            html: 'HTML',
+            json: 'JSON',
+            md: 'Markdown',
+            py: 'Python',
+            java: 'Java',
+            cpp: 'C++',
+            c: 'C',
+            go: 'Go',
+            rs: 'Rust',
+            php: 'PHP',
+            rb: 'Ruby'
+        };
 
-### Purpose
-[Task purpose and background]
-
-### Task Details
-- [Specific task 1]
-- [Specific task 2]
-...
-
-### Completion Criteria
-- [ ] [Criteria 1]
-- [ ] [Criteria 2]
-...
-
-### Related Information
-- Impact: [Affected components and features]
-- Dependencies: [Dependencies on other tasks or issues]
-- Priority: [High/Medium/Low]
-- Estimated Time: [Expected completion time]
-
-### Additional Context
-- [Other important information]
-- [References and links]`;
+        return extension ? (typeMap[extension] || 'Unknown') : 'Unknown';
     }
 
-    private getStandardTemplate(): string {
-        return `Please provide output in the following format:
+    private formatAnalysisResult(analyses: FileAnalysis[]): string {
+        let result = '# Repository Analysis\n\n';
 
-### Description
-[Detailed explanation based on user description]
+        // ファイルタイプごとにグループ化
+        const groupedByType = analyses.reduce((groups: { [key: string]: FileAnalysis[] }, analysis) => {
+            const type = analysis.type || 'Unknown';
+            if (!groups[type]) {
+                groups[type] = [];
+            }
+            groups[type].push(analysis);
+            return groups;
+        }, {});
 
-### Steps to Reproduce (for bugs) or Implementation Details (for features)
-1. [Step 1]
-2. [Step 2]
-...
+        // 各タイプのファイルをまとめて表示
+        for (const [type, files] of Object.entries(groupedByType)) {
+            result += `## ${type} Files\n\n`;
+            for (const file of files) {
+                result += `### ${file.path}\n\n`;
+                if (file.error) {
+                    result += `Error: ${file.error}\n\n`;
+                } else if (file.content) {
+                    result += '```' + (type.toLowerCase().includes('typescript') ? 'typescript' : '') + '\n';
+                    result += file.content;
+                    result += '\n```\n\n';
+                }
+            }
+        }
 
-### Expected Behavior
-[Expected behavior or outcome]
-
-### Current Behavior (for bugs)
-[Current behavior or issue]
-
-### Technical Details
-- Affected Files
-- Related Components
-- Proposed Changes
-
-### Additional Context
-- Environment Information
-- Related Settings
-- Other Important Information
-
-### Checklist
-- [ ] Documentation update required
-- [ ] Tests addition/update required
-- [ ] Breaking changes included`;
+        return result;
     }
 
     async generatePreview(params: IssueGenerationParams): Promise<GeneratedIssueContent> {
         try {
-            const structure = await this.analyzeRepository(params.files);
-            const template = this.getTemplateForType(params.type.type);
+            // ファイル解析
+            const fileAnalyses = params.files && params.files.length > 0
+                ? await this.analyzeFiles(params.files)
+                : [];
+            
+            const analysisResult = this.formatAnalysisResult(fileAnalyses);
 
-            const prompt = `
-Generate a GitHub issue based on the following user input and repository analysis.
-
-Issue Type: ${params.type.type}
-User Description: ${params.description}
-
-Repository Structure:
-${structure}
-
-${template}`;
-
-            const response = await this.openai.openai.chat.completions.create({
-                model: 'chatgpt-4o-latest',
-                messages: [
-                    { role: 'user', content: prompt }
-                ],
-                temperature: 0.1,
-                max_tokens: 1000
+            const prompt = `${params.type.type === 'task' ? 'issue.task' : 'issue.standard'}`;
+            const body = await this.openai.createChatCompletion({
+                prompt: `${prompt}\n\nRepository Analysis:\n${analysisResult}\n\nUser Description: ${params.description}`,
+                maxTokens: 1000,
+                temperature: 0.1
             });
 
-            const body = response.choices[0].message.content || 'Failed to generate content';
+            if (!body) throw new Error('Failed to generate content');
             const title = await this.generateTitle(params.type.type, params.description);
 
             return { title, body };
-        } catch (error: any) {
-            throw new Error(`Failed to generate preview: ${error.message}`);
+        } catch (error) {
+            throw new Error(`Failed to generate preview: ${error}`);
         }
     }
 
     async createIssue(content: GeneratedIssueContent, type: IssueType): Promise<string | undefined> {
         try {
-            const config = vscode.workspace.getConfiguration('otakCommitter');
-            const useEmoji = config.get<boolean>('useEmoji') || false;
+            const useEmoji = this.config.useEmoji || false;
 
             const issueTitle = useEmoji 
                 ? `${type.label.split(' ')[0]} ${content.title}`
@@ -250,9 +208,39 @@ ${template}`;
             });
 
             return issue.html_url;
+        } catch (error) {
+            this.showError('Failed to create issue', error);
+            return undefined;
+        }
+    }
+}
 
-        } catch (error: any) {
-            vscode.window.showErrorMessage(`Failed to create issue: ${error.message}`);
+export class IssueGeneratorServiceFactory extends BaseServiceFactory<IssueGeneratorService> {
+    async create(config?: Partial<ServiceConfig>): Promise<IssueGeneratorService> {
+        const [openai, github, git] = await Promise.all([
+            OpenAIServiceFactory.initialize(config),
+            GitHubServiceFactory.initialize(config),
+            GitServiceFactory.initialize(config)
+        ]);
+
+        if (!openai || !github || !git) {
+            throw new Error('Failed to initialize required services');
+        }
+
+        return new IssueGeneratorService(openai, github, git, config);
+    }
+
+    static async initialize(config?: Partial<ServiceConfig>): Promise<IssueGeneratorService | undefined> {
+        try {
+            const factory = new IssueGeneratorServiceFactory();
+            return await factory.create(config);
+        } catch (error) {
+            console.error('Failed to initialize Issue Generator service:', error);
+            vscode.window.showErrorMessage(
+                error instanceof Error 
+                    ? error.message 
+                    : 'Failed to initialize Issue Generator service'
+            );
             return undefined;
         }
     }

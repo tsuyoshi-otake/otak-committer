@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import { GitService } from '../services/git.js';
-import { OpenAIService } from '../services/openai.js';
-import { MessageStyle } from '../types/messageStyle.js';
+import { GitService, GitServiceFactory } from '../services/git';
+import { OpenAIService } from '../services/openai';
+import { MessageStyle } from '../types/messageStyle';
 
 export async function generateCommit(): Promise<void> {
     try {
@@ -9,7 +9,7 @@ export async function generateCommit(): Promise<void> {
 
         // Git差分の取得
         console.log('Initializing GitService...');
-        const git = await GitService.initialize();
+        const git = await GitServiceFactory.initialize();
         if (!git) {
             return;
         }

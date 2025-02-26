@@ -2,7 +2,9 @@ export type PromptType =
     | 'system'
     | 'commit'
     | 'prTitle'
-    | 'prBody';
+    | 'prBody'
+    | 'issue.task'
+    | 'issue.standard';
 
 export interface LanguageSettings {
     language: string;
