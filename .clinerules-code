@@ -1,37 +1,83 @@
-# コード規約
+# Code Conventions
 
-## 1. プロジェクト構造
+## 1. Project Structure and Dependencies
+
+### 1.1 Basic Structure
+
 ```
 src/
-├── commands/       # コマンド実装
-│   ├── generateCommit.ts  # コミットメッセージ生成
-│   └── generatePR.ts      # PR生成
-├── services/       # サービス層
-│   ├── git.ts     # Git操作
-│   ├── github.ts  # GitHub API
-│   └── openai.ts  # OpenAI API
-├── languages/      # 多言語サポート
-│   ├── asian.ts          # アジア言語
-│   ├── european.ts       # 欧米言語
-│   ├── middleEastern.ts  # 中東言語
-│   └── index.ts          # 言語設定
-└── types/         # 型定義
-    ├── git.ts     # Git関連の型
-    ├── github.ts  # GitHub関連の型
-    ├── language.ts # 言語関連の型
-    └── messageStyle.ts # メッセージスタイル
+├── commands/       # Command implementations
+│   ├── generateCommit.ts  # Generate commit messages
+│   ├── generateIssue.ts   # Issue generation
+│   └── generatePR.ts      # PR generation
+├── services/       # Service layer
+│   ├── git.ts            # Git operations (diff retrieval, state management)
+│   ├── github.ts         # GitHub API (PR/Issue creation)
+│   ├── issueGenerator.ts # Issue generation logic
+│   └── openai.ts         # OpenAI API (text generation)
+├── languages/      # Multilingual support
+│   ├── asian.ts           # Asian languages
+│   ├── european.ts        # Western languages
+│   ├── middleEastern.ts   # Middle Eastern languages
+│   ├── english.ts         # English prompts
+│   ├── japanese.ts        # Japanese prompts
+│   └── index.ts           # Aggregation of language settings
+├── types/         # Type definitions
+│   ├── git.ts     # Git-related types
+│   ├── github.ts  # GitHub-related types
+│   ├── language.ts # Language-related types
+│   └── messageStyle.ts # Message style definitions
+└── utils/         # Utility functions
+    ├── fileSelector.ts # File selection UI
+    └── preview.ts     # Preview display
 ```
 
-## 2. コーディング規則
+### 1.2 Dependencies of Main Components
 
-### 2.1 TypeScript設定
-- strict: true
-- noImplicitAny: true
-- esModuleInterop: true
-- skipLibCheck: true
+#### Entry Point
+- `extension.ts`
+  - Initializes the extension and loads configurations
+  - Registers commands (generateCommit, generateIssue, generatePR)
+  - Manages language settings (`LANGUAGE_CONFIGS`) and message styles
 
-### 2.2 APIサービス実装
-```typescript
+#### Commands Dependencies
+- `generateCommit.ts`
+  - → `git.ts`: Retrieve diffs
+  - → `openai.ts`: Generate messages
+  - → `messageStyle.ts`: Style definitions
+  - → `commitGuide.ts`: Prefix information
+
+- `generateIssue.ts`
+  - → `issueGenerator.ts`: Issue generation logic
+  - → `git.ts`: Repository analysis
+  - → `github.ts`: Issue creation
+  - → `fileSelector.ts`: File selection UI
+  - → `preview.ts`: Preview display
+
+- `generatePR.ts`
+  - → `github.ts`: Branch information and PR creation
+  - → `git.ts`: Local operations
+  - → `openai.ts`: Title and body generation
+  - → `preview.ts`: Preview display
+
+#### Role and Collaboration within the Service Layer
+- `git.ts`: Local Git operations
+- `github.ts`: GitHub API operations
+- `issueGenerator.ts`: Integrated issue generation
+- `openai.ts`: Natural language generation
+  - Works in conjunction with language files to generate prompts
+
+## 2. Coding Guidelines
+
+### 2.1 TypeScript Settings
+- `strict`: true
+- `noImplicitAny`: true
+- `esModuleInterop`: true
+- `skipLibCheck`: true
+
+### 2.2 API Service Implementation
+
+```typescript file: APIService.ts
 export class APIService {
     private client: Client;
     
@@ -40,12 +86,12 @@ export class APIService {
     }
     
     static async initialize(): Promise<APIService | undefined> {
-        // 初期化ロジック
+        // Initialization logic
     }
     
     async operation(): Promise<Result> {
         try {
-            // 操作実行
+            // Execute operation
         } catch (error: any) {
             throw new Error(`Failed: ${error.message}`);
         }
@@ -53,8 +99,9 @@ export class APIService {
 }
 ```
 
-### 2.3 多言語サポート
-```typescript
+### 2.3 Multilingual Support
+
+```typescript file: languagePrompt.ts
 export const getPrompt = (type: PromptType): string => {
     const prompts = {
         system: `...`,
@@ -65,85 +112,101 @@ export const getPrompt = (type: PromptType): string => {
 };
 ```
 
-### 2.4 エラーハンドリング
-```typescript
+### 2.4 Error Handling
+
+```typescript file: errorHandling.ts
 try {
     await operation();
 } catch (error: any) {
-    vscode.window.showErrorMessage(`エラー: ${error.message}`);
+    vscode.window.showErrorMessage(`Error: ${error.message}`);
     return undefined;
 }
 ```
 
-## 3. 機能実装
+## 3. Feature Implementation
 
-### 3.1 コミットメッセージ生成
-1. Git差分の取得
-2. OpenAI APIによる生成
-3. スタイル適用
-4. コミット実行
+### 3.1 Commit Message Generation
+1. Retrieve Git diff (via `git.ts`)
+2. Generate text using the OpenAI API (`openai.ts`)
+3. Apply the message style
+4. Reflect the changes in the SCM input field
 
-### 3.2 PR生成
-1. 差分情報の収集
-2. Issue連携（オプション）
-3. タイトル・説明の自動生成
-4. PR作成
+### 3.2 Issue Generation
+1. Select the type of Issue
+2. Choose the files to analyze (via `fileSelector.ts`)
+3. Generate a preview (via `preview.ts`)
+4. Create the GitHub Issue (via `github.ts`)
 
-### 3.3 設定管理
-```typescript
+### 3.3 PR Generation
+1. Retrieve branch information and diff
+2. Generate the title and body using OpenAI
+3. Display a preview for confirmation
+4. Execute the PR creation
+
+### 3.4 Configuration Management
+
+```typescript file: config.ts
 const config = vscode.workspace.getConfiguration('otakCommitter');
 const language = config.get<string>('language') || 'japanese';
 const messageStyle = config.get<MessageStyle>('messageStyle') || 'normal';
 ```
 
-## 4. テスト規約
+## 4. Testing Guidelines
 
-### 4.1 ユニットテスト
-```typescript
+### 4.1 Unit Tests
+
+```typescript file: componentTest.ts
 suite('Component Test', () => {
     test('should behave correctly', () => {
-        // テストケース
+        // Test cases
     });
 });
 ```
 
-### 4.2 設定テスト
-```typescript
+### 4.2 Configuration Tests
+
+```typescript file: configurationTest.ts
 test('Configuration loads', () => {
     const config = vscode.workspace.getConfiguration('otakCommitter');
     assert.ok(config.get('setting'));
 });
 ```
 
-## 5. ビルド・パッケージング
-```bash
+## 5. Build and Packaging
+
+```bash file: build.sh
 npm run vscode:prepublish && npx @vscode/vsce package
 ```
 
-## 6. 環境変数
-- OPENAI_API_KEY: OpenAI APIキー
-- GITHUB_TOKEN: GitHub個人アクセストークン
+## 6. Environment Variables
 
-## 7. 依存関係管理
-- simple-git: Gitクライアント
-- openai: OpenAI API SDK
-- @types/*: 型定義ファイル
+- `OPENAI_API_KEY`: OpenAI API key
+- `GITHUB_TOKEN`: GitHub personal access token
 
-## 8. コードレビュー基準
-1. 型安全性の確保
-2. エラーハンドリングの徹底
-3. 設定値の適切な利用
-4. インターフェースの一貫性
-5. パフォーマンスへの配慮
+## 7. Dependency Management
 
-## 9. パフォーマンス考慮事項
-1. 非同期処理の適切な利用
-2. メモリ使用量の最適化
-3. API呼び出しの制御
-4. キャッシュの活用
+- `simple-git`: Git client
+- `openai`: OpenAI API SDK
+- `@types/*`: Type definition packages
 
-## 10. セキュリティ
-1. APIキーの安全な管理
-2. トークンの適切な取り扱い
-3. 機密情報の保護
-4. 入力値の検証
+## 8. Code Review Criteria
+
+1. Ensure type safety
+2. Thorough error handling
+3. Proper utilization of configuration values
+4. Consistency in interfaces
+5. Consideration for performance
+
+## 9. Performance Considerations
+
+1. Proper use of asynchronous processing
+2. Memory usage optimization
+3. Control of API calls
+4. Utilization of caching
+
+## 10. Security
+
+1. Secure management of API keys
+2. Appropriate handling of tokens
+3. Protection of sensitive information
+4. Validation of input values

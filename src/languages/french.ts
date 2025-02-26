@@ -3,59 +3,115 @@ import { PromptType } from '../types/language';
 export const getFrenchPrompt = (type: PromptType): string => {
     const prompts: Record<PromptType, string> = {
         system: `
-Je suis un ingénieur logiciel expérimenté qui aide à la création de messages de commit et de PR.
-Ma sortie a les caractéristiques suivantes :
+En tant qu'ingénieur logiciel senior, fournissez des conseils de haut niveau pour les modifications de code.
+Vos retours doivent avoir les caractéristiques suivantes :
 
-- Français clair et concis
-- Expressions techniquement précises
-- Résumé approprié des changements
+- Focus sur les implications architecturales et de conception
+- Suggérer des améliorations plutôt que des implémentations spécifiques
+- Considérer la maintenabilité et l'évolutivité
 `,
         commit: `
-En fonction du diff fourni, générez un message de commit de style {{style}}.
+Analysez les modifications fournies et suggérez des points clés pour le message de commit.
+Considérez :
 
-Description du style :
-- normal : Écriture technique standard
-- emoji : Ton amical avec émojis
-- kawaii : Ton mignon et amical
+Contexte de style :
+- normal : Revue technique professionnelle
+- emoji : Conseils conviviaux
+- kawaii : Retour décontracté
 
-Diff :
+Modifications à examiner :
 {{diff}}
 `,
         prTitle: `
-En fonction du diff suivant, générez un titre de Pull Request.
+Analysez les modifications suivantes et suggérez des points importants pour le titre de la PR.
+Considérez :
 
-Exigences :
-1. Le titre doit être concis et représenter précisément les changements
-2. Inclure un préfixe (par exemple, "Feature:", "Fix:", "Improvement:", etc.)
+- Quel est l'impact principal de ces modifications ?
+- Quelle zone est la plus affectée ?
+- Quel type de changement est-ce ? (fonctionnalité, correction, amélioration)
 
-Diff :
+Modifications à examiner :
 {{diff}}
 `,
         prBody: `
-En fonction du diff suivant, générez une description détaillée de Pull Request.
+Examinez ces modifications et fournissez des conseils pour la description de la Pull Request.
+Considérez ces aspects :
 
-# Aperçu
-- Brève explication des fonctionnalités ou corrections implémentées
-- Objectif et contexte des changements
-- Approche technique adoptée
+# Aperçu Stratégique
+- Quel problème cela résout-il ?
+- Pourquoi cette approche a-t-elle été choisie ?
+- Quelles sont les décisions techniques clés ?
 
-# Points clés de revue
-- Zones nécessitant une attention particulière des relecteurs
-- Décisions de conception importantes
-- Considérations de performance et de maintenabilité
+# Points de Revue
+- Quelles zones nécessitent une attention particulière ?
+- Quels sont les risques potentiels ?
+- Quelles considérations de performance ?
 
-# Détails des changements
-- Principaux changements implémentés
-- Composants et fonctionnalités affectés
-- Changements de dépendances (le cas échéant)
+# Revue d'Implémentation
+- Quels sont les changements principaux ?
+- Comment cela affecte-t-il le système ?
+- Quelles dépendances à considérer ?
 
-# Notes additionnelles
-- Considérations de déploiement
-- Impact sur les fonctionnalités existantes
-- Variables de configuration ou d'environnement requises
+# Exigences de Revue
+- Que faut-il tester ?
+- Quelles considérations de déploiement ?
+- Quelle documentation est nécessaire ?
 
-Diff :
+Modifications à examiner :
 {{diff}}
+`,
+        'issue.task': `
+Analysez la tâche et suggérez les points clés à considérer :
+
+### Objectif
+- Quel problème doit être résolu ?
+- Pourquoi est-ce important maintenant ?
+
+### Guide d'Implémentation
+- Quelles zones doivent être considérées ?
+- Quelles approches sont possibles ?
+
+### Critères de Réussite
+- Comment vérifier l'achèvement ?
+- Quelles sont les exigences de qualité ?
+
+### Considérations Stratégiques
+- Qu'est-ce qui pourrait être impacté ?
+- Quelles dépendances à considérer ?
+- Quel niveau de priorité ?
+- Quel calendrier raisonnable ?
+
+### Notes de Planification
+- Quelles ressources sont nécessaires ?
+- Quels risques à considérer ?
+`,
+        'issue.standard': `
+Analysez ce problème et fournissez des conseils sur les points clés à aborder.
+Considérez :
+
+### Analyse du Problème
+- Quel est le problème central ?
+- Quel contexte est important ?
+
+### Revue Technique
+- Quelles parties du système sont impliquées ?
+- Quelles approches devraient être considérées ?
+- Quelles sont les solutions possibles ?
+
+### Guide d'Implémentation
+- Quelles étapes sont nécessaires ?
+- Que faut-il tester ?
+- Quelles sont les contraintes techniques ?
+
+### Évaluation d'Impact
+- Quelles zones seront affectées ?
+- Quels effets secondaires à considérer ?
+- Quelles précautions sont nécessaires ?
+
+### Exigences de Revue
+- Quelle documentation est nécessaire ?
+- Que faut-il tester ?
+- Y a-t-il des changements importants ?
 `
     };
 

@@ -1,80 +1,13 @@
 import * as vscode from 'vscode';
-import { GitHubService } from '../services/github';
+import { GitHubService, GitHubServiceFactory } from '../services/github';
 import { OpenAIService } from '../services/openai';
-import { GitService } from '../services/git';
-import * as os from 'os';
-import * as path from 'path';
-import * as crypto from 'crypto';
+import { GitService, GitServiceFactory } from '../services/git';
 
 interface Issue {
     number: number;
     title: string;
     labels: string[];
     html_url?: string;
-}
-
-const PREVIEW_DIR = path.join(os.tmpdir(), 'otak-committer');
-
-// 一時ディレクトリのクリーンアップ
-export async function cleanupPreviewFiles() {
-    try {
-        const stats = await vscode.workspace.fs.stat(vscode.Uri.file(PREVIEW_DIR));
-        if (stats) {
-            await vscode.workspace.fs.delete(vscode.Uri.file(PREVIEW_DIR), { recursive: true });
-        }
-    } catch (error) {
-        // ディレクトリが存在しない場合は無視
-        if (error instanceof vscode.FileSystemError && error.code !== 'FileNotFound') {
-            console.error('Error cleaning up preview directory:', error);
-        }
-    }
-}
-
-// ランダムなファイル名を生成
-function generateRandomFileName(): string {
-    const timestamp = Date.now();
-    const random = crypto.randomBytes(4).toString('hex');
-    return `pr-preview-${timestamp}-${random}.md`;
-}
-
-async function closePreviewTabs() {
-    const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs);
-    const closeTasks = tabs
-        .filter(tab => 
-            (tab.label.includes('Preview') || tab.label.includes('プレビュー')) &&
-            tab.input instanceof vscode.TabInputWebview
-        )
-        .map(tab => vscode.window.tabGroups.close(tab));
-    await Promise.all(closeTasks);
-}
-
-async function showMarkdownPreview(content: string): Promise<{ uri: vscode.Uri, document: vscode.TextDocument } | undefined> {
-    try {
-        // 一時ディレクトリをクリーンアップして再作成
-        await cleanupPreviewFiles();
-        await vscode.workspace.fs.createDirectory(vscode.Uri.file(PREVIEW_DIR));
-
-        // ランダムなファイル名で一時ファイルを作成
-        const tempUri = vscode.Uri.file(path.join(PREVIEW_DIR, generateRandomFileName()));
-
-        // まず以前のプレビューを閉じる
-        await closePreviewTabs();
-
-        // ファイルを書き込む
-        const encoder = new TextEncoder();
-        await vscode.workspace.fs.writeFile(tempUri, encoder.encode(content));
-
-        // ドキュメントを開く（表示はしない）
-        const document = await vscode.workspace.openTextDocument(tempUri);
-
-        // プレビューを表示
-        await vscode.commands.executeCommand('markdown.showPreview', tempUri);
-
-        return { uri: tempUri, document };
-    } catch (error) {
-        console.error('Error showing markdown preview:', error);
-        return undefined;
-    }
 }
 
 export async function generatePR(): Promise<void> {
@@ -88,7 +21,7 @@ export async function generatePR(): Promise<void> {
         }
 
         // PR作成
-        const github = await GitHubService.initializeGitHubClient();
+        const github = await GitHubServiceFactory.initialize();
         if (!github) {
             return;
         }
@@ -118,7 +51,7 @@ export async function generatePR(): Promise<void> {
         }
 
         // GitServiceの初期化
-        const gitService = await GitService.initialize();
+        const gitService = await GitServiceFactory.initialize();
         if (!gitService) {
             return;
         }
@@ -272,6 +205,7 @@ export async function generatePR(): Promise<void> {
                 // プレビューを閉じてクリーンアップ
                 await closePreviewTabs();
                 await cleanupPreviewFiles();
+                previewFile = undefined;
 
                 const prTypeStr = result.draft ? 'Draft PR' : 'Pull Request';
                 const action = await vscode.window.showInformationMessage(
@@ -282,8 +216,6 @@ export async function generatePR(): Promise<void> {
                 if (action === 'Open in Browser') {
                     await vscode.env.openExternal(vscode.Uri.parse(result.html_url));
                 }
-                // プレビューファイルの参照をクリア
-                previewFile = undefined;
             } else {
                 throw new Error('PR creation failed: No PR details received');
             }
@@ -318,4 +250,78 @@ export async function generatePR(): Promise<void> {
             }
         }
     }
+}
+
+// プレビュー表示用の関数
+async function showMarkdownPreview(content: string): Promise<{ uri: vscode.Uri, document: vscode.TextDocument } | undefined> {
+    try {
+        // 一時ディレクトリをクリーンアップして再作成
+        await cleanupPreviewFiles();
+        const previewDir = await getTempDir();
+        await vscode.workspace.fs.createDirectory(vscode.Uri.file(previewDir));
+
+        // ランダムなファイル名で一時ファイルを作成
+        const tempUri = vscode.Uri.file(getPreviewFilePath());
+
+        // まず以前のプレビューを閉じる
+        await closePreviewTabs();
+
+        // ファイルを書き込む
+        const encoder = new TextEncoder();
+        await vscode.workspace.fs.writeFile(tempUri, encoder.encode(content));
+
+        // ドキュメントを開く（表示はしない）
+        const document = await vscode.workspace.openTextDocument(tempUri);
+
+        // プレビューを表示
+        await vscode.commands.executeCommand('markdown.showPreview', tempUri);
+
+        return { uri: tempUri, document };
+    } catch (error) {
+        console.error('Error showing markdown preview:', error);
+        return undefined;
+    }
+}
+
+// プレビュータブを閉じる
+async function closePreviewTabs() {
+    const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs);
+    const closeTasks = tabs
+        .filter(tab => 
+            (tab.label.includes('Preview') || tab.label.includes('プレビュー')) &&
+            tab.input instanceof vscode.TabInputWebview
+        )
+        .map(tab => vscode.window.tabGroups.close(tab));
+    await Promise.all(closeTasks);
+}
+
+// プレビューファイルをクリーンアップ
+async function cleanupPreviewFiles() {
+    const previewDir = await getTempDir();
+    try {
+        const stats = await vscode.workspace.fs.stat(vscode.Uri.file(previewDir));
+        if (stats) {
+            await vscode.workspace.fs.delete(vscode.Uri.file(previewDir), { recursive: true });
+        }
+    } catch (error) {
+        // ディレクトリが存在しない場合は無視
+        if (error instanceof vscode.FileSystemError && error.code !== 'FileNotFound') {
+            console.error('Error cleaning up preview directory:', error);
+        }
+    }
+}
+
+// 一時ディレクトリのパスを取得
+function getTempDir(): string {
+    return vscode.Uri.joinPath(vscode.Uri.file(require('os').tmpdir()), 'otak-committer').fsPath;
+}
+
+// プレビューファイルのパスを生成
+function getPreviewFilePath(): string {
+    const timestamp = Date.now();
+    const random = require('crypto').randomBytes(4).toString('hex');
+    return vscode.Uri.joinPath(
+        vscode.Uri.file(getTempDir()),
+        `pr-preview-${timestamp}-${random}.md`
+    ).fsPath;
 }

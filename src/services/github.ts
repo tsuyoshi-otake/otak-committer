@@ -1,36 +1,49 @@
 import * as vscode from 'vscode';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+import { BaseService, BaseServiceFactory } from './base';
 import {
+    ServiceConfig,
     GitHubAPI,
     PullRequestParams,
+    IssueParams,
     IssueInfo,
     PullRequestDiff,
     GitHubApiError,
     CreatePullRequestResponse,
     GitHubDiffFile,
     GitHubLabel
-} from '../types/github';
+} from '../types';
 
-const DEFAULT_BASE_BRANCHES = ['develop', 'main', 'master'];
+import { BranchManager, BranchSelector, BranchSelection } from './branch';
 
-export class GitHubService {
+export class GitHubService extends BaseService implements BranchManager {
     private octokit?: GitHubAPI;
     private owner: string = '';
     private repo: string = '';
     private initialized: boolean = false;
     private gitApi: any;
 
-    constructor(private token: string) {}
+    constructor(config?: Partial<ServiceConfig>) {
+        super(config);
+    }
 
     private async ensureInitialized(): Promise<void> {
         if (this.initialized) {return;}
+
+        const hasToken = await this.ensureConfig(
+            'githubToken',
+            'GitHub token is not configured. Would you like to configure it now?'
+        );
+        if (!hasToken) {
+            throw new Error('GitHub token is required');
+        }
 
         // プロキシ設定の取得
         const proxyUrl = vscode.workspace.getConfiguration('http').get<string>('proxy');
         
         const { Octokit } = await import('@octokit/rest');
         this.octokit = new Octokit({
-            auth: this.token,
+            auth: this.config.githubToken,
             userAgent: 'otak-committer',
             ...(proxyUrl ? {
                 request: {
@@ -52,9 +65,6 @@ export class GitHubService {
         this.initialized = true;
     }
 
-    /**
-     * Git設定からリポジトリ情報を検出
-     */
     private async detectRepositoryInfo(): Promise<void> {
         const repo = this.gitApi.repositories[0];
         if (!repo) {
@@ -75,9 +85,6 @@ export class GitHubService {
         [, this.owner, this.repo] = match;
     }
 
-    /**
-     * 現在のブランチ名を取得
-     */
     async getCurrentBranch(): Promise<string | undefined> {
         await this.ensureInitialized();
         const repo = this.gitApi.repositories[0];
@@ -87,118 +94,14 @@ export class GitHubService {
         return repo.state.HEAD?.name;
     }
 
-    /**
-     * GitHub認証トークンの設定を促す
-     */
-    static async showGitHubTokenPrompt(): Promise<boolean> {
-        const response = await vscode.window.showWarningMessage(
-            'GitHub token is not configured. Would you like to configure it now?',
-            'Yes',
-            'No'
-        );
-
-        if (response === 'Yes') {
-            await vscode.commands.executeCommand('workbench.action.openSettings', 'otakCommitter.github');
-            return true;
-        }
-        return false;
+    static async selectBranches(): Promise<BranchSelection | undefined> {
+        const service = await GitHubServiceFactory.initialize();
+        return service ? BranchSelector.selectBranches(service) : undefined;
     }
 
-    /**
-     * GitHubクライアントの初期化
-     */
-    static async initializeGitHubClient(): Promise<GitHubService | undefined> {
-        const config = vscode.workspace.getConfiguration('otakCommitter.github');
-        const token = config.get<string>('token');
-
-        if (!token) {
-            await GitHubService.showGitHubTokenPrompt();
-            return undefined;
-        }
-
-        return new GitHubService(token);
-    }
-
-    /**
-     * ブランチをソート（develop, main, master を優先）
-     */
-    private static sortBranches(branches: string[], currentBranch?: string): vscode.QuickPickItem[] {
-        return branches
-            .map(branch => ({
-                label: branch,
-                description: branch === currentBranch ? '(current)' : undefined,
-                // デフォルトブランチの優先度を設定
-                sortOrder: DEFAULT_BASE_BRANCHES.indexOf(branch)
-            }))
-            .sort((a, b) => {
-                // デフォルトブランチを優先
-                if (a.sortOrder !== -1 || b.sortOrder !== -1) {
-                    return (a.sortOrder === -1 ? 999 : a.sortOrder) - (b.sortOrder === -1 ? 999 : b.sortOrder);
-                }
-                return a.label.localeCompare(b.label);
-            });
-    }
-
-    /**
-     * ブランチ選択UI
-     */
-    static async selectBranches(): Promise<{ base: string; compare: string } | undefined> {
-        const github = await GitHubService.initializeGitHubClient();
-        if (!github) {
-            return undefined;
-        }
-
-        const branches = await github.getBranches();
-        const currentBranch = await github.getCurrentBranch();
-
-        // baseブランチの選択（develop, main, masterを優先）
-        const baseItems = this.sortBranches(
-            branches.filter(b => b !== currentBranch)
-        );
-        
-        const baseItem = await vscode.window.showQuickPick(baseItems, {
-            placeHolder: 'Select base branch'
-        });
-
-        if (!baseItem) {
-            return undefined;
-        }
-
-        // compareブランチの選択（現在のブランチを優先）
-        const compareItems = branches
-            .filter(branch => branch !== baseItem.label)
-            .map(branch => ({
-                label: branch,
-                description: branch === currentBranch ? '(current)' : undefined
-            }))
-            .sort((a, b) => {
-                if (a.label === currentBranch) {return -1;}
-                if (b.label === currentBranch) {return 1;}
-                return a.label.localeCompare(b.label);
-            });
-
-        const compareItem = await vscode.window.showQuickPick(compareItems, {
-            placeHolder: 'Select compare branch'
-        });
-
-        if (!compareItem) {
-            return undefined;
-        }
-
-        return {
-            base: baseItem.label,
-            compare: compareItem.label
-        };
-    }
-
-    /**
-     * 指定されたブランチ間の詳細な差分を取得
-     */
     async getBranchDiffDetails(base: string, compare: string): Promise<PullRequestDiff> {
         await this.ensureInitialized();
-        if (!this.octokit) {
-            throw new Error('GitHub client not initialized');
-        }
+        this.validateState(!!this.octokit, 'GitHub client not initialized');
 
         try {
             const response = await this.octokit.repos.compareCommits({
@@ -229,23 +132,14 @@ export class GitHubService {
                     deletions: files.reduce((sum: number, file: GitHubDiffFile) => sum + file.deletions, 0)
                 }
             };
-        } catch (error: any) {
-            throw new GitHubApiError(
-                `Failed to get diff: ${error.message}`,
-                error.status,
-                error.response?.data
-            );
+        } catch (error) {
+            this.handleError(error);
         }
     }
 
-    /**
-     * Issue情報を取得
-     */
     async getIssue(number: number): Promise<IssueInfo> {
         await this.ensureInitialized();
-        if (!this.octokit) {
-            throw new Error('GitHub client not initialized');
-        }
+        this.validateState(!!this.octokit, 'GitHub client not initialized');
 
         try {
             const response = await this.octokit.issues.get({
@@ -255,10 +149,7 @@ export class GitHubService {
             });
 
             if (response.status !== 200) {
-                throw new GitHubApiError(
-                    'Failed to get issue',
-                    response.status
-                );
+                throw new GitHubApiError('Failed to get issue', response.status);
             }
 
             return {
@@ -269,26 +160,16 @@ export class GitHubService {
                     typeof label === 'string' ? label : label.name || ''
                 )
             };
-        } catch (error: any) {
-            throw new GitHubApiError(
-                `Failed to get issue: ${error.message}`,
-                error.status,
-                error.response?.data
-            );
+        } catch (error) {
+            this.handleError(error);
         }
     }
 
-    /**
-     * PRを作成
-     */
     async createPullRequest(params: PullRequestParams): Promise<CreatePullRequestResponse> {
         await this.ensureInitialized();
-        if (!this.octokit) {
-            throw new Error('GitHub client not initialized');
-        }
+        this.validateState(!!this.octokit, 'GitHub client not initialized');
 
         try {
-            // Issue関連付けがある場合は、タイトルと本文を取得
             let title = params.title;
             let body = params.body;
 
@@ -298,7 +179,6 @@ export class GitHubService {
                 body = body || `Closes #${issue.number}\n\n${issue.body}`;
             }
 
-            // 差分の確認
             const diff = await this.getBranchDiffDetails(params.base, params.compare);
             if (diff.files.length === 0) {
                 throw new Error('No changes to create a pull request');
@@ -315,10 +195,7 @@ export class GitHubService {
             });
 
             if (response.status !== 201) {
-                throw new GitHubApiError(
-                    'Failed to create pull request',
-                    response.status
-                );
+                throw new GitHubApiError('Failed to create pull request', response.status);
             }
 
             return {
@@ -326,26 +203,43 @@ export class GitHubService {
                 html_url: response.data.html_url,
                 draft: params.draft || false
             };
-        } catch (error: any) {
-            if (error.message === 'No changes to create a pull request') {
-                throw new Error(error.message);
+        } catch (error) {
+            if (error instanceof Error && error.message === 'No changes to create a pull request') {
+                throw error;
             }
-            throw new GitHubApiError(
-                `Failed to create pull request: ${error.message}`,
-                error.status,
-                error.response?.data
-            );
+            this.handleError(error);
         }
     }
 
-    /**
-     * リポジトリのブランチ一覧を取得
-     */
+    async createIssue(params: IssueParams): Promise<{ number: number; html_url: string }> {
+        await this.ensureInitialized();
+        this.validateState(!!this.octokit, 'GitHub client not initialized');
+
+        try {
+            const response = await this.octokit.issues.create({
+                owner: this.owner,
+                repo: this.repo,
+                title: params.title,
+                body: params.body,
+                labels: params.labels
+            });
+
+            if (response.status !== 201) {
+                throw new GitHubApiError('Failed to create issue', response.status);
+            }
+
+            return {
+                number: response.data.number,
+                html_url: response.data.html_url
+            };
+        } catch (error) {
+            this.handleError(error);
+        }
+    }
+
     async getBranches(): Promise<string[]> {
         await this.ensureInitialized();
-        if (!this.octokit) {
-            throw new Error('GitHub client not initialized');
-        }
+        this.validateState(!!this.octokit, 'GitHub client not initialized');
 
         try {
             const response = await this.octokit.repos.listBranches({
@@ -355,30 +249,18 @@ export class GitHubService {
             });
 
             if (response.status !== 200) {
-                throw new GitHubApiError(
-                    'Failed to get branches',
-                    response.status
-                );
+                throw new GitHubApiError('Failed to get branches', response.status);
             }
 
             return response.data.map(branch => branch.name);
-        } catch (error: any) {
-            throw new GitHubApiError(
-                `Failed to get branches: ${error.message}`,
-                error.status,
-                error.response?.data
-            );
+        } catch (error) {
+            this.handleError(error);
         }
     }
 
-    /**
-     * リポジトリのIssue一覧を取得（PRは除外）
-     */
     async getIssues(): Promise<IssueInfo[]> {
         await this.ensureInitialized();
-        if (!this.octokit) {
-            throw new Error('GitHub client not initialized');
-        }
+        this.validateState(!!this.octokit, 'GitHub client not initialized');
 
         try {
             const response = await this.octokit.issues.listForRepo({
@@ -391,13 +273,9 @@ export class GitHubService {
             });
 
             if (response.status !== 200) {
-                throw new GitHubApiError(
-                    'Failed to get issues',
-                    response.status
-                );
+                throw new GitHubApiError('Failed to get issues', response.status);
             }
 
-            // pull_requestフィールドを持つものを除外（PRs）
             return response.data
                 .filter(item => !('pull_request' in item))
                 .map(issue => ({
@@ -408,12 +286,29 @@ export class GitHubService {
                         typeof label === 'string' ? label : label.name || ''
                     )
                 }));
-        } catch (error: any) {
-            throw new GitHubApiError(
-                `Failed to get issues: ${error.message}`,
-                error.status,
-                error.response?.data
+        } catch (error) {
+            this.handleError(error);
+        }
+    }
+}
+
+export class GitHubServiceFactory extends BaseServiceFactory<GitHubService> {
+    async create(config?: Partial<ServiceConfig>): Promise<GitHubService> {
+        return new GitHubService(config);
+    }
+
+    static async initialize(config?: Partial<ServiceConfig>): Promise<GitHubService | undefined> {
+        try {
+            const factory = new GitHubServiceFactory();
+            return await factory.create(config);
+        } catch (error) {
+            console.error('Failed to initialize GitHub service:', error);
+            vscode.window.showErrorMessage(
+                error instanceof Error 
+                    ? error.message 
+                    : 'Failed to initialize GitHub service'
             );
+            return undefined;
         }
     }
 }

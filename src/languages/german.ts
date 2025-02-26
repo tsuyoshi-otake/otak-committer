@@ -3,59 +3,115 @@ import { PromptType } from '../types/language';
 export const getGermanPrompt = (type: PromptType): string => {
     const prompts: Record<PromptType, string> = {
         system: `
-Ich bin ein erfahrener Softwareentwickler, der bei der Erstellung von Commit-Nachrichten und PRs unterstützt.
-Meine Ausgabe hat folgende Eigenschaften:
+Als erfahrener Software-Ingenieur bieten Sie Beratung auf hoher Ebene für Code-Änderungen.
+Ihr Feedback sollte folgende Eigenschaften aufweisen:
 
-- Klares und präzises Deutsch
-- Technisch akkurate Ausdrücke
-- Angemessene Zusammenfassung der Änderungen
+- Fokus auf architektonische und Design-Auswirkungen
+- Verbesserungsvorschläge statt spezifischer Implementierungen
+- Berücksichtigung von Wartbarkeit und Skalierbarkeit
 `,
         commit: `
-Basierend auf dem bereitgestellten Diff, generieren Sie eine {{style}} Commit-Nachricht.
+Analysieren Sie die bereitgestellten Änderungen und schlagen Sie Kernpunkte für die Commit-Nachricht vor.
+Berücksichtigen Sie:
 
-Stilbeschreibung:
-- normal: Standard technische Schreibweise
-- emoji: Freundlicher Ton mit Emojis
-- kawaii: Niedlicher und freundlicher Ton
+Stil-Kontext:
+- normal: Professionelle technische Überprüfung
+- emoji: Freundliche Anleitung
+- kawaii: Lockeres Feedback
 
-Diff:
+Zu überprüfende Änderungen:
 {{diff}}
 `,
         prTitle: `
-Basierend auf dem folgenden Diff, generieren Sie einen Pull Request Titel.
+Analysieren Sie die folgenden Änderungen und schlagen Sie wichtige Punkte für den PR-Titel vor.
+Berücksichtigen Sie:
 
-Anforderungen:
-1. Der Titel sollte prägnant sein und die Änderungen genau darstellen
-2. Fügen Sie ein Präfix hinzu (z.B. "Feature:", "Fix:", "Improvement:", etc.)
+- Was ist die Hauptauswirkung dieser Änderungen?
+- Welcher Bereich ist am stärksten betroffen?
+- Um welche Art von Änderung handelt es sich? (Feature, Fix, Verbesserung)
 
-Diff:
+Zu überprüfende Änderungen:
 {{diff}}
 `,
         prBody: `
-Basierend auf dem folgenden Diff, generieren Sie eine detaillierte Pull Request Beschreibung.
+Überprüfen Sie diese Änderungen und geben Sie Hinweise für die Pull Request-Beschreibung.
+Berücksichtigen Sie diese Aspekte:
 
-# Überblick
-- Kurze Erklärung der implementierten Funktionen oder Korrekturen
-- Zweck und Hintergrund der Änderungen
-- Gewählter technischer Ansatz
+# Strategischer Überblick
+- Welches Problem wird gelöst?
+- Warum wurde dieser Ansatz gewählt?
+- Was sind die wichtigsten technischen Entscheidungen?
 
-# Wichtige Überprüfungspunkte
-- Bereiche, die besondere Aufmerksamkeit der Reviewer erfordern
-- Wichtige Design-Entscheidungen
-- Überlegungen zu Leistung und Wartbarkeit
+# Überprüfungsschwerpunkte
+- Welche Bereiche benötigen besondere Aufmerksamkeit?
+- Welche potenziellen Risiken gibt es?
+- Welche Leistungsaspekte sind zu berücksichtigen?
 
-# Änderungsdetails
-- Hauptsächlich implementierte Änderungen
-- Betroffene Komponenten und Funktionalitäten
-- Änderungen an Abhängigkeiten (falls vorhanden)
+# Implementierungsüberprüfung
+- Was sind die Hauptänderungen?
+- Wie wirkt sich das auf das System aus?
+- Welche Abhängigkeiten sind zu berücksichtigen?
 
-# Zusätzliche Hinweise
-- Überlegungen zur Bereitstellung
-- Auswirkungen auf bestehende Funktionen
-- Erforderliche Konfigurations- oder Umgebungsvariablen
+# Prüfanforderungen
+- Was muss getestet werden?
+- Welche Bereitstellungsaspekte sind zu beachten?
+- Welche Dokumentation wird benötigt?
 
-Diff:
+Zu überprüfende Änderungen:
 {{diff}}
+`,
+        'issue.task': `
+Analysieren Sie die Aufgabe und schlagen Sie wichtige zu berücksichtigende Punkte vor:
+
+### Zweck
+- Welches Problem muss gelöst werden?
+- Warum ist das jetzt wichtig?
+
+### Implementierungsleitfaden
+- Welche Bereiche müssen berücksichtigt werden?
+- Welche Ansätze sind möglich?
+
+### Erfolgskriterien
+- Wie kann die Fertigstellung überprüft werden?
+- Was sind die Qualitätsanforderungen?
+
+### Strategische Überlegungen
+- Was könnte betroffen sein?
+- Welche Abhängigkeiten sind zu berücksichtigen?
+- Wie hoch ist die Priorität?
+- Was ist ein angemessener Zeitrahmen?
+
+### Planungshinweise
+- Welche Ressourcen werden benötigt?
+- Welche Risiken sind zu berücksichtigen?
+`,
+        'issue.standard': `
+Analysieren Sie dieses Problem und geben Sie Hinweise zu wichtigen Punkten.
+Berücksichtigen Sie:
+
+### Problemanalyse
+- Was ist das Kernproblem?
+- Welcher Kontext ist wichtig?
+
+### Technische Überprüfung
+- Welche Systemteile sind betroffen?
+- Welche Ansätze sollten in Betracht gezogen werden?
+- Was sind mögliche Lösungen?
+
+### Implementierungsleitfaden
+- Welche Schritte sind erforderlich?
+- Was sollte getestet werden?
+- Was sind die technischen Einschränkungen?
+
+### Auswirkungsbeurteilung
+- Welche Bereiche werden betroffen sein?
+- Welche Nebenwirkungen sind zu berücksichtigen?
+- Welche Vorsichtsmaßnahmen sind erforderlich?
+
+### Prüfanforderungen
+- Welche Dokumentation wird benötigt?
+- Was muss getestet werden?
+- Gibt es Breaking Changes?
 `
     };
 

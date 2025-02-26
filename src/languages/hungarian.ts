@@ -3,59 +3,115 @@ import { PromptType } from '../types/language';
 export const getHungarianPrompt = (type: PromptType): string => {
     const prompts: Record<PromptType, string> = {
         system: `
-Tapasztalt szoftvermérnök vagyok, aki segít a commit üzenetek és PR-ek létrehozásában.
-A kimenetem a következő jellemzőkkel rendelkezik:
+Tapasztalt szoftvermérnökként nyújtson magas szintű útmutatást a kódváltoztatásokhoz.
+Visszajelzésének a következő jellemzőkkel kell rendelkeznie:
 
-- Világos és tömör magyar nyelv
-- Technikailag pontos kifejezések
-- Megfelelő összefoglalása a változtatásoknak
+- Fókusz az architekturális és tervezési következményekre
+- Fejlesztési javaslatok konkrét implementációk helyett
+- Karbantarthatóság és skálázhatóság figyelembevétele
 `,
         commit: `
-A megadott diff alapján generáljon egy {{style}} stílusú commit üzenetet.
+Elemezze a megadott változtatásokat és javasoljon kulcspontokat a commit üzenethez.
+Vegye figyelembe:
 
-Stílus leírása:
-- normal: Standard technikai írás
-- emoji: Barátságos hangnem emojikkal
-- kawaii: Aranyos és barátságos hangnem
+Stílus kontextus:
+- normal: Professzionális technikai áttekintés
+- emoji: Barátságos útmutatás
+- kawaii: Közvetlen visszajelzés
 
-Diff:
+Áttekintendő változtatások:
 {{diff}}
 `,
         prTitle: `
-A következő diff alapján generáljon egy Pull Request címet.
+Elemezze a következő változtatásokat és javasoljon fontos pontokat a PR címéhez.
+Vegye figyelembe:
 
-Követelmények:
-1. A címnek tömörnek kell lennie és pontosan kell képviselnie a változtatásokat
-2. Tartalmazzon előtagot (pl. "Feature:", "Fix:", "Improvement:", stb.)
+- Mi a fő hatása ezeknek a változtatásoknak?
+- Melyik terület a legérintettebb?
+- Milyen típusú változtatás ez? (funkció, javítás, fejlesztés)
 
-Diff:
+Áttekintendő változtatások:
 {{diff}}
 `,
         prBody: `
-A következő diff alapján generáljon részletes Pull Request leírást.
+Tekintse át ezeket a változtatásokat és nyújtson útmutatást a Pull Request leírásához.
+Vegye figyelembe ezeket a szempontokat:
 
-# Áttekintés
-- A megvalósított funkciók vagy javítások rövid magyarázata
-- A változtatások célja és háttere
-- Alkalmazott technikai megközelítés
+# Stratégiai áttekintés
+- Milyen problémát old meg?
+- Miért ezt a megközelítést választottuk?
+- Mik a kulcsfontosságú technikai döntések?
 
-# Felülvizsgálati kulcspontok
-- Különös figyelmet igénylő területek a felülvizsgálók számára
-- Fontos tervezési döntések
-- Teljesítménnyel és karbantarthatósággal kapcsolatos megfontolások
+# Áttekintési pontok
+- Mely területek igényelnek különös figyelmet?
+- Mik a potenciális kockázatok?
+- Milyen teljesítménybeli megfontolások vannak?
 
-# Változtatások részletei
-- Fő megvalósított változtatások
-- Érintett komponensek és funkcionalitások
-- Függőségi változtatások (ha vannak)
+# Implementáció áttekintése
+- Mik a fő változtatások?
+- Hogyan hat ez a rendszerre?
+- Milyen függőségeket kell figyelembe venni?
 
-# További megjegyzések
-- Telepítési megfontolások
-- Hatás a meglévő funkciókra
-- Szükséges konfigurációs vagy környezeti változók
+# Áttekintési követelmények
+- Mit kell tesztelni?
+- Milyen telepítési megfontolások vannak?
+- Milyen dokumentáció szükséges?
 
-Diff:
+Áttekintendő változtatások:
 {{diff}}
+`,
+        'issue.task': `
+Elemezze a feladatot és javasoljon figyelembe veendő kulcspontokat:
+
+### Cél
+- Milyen problémát kell megoldani?
+- Miért fontos ez most?
+
+### Implementációs útmutató
+- Mely területeket kell figyelembe venni?
+- Milyen megközelítések lehetségesek?
+
+### Sikerkritériumok
+- Hogyan ellenőrizhető a befejezés?
+- Mik a minőségi követelmények?
+
+### Stratégiai megfontolások
+- Mi lehet érintett?
+- Milyen függőségeket kell figyelembe venni?
+- Mi a prioritási szint?
+- Mi az észszerű időkeret?
+
+### Tervezési megjegyzések
+- Milyen erőforrásokra van szükség?
+- Milyen kockázatokat kell figyelembe venni?
+`,
+        'issue.standard': `
+Elemezze ezt a problémát és nyújtson útmutatást a kulcspontokhoz.
+Vegye figyelembe:
+
+### Probléma elemzés
+- Mi az alapvető probléma?
+- Milyen kontextus fontos?
+
+### Technikai áttekintés
+- A rendszer mely részei érintettek?
+- Milyen megközelítéseket kell figyelembe venni?
+- Mik a lehetséges megoldások?
+
+### Implementációs útmutató
+- Milyen lépések szükségesek?
+- Mit kell tesztelni?
+- Mik a technikai korlátok?
+
+### Hatáselemzés
+- Mely területek lesznek érintettek?
+- Milyen mellékhatásokat kell figyelembe venni?
+- Milyen óvintézkedések szükségesek?
+
+### Áttekintési követelmények
+- Milyen dokumentáció szükséges?
+- Mit kell tesztelni?
+- Vannak-e töréspontok?
 `
     };
 
