@@ -18,6 +18,9 @@ interface FileAnalysis {
 }
 
 export class IssueGeneratorService extends BaseService {
+    // 100Kトークン制限
+    private static readonly MAX_TOKENS = 100 * 1000;
+
     constructor(
         private readonly openai: OpenAIService,
         private readonly github: GitHubService,
@@ -81,6 +84,7 @@ export class IssueGeneratorService extends BaseService {
     private async analyzeFiles(files: string[]): Promise<FileAnalysis[]> {
         const analyses: FileAnalysis[] = [];
         const maxPreviewLength = 1000; // ファイルごとのプレビュー最大文字数
+        let totalTokens = 0; // トークン数をトラッキング
 
         for (const file of files) {
             try {
@@ -96,6 +100,16 @@ export class IssueGeneratorService extends BaseService {
                 // ファイルの内容を要約（最初の1000文字まで）
                 if (content.length > maxPreviewLength) {
                     content = content.substring(0, maxPreviewLength) + '\n... (content truncated)';
+                }
+
+                // トークン数を推定（1トークン≈4文字）
+                const estimatedTokens = Math.ceil(content.length / 4);
+
+                // トークン制限を超える場合は制限
+                if (totalTokens + estimatedTokens > IssueGeneratorService.MAX_TOKENS) {
+                    content = '... (content omitted due to token limit)';
+                } else {
+                    totalTokens += estimatedTokens;
                 }
 
                 analyses.push({
@@ -175,6 +189,16 @@ export class IssueGeneratorService extends BaseService {
             const fileAnalyses = params.files && params.files.length > 0
                 ? await this.analyzeFiles(params.files)
                 : [];
+
+            if (fileAnalyses.length > 0) {
+                const estimatedTokens = Math.ceil(fileAnalyses.reduce((sum, analysis) => 
+                    sum + (analysis.content?.length || 0), 0) / 4);
+                if (estimatedTokens > IssueGeneratorService.MAX_TOKENS) {
+                    console.warn(
+                        `Analysis content exceeds 100K tokens limit (estimated ${Math.floor(estimatedTokens/1000)}K tokens). Some content will be truncated.`
+                    );
+                }
+            }
             
             const analysisResult = this.formatAnalysisResult(fileAnalyses);
             const useEmoji = this.config.useEmoji || false;

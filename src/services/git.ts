@@ -19,8 +19,8 @@ interface StatusResult {
 export class GitService extends BaseService {
     protected git: SimpleGit;
     private workspaceRoot: string;
-    // 100KB制限（文字数に換算）
-    private static readonly MAX_DIFF_SIZE = 100 * 1024;
+    // 100Kトークン制限
+    private static readonly MAX_TOKENS = 100 * 1000;
 
     constructor(workspaceRoot: string, config?: Partial<ServiceConfig>) {
         super(config);
@@ -55,11 +55,12 @@ export class GitService extends BaseService {
 
             // 差分を取得
             const diff = await this.git.diff(['--cached']);
+            const tokenCount = Math.ceil(diff.length / 4); // 大まかな推定：1トークン≈4文字
 
             // サイズチェック
-            if (diff.length > GitService.MAX_DIFF_SIZE) {
+            if (tokenCount > GitService.MAX_TOKENS) {
                 throw new Error(
-                    `Diff size exceeds 100KB limit. Consider making smaller commits or excluding large files.`
+                    `Diff size exceeds 100K tokens limit (estimated ${Math.floor(tokenCount/1000)}K tokens). Consider making smaller commits or excluding large files.`
                 );
             }
             return diff;
