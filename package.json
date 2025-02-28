@@ -7,12 +7,12 @@
   "icon": "./images/icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tsuyoshi-otake-system-exe-jp/otak-committer"
+    "url": "https://github.com/tsuyoshi-otake/otak-committer"
   },
   "bugs": {
-    "url": "https://github.com/tsuyoshi-otake-system-exe-jp/otak-committer/issues"
+    "url": "https://github.com/tsuyoshi-otake/otak-committer/issues"
   },
-  "homepage": "https://github.com/tsuyoshi-otake-system-exe-jp/otak-committer#readme",
+  "homepage": "https://github.com/tsuyoshi-otake/otak-committer#readme",
   "version": "1.5.1",
   "engines": {
     "vscode": "^1.90.0"
