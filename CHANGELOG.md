@@ -1,5 +1,11 @@
 # Change Log
 
+## [1.5.2] - 2025-02-28
+
+### Added
+- Enhanced commit message generation to support untracked files
+- Improved file status detection for better coverage of Git changes
+
 ## [1.5.1] - 2025-02-28
 
 ### Changed
