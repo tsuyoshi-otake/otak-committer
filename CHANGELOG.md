@@ -1,5 +1,12 @@
 # Change Log
 
+## [1.5.1] - 2025-02-28
+
+### Changed
+- Implemented 100K token limit for all content generation
+  - Applied to commits, issues, and pull requests
+  - Added content truncation with appropriate warnings
+
 ## [1.5.0] - 2025-02-26
 
 ### Added
