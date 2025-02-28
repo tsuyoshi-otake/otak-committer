@@ -19,11 +19,14 @@ interface StatusResult {
 export class GitService extends BaseService {
     protected git: SimpleGit;
     private workspaceRoot: string;
+    // 100KB制限（文字数に換算）
+    private static readonly MAX_DIFF_SIZE = 100 * 1024;
 
     constructor(workspaceRoot: string, config?: Partial<ServiceConfig>) {
         super(config);
         this.workspaceRoot = workspaceRoot;
         this.git = simpleGit(workspaceRoot);
+
     }
 
     async getDiff(): Promise<string> {
@@ -52,6 +55,13 @@ export class GitService extends BaseService {
 
             // 差分を取得
             const diff = await this.git.diff(['--cached']);
+
+            // サイズチェック
+            if (diff.length > GitService.MAX_DIFF_SIZE) {
+                throw new Error(
+                    `Diff size exceeds 100KB limit. Consider making smaller commits or excluding large files.`
+                );
+            }
             return diff;
         } catch (error) {
             this.handleError(error);

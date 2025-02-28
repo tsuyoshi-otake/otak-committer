@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { IssueGeneratorService, IssueGeneratorServiceFactory } from '../services/issueGenerator';
+import { selectFiles as externalSelectFiles } from '../utils/fileSelector';
 
 export async function generateIssue() {
     let previewFile: { uri: vscode.Uri, document: vscode.TextDocument } | undefined;
@@ -236,18 +237,8 @@ async function cleanupPreviewFiles() {
 
 // ファイル選択ダイアログ
 async function selectFiles(files: string[]): Promise<string[]> {
-    const items = files.map(file => ({
-        label: file,
-        picked: true
-    }));
-
-    const selectedItems = await vscode.window.showQuickPick(items, {
-        canPickMany: true,
-        placeHolder: 'Select files to include in analysis (Space to toggle selection)',
-        ignoreFocusOut: true
-    });
-
-    return selectedItems ? selectedItems.map(item => item.label) : [];
+    // 外部のfileSelectorモジュールを使用
+    return externalSelectFiles(files);
 }
 
 // 一時ディレクトリのパスを取得

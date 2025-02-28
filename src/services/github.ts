@@ -20,6 +20,8 @@ export class GitHubService extends BaseService implements BranchManager {
     private octokit?: GitHubAPI;
     private owner: string = '';
     private repo: string = '';
+    // 100KB制限（文字数に換算）
+    private static readonly MAX_DIFF_SIZE = 100 * 1024;
     private initialized: boolean = false;
     private gitApi: any;
 
@@ -118,12 +120,30 @@ export class GitHubService extends BaseService implements BranchManager {
                 );
             }
 
+            let totalSize = 0;
             const files: GitHubDiffFile[] = response.data.files.map(file => ({
                 filename: file.filename,
                 additions: file.additions,
                 deletions: file.deletions,
                 patch: file.patch || ''
+,
             }));
+            
+            // パッチ全体のサイズを計算
+            for (const file of files) {
+                totalSize += file.patch.length;
+            }
+            
+            // サイズ制限を超えている場合、パッチを切り詰める
+            if (totalSize > GitHubService.MAX_DIFF_SIZE) {
+                const ratio = GitHubService.MAX_DIFF_SIZE / totalSize;
+                for (const file of files) {
+                    const maxLength = Math.floor(file.patch.length * ratio);
+                    if (file.patch.length > maxLength) {
+                        file.patch = file.patch.substring(0, maxLength) + '\n... (diff truncated due to size limit)';
+                    }
+                }
+            }
 
             return {
                 files,
