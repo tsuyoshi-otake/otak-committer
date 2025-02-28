@@ -30,9 +30,9 @@ export class GitService extends BaseService {
         try {
             const status = await this.git.status();
             
-            // 変更されたファイルのパスを取得
+            // 変更されたファイルのパスを取得（削除やリネームを含むすべての変更を対象に）
             const modifiedFiles = status.files
-                .filter(file => file.working_dir === 'M' || file.working_dir === 'A')
+                .filter(file => file.working_dir !== ' ' && file.working_dir !== '?' && file.working_dir !== '!')
                 .map(file => file.path);
 
             // ステージされていない変更があればステージング
@@ -43,7 +43,7 @@ export class GitService extends BaseService {
             // 新しいステータスを取得
             const newStatus = await this.git.status();
             const stagedFiles = newStatus.files
-                .filter(file => file.index === 'M' || file.index === 'A')
+                .filter(file => file.index !== ' ' && file.index !== '?' && file.index !== '!')
                 .map(file => file.path);
 
             if (stagedFiles.length === 0) {
