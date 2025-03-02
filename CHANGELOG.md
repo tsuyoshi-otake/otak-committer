@@ -1,5 +1,13 @@
 # Change Log
 
+## [1.5.3] - 2025-03-02
+
+### Added
+- Added GitHub App authentication support
+  - New configuration options for GitHub App authentication (appId, privateKey, installationId)
+  - Automatic selection between token and GitHub App authentication
+  - Improved error handling and user guidance for authentication setup
+
 ## [1.5.2] - 2025-02-28
 
 ### Added

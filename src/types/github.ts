@@ -1,5 +1,11 @@
 export interface GitHubConfig {
-    token: string;
+    token?: string;
+    app?: {
+        appId: string;
+        privateKey: string;
+        installationId: string;
+    };
+    userAgent?: string;
 }
 
 export interface PullRequestParams {

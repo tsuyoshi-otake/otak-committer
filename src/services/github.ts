@@ -32,27 +32,72 @@ export class GitHubService extends BaseService implements BranchManager {
     private async ensureInitialized(): Promise<void> {
         if (this.initialized) {return;}
 
-        const hasToken = await this.ensureConfig(
-            'githubToken',
-            'GitHub token is not configured. Would you like to configure it now?'
-        );
-        if (!hasToken) {
-            throw new Error('GitHub token is required');
-        }
-
+        
         // プロキシ設定の取得
         const proxyUrl = vscode.workspace.getConfiguration('http').get<string>('proxy');
         
-        const { Octokit } = await import('@octokit/rest');
-        this.octokit = new Octokit({
-            auth: this.config.githubToken,
-            userAgent: 'otak-committer',
-            ...(proxyUrl ? {
-                request: {
-                    agent: new HttpsProxyAgent(proxyUrl)
+        // GitHub Appの設定をチェック
+        const hasAppConfig = this.config.githubAppId && 
+                          this.config.githubPrivateKey && 
+                          this.config.githubInstallationId;
+
+        // トークンまたはGitHub App設定のいずれかが必要
+        if (!this.config.githubToken && !hasAppConfig) {
+            const useAppAuth = await vscode.window.showQuickPick(
+                [
+                    { label: 'Token認証', description: 'GitHub Personal Access Tokenを使用' },
+                    { label: 'GitHub App認証', description: 'GitHub Appの認証情報を使用' }
+                ],
+                { placeHolder: '認証方式を選択してください' }
+            );
+
+            if (!useAppAuth) {
+                throw new Error('認証方式を選択してください');
+            }
+
+            if (useAppAuth.label === 'Token認証') {
+                const hasToken = await this.ensureConfig(
+                    'githubToken',
+                    'GitHub tokenが設定されていません。設定しますか？'
+                );
+                if (!hasToken) {
+                    throw new Error('GitHub tokenは必須です');
                 }
-            } : {})
-        }) as unknown as GitHubAPI;
+        } else {
+                throw new Error('GitHub App認証の設定が必要です。githubAppId, githubPrivateKey, githubInstallationIdを設定してください。');
+            }
+        }
+ 
+        const { Octokit } = await import('@octokit/rest');
+
+        // 認証方式に応じてOctokitを初期化
+        if (this.config.githubToken) {
+            // トークン認証
+                this.octokit = new Octokit({
+                auth: this.config.githubToken,
+                userAgent: 'otak-committer',
+                ...(proxyUrl ? {
+                    request: {
+ agent: new HttpsProxyAgent(proxyUrl)
+ }
+                } : {})
+            }) as unknown as GitHubAPI;
+        } else if (hasAppConfig) {
+            // GitHub App認証
+            const { createAppAuth } = await import('@octokit/auth-app');
+            this.octokit = new Octokit({
+                authStrategy: createAppAuth,
+                auth: {
+                    appId: this.config.githubAppId,
+                    privateKey: this.config.githubPrivateKey,
+                    installationId: this.config.githubInstallationId
+                },
+                userAgent: 'otak-committer',
+                ...(proxyUrl ? {
+                    request: { agent: new HttpsProxyAgent(proxyUrl) }
+                } : {})
+            }) as unknown as GitHubAPI;
+        }
 
         // Git APIの初期化
         const gitExtension = vscode.extensions.getExtension('vscode.git')?.exports;
