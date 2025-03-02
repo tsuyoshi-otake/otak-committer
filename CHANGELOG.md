@@ -1,6 +1,15 @@
 # Change Log
 
-## [1.6] - 2025-03-02
+## [1.6.1] - 2025-03-02
+
+### Changed
+- **Improved error message handling:**
+  - Standardized notification display times to 3 seconds
+  - Unified error message format for better consistency
+  - Added progress indicators for ongoing operations
+  - Improved visual feedback for error states
+
+## [1.6.0] - 2025-03-02
 
 ### Changed
 - **Switched to VS Code's built-in GitHub authentication:**

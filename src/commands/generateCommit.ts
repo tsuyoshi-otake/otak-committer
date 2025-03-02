@@ -35,6 +35,11 @@ export async function generateCommit(): Promise<void> {
         const openai = await OpenAIService.initialize();
         if (!openai) {
             console.error('Failed to initialize OpenAIService');
+            await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: 'Failed to generate commit: OpenAI service initialization failed...',
+                cancellable: false
+            }, async () => new Promise<void>(resolve => setTimeout(resolve, 3000)));
             return;
         }
 
@@ -66,7 +71,11 @@ export async function generateCommit(): Promise<void> {
 
         if (!message) {
             console.error('Failed to generate commit message: message is empty');
-            vscode.window.showErrorMessage('Failed to generate commit message');
+            await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: 'Failed to generate commit: Empty message received',
+                cancellable: false
+            }, async () => new Promise<void>(resolve => setTimeout(resolve, 3000)));
             return;
         }
 
@@ -74,7 +83,11 @@ export async function generateCommit(): Promise<void> {
         const gitExtension = vscode.extensions.getExtension('vscode.git');
         if (!gitExtension) {
             console.error('Git extension not found');
-            vscode.window.showErrorMessage('Git extension is not available');
+            await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: 'Failed to generate commit: Git extension is not available',
+                cancellable: false
+            }, async () => new Promise<void>(resolve => setTimeout(resolve, 3000)));
             return;
         }
 
@@ -83,12 +96,16 @@ export async function generateCommit(): Promise<void> {
         const repository = gitApi.repositories[0];
         if (!repository) {
             console.error('No Git repository found');
-            vscode.window.showErrorMessage('No Git repository found');
+            await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: 'Failed to generate commit: No Git repository found',
+                cancellable: false
+            }, async () => new Promise<void>(resolve => setTimeout(resolve, 3000)));
             return;
         }
 
         // 生成されたメッセージをソースコントロールのインプットボックスに設定
-        console.log('Setting generated message to source control input...');
+        console.log('Setting generated message to source control input');
         repository.inputBox.value = message;
 
         console.log('Successfully set commit message');
@@ -102,6 +119,10 @@ export async function generateCommit(): Promise<void> {
         });
     } catch (error: any) {
         console.error('Error in generateCommit:', error);
-        vscode.window.showErrorMessage(`Failed to generate commit: ${error.message}`);
+        await vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: `Failed to generate commit: ${error.message}`,
+            cancellable: false
+        }, async () => new Promise<void>(resolve => setTimeout(resolve, 3000)));
     }
 }

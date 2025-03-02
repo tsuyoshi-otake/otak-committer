@@ -29,7 +29,7 @@ export class GitService extends BaseService {
 
     }
 
-    async getDiff(): Promise<string> {
+    async getDiff(): Promise<string | undefined> {
         try {
             const status = await this.git.status();
             
@@ -50,7 +50,7 @@ export class GitService extends BaseService {
                 .map(file => file.path);
 
             if (stagedFiles.length === 0) {
-                throw new Error('No changes to commit');
+                return undefined;
             }
 
             // 差分を取得
