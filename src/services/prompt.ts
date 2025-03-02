@@ -1,34 +1,10 @@
 import * as vscode from 'vscode';
-import { PromptType } from '../types/language';
 import { MessageStyle } from '../types/messageStyle';
 import { PullRequestDiff } from '../types/github';
 import { TemplateInfo } from '../types';
 import { COMMIT_PREFIXES, CommitPrefix } from '../constants/commitGuide';
 
 export class PromptService {
-    private async loadLanguageModule(language: string): Promise<(type: PromptType) => string> {
-        try {
-            try {
-                const module = await import(`../languages/${language}`);
-                const promptFunction = module[`get${language.charAt(0).toUpperCase() + language.slice(1)}Prompt`];
-                if (promptFunction) {
-                    return promptFunction;
-                }
-            } catch (importError) {
-                console.warn(`Language module not found for ${language}, falling back to English:`, importError);
-            }
-
-            // フォールバック：英語
-            const { getEnglishPrompt } = await import('../languages/english');
-            return getEnglishPrompt;
-        } catch (error) {
-            console.error('Error loading language module:', error);
-            vscode.window.showErrorMessage(`Failed to load language module: ${error}`);
-            const { getEnglishPrompt } = await import('../languages/english');
-            return getEnglishPrompt;
-        }
-    }
-
     async createCommitPrompt(
         diff: string,
         language: string,

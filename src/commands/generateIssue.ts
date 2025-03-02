@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { IssueGeneratorService, IssueGeneratorServiceFactory } from '../services/issueGenerator';
+import { IssueGeneratorServiceFactory } from '../services/issueGenerator';
 import { selectFiles as externalSelectFiles } from '../utils/fileSelector';
 
 export async function generateIssue() {

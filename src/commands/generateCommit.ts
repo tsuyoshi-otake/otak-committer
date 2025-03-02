@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { GitService, GitServiceFactory } from '../services/git';
+import { GitServiceFactory } from '../services/git';
 import { OpenAIService } from '../services/openai';
 import { MessageStyle } from '../types/messageStyle';
 

@@ -206,7 +206,6 @@ export class IssueGeneratorService extends BaseService {
             const customMessage = vscode.workspace.getConfiguration('otakCommitter').get<string>('customMessage') || '';
             const customInstruction = customMessage ? `\n\nAdditional requirements: ${customMessage}` : '';
 
-            const prompt = `${params.type.type === 'task' ? 'issue.task' : 'issue.standard'}`;
             const body = await this.openai.createChatCompletion({
                 prompt: `Generate a GitHub issue in recommended format for the following analysis and description. Include appropriate sections like Background, Problem Statement, Expected Behavior, Steps to Reproduce (if applicable), and Additional Context. Keep the technical details but organize them well.\n\n${emojiInstruction}${customInstruction}\n\nRepository Analysis:\n${analysisResult}\n\nUser Description: ${params.description}`,
                 maxTokens: 1000,

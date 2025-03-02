@@ -98,25 +98,44 @@ export const getPrompt = (language: SupportedLanguage, type: PromptType): string
         return getEnglishPrompt(type);
     }
 
-    const europeanLanguages: EuropeanLanguages[] = [
-        'french', 'german', 'italian', 'spanish', 'portuguese',
-        'czech', 'hungarian', 'bulgarian', 'turkish', 'russian'
-    ];
-    const asianLanguages: string[] = [
-        'chinese', 'traditionalChinese', 'korean', 'vietnamese', 'thai',
-        'hindi', 'bengali', 'javanese', 'tamil', 'burmese'
-    ];
-    const middleEasternLanguages: MiddleEasternLanguages[] = [
-        'arabic', 'hebrew'
-    ];
+    // 言語コードのマッピング
+    const europeanLangToCode: Record<string, string> = {
+        'french': 'fr',
+        'german': 'de',
+        'italian': 'it',
+        'spanish': 'es',
+        'portuguese': 'pt',
+        'czech': 'cs',
+        'hungarian': 'hu',
+        'bulgarian': 'bg',
+        'russian': 'ru'
+    };
+
+    const asianLangToCode: Record<string, string> = {
+        'chinese': 'zh',
+        'traditionalChinese': 'zh-tw',
+        'korean': 'ko',
+        'vietnamese': 'vi',
+        'thai': 'th',
+        'hindi': 'hi',
+        'bengali': 'bn',
+        'javanese': 'jv',
+        'tamil': 'ta',
+        'burmese': 'my'
+    };
+
+    const middleEasternLangToCode: Record<string, string> = {
+        'arabic': 'ar',
+        'hebrew': 'he'
+    };
 
     // 言語グループに基づいて適切なプロンプト生成関数を選択
-    if (europeanLanguages.includes(language as EuropeanLanguages)) {
-        return getEuropeanPrompt(language as EuropeanLanguages, type);
-    } else if (asianLanguages.includes(language)) {
-        return getAsianPrompt(language as AsianLanguages, type);
-    } else if (middleEasternLanguages.includes(language as MiddleEasternLanguages)) {
-        return getMiddleEasternPrompt(language as MiddleEasternLanguages, type);
+    if (language in europeanLangToCode) {
+        return getEuropeanPrompt(europeanLangToCode[language] as any, type);
+    } else if (language in asianLangToCode) {
+        return getAsianPrompt(asianLangToCode[language] as any, type);
+    } else if (language in middleEasternLangToCode) {
+        return getMiddleEasternPrompt(middleEasternLangToCode[language] as any, type);
     }
 
     // デフォルトは英語を返す

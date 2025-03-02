@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ServiceConfig, ServiceError } from '../types';
+import { ServiceConfig } from '../types';
 import { getServiceConfig, handleServiceError, showConfigurationPrompt } from '../utils';
 
 export abstract class BaseService {

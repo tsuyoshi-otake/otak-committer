@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { GitHubService, GitHubServiceFactory } from '../services/github';
 import { OpenAIService } from '../services/openai';
-import { GitService, GitServiceFactory } from '../services/git';
+import { GitServiceFactory } from '../services/git';
 
 interface Issue {
     number: number;
