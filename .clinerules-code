@@ -11,10 +11,13 @@ src/
 │   ├── generateIssue.ts   # Issue generation
 │   └── generatePR.ts      # PR generation
 ├── services/       # Service layer
-│   ├── git.ts            # Git operations (diff retrieval, state management)
-│   ├── github.ts         # GitHub API (PR/Issue creation)
+│   ├── base.ts           # Base service and factory implementations
+│   ├── branch.ts         # Branch management interface and utilities
+│   ├── git.ts           # Git operations (diff retrieval, state management)
+│   ├── github.ts        # GitHub API (PR/Issue creation)
 │   ├── issueGenerator.ts # Issue generation logic
-│   └── openai.ts         # OpenAI API (text generation)
+│   ├── openai.ts        # OpenAI API (text generation)
+│   └── prompt.ts        # Prompt generation and management
 ├── languages/      # Multilingual support
 │   ├── asian.ts           # Asian languages
 │   ├── european.ts        # Western languages
@@ -60,12 +63,74 @@ src/
   - → `openai.ts`: Title and body generation
   - → `preview.ts`: Preview display
 
-#### Role and Collaboration within the Service Layer
-- `git.ts`: Local Git operations
-- `github.ts`: GitHub API operations
-- `issueGenerator.ts`: Integrated issue generation
-- `openai.ts`: Natural language generation
-  - Works in conjunction with language files to generate prompts
+### 1.3 Service Layer Architecture
+
+#### Base Classes and Interfaces
+- `BaseService`
+  - 基本的なサービス機能の提供
+  - コンフィグ管理とエラーハンドリング
+  - 状態検証とリソース解放
+  ```typescript
+  class BaseService {
+    protected config: ServiceConfig;
+    async ensureConfig(key: keyof ServiceConfig, promptMessage: string): Promise<boolean>;
+    protected handleError(error: any): never;
+    protected showError(message: string, error?: any): void;
+    protected validateState(condition: boolean, message: string): void;
+    async dispose(): Promise<void>;
+  }
+  ```
+
+- `BaseServiceFactory`
+  - サービスインスタンスの生成と依存関係の管理
+  - 初期化エラーのハンドリング
+  ```typescript
+  class BaseServiceFactory<T> {
+    async create(config?: Partial<ServiceConfig>): Promise<T>;
+    protected validateDependencies(...services: (BaseService|undefined)[]): Promise<boolean>;
+    protected handleInitError(error: any, message: string): undefined;
+  }
+  ```
+
+#### Service Implementations
+- `GitService`
+  - Gitリポジトリ操作の提供
+  - ファイル差分と状態の取得
+  - テンプレート検出機能
+  
+- `GitHubService`
+  - GitHub API操作の実装
+  - リポジトリ情報の検出と管理
+  - Issue/PR作成機能の提供
+  
+- `OpenAIService`
+  - OpenAI APIとの連携
+  - 各種生成処理の実装
+  - APIキー検証機能
+
+- `IssueGeneratorService`
+  - Issue生成ロジックの統合
+  - ファイル分析と内容生成
+  - 複数サービスの連携管理
+
+#### Branch Management
+- `BranchManager` (Interface)
+  ```typescript
+  interface BranchManager {
+    getCurrentBranch(): Promise<string | undefined>;
+    getBranches(): Promise<string[]>;
+  }
+  ```
+
+- `BranchSelector` (Utility)
+  - ブランチ選択UIの提供
+  - 現在のブランチを考慮したソート機能
+
+#### Prompt Management
+- `PromptService`
+  - 各種プロンプトの生成と管理
+  - テンプレートの適用
+  - 多言語対応の統合
 
 ## 2. Coding Guidelines
 
@@ -75,51 +140,52 @@ src/
 - `esModuleInterop`: true
 - `skipLibCheck`: true
 
-### 2.2 API Service Implementation
+### 2.2 Service Implementation Pattern
 
-```typescript file: APIService.ts
-export class APIService {
-    private client: Client;
-    
-    constructor(config: Config) {
-        this.client = new Client(config);
+```typescript
+export class ServiceImplementation extends BaseService {
+    constructor(config?: Partial<ServiceConfig>) {
+        super(config);
     }
     
-    static async initialize(): Promise<APIService | undefined> {
-        // Initialization logic
+    async initialize(): Promise<void> {
+        await this.ensureConfig('requiredKey', 'Configuration message');
+        this.validateState(condition, 'Validation message');
     }
     
     async operation(): Promise<Result> {
         try {
-            // Execute operation
+            // Implementation
         } catch (error: any) {
-            throw new Error(`Failed: ${error.message}`);
+            this.handleError(error);
         }
     }
 }
 ```
 
-### 2.3 Multilingual Support
+### 2.3 Factory Implementation Pattern
 
-```typescript file: languagePrompt.ts
-export const getPrompt = (type: PromptType): string => {
-    const prompts = {
-        system: `...`,
-        commit: `...`,
-        pr: `...`
-    };
-    return prompts[type] || '';
-};
+```typescript
+export class ServiceFactory extends BaseServiceFactory<Service> {
+    async create(config?: Partial<ServiceConfig>): Promise<Service> {
+        try {
+            const service = new Service(config);
+            await service.initialize();
+            return service;
+        } catch (error) {
+            return this.handleInitError(error, 'Service initialization failed');
+        }
+    }
+}
 ```
 
 ### 2.4 Error Handling
 
-```typescript file: errorHandling.ts
+```typescript
 try {
     await operation();
 } catch (error: any) {
-    vscode.window.showErrorMessage(`Error: ${error.message}`);
-    return undefined;
+    this.handleError(error);
 }
 ```
 
@@ -145,7 +211,7 @@ try {
 
 ### 3.4 Configuration Management
 
-```typescript file: config.ts
+```typescript
 const config = vscode.workspace.getConfiguration('otakCommitter');
 const language = config.get<string>('language') || 'japanese';
 const messageStyle = config.get<MessageStyle>('messageStyle') || 'normal';
@@ -153,19 +219,29 @@ const messageStyle = config.get<MessageStyle>('messageStyle') || 'normal';
 
 ## 4. Testing Guidelines
 
-### 4.1 Unit Tests
+### 4.1 Service Tests
 
-```typescript file: componentTest.ts
-suite('Component Test', () => {
-    test('should behave correctly', () => {
-        // Test cases
+```typescript
+describe('ServiceImplementation', () => {
+    let service: ServiceImplementation;
+    
+    beforeEach(() => {
+        service = new ServiceImplementation();
+    });
+    
+    it('should initialize correctly', async () => {
+        await expect(service.initialize()).resolves.not.toThrow();
+    });
+    
+    it('should handle errors appropriately', async () => {
+        await expect(service.operation()).rejects.toThrow('Expected error');
     });
 });
 ```
 
 ### 4.2 Configuration Tests
 
-```typescript file: configurationTest.ts
+```typescript
 test('Configuration loads', () => {
     const config = vscode.workspace.getConfiguration('otakCommitter');
     assert.ok(config.get('setting'));
@@ -174,7 +250,7 @@ test('Configuration loads', () => {
 
 ## 5. Build and Packaging
 
-```bash file: build.sh
+```bash
 npm run vscode:prepublish && npx @vscode/vsce package
 ```
 
@@ -188,25 +264,26 @@ npm run vscode:prepublish && npx @vscode/vsce package
 - `simple-git`: Git client
 - `openai`: OpenAI API SDK
 - `@types/*`: Type definition packages
+- `@octokit/rest`: GitHub API client
 
 ## 8. Code Review Criteria
 
-1. Ensure type safety
-2. Thorough error handling
-3. Proper utilization of configuration values
-4. Consistency in interfaces
-5. Consideration for performance
+1. サービス層の適切な分離と責任の明確化
+2. ファクトリーパターンの正しい実装
+3. エラーハンドリングの一貫性
+4. 設定値の適切な利用
+5. パフォーマンスへの配慮
 
 ## 9. Performance Considerations
 
-1. Proper use of asynchronous processing
-2. Memory usage optimization
-3. Control of API calls
-4. Utilization of caching
+1. サービスの遅延初期化
+2. リソースの適切な解放
+3. API呼び出しの最適化
+4. キャッシュの活用
 
 ## 10. Security
 
-1. Secure management of API keys
-2. Appropriate handling of tokens
-3. Protection of sensitive information
-4. Validation of input values
+1. API キーの安全な管理
+2. トークンの適切な取り扱い
+3. 機密情報の保護
+4. 入力値の検証
