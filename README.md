@@ -98,6 +98,9 @@ For Issues:
      - AI-generated title
      - Structured description
      - Selected files context
+## GitHub Authentication
+
+This extension now uses VS Code’s built-in GitHub authentication by default. There is no separate sign-out feature provided by the extension; authentication and sign-out are managed by VS Code. To sign out of GitHub, please use the Accounts icon in the Activity Bar or manage your sessions via VS Code settings.
      - Appropriate labels
 
 Key Features:

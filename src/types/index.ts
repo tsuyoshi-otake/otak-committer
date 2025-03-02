@@ -1,10 +1,6 @@
 // Base interfaces
 export interface ServiceConfig {
     openaiApiKey?: string;
-    githubToken?: string;
-    githubAppId?: string;
-    githubPrivateKey?: string;
-    githubInstallationId?: string;
     language: string;
     messageStyle: string;
     useEmoji: boolean;

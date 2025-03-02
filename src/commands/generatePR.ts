@@ -11,6 +11,11 @@ interface Issue {
 }
 
 export async function generatePR(): Promise<void> {
+    const session = await vscode.authentication.getSession('github', ['repo'], { createIfNone: true });
+    if (!session) {
+        vscode.window.showErrorMessage("GitHub authentication is required. Please sign in.");
+        return;
+    }
     let previewFile: { uri: vscode.Uri, document: vscode.TextDocument } | undefined;
 
     try {

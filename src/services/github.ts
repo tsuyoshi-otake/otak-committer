@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { BaseService, BaseServiceFactory } from './base';
 import {
-    ServiceConfig,
     GitHubAPI,
     PullRequestParams,
     IssueParams,
@@ -13,103 +12,83 @@ import {
     GitHubDiffFile,
     GitHubLabel
 } from '../types';
-
+import { authentication } from 'vscode';
 import { BranchManager, BranchSelector, BranchSelection } from './branch';
 
 export class GitHubService extends BaseService implements BranchManager {
     private octokit?: GitHubAPI;
     private owner: string = '';
     private repo: string = '';
-    // 100Kトークン制限
     private static readonly MAX_TOKENS = 100 * 1000;
     private initialized: boolean = false;
     private gitApi: any;
 
-    constructor(config?: Partial<ServiceConfig>) {
-        super(config);
+    constructor() {
+        super();
     }
 
     private async ensureInitialized(): Promise<void> {
-        if (this.initialized) {return;}
+        if (this.initialized) { return; }
 
-        
-        // プロキシ設定の取得
-        const proxyUrl = vscode.workspace.getConfiguration('http').get<string>('proxy');
-        
-        // GitHub Appの設定をチェック
-        const hasAppConfig = this.config.githubAppId && 
-                          this.config.githubPrivateKey && 
-                          this.config.githubInstallationId;
+        try {
+            // Use VS Code's built-in GitHub authentication
+            let authSession = await authentication.getSession('github', ['repo'], { createIfNone: false });
 
-        // トークンまたはGitHub App設定のいずれかが必要
-        if (!this.config.githubToken && !hasAppConfig) {
-            const useAppAuth = await vscode.window.showQuickPick(
-                [
-                    { label: 'Token認証', description: 'GitHub Personal Access Tokenを使用' },
-                    { label: 'GitHub App認証', description: 'GitHub Appの認証情報を使用' }
-                ],
-                { placeHolder: '認証方式を選択してください' }
-            );
-
-            if (!useAppAuth) {
-                throw new Error('認証方式を選択してください');
-            }
-
-            if (useAppAuth.label === 'Token認証') {
-                const hasToken = await this.ensureConfig(
-                    'githubToken',
-                    'GitHub tokenが設定されていません。設定しますか？'
+            if (!authSession) {
+                const choice = await vscode.window.showInformationMessage(
+                    'GitHub operations require authentication. Please authenticate.',
+                    'Yes',
+                    'No'
                 );
-                if (!hasToken) {
-                    throw new Error('GitHub tokenは必須です');
-                }
-        } else {
-                throw new Error('GitHub App認証の設定が必要です。githubAppId, githubPrivateKey, githubInstallationIdを設定してください。');
-            }
-        }
- 
-        const { Octokit } = await import('@octokit/rest');
 
-        // 認証方式に応じてOctokitを初期化
-        if (this.config.githubToken) {
-            // トークン認証
-                this.octokit = new Octokit({
-                auth: this.config.githubToken,
+                if (choice !== 'Yes') {
+                    throw new Error('GitHub authentication is required.');
+                }
+
+                // Execute authentication if the user agrees
+                authSession = await authentication.getSession('github', ['repo'], { createIfNone: true });
+                if (!authSession) {
+                    throw new Error('GitHub authentication failed.');
+                }
+            }
+
+            // Retrieve proxy settings
+            const proxyUrl = vscode.workspace.getConfiguration('http').get<string>('proxy');
+
+            const { Octokit } = await import('@octokit/rest');
+
+            // Initialize Octokit with the VS Code authentication token
+            this.octokit = new Octokit({
+                auth: authSession.accessToken,
                 userAgent: 'otak-committer',
                 ...(proxyUrl ? {
                     request: {
- agent: new HttpsProxyAgent(proxyUrl)
- }
+                        agent: new HttpsProxyAgent(proxyUrl)
+                    }
                 } : {})
             }) as unknown as GitHubAPI;
-        } else if (hasAppConfig) {
-            // GitHub App認証
-            const { createAppAuth } = await import('@octokit/auth-app');
-            this.octokit = new Octokit({
-                authStrategy: createAppAuth,
-                auth: {
-                    appId: this.config.githubAppId,
-                    privateKey: this.config.githubPrivateKey,
-                    installationId: this.config.githubInstallationId
-                },
-                userAgent: 'otak-committer',
-                ...(proxyUrl ? {
-                    request: { agent: new HttpsProxyAgent(proxyUrl) }
-                } : {})
-            }) as unknown as GitHubAPI;
-        }
 
-        // Git APIの初期化
-        const gitExtension = vscode.extensions.getExtension('vscode.git')?.exports;
-        if (!gitExtension) {
-            throw new Error('Git extension not found');
-        }
-        this.gitApi = gitExtension.getAPI(1);
+            // Initialize the Git API
+            const gitExtension = vscode.extensions.getExtension('vscode.git')?.exports;
+            if (!gitExtension) {
+                throw new Error('Git extension not found');
+            }
+            this.gitApi = gitExtension.getAPI(1);
 
-        // リポジトリ情報の自動検出
-        await this.detectRepositoryInfo();
-        
-        this.initialized = true;
+            // Auto-detect repository information
+            await this.detectRepositoryInfo();
+
+            this.initialized = true;
+
+        } catch (error) {
+            // Provide user-friendly error messages
+            const message = error instanceof Error
+                ? `GitHub operation error: ${error.message}`
+                : 'An unexpected error occurred during GitHub operation.';
+
+            vscode.window.showErrorMessage(message);
+            throw error;
+        }
     }
 
     private async detectRepositoryInfo(): Promise<void> {
@@ -118,7 +97,7 @@ export class GitHubService extends BaseService implements BranchManager {
             throw new Error('No Git repository found');
         }
 
-        // リモートURLからowner/repoを抽出
+        // Extract owner/repo from the remote URL
         const remoteUrl = await repo.getConfig('remote.origin.url');
         if (!remoteUrl) {
             throw new Error('No remote origin URL found');
@@ -170,17 +149,15 @@ export class GitHubService extends BaseService implements BranchManager {
                 filename: file.filename,
                 additions: file.additions,
                 deletions: file.deletions,
-                patch: file.patch || ''
-,
+                patch: file.patch || '',
             }));
-            
-            // パッチ全体のサイズを計算
+
+            // Calculate the total size of patches (approximation: 1 token ≈ 4 characters)
             for (const file of files) {
-                // 大まかな推定：1トークン≈4文字
                 totalTokens += Math.ceil(file.patch.length / 4);
             }
-            
-            // サイズ制限を超えている場合、パッチを切り詰める
+
+            // Truncate patches if the size limit is exceeded
             if (totalTokens > GitHubService.MAX_TOKENS) {
                 const ratio = GitHubService.MAX_TOKENS / totalTokens;
                 for (const file of files) {
@@ -222,7 +199,7 @@ export class GitHubService extends BaseService implements BranchManager {
                 number: response.data.number,
                 title: response.data.title,
                 body: response.data.body || '',
-                labels: response.data.labels.map((label: string | GitHubLabel) => 
+                labels: response.data.labels.map((label: string | GitHubLabel) =>
                     typeof label === 'string' ? label : label.name || ''
                 )
             };
@@ -348,7 +325,7 @@ export class GitHubService extends BaseService implements BranchManager {
                     number: issue.number,
                     title: issue.title,
                     body: issue.body || '',
-                    labels: (issue.labels || []).map((label: string | GitHubLabel) => 
+                    labels: (issue.labels || []).map((label: string | GitHubLabel) =>
                         typeof label === 'string' ? label : label.name || ''
                     )
                 }));
@@ -359,19 +336,19 @@ export class GitHubService extends BaseService implements BranchManager {
 }
 
 export class GitHubServiceFactory extends BaseServiceFactory<GitHubService> {
-    async create(config?: Partial<ServiceConfig>): Promise<GitHubService> {
-        return new GitHubService(config);
+    async create(): Promise<GitHubService> {
+        return new GitHubService();
     }
 
-    static async initialize(config?: Partial<ServiceConfig>): Promise<GitHubService | undefined> {
+    static async initialize(): Promise<GitHubService | undefined> {
         try {
             const factory = new GitHubServiceFactory();
-            return await factory.create(config);
+            return await factory.create();
         } catch (error) {
             console.error('Failed to initialize GitHub service:', error);
             vscode.window.showErrorMessage(
-                error instanceof Error 
-                    ? error.message 
+                error instanceof Error
+                    ? error.message
                     : 'Failed to initialize GitHub service'
             );
             return undefined;

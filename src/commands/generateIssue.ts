@@ -3,6 +3,13 @@ import { IssueGeneratorService, IssueGeneratorServiceFactory } from '../services
 import { selectFiles as externalSelectFiles } from '../utils/fileSelector';
 
 export async function generateIssue() {
+    // Check GitHub authentication immediately upon button press
+    const session = await vscode.authentication.getSession('github', ['repo'], { createIfNone: true });
+    if (!session) {
+        vscode.window.showErrorMessage("GitHub authentication is required. Please sign in.");
+        return;
+    }
+    
     let previewFile: { uri: vscode.Uri, document: vscode.TextDocument } | undefined;
 
     try {

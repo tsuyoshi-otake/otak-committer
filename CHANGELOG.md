@@ -1,5 +1,18 @@
 # Change Log
 
+## [1.6] - 2025-03-02
+
+### Changed
+- **Switched to VS Code's built-in GitHub authentication:**
+  - Removed custom GitHub token configuration.
+  - Removed GitHub App authentication.
+  - Simplified authentication flow using VS Code's native GitHub integration.
+  - Unified authentication notifications in both Issue and PR commands with English messages.
+  - Improved user experience with automatic token management and user-friendly prompts.
+  - Enhanced error handling with clearer messages.
+- **Updated README.md:**
+  - Added a "GitHub Authentication" section outlining that the extension now uses VS Code’s built-in authentication by default, with sign-in/sign-out managed via VS Code.
+
 ## [1.5.3] - 2025-03-02
 
 ### Added

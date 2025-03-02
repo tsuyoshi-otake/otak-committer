@@ -246,16 +246,24 @@ export class IssueGeneratorService extends BaseService {
 
 export class IssueGeneratorServiceFactory extends BaseServiceFactory<IssueGeneratorService> {
     async create(config?: Partial<ServiceConfig>): Promise<IssueGeneratorService> {
-        const [openai, github, git] = await Promise.all([
+        // GitHubの初期化を先に行い、認証状態を確認
+        const github = await GitHubServiceFactory.initialize();
+        if (!github) {
+            vscode.window.showErrorMessage('GitHubの操作にはGitHub認証が必要です。認証を行ってから再度お試しください。');
+            throw new Error('GitHub認証が必要です');
+        }
+
+        // 認証が成功したら他のサービスを初期化
+        const [openai, git] = await Promise.all([
             OpenAIServiceFactory.initialize(config),
-            GitHubServiceFactory.initialize(config),
             GitServiceFactory.initialize(config)
         ]);
 
-        if (!openai || !github || !git) {
+        if (!openai || !git) {
             throw new Error('Failed to initialize required services');
         }
 
+        // GitHub認証が完了している状態でサービスを作成
         return new IssueGeneratorService(openai, github, git, config);
     }
 
