@@ -22,7 +22,11 @@ export async function generateCommit(): Promise<void> {
         const diff = await git.getDiff();
         if (!diff) {
             console.log('No changes to commit');
-            vscode.window.showWarningMessage('No changes to commit');
+            await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: 'Failed to generate commit: No changes to commit',
+                cancellable: false
+            }, async () => new Promise<void>(resolve => setTimeout(resolve, 3000)));
             return;
         }
 
