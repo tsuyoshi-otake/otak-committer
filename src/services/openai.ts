@@ -33,7 +33,7 @@ export class OpenAIService extends BaseService {
             );
 
             const response = await this.openai.chat.completions.create({
-                model: 'chatgpt-4o-latest',
+                model: 'gpt-4.1',
                 messages: [
                     { role: 'user', content: userPrompt }
                 ],

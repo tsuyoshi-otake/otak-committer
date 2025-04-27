@@ -1,7 +1,7 @@
 <p align="center">
   <h1 align="center">otak-committer</h1>
   <p align="center">
-    VS Code extension for intelligent SCM operations - Multilingual commit message generation with AI support (supporting 25 languages) and future PR management features.
+    VS Code extension for intelligent SCM operations - Multilingual commit message generation with AI support (supporting 25 languages) and PR management features.
   </p>
 </p>
 

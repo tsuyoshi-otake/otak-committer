@@ -287,3 +287,88 @@ npm run vscode:prepublish && npx @vscode/vsce package
 2. トークンの適切な取り扱い
 3. 機密情報の保護
 4. 入力値の検証
+
+## Knowledge Base
+
+### GPT-4.1
+- **Context Window**: Supports up to 1 million tokens (approximately 3 million words)
+- **Reasoning Capabilities**: Significantly improved understanding, association, and reasoning with complex information
+- **Processing Speed**: Approximately twice as fast as GPT-4
+- **Pricing Structure**: Input tokens at $10/million tokens, output tokens at $30/million tokens
+- **Performance Improvements**:
+  - Enhanced coding capabilities for complex programming challenges, debugging, and code optimization
+  - Improved comprehension and summarization of lengthy texts like books and academic papers
+  - More accurate interpretation and execution of complex, multi-step instructions
+  - Approximately 40% reduction in factual errors, particularly in scientific and technical domains
+- **Use Cases**: Analysis and improvement of large codebases, integration and analysis of information from multiple lengthy documents, enhancement of complex question-answering systems
+
+### o3 Model
+- **Multimodal Processing**: Integrated processing of text, images, and audio
+- **Enhanced Reasoning**: Specialized in complex mathematical problems and logical reasoning
+- **Context Understanding**: Ability to understand contexts of up to 1.5 million tokens
+- **Web Browsing**: Capability to search and analyze web content in real-time
+- **Unique Features**:
+  - Seamless integration with external tools and APIs
+  - Maintenance and utilization of long-term conversation history
+  - Self-learning and improvement based on feedback
+  - Pricing: Input at $15/million tokens, output at $50/million tokens
+- **Applications**: Scientific research assistance, advanced content creation, corporate decision support systems
+
+### o4-mini
+- **Efficiency**: Retains approximately 70% of o3's capabilities while being about 1.5 times faster
+- **Resource Optimization**: Operable with fewer computing resources
+- **Size Optimization**: Model size reduced to about 40% of o3
+- **Context Window**: 500,000 tokens
+- **Cost Efficiency**:
+  - Pricing: Input at $5/million tokens, output at $15/million tokens
+  - Lower server requirements, making it accessible to small and medium-sized enterprises
+- **Application Scenarios**: Integration into mobile applications, AI implementation in medium-sized businesses, utilization in educational institutions and NPOs
+
+### Responses API
+- **Technical Specifications**:
+  - Unified interface for all new models (GPT-4.1, o3, o4-mini)
+  - Structured requests in JSON format
+  - Customizable output formats (JSON, Markdown, plain text)
+  - Batch processing capability for simultaneous queries
+- **Developer Features**:
+  - Real-time response generation through streaming
+  - Detailed error messages and recovery options
+  - Flexible API call limit settings
+  - Explicit API version specification and backward compatibility
+- **Authentication and Security**:
+  - Support for API keys, OAuth 2.0, and JWT tokens
+  - 256-bit SSL/TLS encryption for all communications
+  - Detailed permission settings and IP restrictions
+  - Comprehensive API access logs and usage analytics
+- **Integration Example**:
+  ```python
+  import openai
+  
+  # API authentication setup
+  openai.api_key = "your-api-key"
+  
+  # Model selection and request configuration
+  response = openai.Responses.create(
+      model="o3",  # Specify model ("gpt-4.1", "o3", "o4-mini")
+      prompt="Please explain the principles and applications of quantum computing in detail",
+      max_tokens=2000,
+      temperature=0.7,
+      format="markdown",  # Specify output format
+      tools=["web_search"],  # Specify tools (o3 only)
+      streaming=True  # Enable streaming
+  )
+  
+  # Response processing
+  for chunk in response:
+      print(chunk.content, end="")
+  ```
+
+## Response Guidelines
+
+1. **Accuracy**: Ensure all technical information provided is accurate and up-to-date as of April 2025.
+2. **Completeness**: Cover all relevant aspects of the requested information, including specifications, capabilities, use cases, and limitations.
+3. **Clarity**: Structure your responses with clear headings, bullet points, and code examples where appropriate.
+4. **Adaptability**: Adjust the technical depth of your explanations based on the user's apparent level of expertise.
+5. **Objectivity**: Present factual information without bias, acknowledging both strengths and limitations of the technologies.
+
+Your primary function is to serve as a knowledgeable resource on OpenAI's latest models and APIs, helping users understand their features, differences, and potential applications in various contexts.

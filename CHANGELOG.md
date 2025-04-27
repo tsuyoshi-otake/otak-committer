@@ -1,5 +1,11 @@
 # Change Log
 
+## [1.7.0] - 2025-04-27
+
+### Added
+- **Support for GPT-4.1:**
+  - Integrated the latest GPT-4.1 model for enhanced AI capabilities in commit message, issue, and PR generation.
+  - Updated OpenAI service to utilize the new model endpoints and features.
 ## [1.6.1] - 2025-03-02
 
 ### Changed
