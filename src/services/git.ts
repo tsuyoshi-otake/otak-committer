@@ -20,7 +20,10 @@ export class GitService extends BaseService {
     protected git: SimpleGit;
     private workspaceRoot: string;
     // 100Kトークン制限
-    private static readonly MAX_TOKENS = 100 * 1000;
+    // トークン切り詰め閾値 (200K)
+    private static readonly TRUNCATE_THRESHOLD_TOKENS = 200 * 1000;
+    // 1トークンあたりの推定文字数
+    private static readonly CHARS_PER_TOKEN = 4;
 
     constructor(workspaceRoot: string, config?: Partial<ServiceConfig>) {
         super(config);
@@ -54,15 +57,21 @@ export class GitService extends BaseService {
             }
 
             // 差分を取得
-            const diff = await this.git.diff(['--cached']);
-            const tokenCount = Math.ceil(diff.length / 4); // 大まかな推定：1トークン≈4文字
+            let diff = await this.git.diff(['--cached']);
+            const tokenCount = Math.ceil(diff.length / GitService.CHARS_PER_TOKEN); // 大まかな推定
 
-            // サイズチェック
-            if (tokenCount > GitService.MAX_TOKENS) {
-                throw new Error(
-                    `Diff size exceeds 100K tokens limit (estimated ${Math.floor(tokenCount/1000)}K tokens). Consider making smaller commits or excluding large files.`
+            // トークン数が閾値を超えた場合、切り詰めて警告を表示
+            if (tokenCount > GitService.TRUNCATE_THRESHOLD_TOKENS) {
+                const estimatedKTokens = Math.floor(tokenCount / 1000);
+                const thresholdKTokens = Math.floor(GitService.TRUNCATE_THRESHOLD_TOKENS / 1000);
+                const truncatedLength = GitService.TRUNCATE_THRESHOLD_TOKENS * GitService.CHARS_PER_TOKEN;
+                
+                vscode.window.showWarningMessage(
+                    `Diff size (${estimatedKTokens}K tokens) exceeds the ${thresholdKTokens}K limit. The content will be truncated for AI processing.`
                 );
+                diff = diff.substring(0, truncatedLength);
             }
+            
             return diff;
         } catch (error) {
             this.handleError(error);

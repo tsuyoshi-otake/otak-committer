@@ -63,13 +63,13 @@ export class OpenAIService extends BaseService {
 
             const [titleResponse, bodyResponse] = await Promise.all([
                 this.openai.chat.completions.create({
-                    model: 'chatgpt-4o-latest',
+                    model: 'gpt-4.1',
                     messages: [{ role: 'user', content: prompts.title }],
                     temperature: 0.1,
                     max_tokens: 100
                 }),
                 this.openai.chat.completions.create({
-                    model: 'chatgpt-4o-latest',
+                    model: 'gpt-4.1',
                     messages: [{ role: 'user', content: prompts.body }],
                     temperature: 0.1,
                     max_tokens: 1000
@@ -103,7 +103,7 @@ export class OpenAIService extends BaseService {
             const language = this.config.language || 'english';
 
             const response = await this.openai.chat.completions.create({
-                model: params.model || 'chatgpt-4o-latest',
+                model: params.model || 'gpt-4.1',
                 messages: [
                     {
                         role: 'system',

@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.7.1] - 2025-04-27
+
+### Changed
+- Modified Git diff handling for commit message generation: Diffs exceeding 200K tokens will now be truncated to the first ~200K tokens, and a warning message will be displayed. This prevents errors with very large diffs while still allowing AI processing.
 ## [1.7.0] - 2025-04-27
 
 ### Added
