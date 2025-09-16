@@ -4,11 +4,16 @@ import { generatePR } from './commands/generatePR.js';
 import { generateIssue } from './commands/generateIssue.js';
 import { LANGUAGE_CONFIGS, SupportedLanguage } from './languages/index.js';
 import { MessageStyle } from './types/messageStyle.js';
+import { SecretStorageManager } from './utils/secretStorage.js';
 
 let languageStatusBarItem: vscode.StatusBarItem;
 
 export async function activate(context: vscode.ExtensionContext) {
     console.log('Activating otak-committer extension...');
+
+    // Initialize SecretStorage manager and migrate existing API keys
+    const secretStorage = SecretStorageManager.initialize(context);
+    await secretStorage.migrateFromConfiguration();
 
     // ステータスバーアイテムの初期化を最優先で行う
     console.log('Initializing status bar item...');

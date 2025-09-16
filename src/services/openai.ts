@@ -6,6 +6,7 @@ import { ServiceConfig, TemplateInfo } from '../types';
 import { MessageStyle } from '../types/messageStyle';
 import { PullRequestDiff } from '../types/github';
 import { formatMarkdown, cleanMarkdown } from '../utils';
+import { SecretStorageManager } from '../utils/secretStorage';
 
 export class OpenAIService extends BaseService {
     protected openai: OpenAI;
@@ -146,12 +147,29 @@ export class OpenAIServiceFactory extends BaseServiceFactory<OpenAIService> {
 
     static async initialize(config?: Partial<ServiceConfig>): Promise<OpenAIService | undefined> {
         try {
-            const serviceConfig = {
-                ...config,
-                openaiApiKey: config?.openaiApiKey || vscode.workspace.getConfiguration('otakCommitter').get<string>('openaiApiKey')
-            };
+            const secretStorage = SecretStorageManager.getInstance();
 
-            if (!serviceConfig.openaiApiKey) {
+            // Try to get API key from SecretStorage first
+            let apiKey = await secretStorage.getOpenAIApiKey();
+
+            // If not in SecretStorage, check if it's in config (for backwards compatibility)
+            if (!apiKey) {
+                const configKey = vscode.workspace.getConfiguration('otakCommitter').get<string>('openaiApiKey');
+                if (configKey && configKey.trim() !== '') {
+                    console.log('Migrating OpenAI API key from configuration to secure storage...');
+                    // Migrate to SecretStorage
+                    await secretStorage.setOpenAIApiKey(configKey);
+                    // Clear from configuration
+                    const config = vscode.workspace.getConfiguration('otakCommitter');
+                    await config.update('openaiApiKey', undefined, vscode.ConfigurationTarget.Global);
+                    await config.update('openaiApiKey', undefined, vscode.ConfigurationTarget.Workspace);
+                    apiKey = configKey;
+                    vscode.window.showInformationMessage('OpenAI API key has been migrated to secure storage');
+                }
+            }
+
+            // If still no API key, prompt user
+            if (!apiKey) {
                 const configured = await vscode.window.showWarningMessage(
                     'OpenAI API key is not configured. Would you like to configure it now?',
                     'Yes',
@@ -159,10 +177,20 @@ export class OpenAIServiceFactory extends BaseServiceFactory<OpenAIService> {
                 );
 
                 if (configured === 'Yes') {
-                    await vscode.commands.executeCommand('workbench.action.openSettings', 'otakCommitter.openai');
+                    const success = await secretStorage.promptForOpenAIApiKey();
+                    if (!success) {
+                        return undefined;
+                    }
+                    apiKey = await secretStorage.getOpenAIApiKey();
+                } else {
+                    return undefined;
                 }
-                return undefined;
             }
+
+            const serviceConfig = {
+                ...config,
+                openaiApiKey: apiKey
+            };
 
             const factory = new OpenAIServiceFactory();
             const service = await factory.create(serviceConfig);
@@ -177,8 +205,8 @@ export class OpenAIServiceFactory extends BaseServiceFactory<OpenAIService> {
         } catch (error) {
             console.error('Failed to initialize OpenAI service:', error);
             vscode.window.showErrorMessage(
-                error instanceof Error 
-                    ? error.message 
+                error instanceof Error
+                    ? error.message
                     : 'Failed to initialize OpenAI service'
             );
             return undefined;
