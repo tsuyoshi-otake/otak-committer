@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { GitServiceFactory } from '../services/git';
 import { OpenAIService } from '../services/openai';
 import { MessageStyle } from '../types/messageStyle';
+import { sanitizeCommitMessage } from '../utils';
 
 export async function generateCommit(): Promise<void> {
     try {
@@ -65,8 +66,8 @@ export async function generateCommit(): Promise<void> {
                 return '';
             }
 
-            // ```を削除
-            return generatedMessage.replace(/^```[\s\S]*?\n/, '').replace(/\n```$/, '').trim();
+            // Sanitize the message (escape dangerous characters, remove markdown blocks, etc.)
+            return sanitizeCommitMessage(generatedMessage);
         });
 
         if (!message) {
