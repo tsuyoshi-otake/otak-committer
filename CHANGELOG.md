@@ -1,5 +1,32 @@
 # Change Log
 
+## [1.8.2] - 2025-09-18
+
+### Security
+- **Removed deprecated API key setting:**
+  - Completely removed `otakCommitter.openaiApiKey` from package.json
+  - Setting no longer appears in VS Code settings UI
+  - API keys now exclusively stored in SecretStorage
+
+### Changed
+- Users must now use the prompt dialog to set API keys (no manual configuration option)
+
+## [1.8.1] - 2025-09-18
+
+### Security
+- **Enhanced API key migration:**
+  - Added forceClearDeprecatedSettings method to ensure complete removal of API keys from settings
+  - Clear API keys from all configuration scopes (Global, Workspace, WorkspaceFolder)
+  - Improved security by forcing clearance of deprecated settings on every startup
+
+### Fixed
+- **Package vulnerabilities:**
+  - Updated all vulnerable dependencies to latest secure versions
+  - Fixed axios SSRF and DoS vulnerabilities
+  - Fixed form-data critical vulnerability
+  - Updated esbuild to resolve security issue
+  - Fixed eslint and brace-expansion vulnerabilities
+
 ## [1.8.0] - 2025-09-18
 
 ### Added

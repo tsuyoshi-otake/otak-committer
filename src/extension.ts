@@ -15,6 +15,10 @@ export async function activate(context: vscode.ExtensionContext) {
     const secretStorage = SecretStorageManager.initialize(context);
     await secretStorage.migrateFromConfiguration();
 
+    // Force clear any remaining API keys from settings on every startup
+    // This ensures deprecated settings are always cleared for security
+    await secretStorage.forceClearDeprecatedSettings();
+
     // ステータスバーアイテムの初期化を最優先で行う
     console.log('Initializing status bar item...');
     languageStatusBarItem = vscode.window.createStatusBarItem(
@@ -119,13 +123,18 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.executeCommand('workbench.action.openSettings', 'otakCommitter');
     });
 
+    const setApiKeyCommand = vscode.commands.registerCommand('otak-committer.setApiKey', async () => {
+        await secretStorage.promptForOpenAIApiKey();
+    });
+
     context.subscriptions.push(
         generateCommitCommand,
         generatePRCommand,
         generateIssueCommand,
         changeLanguageCommand,
         changeMessageStyleCommand,
-        openSettingsCommand
+        openSettingsCommand,
+        setApiKeyCommand
     );
 
     // 設定変更の監視
@@ -156,7 +165,7 @@ function updateLanguageStatusBar() {
         tooltip.appendMarkdown(`Configuration\n\n`);
         tooltip.appendMarkdown(`Current Style: ${config.get<MessageStyle>('messageStyle') || 'normal'}\n\n`);
         tooltip.appendMarkdown(`---\n\n`);
-        tooltip.appendMarkdown(`$(versions) [Change Message Style](command:otak-committer.changeMessageStyle) &nbsp;&nbsp; $(gear) [Open Settings](command:otak-committer.openSettings)`);
+        tooltip.appendMarkdown(`$(key) [Set API Key](command:otak-committer.setApiKey) &nbsp;&nbsp; $(gear) [Open Settings](command:otak-committer.openSettings)`);
 
         languageStatusBarItem.tooltip = tooltip;
         languageStatusBarItem.command = {

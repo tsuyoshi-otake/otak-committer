@@ -13,7 +13,7 @@
     "url": "https://github.com/tsuyoshi-otake/otak-committer/issues"
   },
   "homepage": "https://github.com/tsuyoshi-otake/otak-committer#readme",
-  "version": "1.8.0",
+  "version": "1.8.2",
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -38,13 +38,6 @@
     "configuration": {
       "title": "otak-committer",
       "properties": {
-        "otakCommitter.openaiApiKey": {
-          "type": "string",
-          "default": "",
-          "description": "DEPRECATED: API keys are now stored securely. This setting will be automatically migrated.",
-          "deprecationMessage": "This setting is deprecated. API keys are now stored securely using VS Code's SecretStorage API.",
-          "markdownDeprecationMessage": "**This setting is deprecated.** API keys are now stored securely using VS Code's SecretStorage API. Your existing key will be automatically migrated."
-        },
         "otakCommitter.language": {
           "type": "string",
           "default": "english",
@@ -177,6 +170,11 @@
         "command": "otak-committer.changeMessageStyle",
         "title": "Change Commit Message Style",
         "category": "otak-committer"
+      },
+      {
+        "command": "otak-committer.setApiKey",
+        "title": "Set OpenAI API Key",
+        "category": "otak-committer"
       }
     ],
     "menus": {
@@ -240,7 +238,7 @@
     "@typescript-eslint/parser": "^8.22.0",
     "@vscode/test-cli": "^0.0.10",
     "@vscode/test-electron": "^2.4.1",
-    "esbuild": "^0.20.0",
+    "esbuild": "^0.25.10",
     "eslint": "^9.19.0",
     "glob": "^10.3.10",
     "mocha": "^10.3.0",

@@ -45,21 +45,24 @@ export class SecretStorageManager {
                 console.log('Migrating OpenAI API key from configuration to secure storage...');
                 await this.setOpenAIApiKey(openaiKey);
 
-                // Clear from configuration
+                // Clear from configuration by setting to empty string
+                // VS Code doesn't properly clear deprecated settings with undefined
                 try {
-                    await config.update('openaiApiKey', undefined, vscode.ConfigurationTarget.Global);
+                    await config.update('openaiApiKey', '', vscode.ConfigurationTarget.Global);
+                    console.log('Cleared API key from global configuration');
                 } catch (e) {
                     console.error('Failed to clear global config:', e);
                 }
 
                 try {
-                    await config.update('openaiApiKey', undefined, vscode.ConfigurationTarget.Workspace);
+                    await config.update('openaiApiKey', '', vscode.ConfigurationTarget.Workspace);
+                    console.log('Cleared API key from workspace configuration');
                 } catch (e) {
                     console.error('Failed to clear workspace config:', e);
                 }
 
                 console.log('OpenAI API key migration completed');
-                vscode.window.showInformationMessage('OpenAI API key has been migrated to secure storage');
+                vscode.window.showInformationMessage('OpenAI API key has been migrated to secure storage. The old setting has been cleared.');
             }
         } catch (error) {
             console.error('Failed to migrate API key:', error);
@@ -86,6 +89,32 @@ export class SecretStorageManager {
      */
     async deleteOpenAIApiKey(): Promise<void> {
         await this.context.secrets.delete('otak-committer.openaiApiKey');
+    }
+
+    /**
+     * Force clear deprecated settings on every startup
+     * This ensures API keys are never left in plain text settings
+     */
+    async forceClearDeprecatedSettings(): Promise<void> {
+        try {
+            const config = vscode.workspace.getConfiguration('otakCommitter');
+            const openaiKey = config.get<string>('openaiApiKey');
+
+            // Always clear the deprecated setting, even if it's already empty
+            // This ensures it's cleaned from all scopes
+            if (openaiKey !== undefined && openaiKey !== '') {
+                console.log('Force clearing deprecated API key setting for security...');
+
+                // Clear from all configuration targets
+                await config.update('openaiApiKey', '', vscode.ConfigurationTarget.Global);
+                await config.update('openaiApiKey', '', vscode.ConfigurationTarget.Workspace);
+                await config.update('openaiApiKey', '', vscode.ConfigurationTarget.WorkspaceFolder);
+
+                console.log('Deprecated API key setting cleared from all scopes');
+            }
+        } catch (error) {
+            console.error('Failed to force clear deprecated settings:', error);
+        }
     }
 
     /**
