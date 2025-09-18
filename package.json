@@ -4,7 +4,7 @@
   "description": "VS Code extension for intelligent SCM operations - Multilingual commit message generation with AI support (25 languages supported) and future PR management features.",
   "publisher": "odangoo",
   "license": "MIT",
-  "icon": "./images/icon.png",
+  "icon": "images/icon.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/tsuyoshi-otake/otak-committer"
@@ -13,7 +13,7 @@
     "url": "https://github.com/tsuyoshi-otake/otak-committer/issues"
   },
   "homepage": "https://github.com/tsuyoshi-otake/otak-committer#readme",
-  "version": "1.7.1",
+  "version": "1.8.0",
   "engines": {
     "vscode": "^1.90.0"
   },

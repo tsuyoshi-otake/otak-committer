@@ -1,5 +1,25 @@
 # Change Log
 
+## [1.8.0] - 2025-09-18
+
+### Added
+- **CLAUDE.md documentation file:**
+  - Added comprehensive development guide for Claude Code instances
+  - Documented service architecture and key implementation patterns
+  - Included common development commands and tasks
+
+### Security
+- **Secure API key storage:**
+  - Migrated OpenAI API key storage to VS Code's SecretStorage API
+  - Enhanced security by removing plain text storage options
+  - Improved API key validation and error handling
+
+### Changed
+- **Enhanced commit message sanitization:**
+  - Added utility function to sanitize commit messages
+  - Prevents command injection vulnerabilities
+  - Improved handling of special characters
+
 ## [1.7.1] - 2025-04-27
 
 ### Changed
