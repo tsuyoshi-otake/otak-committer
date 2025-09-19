@@ -1,5 +1,14 @@
 # Change Log
 
+## [1.8.3] - 2025-09-19
+
+### Fixed
+- **File path handling with spaces and special characters:**
+  - Fixed commit message generation failure for files with spaces in paths
+  - Improved handling of deleted files in git operations
+  - Files are now added individually to avoid path parsing issues
+  - Added proper error handling for deleted file scenarios
+
 ## [1.8.2] - 2025-09-18
 
 ### Security

@@ -13,7 +13,7 @@
     "url": "https://github.com/tsuyoshi-otake/otak-committer/issues"
   },
   "homepage": "https://github.com/tsuyoshi-otake/otak-committer#readme",
-  "version": "1.8.2",
+  "version": "1.8.3",
   "engines": {
     "vscode": "^1.90.0"
   },

@@ -43,7 +43,23 @@ export class GitService extends BaseService {
 
             // ステージされていない変更があればステージング
             if (modifiedFiles.length > 0) {
-                await this.git.add(modifiedFiles);
+                // ファイルを一つずつ追加（スペースを含むパスの問題を回避）
+                for (const file of modifiedFiles) {
+                    try {
+                        await this.git.add(file);
+                    } catch (error) {
+                        // 削除されたファイルの場合は git rm を試みる
+                        if (error instanceof Error && error.message.includes('did not match any files')) {
+                            try {
+                                await this.git.rm(file);
+                            } catch {
+                                // すでに削除されている場合は無視
+                            }
+                        } else {
+                            throw error;
+                        }
+                    }
+                }
             }
 
             // 新しいステータスを取得
