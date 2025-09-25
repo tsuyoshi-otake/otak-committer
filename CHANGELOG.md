@@ -1,5 +1,42 @@
 # Change Log
 
+## [1.8.5] - 2025-09-19
+
+### Security
+- **Enhanced backup encryption:**
+  - GlobalState backup now uses AES-256-GCM encryption
+  - Machine-specific key generation using hostname, platform, and user info
+  - Automatic decryption when recovering from backup
+  - Added encryption self-test in diagnostics
+
+### Changed
+- **Improved security for API key backup:**
+  - Backup storage is now encrypted instead of plaintext
+  - Uses PBKDF2 for key derivation with 100,000 iterations
+  - Random salt and IV for each encryption operation
+
+## [1.8.4] - 2025-09-19
+
+### Fixed
+- **API key persistence issues in WSL/Remote environments:**
+  - Added redundant storage using both SecretStorage and GlobalState
+  - Implemented automatic fallback when SecretStorage fails
+  - Added recovery mechanism to restore lost keys from backup
+  - Improved error handling during storage operations
+
+### Added
+- **Storage diagnostics command:**
+  - New command `Diagnose API Key Storage` to troubleshoot storage issues
+  - Shows detailed information about API key location and status
+  - Helps identify WSL and Remote Development environment issues
+  - Accessible via Command Palette
+
+### Changed
+- **Enhanced logging:**
+  - Added detailed environment logging during initialization
+  - Improved error messages for storage operations
+  - Better visibility into API key retrieval process
+
 ## [1.8.3] - 2025-09-19
 
 ### Fixed

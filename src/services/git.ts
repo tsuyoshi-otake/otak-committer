@@ -35,7 +35,7 @@ export class GitService extends BaseService {
     async getDiff(): Promise<string | undefined> {
         try {
             const status = await this.git.status();
-            
+
             // 変更されたファイルのパスを取得（削除やリネームを含むすべての変更を対象に）
             const modifiedFiles = status.files
                 .filter(file => file.working_dir !== ' ' || file.index !== ' ')  // 変更されたファイルまたは未追跡のファイルを含める
@@ -46,7 +46,13 @@ export class GitService extends BaseService {
                 // ファイルを一つずつ追加（スペースを含むパスの問題を回避）
                 for (const file of modifiedFiles) {
                     try {
-                        await this.git.add(file);
+                        // Windowsの予約デバイス名の場合は、--に続けてファイル名を指定
+                        if (this.isWindowsReservedName(file)) {
+                            // 予約名ファイルは明示的にパスとして指定
+                            await this.git.raw(['add', '--', file]);
+                        } else {
+                            await this.git.add(file);
+                        }
                     } catch (error) {
                         // 削除されたファイルの場合は git rm を試みる
                         if (error instanceof Error && error.message.includes('did not match any files')) {
@@ -73,7 +79,34 @@ export class GitService extends BaseService {
             }
 
             // 差分を取得
-            let diff = await this.git.diff(['--cached']);
+            let diff = '';
+
+            // 予約名ファイルとそれ以外を分ける
+            const reservedFiles = stagedFiles.filter(file => this.isWindowsReservedName(file));
+            const normalFiles = stagedFiles.filter(file => !this.isWindowsReservedName(file));
+
+            // 通常のファイルの差分を取得
+            if (normalFiles.length > 0) {
+                diff = await this.git.diff(['--cached']);
+            }
+
+            // 予約名ファイルがある場合は警告を表示し、ファイル名だけを差分に追加
+            if (reservedFiles.length > 0) {
+                const reservedFilesList = reservedFiles.join(', ');
+                vscode.window.showInformationMessage(
+                    `Files with reserved names (${reservedFilesList}) will be included but their content cannot be displayed in diff.`
+                );
+
+                // ファイル名だけを差分に追加
+                if (diff) {
+                    diff += '\n\n';
+                }
+                diff += `# Files with reserved names (content not available):\n`;
+                reservedFiles.forEach(file => {
+                    diff += `# - ${file}\n`;
+                });
+            }
+
             const tokenCount = Math.ceil(diff.length / GitService.CHARS_PER_TOKEN); // 大まかな推定
 
             // トークン数が閾値を超えた場合、切り詰めて警告を表示
@@ -192,6 +225,25 @@ export class GitService extends BaseService {
         } catch {
             return false;
         }
+    }
+
+    private isWindowsReservedName(filePath: string): boolean {
+        // Windowsの予約デバイス名
+        const reservedNames = [
+            'CON', 'PRN', 'AUX', 'NUL',
+            'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
+            'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9'
+        ];
+
+        // ファイル名部分を取得（パスの最後の部分）
+        const fileName = path.basename(filePath);
+        // 拡張子を除いたファイル名を取得
+        const nameWithoutExt = fileName.split('.')[0];
+
+        // 大文字小文字を無視して比較
+        return reservedNames.some(reserved =>
+            nameWithoutExt.toUpperCase() === reserved
+        );
     }
 }
 

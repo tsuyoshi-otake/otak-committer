@@ -13,11 +13,18 @@ export async function activate(context: vscode.ExtensionContext) {
 
     // Initialize SecretStorage manager and migrate existing API keys
     const secretStorage = SecretStorageManager.initialize(context);
-    await secretStorage.migrateFromConfiguration();
 
-    // Force clear any remaining API keys from settings on every startup
-    // This ensures deprecated settings are always cleared for security
-    await secretStorage.forceClearDeprecatedSettings();
+    try {
+        await secretStorage.migrateFromConfiguration();
+        // Force clear any remaining API keys from settings on every startup
+        // This ensures deprecated settings are always cleared for security
+        await secretStorage.forceClearDeprecatedSettings();
+    } catch (error) {
+        console.error('[Extension] Error during API key migration:', error);
+        vscode.window.showWarningMessage(
+            'Note: There was an issue with API key storage migration. You may need to re-enter your API key.'
+        );
+    }
 
     // ステータスバーアイテムの初期化を最優先で行う
     console.log('Initializing status bar item...');
@@ -127,6 +134,10 @@ export async function activate(context: vscode.ExtensionContext) {
         await secretStorage.promptForOpenAIApiKey();
     });
 
+    const diagnoseStorageCommand = vscode.commands.registerCommand('otak-committer.diagnoseStorage', async () => {
+        await secretStorage.diagnoseStorage();
+    });
+
     context.subscriptions.push(
         generateCommitCommand,
         generatePRCommand,
@@ -134,7 +145,8 @@ export async function activate(context: vscode.ExtensionContext) {
         changeLanguageCommand,
         changeMessageStyleCommand,
         openSettingsCommand,
-        setApiKeyCommand
+        setApiKeyCommand,
+        diagnoseStorageCommand
     );
 
     // 設定変更の監視
