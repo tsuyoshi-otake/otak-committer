@@ -1,5 +1,20 @@
 # Change Log
 
+## [1.8.6] - 2025-09-20
+
+### Fixed
+- **Migration notification shown only once:**
+  - API key migration notification now appears only on first migration
+  - Added persistent flag to track notification display status
+  - Prevents repetitive notifications on every VS Code restart
+
+### Documentation
+- **Enhanced README with security information:**
+  - Added comprehensive Security & Privacy section
+  - Documented single-maintainer security benefits
+  - Improved English for US developer audience
+  - Removed decorative emojis for professional appearance
+
 ## [1.8.5] - 2025-09-19
 
 ### Security
