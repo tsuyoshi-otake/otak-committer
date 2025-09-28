@@ -10,6 +10,7 @@ export class SecretStorageManager {
     private context: vscode.ExtensionContext;
     private static readonly GLOBAL_STATE_KEY = 'otak-committer.openaiApiKey.backup';
     private static readonly SECRET_KEY = 'otak-committer.openaiApiKey';
+    private static readonly MIGRATION_FLAG_KEY = 'otak-committer.migrationNotificationShown';
 
     private constructor(context: vscode.ExtensionContext) {
         this.context = context;
@@ -80,7 +81,13 @@ export class SecretStorageManager {
                 }
 
                 console.log('OpenAI API key migration completed');
-                vscode.window.showInformationMessage('OpenAI API key has been migrated to secure storage. The old setting has been cleared.');
+
+                // Only show the notification once
+                const notificationShown = this.context.globalState.get<boolean>(SecretStorageManager.MIGRATION_FLAG_KEY);
+                if (!notificationShown) {
+                    vscode.window.showInformationMessage('OpenAI API key has been migrated to secure storage. The old setting has been cleared.');
+                    await this.context.globalState.update(SecretStorageManager.MIGRATION_FLAG_KEY, true);
+                }
             }
         } catch (error) {
             console.error('Failed to migrate API key:', error);
