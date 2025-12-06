@@ -1,33 +1,14 @@
-export interface GitChange {
-    file: string;
-    status: 'added' | 'modified' | 'deleted' | 'renamed' | 'copied';
-    patch?: string;
-}
+/**
+ * @deprecated Import from '../types/enums/GitStatus' instead
+ */
+export { GitStatus } from './enums/GitStatus';
 
-export interface GitCommitOptions {
-    message: string;
-    amend?: boolean;
-}
+/**
+ * @deprecated Import from '../types/interfaces/Git' instead
+ */
+export type { GitChange, GitCommitOptions, GitConfig, GitError } from './interfaces/Git';
 
-export interface GitConfig {
-    email?: string;
-    name?: string;
-    remote?: string;
-}
-
-export interface GitError {
-    message: string;
-    code?: string;
-    command?: string;
-}
-
-export class GitOperationError extends Error {
-    constructor(
-        message: string,
-        public readonly code?: string,
-        public readonly command?: string
-    ) {
-        super(message);
-        this.name = 'GitOperationError';
-    }
-}
+/**
+ * @deprecated Import from '../types/errors/ServiceError' instead
+ */
+export { GitServiceError as GitOperationError } from './errors/ServiceError';

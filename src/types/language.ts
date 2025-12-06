@@ -1,23 +1,16 @@
-export type PromptType = 
-    | 'system'
-    | 'commit'
-    | 'prTitle'
-    | 'prBody'
-    | 'issue.task'
-    | 'issue.standard';
+/**
+ * @deprecated Import from '../types/enums/PromptType' instead
+ */
+export { PromptType } from './enums/PromptType';
 
-export interface LanguageSettings {
-    language: string;
-    messageStyle: string;
-}
+/**
+ * @deprecated Import from '../types/interfaces/Config' instead
+ */
+export type { LanguageSettings, LanguageConfig } from './interfaces/Config';
 
-export interface LanguageConfig {
-    name: string;
-    label: string;
-    description: string;
-    isRTL?: boolean;
-}
-
+/**
+ * @deprecated Use Record<string, LanguageConfig> instead
+ */
 export type LanguageConfigType = {
-    readonly [key: string]: LanguageConfig;
+    readonly [key: string]: import('./interfaces/Config').LanguageConfig;
 };

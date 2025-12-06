@@ -1,15 +1,17 @@
-export type MessageStyle = 'simple' | 'normal' | 'detailed';
-export type MessageType = 'commit' | 'pr';
+/**
+ * @deprecated Import from '../types/enums/MessageStyle' instead
+ */
+export { MessageStyle, MessageType, EmojiStyle } from './enums/MessageStyle';
 
-export interface MessageStyleConfig {
-    tokens: {
-        commit: number;
-        pr: number;
-    };
-    description: string;
-}
+/**
+ * @deprecated Import from '../types/interfaces/Config' instead
+ */
+export type { MessageStyleConfig, EmojiConfig } from './interfaces/Config';
 
-export const MESSAGE_STYLES: Record<MessageStyle, MessageStyleConfig> = {
+/**
+ * Message style configurations with token limits
+ */
+export const MESSAGE_STYLES: Record<import('./enums/MessageStyle').MessageStyle, import('./interfaces/Config').MessageStyleConfig> = {
     simple: {
         tokens: {
             commit: 100,
@@ -33,11 +35,9 @@ export const MESSAGE_STYLES: Record<MessageStyle, MessageStyleConfig> = {
     }
 };
 
-export interface EmojiConfig {
-    enabled: boolean;
-    style: 'github' | 'unicode';
-}
-
+/**
+ * Emoji categories for commit messages
+ */
 export const EMOJI_CATEGORIES = {
     feature: ['✨', ':sparkles:'],
     bugfix: ['🐛', ':bug:'],

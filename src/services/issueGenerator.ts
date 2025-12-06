@@ -9,6 +9,7 @@ import {
     IssueGenerationParams,
     GeneratedIssueContent
 } from '../types/issue';
+import { ErrorHandler } from '../infrastructure/error';
 
 interface FileAnalysis {
     path: string;
@@ -17,6 +18,22 @@ interface FileAnalysis {
     error?: string;
 }
 
+/**
+ * Service for generating GitHub issues using AI
+ * 
+ * Analyzes repository files and generates appropriate GitHub issues
+ * with AI-powered content generation.
+ * 
+ * @example
+ * ```typescript
+ * const service = await IssueGeneratorService.initialize();
+ * const preview = await service.generatePreview({
+ *   type: issueType,
+ *   description: 'Bug description',
+ *   files: ['src/file.ts']
+ * });
+ * ```
+ */
 export class IssueGeneratorService extends BaseService {
     // 100Kトークン制限
     private static readonly MAX_TOKENS = 100 * 1000;
@@ -30,10 +47,28 @@ export class IssueGeneratorService extends BaseService {
         super(config);
     }
 
+    /**
+     * Get all tracked files in the repository
+     * 
+     * @returns Array of tracked file paths
+     */
     async getTrackedFiles(): Promise<string[]> {
         return this.git.getTrackedFiles();
     }
 
+    /**
+     * Get available issue types
+     * 
+     * Returns a list of issue types that can be generated (task, bug, feature, etc.)
+     * 
+     * @returns Array of issue type configurations
+     * 
+     * @example
+     * ```typescript
+     * const types = service.getAvailableTypes();
+     * types.forEach(type => console.log(type.label));
+     * ```
+     */
     getAvailableTypes(): IssueType[] {
         const useEmoji = this.config.useEmoji || false;
 
@@ -68,20 +103,25 @@ export class IssueGeneratorService extends BaseService {
 
     private async generateTitle(type: string, description: string): Promise<string> {
         try {
+            this.logger.debug(`Generating title for ${type}`);
+            
             const title = await this.openai.createChatCompletion({
                 prompt: `Create a concise title (maximum 50 characters) in ${this.config.language || 'english'} for this ${type} based on the following description:\n\n${description}\n\nRequirements:\n- Must be in ${this.config.language || 'english'}\n- Maximum 50 characters\n- Clear and descriptive\n- No technical jargon unless necessary`,
                 temperature: 0.1,
                 maxTokens: 50
             });
 
+            this.logger.info('Title generated successfully');
             return title || description.slice(0, 50);
         } catch (error) {
+            this.logger.error('Failed to generate title', error);
             this.showError('Failed to generate title', error);
             return description.slice(0, 50);
         }
     }
 
     private async analyzeFiles(files: string[]): Promise<FileAnalysis[]> {
+        this.logger.info(`Analyzing ${files.length} files`);
         const analyses: FileAnalysis[] = [];
         const maxPreviewLength = 1000; // ファイルごとのプレビュー最大文字数
         let totalTokens = 0; // トークン数をトラッキング
@@ -107,6 +147,7 @@ export class IssueGeneratorService extends BaseService {
 
                 // トークン制限を超える場合は制限
                 if (totalTokens + estimatedTokens > IssueGeneratorService.MAX_TOKENS) {
+                    this.logger.warning(`Token limit reached, omitting content for ${file}`);
                     content = '... (content omitted due to token limit)';
                 } else {
                     totalTokens += estimatedTokens;
@@ -118,6 +159,7 @@ export class IssueGeneratorService extends BaseService {
                     type: type
                 });
             } catch (error) {
+                this.logger.warning(`Failed to analyze file ${file}`, error);
                 analyses.push({
                     path: file,
                     error: error instanceof Error ? error.message : 'Unknown error'
@@ -125,6 +167,7 @@ export class IssueGeneratorService extends BaseService {
             }
         }
 
+        this.logger.info(`File analysis complete: ${analyses.length} files analyzed, ${totalTokens} tokens`);
         return analyses;
     }
 
@@ -183,8 +226,27 @@ export class IssueGeneratorService extends BaseService {
         return result;
     }
 
+    /**
+     * Generate a preview of the issue content
+     * 
+     * Analyzes selected files and generates issue title and body using AI.
+     * 
+     * @param params - Issue generation parameters
+     * @returns Generated issue content (title and body)
+     * 
+     * @example
+     * ```typescript
+     * const preview = await service.generatePreview({
+     *   type: { type: 'bug', label: 'Bug Report', description: '...' },
+     *   description: 'Application crashes on startup',
+     *   files: ['src/main.ts']
+     * });
+     * ```
+     */
     async generatePreview(params: IssueGenerationParams): Promise<GeneratedIssueContent> {
         try {
+            this.logger.info('Generating issue preview');
+            
             // ファイル解析
             const fileAnalyses = params.files && params.files.length > 0
                 ? await this.analyzeFiles(params.files)
@@ -194,7 +256,7 @@ export class IssueGeneratorService extends BaseService {
                 const estimatedTokens = Math.ceil(fileAnalyses.reduce((sum, analysis) => 
                     sum + (analysis.content?.length || 0), 0) / 4);
                 if (estimatedTokens > IssueGeneratorService.MAX_TOKENS) {
-                    console.warn(
+                    this.logger.warning(
                         `Analysis content exceeds 100K tokens limit (estimated ${Math.floor(estimatedTokens/1000)}K tokens). Some content will be truncated.`
                     );
                 }
@@ -212,18 +274,39 @@ export class IssueGeneratorService extends BaseService {
                 temperature: 0.1
             });
 
-            if (!body) throw new Error('Failed to generate content');
+            if (!body) {
+                this.logger.error('Failed to generate issue body content');
+                throw new Error('Failed to generate content');
+            }
 
             const title = await this.generateTitle(params.type.type, params.description);
 
+            this.logger.info('Issue preview generated successfully');
             return { title, body };
         } catch (error) {
+            this.logger.error('Failed to generate preview', error);
             throw new Error(`Failed to generate preview: ${error}`);
         }
     }
 
+    /**
+     * Create a GitHub issue with the generated content
+     * 
+     * @param content - The generated issue content
+     * @param type - The issue type
+     * @returns The URL of the created issue or undefined if creation fails
+     * 
+     * @example
+     * ```typescript
+     * const url = await service.createIssue(preview, issueType);
+     * if (url) {
+     *   console.log('Issue created:', url);
+     * }
+     * ```
+     */
     async createIssue(content: GeneratedIssueContent, type: IssueType): Promise<string | undefined> {
         try {
+            this.logger.info(`Creating issue: ${content.title}`);
             const useEmoji = this.config.useEmoji || false;
 
             const issueTitle = useEmoji 
@@ -235,14 +318,21 @@ export class IssueGeneratorService extends BaseService {
                 body: content.body
             });
 
+            this.logger.info(`Issue created successfully: ${issue.html_url}`);
             return issue.html_url;
         } catch (error) {
+            this.logger.error('Failed to create issue', error);
             this.showError('Failed to create issue', error);
             return undefined;
         }
     }
 }
 
+/**
+ * Factory for creating issue generator service instances
+ * 
+ * Handles initialization of all required services (OpenAI, GitHub, Git).
+ */
 export class IssueGeneratorServiceFactory extends BaseServiceFactory<IssueGeneratorService> {
     async create(config?: Partial<ServiceConfig>): Promise<IssueGeneratorService> {
         // GitHubの初期化を先に行い、認証状態を確認
@@ -271,12 +361,10 @@ export class IssueGeneratorServiceFactory extends BaseServiceFactory<IssueGenera
             const factory = new IssueGeneratorServiceFactory();
             return await factory.create(config);
         } catch (error) {
-            console.error('Failed to initialize Issue Generator service:', error);
-            vscode.window.showErrorMessage(
-                error instanceof Error 
-                    ? error.message 
-                    : 'Failed to initialize Issue Generator service'
-            );
+            ErrorHandler.handle(error, {
+                operation: 'Initialize Issue Generator service',
+                component: 'IssueGeneratorServiceFactory'
+            });
             return undefined;
         }
     }

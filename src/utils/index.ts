@@ -156,3 +156,6 @@ export function sanitizeCommitMessage(message: string): string {
         // Remove any trailing periods from subject line (first line)
         .replace(/^([^\n]+)\.(\n|$)/, '$1$2');
 }
+
+// Dependency Analysis
+export * from './dependencyAnalyzer';

@@ -226,10 +226,12 @@
   "scripts": {
     "vscode:prepublish": "npm run esbuild-base -- --minify",
     "compile": "tsc -p ./ --noEmit",
+    "compile:test": "tsc -p ./tsconfig.test.json",
     "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile && npm run lint",
+    "pretest": "npm run compile:test && npm run lint",
     "lint": "eslint src",
     "test": "node ./out/test/runTest.js",
+    "test:unit": "npm run compile:test && node ./out/test/run-unit-tests.js",
     "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --loader:.ts=tsx",
     "esbuild": "npm run esbuild-base -- --sourcemap --tsconfig=tsconfig.json",
     "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch"
@@ -245,6 +247,7 @@
     "@vscode/test-electron": "^2.4.1",
     "esbuild": "^0.25.10",
     "eslint": "^9.19.0",
+    "fast-check": "^4.3.0",
     "glob": "^10.3.10",
     "mocha": "^10.3.0",
     "typescript": "^5.7.3"

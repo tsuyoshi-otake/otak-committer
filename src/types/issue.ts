@@ -1,28 +1,14 @@
-import { GitHubAPI } from './github';
+/**
+ * @deprecated Import from '../types/enums/IssueType' instead
+ */
+export { IssueTypeEnum } from './enums/IssueType';
 
-export interface IssueType {
-    label: string;
-    description: string;
-    type: 'task' | 'bug' | 'feature' | 'docs' | 'refactor';
-}
-
-export interface IssueGenerationParams {
-    type: IssueType;
-    description: string;
-    files?: string[];
-}
-
-export interface GeneratedIssueContent {
-    title: string;
-    body: string;
-}
-
-export interface IssueGeneratorDependencies {
-    openai: {
-        openai: GitHubAPI;
-    };
-    github: GitHubAPI;
-    git: {
-        getTrackedFiles(): Promise<string[]>;
-    };
-}
+/**
+ * @deprecated Import from '../types/interfaces/Issue' instead
+ */
+export type {
+    IssueType,
+    IssueGenerationParams,
+    GeneratedIssueContent,
+    IssueGeneratorDependencies
+} from './interfaces/Issue';

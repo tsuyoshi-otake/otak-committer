@@ -1,33 +1,23 @@
-// Base interfaces
-export interface ServiceConfig {
-    openaiApiKey?: string;
-    githubToken?: string;
-    language: string;
-    messageStyle: string;
-    useEmoji: boolean;
-}
+/**
+ * Centralized type system exports
+ * All types are organized into enums, interfaces, and errors
+ */
 
-export interface ServiceError extends Error {
-    code: string;
-    status?: number;
-    data?: any;
-}
+// Export all enums
+export * from './enums';
 
-// Common types
-export interface FileInfo {
-    path: string;
-    content?: string;
-    type?: string;
-}
+// Export all interfaces
+export * from './interfaces';
 
-export interface TemplateInfo {
-    type: 'commit' | 'pr';
-    content: string;
-    path: string;
-}
+// Export all errors
+export * from './errors';
 
-// Re-export specific types
+// Legacy ServiceError interface export (for backward compatibility with utils)
+export type { IServiceError as ServiceError } from './interfaces/Common';
+
+// Legacy exports for backward compatibility (deprecated)
 export * from './git';
 export * from './github';
 export * from './language';
 export * from './messageStyle';
+export * from './issue';

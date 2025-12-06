@@ -1,102 +1,45 @@
-# CLAUDE.md
+# AI-DLC and Spec-Driven Development
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Kiro-style Spec Driven Development implementation on AI-DLC (AI Development Life Cycle)
 
-## Project Overview
+## Project Context
 
-otak-committer is a VS Code extension that uses AI (GPT-4.1) to generate Git commit messages, pull requests, and GitHub issues. It supports 25 languages and integrates with VS Code's SCM interface.
+### Paths
+- Steering: `.kiro/steering/`
+- Specs: `.kiro/specs/`
 
-## Development Commands
+### Steering vs Specification
 
-```bash
-# Install dependencies
-npm install
+**Steering** (`.kiro/steering/`) - Guide AI with project-wide rules and context
+**Specs** (`.kiro/specs/`) - Formalize development process for individual features
 
-# Compile TypeScript (type checking only)
-npm run compile
+### Active Specifications
+- Check `.kiro/specs/` for active specifications
+- Use `/kiro:spec-status [feature-name]` to check progress
 
-# Development build with source maps
-npm run esbuild
+## Development Guidelines
+- Think in English, generate responses in Japanese. All Markdown content written to project files (e.g., requirements.md, design.md, tasks.md, research.md, validation reports) MUST be written in the target language configured for this specification (see spec.json.language).
 
-# Watch mode for development
-npm run watch
+## Minimal Workflow
+- Phase 0 (optional): `/kiro:steering`, `/kiro:steering-custom`
+- Phase 1 (Specification):
+  - `/kiro:spec-init "description"`
+  - `/kiro:spec-requirements {feature}`
+  - `/kiro:validate-gap {feature}` (optional: for existing codebase)
+  - `/kiro:spec-design {feature} [-y]`
+  - `/kiro:validate-design {feature}` (optional: design review)
+  - `/kiro:spec-tasks {feature} [-y]`
+- Phase 2 (Implementation): `/kiro:spec-impl {feature} [tasks]`
+  - `/kiro:validate-impl {feature}` (optional: after implementation)
+- Progress check: `/kiro:spec-status {feature}` (use anytime)
 
-# Run linting
-npm run lint
+## Development Rules
+- 3-phase approval workflow: Requirements → Design → Tasks → Implementation
+- Human review required each phase; use `-y` only for intentional fast-track
+- Keep steering current and verify alignment with `/kiro:spec-status`
+- Follow the user's instructions precisely, and within that scope act autonomously: gather the necessary context and complete the requested work end-to-end in this run, asking questions only when essential information is missing or the instructions are critically ambiguous.
 
-# Run tests
-npm run test
-
-# Production build (minified)
-npm run vscode:prepublish
-
-# Package the extension
-vsce package
-```
-
-## Architecture
-
-### Service-Based Architecture
-The codebase uses a service-oriented pattern with abstract base classes:
-
-- **BaseService** (src/services/base.ts): Abstract base providing configuration management, error handling, and factory pattern
-- **OpenAIService**: Handles all AI interactions with GPT-4.1, manages prompts and responses
-- **GitService**: Git operations, diff analysis, staging, template discovery
-- **GitHubService**: GitHub API integration for PRs and issues
-- **PromptService**: Centralized prompt engineering for different languages and styles
-
-Services are instantiated through factories and use dependency injection patterns.
-
-### Language Support System
-25 languages are supported through individual modules in src/languages/:
-- Each language has its own prompt engineering
-- Languages are grouped regionally (European, Asian, Middle Eastern)
-- RTL support for Arabic and Hebrew
-
-### Security Considerations
-- API keys stored using VS Code's SecretStorage API (never in plain text)
-- Commit messages sanitized with sanitizeCommitMessage() utility
-- Large diffs truncated at 200K tokens to prevent token overflow
-
-## Key Implementation Details
-
-### Adding New Features
-1. Commands go in src/commands/ and must be registered in extension.ts
-2. Services inherit from BaseService and implement dispose()
-3. Language support requires new module in src/languages/ and registration in constants
-
-### Testing Approach
-- Tests use Mocha framework with VS Code Extension Host
-- Test files must end with .test.js
-- Run individual tests by modifying the glob pattern in src/test/suite/index.ts
-
-### Configuration Schema
-Extension settings are defined in package.json under contributes.configuration. Main settings:
-- `otak-committer.language`: Language selection
-- `otak-committer.messageStyle`: simple/normal/detailed
-- `otak-committer.useEmoji`: Enable/disable emoji support
-
-### Build Process
-The extension uses esbuild for bundling:
-- Development builds include source maps
-- Production builds are minified
-- Output goes to out/ directory
-- Entry point is src/extension.ts
-
-## Common Tasks
-
-### Update Version
-1. Update version in package.json
-2. Update CHANGELOG.md with new version details
-3. Run `vsce package` to create .vsix file
-
-### Add New Language Support
-1. Create language module in src/languages/
-2. Add to SUPPORTED_LANGUAGES in src/constants/languages.ts
-3. Implement getPrompt() and getCommitGuide() functions
-4. Test with different diff scenarios
-
-### Modify AI Behavior
-- Prompts are centralized in PromptService
-- Model selection in OpenAIService (currently GPT-4.1)
-- Token limits defined in services/openai.ts
+## Steering Configuration
+- Load entire `.kiro/steering/` as project memory
+- Default files: `product.md`, `tech.md`, `structure.md`
+- Custom files are supported (managed via `/kiro:steering-custom`)

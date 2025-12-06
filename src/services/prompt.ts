@@ -4,11 +4,44 @@ import { PullRequestDiff } from '../types/github';
 import { TemplateInfo } from '../types';
 import { COMMIT_PREFIXES, CommitPrefix } from '../constants/commitGuide';
 
+/**
+ * Service for creating prompts for AI models
+ * 
+ * Generates structured prompts for commit messages, pull requests,
+ * and other AI-powered content generation.
+ * 
+ * @example
+ * ```typescript
+ * const promptService = new PromptService();
+ * const prompt = await promptService.createCommitPrompt(diff, 'english', 'normal');
+ * ```
+ */
 export class PromptService {
+    /**
+     * Create a prompt for generating commit messages
+     * 
+     * Generates a structured prompt that includes the diff, language preferences,
+     * message style, and optional template.
+     * 
+     * @param diff - The Git diff to analyze
+     * @param language - The target language for the commit message
+     * @param messageStyle - The style of the message (simple, normal, detailed)
+     * @param template - Optional commit message template
+     * @returns The generated prompt string
+     * 
+     * @example
+     * ```typescript
+     * const prompt = await promptService.createCommitPrompt(
+     *   diff,
+     *   'english',
+     *   MessageStyle.Normal
+     * );
+     * ```
+     */
     async createCommitPrompt(
         diff: string,
         language: string,
-        messageStyle: MessageStyle,
+        messageStyle: MessageStyle | string,
         template?: TemplateInfo
     ): Promise<string> {
         const useEmoji = vscode.workspace.getConfiguration('otakCommitter').get<boolean>('useEmoji') || false;
@@ -56,6 +89,20 @@ Please provide a clear and ${messageStyle} commit message following the format a
 ${emojiInstruction}${customInstruction}`;
     }
 
+    /**
+     * Generate a summary of a pull request diff
+     * 
+     * Creates a formatted summary of changed files and their modifications.
+     * 
+     * @param diff - The pull request diff information
+     * @returns Formatted diff summary string
+     * 
+     * @example
+     * ```typescript
+     * const summary = await promptService.generateDiffSummary(diff);
+     * console.log(summary);
+     * ```
+     */
     async generateDiffSummary(diff: PullRequestDiff): Promise<string> {
         return `Changed files:
 ${diff.files.map(file => `- ${file.filename} (additions: ${file.additions}, deletions: ${file.deletions})`).join('\n')}
@@ -66,6 +113,24 @@ ${diff.files.map(file => `
 ${file.patch}`).join('\n')}`;
     }
 
+    /**
+     * Create prompts for generating pull request content
+     * 
+     * Generates separate prompts for PR title and body based on the diff
+     * and optional template.
+     * 
+     * @param diff - The pull request diff information
+     * @param language - The target language for the PR content
+     * @param template - Optional PR template
+     * @returns Object containing title and body prompts
+     * 
+     * @example
+     * ```typescript
+     * const prompts = await promptService.createPRPrompt(diff, 'english');
+     * console.log('Title prompt:', prompts.title);
+     * console.log('Body prompt:', prompts.body);
+     * ```
+     */
     async createPRPrompt(
         diff: PullRequestDiff,
         language: string,
