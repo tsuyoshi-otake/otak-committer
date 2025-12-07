@@ -5,6 +5,31 @@ import { TemplateInfo } from '../types';
 import { COMMIT_PREFIXES, CommitPrefix } from '../constants/commitGuide';
 
 /**
+ * Message length limits by style (in characters)
+ * Updated to provide longer commit messages for better context
+ */
+export const MESSAGE_LENGTH_LIMITS = {
+    [MessageStyle.Simple]: 100,    // Doubled from 50
+    [MessageStyle.Normal]: 144,    // Doubled from 72
+    [MessageStyle.Detailed]: 200,  // Doubled from 100
+} as const;
+
+/**
+ * Get the character limit for a given message style
+ * @param style - The message style
+ * @returns The character limit
+ */
+export function getMessageLengthLimit(style: MessageStyle | string): number {
+    if (style === MessageStyle.Simple || style === 'simple') {
+        return MESSAGE_LENGTH_LIMITS[MessageStyle.Simple];
+    }
+    if (style === MessageStyle.Detailed || style === 'detailed') {
+        return MESSAGE_LENGTH_LIMITS[MessageStyle.Detailed];
+    }
+    return MESSAGE_LENGTH_LIMITS[MessageStyle.Normal];
+}
+
+/**
  * Service for creating prompts for AI models
  * 
  * Generates structured prompts for commit messages, pull requests,
@@ -68,6 +93,9 @@ Please follow the template format strictly without any leading newlines.`;
             return `${prefix.prefix}: ${desc}`;
         }).join('\n');
 
+        // Get the character limit for the message style
+        const charLimit = getMessageLengthLimit(messageStyle);
+
         return `Generate a commit message in ${language} for the following Git diff.
 Use one of these prefixes:
 
@@ -78,8 +106,7 @@ The commit message should follow this format without any leading newlines:
 
 <body>
 
-The subject line should be under 50 characters.
-The body should be wrapped at 72 characters.
+The total commit message should be under ${charLimit} characters.
 The style should be: ${messageStyle}
 
 Git diff:

@@ -1,0 +1,91 @@
+{
+  "commands": {
+    "generateCommit": "Tao Thong Diep Commit",
+    "generatePR": "Tao Pull Request",
+    "generateIssue": "Tao Issue",
+    "changeLanguage": "Thay Doi Ngon Ngu",
+    "changeMessageStyle": "Thay Doi Kieu Thong Diep",
+    "setApiKey": "Cai Dat API Key",
+    "openSettings": "Mo Cai Dat",
+    "diagnoseStorage": "Chan Doan Luu Tru API Key"
+  },
+  "messages": {
+    "apiKeyNotConfigured": "API key OpenAI chua duoc cau hinh. Ban co muon cau hinh ngay bay gio khong?",
+    "apiKeySaved": "API key da duoc luu thanh cong",
+    "authRequired": "Can xac thuc GitHub. Vui long dang nhap.",
+    "languageChanged": "Ngon ngu da duoc thay doi thanh {language}",
+    "messageStyleChanged": "Kieu thong diep da duoc thay doi thanh {style}",
+    "noChangesToCommit": "Khong co thay doi de commit",
+    "commitMessageGenerated": "Thong diep commit da duoc tao",
+    "openAIInitFailed": "Khoi tao dich vu OpenAI that bai",
+    "emptyMessageReceived": "Nhan duoc thong diep trong",
+    "noChangesBetweenBranches": "Khong tim thay thay doi giua cac nhanh da chon. Vui long thuc hien mot so thay doi truoc khi tao PR.",
+    "failedToGeneratePR": "Khong the tao noi dung PR. Vui long thu lai.",
+    "failedToShowPreview": "Khong the hien thi ban xem truoc",
+    "prCreatedSuccess": "{prType} #{number} da duoc tao thanh cong!",
+    "draftPRNotSupported": "Draft PR chi kha dung trong GitHub Team va Enterprise. Tao PR thong thuong thay the.",
+    "issueCreatedSuccess": "Issue da duoc tao thanh cong",
+    "noFilesSelectedConfirm": "Khong co tap tin nao duoc chon. Tao issue chi voi cau truc repository?",
+    "generatingIssue": "Dang tao issue...",
+    "analyzingRepository": "Dang phan tich repository...",
+    "creatingIssue": "Dang tao issue...",
+    "updatingContent": "Dang cap nhat noi dung...",
+    "waitingForModificationInput": "Dang cho nhap sua doi..."
+  },
+  "statusBar": {
+    "configuration": "Cau Hinh",
+    "currentStyle": "Kieu Hien Tai",
+    "setApiKey": "Cai Dat API Key",
+    "openSettings": "Mo Cai Dat"
+  },
+  "quickPick": {
+    "selectCommitLanguage": "Chon ngon ngu thong diep commit",
+    "selectMessageStyle": "Chon kieu thong diep",
+    "selectRelatedIssue": "Chon issue lien quan (tuy chon, nhan Escape de bo qua)",
+    "selectPRType": "Chon loai PR (nhan Escape de bo qua)",
+    "selectIssueType": "Chon loai issue",
+    "enterIssueDescription": "Nhap mo ta issue",
+    "describeIssue": "Mo ta issue, van de hoac nhiem vu",
+    "enterModificationInstructions": "Nhap huong dan sua doi (nhan Escape de bo qua)",
+    "describeModification": "Mo ta cach noi dung nen duoc sua doi",
+    "chooseAction": "Chon hanh dong",
+    "enterApiKey": "Nhap API key OpenAI cua ban"
+  },
+  "prTypes": {
+    "draft": "Draft Pull Request",
+    "draftDescription": "Can xem xet truoc khi merge",
+    "regular": "Pull Request Thong Thuong",
+    "regularDescription": "San sang de xem xet va merge"
+  },
+  "issueActions": {
+    "modify": "Sua Doi Noi Dung",
+    "modifyDescription": "Cung cap phan hoi de cai thien noi dung",
+    "create": "Tao Issue",
+    "createDescription": "Tao issue voi noi dung hien tai",
+    "cancel": "Huy Bo",
+    "cancelDescription": "Huy viec tao issue"
+  },
+  "messageStyles": {
+    "simple": "Don Gian",
+    "simpleDetail": "Thong diep commit ngan gon voi chi tiet toi thieu",
+    "normal": "Binh Thuong",
+    "normalDetail": "Thong diep commit tieu chuan voi chi tiet vua phai",
+    "detailed": "Chi Tiet",
+    "detailedDetail": "Thong diep commit toan dien voi ngu canh day du"
+  },
+  "buttons": {
+    "yes": "Co",
+    "no": "Khong",
+    "openInBrowser": "Mo Trong Trinh Duyet",
+    "openIssue": "Mo Issue"
+  },
+  "progress": {
+    "generatingCommitMessage": "Dang tao thong diep commit...",
+    "analyzingChanges": "Tao Pull Request - Dang phan tich thay doi...",
+    "creatingPR": "Dang tao {prType} Pull Request..."
+  },
+  "errors": {
+    "gitExtensionNotFound": "Phan mo rong Git khong kha dung",
+    "noGitRepository": "Khong tim thay Git repository"
+  }
+}

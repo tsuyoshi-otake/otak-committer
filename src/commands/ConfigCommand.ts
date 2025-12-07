@@ -3,7 +3,7 @@ import { BaseCommand } from './BaseCommand.js';
 import { LANGUAGE_CONFIGS } from '../languages/index.js';
 import { SupportedLanguage } from '../types/enums/SupportedLanguage.js';
 import { MessageStyle } from '../types/enums/MessageStyle.js';
-import { t } from '../i18n/index.js';
+import { t, LanguagePreferenceManager, SupportedLocale } from '../i18n/index.js';
 
 /**
  * Command for managing extension configuration
@@ -31,12 +31,13 @@ export class ConfigCommand extends BaseCommand {
 
     /**
      * Change the language setting
-     * 
+     *
      * Displays a quick pick menu with all available languages and updates
-     * the configuration when the user makes a selection.
-     * 
+     * the configuration when the user makes a selection. Also updates
+     * the LanguagePreferenceManager to use this language for commit messages.
+     *
      * @returns A promise that resolves when the language is changed or the user cancels
-     * 
+     *
      * @example
      * ```typescript
      * const configCommand = new ConfigCommand(context);
@@ -68,6 +69,20 @@ export class ConfigCommand extends BaseCommand {
                     selected.description as SupportedLanguage,
                     vscode.ConfigurationTarget.Global
                 );
+
+                // Map the selected language to a SupportedLocale and update preference
+                const localeMap: Record<string, SupportedLocale> = {
+                    'japanese': 'ja',
+                    'english': 'en',
+                    'vietnamese': 'vi',
+                    'korean': 'ko',
+                    'chinese': 'zh-cn',
+                    'traditionalChinese': 'zh-tw'
+                };
+                const locale = localeMap[selected.description as string];
+                if (locale) {
+                    await LanguagePreferenceManager.setPreferredLanguage(locale);
+                }
 
                 this.logger.info(`Language changed to: ${selected.description}`);
                 vscode.window.showInformationMessage(t('messages.languageChanged', { language: selected.label }));

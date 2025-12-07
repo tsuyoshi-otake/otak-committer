@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import OpenAI from 'openai';
 import { BaseService, BaseServiceFactory } from './base';
-import { PromptService } from './prompt';
+import { PromptService, getMessageLengthLimit } from './prompt';
 import { ServiceConfig, TemplateInfo } from '../types';
 import { MessageStyle } from '../types/messageStyle';
 import { PullRequestDiff } from '../types/github';
@@ -70,13 +70,17 @@ export class OpenAIService extends BaseService {
                 template
             );
 
+            // Calculate max_tokens based on message style with 1.5x buffer for Japanese
+            const charLimit = getMessageLengthLimit(messageStyle);
+            const maxTokens = Math.ceil(charLimit * 1.5);
+
             const response = await this.openai.chat.completions.create({
                 model: 'gpt-4.1',
                 messages: [
                     { role: 'user', content: userPrompt }
                 ],
                 temperature: 0.1,
-                max_tokens: 100
+                max_tokens: maxTokens
             });
 
             let message = response.choices[0].message.content;

@@ -27,8 +27,8 @@ suite('i18n Integration Tests', () => {
             const manager = TranslationManager.getInstance();
             const locale = manager.getLocale();
 
-            // Should be either 'ja' or 'en'
-            assert.ok(['ja', 'en'].includes(locale), `Expected locale to be 'ja' or 'en', got '${locale}'`);
+            // Should be one of supported locales
+            assert.ok(['ja', 'en', 'vi', 'ko', 'zh-cn'].includes(locale), `Expected locale to be a supported locale, got '${locale}'`);
         });
 
         test('should provide same instance across multiple calls', () => {
@@ -116,11 +116,28 @@ suite('i18n Integration Tests', () => {
             assert.strictEqual(LocaleDetector.detectLocale('en-GB'), 'en');
         });
 
-        test('should default to English for other locales', () => {
+        test('should detect Vietnamese locale correctly', () => {
+            assert.strictEqual(LocaleDetector.detectLocale('vi'), 'vi');
+            assert.strictEqual(LocaleDetector.detectLocale('vi-VN'), 'vi');
+        });
+
+        test('should detect Korean locale correctly', () => {
+            assert.strictEqual(LocaleDetector.detectLocale('ko'), 'ko');
+            assert.strictEqual(LocaleDetector.detectLocale('ko-KR'), 'ko');
+        });
+
+        test('should detect Chinese (Simplified) locale correctly', () => {
+            assert.strictEqual(LocaleDetector.detectLocale('zh-cn'), 'zh-cn');
+            assert.strictEqual(LocaleDetector.detectLocale('zh-hans'), 'zh-cn');
+        });
+
+        test('should default to English for unsupported locales', () => {
             assert.strictEqual(LocaleDetector.detectLocale('fr'), 'en');
             assert.strictEqual(LocaleDetector.detectLocale('de'), 'en');
-            assert.strictEqual(LocaleDetector.detectLocale('zh'), 'en');
-            assert.strictEqual(LocaleDetector.detectLocale('ko'), 'en');
+            assert.strictEqual(LocaleDetector.detectLocale('es'), 'en');
+            // Chinese Traditional should fall back to English
+            assert.strictEqual(LocaleDetector.detectLocale('zh-tw'), 'en');
+            assert.strictEqual(LocaleDetector.detectLocale('zh-hant'), 'en');
         });
 
         test('should default to English for undefined/empty', () => {
@@ -180,6 +197,8 @@ suite('i18n Integration Tests', () => {
     });
 
     suite('Translation Coverage', () => {
+        const supportedLocales = ['en', 'ja', 'vi', 'ko', 'zh-cn'] as const;
+
         test('should have translations for all command strings', () => {
             const manager = TranslationManager.getInstance();
 
@@ -193,18 +212,13 @@ suite('i18n Integration Tests', () => {
                 'commands.openSettings'
             ];
 
-            // Test English
-            manager.setLocale('en');
-            for (const key of commandKeys) {
-                const translation = manager.t(key);
-                assert.notStrictEqual(translation, key, `Missing English translation for ${key}`);
-            }
-
-            // Test Japanese
-            manager.setLocale('ja');
-            for (const key of commandKeys) {
-                const translation = manager.t(key);
-                assert.notStrictEqual(translation, key, `Missing Japanese translation for ${key}`);
+            // Test all supported locales
+            for (const locale of supportedLocales) {
+                manager.setLocale(locale);
+                for (const key of commandKeys) {
+                    const translation = manager.t(key);
+                    assert.notStrictEqual(translation, key, `Missing ${locale} translation for ${key}`);
+                }
             }
         });
 
@@ -219,18 +233,13 @@ suite('i18n Integration Tests', () => {
                 'messages.commitMessageGenerated'
             ];
 
-            // Test English
-            manager.setLocale('en');
-            for (const key of messageKeys) {
-                const translation = manager.t(key);
-                assert.notStrictEqual(translation, key, `Missing English translation for ${key}`);
-            }
-
-            // Test Japanese
-            manager.setLocale('ja');
-            for (const key of messageKeys) {
-                const translation = manager.t(key);
-                assert.notStrictEqual(translation, key, `Missing Japanese translation for ${key}`);
+            // Test all supported locales
+            for (const locale of supportedLocales) {
+                manager.setLocale(locale);
+                for (const key of messageKeys) {
+                    const translation = manager.t(key);
+                    assert.notStrictEqual(translation, key, `Missing ${locale} translation for ${key}`);
+                }
             }
         });
 
@@ -244,18 +253,13 @@ suite('i18n Integration Tests', () => {
                 'statusBar.openSettings'
             ];
 
-            // Test English
-            manager.setLocale('en');
-            for (const key of statusBarKeys) {
-                const translation = manager.t(key);
-                assert.notStrictEqual(translation, key, `Missing English translation for ${key}`);
-            }
-
-            // Test Japanese
-            manager.setLocale('ja');
-            for (const key of statusBarKeys) {
-                const translation = manager.t(key);
-                assert.notStrictEqual(translation, key, `Missing Japanese translation for ${key}`);
+            // Test all supported locales
+            for (const locale of supportedLocales) {
+                manager.setLocale(locale);
+                for (const key of statusBarKeys) {
+                    const translation = manager.t(key);
+                    assert.notStrictEqual(translation, key, `Missing ${locale} translation for ${key}`);
+                }
             }
         });
     });

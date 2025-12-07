@@ -1,7 +1,7 @@
 <p align="center">
   <h1 align="center">otak-committer</h1>
   <p align="center">
-    AI-powered Git commit messages and pull requests for VS Code. Generate intelligent commit messages in 25 languages.
+    AI-powered Git commit messages and pull requests for VS Code. Generate intelligent commit messages in 25 languages with full UI internationalization support.
   </p>
 </p>
 
@@ -60,7 +60,17 @@ The AI automatically:
 
 ## Features
 
-### Multilingual Support
+### Full UI Internationalization
+The extension now supports complete UI internationalization with automatic language detection:
+
+- **Automatic Language Detection**: Detects your VS Code display language and uses it for the UI
+- **Manual Language Selection**: Override automatic detection with your preferred language
+- **Persistent Preferences**: Your language choice is saved across sessions
+- **Supported UI Languages**: English, Japanese, Korean, Vietnamese, Simplified Chinese, Traditional Chinese
+
+All UI elements including menus, notifications, error messages, and dialogs are translated into your selected language.
+
+### Multilingual Commit Messages
 Generate commit messages in 25 languages:
 
 - English
@@ -98,6 +108,8 @@ Generate commit messages in 25 languages:
 - Native VS Code Source Control integration
 - One-click generation from the SCM panel
 - Status bar controls for quick access
+- Internationalized UI that adapts to your language preferences
+- Automatic language detection based on VS Code settings
 
 ### Quick Controls
 ![Status Bar](images/statusbar.png)
@@ -132,6 +144,7 @@ We take your security and privacy seriously. This extension is built with the hi
 - **Encrypted Backups**: Redundant storage uses AES-256-GCM encryption with machine-specific keys
 - **Automatic Migration**: Legacy API keys in settings are automatically moved to secure storage and deleted
 - **No Configuration Files**: API keys never appear in `settings.json` or any configuration files that could be accidentally committed
+- **Diagnostic Tools**: Built-in storage diagnostics to verify secure storage is working correctly
 
 ### Data Handling
 - **Local Processing**: Git diff analysis happens locally on your machine
@@ -218,11 +231,20 @@ Default: English, Normal style. Change anytime from the status bar.
   - `normal`: Standard commits with context
   - `detailed`: Comprehensive explanations
 
+- **`otakCommitter.i18n.uiLanguage`**: UI language preference (default: `auto`)
+  - `auto`: Automatically detect from VS Code display language
+  - `en`: English
+  - `ja`: Japanese (日本語)
+  - `ko`: Korean (한국어)
+  - `vi`: Vietnamese (Tiếng Việt)
+  - `zh-cn`: Simplified Chinese (简体中文)
+  - `zh-tw`: Traditional Chinese (繁體中文)
+
 - **`otakCommitter.github.token`**: GitHub token for PR/issue features
 
 - **`otakCommitter.customMessage`**: Custom AI instructions (optional)
 
-- **`otakCommitter.useEmoji`**: Enable emoji prefixes in commit messages (default: `true`)
+- **`otakCommitter.useEmoji`**: Enable emoji prefixes in commit messages (default: `false`)
 
 - **`otakCommitter.emojiStyle`**: Emoji format - `github` or `unicode`
 
@@ -236,6 +258,7 @@ Access via Command Palette (`Cmd/Ctrl+Shift+P`):
 - `Set OpenAI API Key`: Configure your API key
 - `Change Language`: Switch commit message language
 - `Change Message Style`: Adjust detail level
+- `Diagnose API Key Storage`: Verify secure storage is working correctly
 - `Open Settings`: Quick access to configuration
 
 ## Related Extensions
