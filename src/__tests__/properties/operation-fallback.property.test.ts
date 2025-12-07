@@ -13,7 +13,6 @@ import * as assert from 'assert';
 import * as fc from 'fast-check';
 import * as vscode from 'vscode';
 import { StorageManager } from '../../infrastructure/storage/StorageManager';
-import { ConfigManager } from '../../infrastructure/config/ConfigManager';
 import { runPropertyTest, createTaggedPropertyTest } from '../../test/helpers/property-test.helper';
 
 // Note: createMockContext is not used in this test file as we focus on failure scenarios
@@ -412,62 +411,6 @@ suite('Operation Fallback Behavior Properties', () => {
             )
         );
     });
-
-    /**
-     * Property 8: ConfigManager provides default values on failure
-     *
-     * Tests that ConfigManager returns safe default values when configuration
-     * access fails, ensuring the extension can continue operating.
-     *
-     * SKIPPED: ConfigManager currently throws when configuration is unavailable.
-     * This test documents expected behavior for future implementation.
-     */
-    test.skip('Property 8: ConfigManager provides default values on failure', () => {
-        runPropertyTest(
-            fc.property(
-                fc.constantFrom(
-                    'language' as const,
-                    'messageStyle' as const,
-                    'useEmoji' as const,
-                    'emojiStyle' as const
-                ),
-                (configKey) => {
-                    // Mock getConfiguration to throw
-                    const originalGet = vscode.workspace.getConfiguration;
-                    (vscode.workspace as any).getConfiguration = () => {
-                        throw new Error('Configuration unavailable');
-                    };
-
-                    const configManager = new ConfigManager();
-
-                    // Property: get() should not throw, should return a value
-                    let didThrow = false;
-                    
-                    try {
-                        configManager.get(configKey);
-                    } catch (error) {
-                        didThrow = true;
-                    } finally {
-                        // Restore original getConfiguration
-                        (vscode.workspace as any).getConfiguration = originalGet;
-                    }
-
-                    // Verify graceful degradation: no exception
-                    assert.strictEqual(
-                        didThrow,
-                        false,
-                        `ConfigManager.get('${configKey}') should not throw when configuration fails`
-                    );
-
-                    // Note: The actual ConfigManager implementation may throw,
-                    // but this test documents the expected behavior for fallback
-
-                    return true;
-                }
-            )
-        );
-    });
-
     /**
      * Property 8: Migration failures don't prevent extension from loading
      * 

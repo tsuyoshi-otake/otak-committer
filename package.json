@@ -13,7 +13,7 @@
     "url": "https://github.com/tsuyoshi-otake/otak-committer/issues"
   },
   "homepage": "https://github.com/tsuyoshi-otake/otak-committer#readme",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -131,9 +131,33 @@
           ],
           "enumDescriptions": [
             "GitHub style emoji codes (:smile:)",
-            "Unicode emoji characters (😊)"
+            "Unicode emoji characters"
           ],
           "description": "Style of emoji to use in messages"
+        },
+        "otakCommitter.reasoningEffort": {
+          "type": "string",
+          "default": "low",
+          "enum": [
+            "none",
+            "low",
+            "medium",
+            "high"
+          ],
+          "enumDescriptions": [
+            "No reasoning (fastest, lowest quality)",
+            "Low reasoning (fast, good quality) - Recommended",
+            "Medium reasoning (balanced)",
+            "High reasoning (slowest, highest quality)"
+          ],
+          "description": "GPT-5.1 reasoning effort level (affects response quality and latency)"
+        },
+        "otakCommitter.maxInputTokens": {
+          "type": "number",
+          "default": 200000,
+          "minimum": 1000,
+          "maximum": 400000,
+          "description": "Maximum input tokens for AI processing (default: 200K)"
         }
       }
     },

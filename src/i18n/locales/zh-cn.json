@@ -102,6 +102,9 @@
     "validating": "正在验证 API 密钥...",
     "validationSuccess": "API 密钥有效",
     "validationFailed": "API 密钥验证失败: {reason}",
-    "retryPrompt": "您想输入其他 API 密钥吗？"
+    "retryPrompt": "您想输入其他 API 密钥吗？",
+    "invalidKeyPrompt": "OpenAI API 密钥无效。是否要更新？",
+    "errorPrompt": "OpenAI API 密钥错误。是否要更新？",
+    "setApiKey": "设置 API 密钥"
   }
 }

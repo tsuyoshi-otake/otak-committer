@@ -35,8 +35,8 @@ interface FileAnalysis {
  * ```
  */
 export class IssueGeneratorService extends BaseService {
-    // 100Kトークン制限
-    private static readonly MAX_TOKENS = 100 * 1000;
+    // Unified 200K token limit for GPT-5.1 migration
+    private static readonly MAX_TOKENS = 200 * 1000;
 
     constructor(
         private readonly openai: OpenAIService,

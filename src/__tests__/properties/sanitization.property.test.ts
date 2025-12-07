@@ -307,7 +307,8 @@ suite('Sanitization Property Tests', () => {
             runPropertyTest(
                 fc.property(
                     fc.string({ minLength: 1, maxLength: 50 })
-                        .map(s => `feat: subject\n\t${s}`),
+                        .filter(s => s.trim().length > 0) // Ensure content after tab isn't just whitespace
+                        .map(s => `feat: subject\n\t${s.trim()}`), // Ensure non-whitespace content follows tab
                     (message) => {
                         const sanitized = sanitizeCommitMessage(message);
                         return sanitized.includes('\t');

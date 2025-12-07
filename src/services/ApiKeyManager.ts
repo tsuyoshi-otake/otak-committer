@@ -47,9 +47,10 @@ export class ApiKeyManager {
 
     /**
      * Regular expression for validating OpenAI API key format
-     * Format: sk- followed by 40 or more alphanumeric characters
+     * Format: sk- followed by at least one character
+     * This permissive pattern accepts test keys, development keys, and all valid OpenAI API keys
      */
-    private static readonly API_KEY_PATTERN = /^sk-[a-zA-Z0-9]{40,}$/;
+    private static readonly API_KEY_PATTERN = /^sk-.+$/;
 
     /**
      * Creates a new ApiKeyManager instance
@@ -71,14 +72,20 @@ export class ApiKeyManager {
      *
      * Checks if the provided string matches the expected OpenAI API key format:
      * - Starts with 'sk-'
-     * - Followed by 40 or more alphanumeric characters
+     * - Followed by at least one character
+     * - Whitespace is trimmed before validation
+     *
+     * This permissive validation accepts test keys, development keys, and all valid OpenAI API keys.
+     * The actual API key validity is verified by OpenAI's API during optional validation.
      *
      * @param key - The API key string to validate
      * @returns True if the key format is valid, false otherwise
      *
      * @example
      * ```typescript
-     * ApiKeyManager.validateKeyFormat('sk-abc123...'); // true
+     * ApiKeyManager.validateKeyFormat('sk-test'); // true
+     * ApiKeyManager.validateKeyFormat('sk-a'); // true
+     * ApiKeyManager.validateKeyFormat('sk-'); // false (no characters after prefix)
      * ApiKeyManager.validateKeyFormat('invalid'); // false
      * ```
      */

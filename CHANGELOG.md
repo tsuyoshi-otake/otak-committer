@@ -1,5 +1,59 @@
 # Change Log
 
+## [2.0.2] - 2025-12-07
+
+### Fixed
+- **API key validation pattern relaxed:**
+  - Changed validation from `/^sk-[a-zA-Z0-9]{40,}$/` to `/^sk-.+$/`
+  - Now accepts test keys, project keys (`sk-proj-`), and shorter valid keys
+  - Resolves issue where some legitimate OpenAI API keys were incorrectly rejected
+  - Maintains basic format validation (requires "sk-" prefix with at least one character)
+
+## [2.0.0] - 2025-12-07
+
+### Major Changes
+- **Migrated from GPT-4.1 to GPT-5.1:**
+  - Updated all AI operations to use OpenAI's GPT-5.1 model
+  - Switched from Chat Completions API to Responses API
+  - Improved response quality with configurable reasoning effort
+
+### Added
+- **Reasoning effort configuration:**
+  - New `otakCommitter.reasoningEffort` setting (none/low/medium/high)
+  - Default setting: "low" for optimal balance of speed and quality
+  - Higher settings provide more thorough analysis at the cost of latency
+
+- **Unified 200K token limit:**
+  - All features now support up to 200,000 input tokens
+  - Previously: 200K for commits, 100K for issues/PRs
+  - Enables processing of larger diffs and file sets
+
+- **New configuration options:**
+  - `otakCommitter.maxInputTokens`: Configure maximum input tokens (default: 200,000)
+  - Advanced users can adjust based on their needs
+
+### Changed
+- **Token management improvements:**
+  - Unified token limit across commit messages, pull requests, and issues
+  - Automatic truncation with user-friendly warning messages
+  - Better token estimation for multi-byte characters
+
+- **Error handling enhancements:**
+  - Improved error classification for GPT-5.1 specific errors
+  - User-friendly error messages without technical details
+  - Better guidance for rate limits, authentication, and network errors
+
+- **Output token allocations:**
+  - Commit messages: 2,000 tokens (optimized for quality)
+  - PR titles: 200 tokens
+  - PR bodies: 4,000 tokens
+  - Issues: 8,000 tokens
+
+### Migration Notes
+- Existing settings (language, emoji, custom message) are preserved
+- API keys continue to work without reconfiguration
+- No breaking changes to user-facing functionality
+
 ## [1.8.6] - 2025-09-20
 
 ### Fixed

@@ -102,6 +102,9 @@
     "validating": "Dang xac thuc API key...",
     "validationSuccess": "API key hop le",
     "validationFailed": "Xac thuc API key that bai: {reason}",
-    "retryPrompt": "Ban co muon nhap API key khac khong?"
+    "retryPrompt": "Ban co muon nhap API key khac khong?",
+    "invalidKeyPrompt": "API key OpenAI khong hop le. Ban co muon cap nhat khong?",
+    "errorPrompt": "Loi API key OpenAI. Ban co muon cap nhat khong?",
+    "setApiKey": "Cai dat API Key"
   }
 }

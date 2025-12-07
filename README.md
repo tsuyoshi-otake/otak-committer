@@ -159,13 +159,6 @@ We take your security and privacy seriously. This extension is built with the hi
 - **Open Source**: Full source code is available for security audits on [GitHub](https://github.com/tsuyoshi-otake/otak-committer)
 - **Isolated Scope**: The extension only accesses staged Git changes and selected files when explicitly requested
 
-### Secure Development
-- **Single Maintainer**: Maintained by a single, accountable developer to prevent unauthorized code injection
-- **Direct Control**: All code changes are personally reviewed and tested before release
-- **No External Contributors**: Eliminates risks associated with malicious pull requests or compromised contributor accounts
-- **Transparent Updates**: Every update is documented in the changelog with clear descriptions of changes
-- **Consistent Security Standards**: Uniform security practices across all code, ensuring no weak points from varying coding standards
-
 ### GitHub Integration
 - **Minimal Permissions**: Only requests the `repo` scope for PR and issue operations
 - **Token Security**: GitHub tokens are stored in the same secure storage as API keys
@@ -189,7 +182,7 @@ We take your security and privacy seriously. This extension is built with the hi
 2. In VS Code, run the command: `otak-committer: Set OpenAI API Key`
 3. Enter your API key when prompted
 
-The extension uses GPT-4o for optimal results. Your API key is stored securely using VS Code's secret storage.
+The extension uses GPT-5.1 for high-quality commit message generation. Your API key is stored securely using VS Code's SecretStorage API.
 
 ### Setting Up GitHub Access
 

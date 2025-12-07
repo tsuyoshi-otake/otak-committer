@@ -102,6 +102,9 @@
     "validating": "API 키 검증 중...",
     "validationSuccess": "API 키가 유효합니다",
     "validationFailed": "API 키 검증 실패: {reason}",
-    "retryPrompt": "다른 API 키를 입력하시겠습니까?"
+    "retryPrompt": "다른 API 키를 입력하시겠습니까?",
+    "invalidKeyPrompt": "OpenAI API 키가 유효하지 않습니다. 업데이트하시겠습니까?",
+    "errorPrompt": "OpenAI API 키 오류입니다. 업데이트하시겠습니까?",
+    "setApiKey": "API 키 설정"
   }
 }

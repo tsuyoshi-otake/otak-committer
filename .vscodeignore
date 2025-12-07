@@ -5,6 +5,7 @@ src/**
 .gitignore
 .clinerules
 tsconfig.json
+tsconfig.test.json
 eslint.config.mjs
 vsc-extension-quickstart.md
 node_modules
@@ -13,6 +14,7 @@ node_modules
 **/.eslintrc.json
 **/*.map
 out/test/**
+out/__tests__/**
 test/**
 *.vsix
 .git
@@ -24,3 +26,19 @@ docs/**
 .editorconfig
 .prettierrc
 .prettierignore
+
+# Sensitive files
+.env*
+.env.keys
+.env.local
+.env.local.example
+
+# Development docs
+.kiro/**
+.claude/**
+CLAUDE.md
+ARCHITECTURE.md
+TESTING.md
+TEST-QUICK-REFERENCE.md
+MIGRATION-VERIFICATION.md
+final-checkpoint-report.md

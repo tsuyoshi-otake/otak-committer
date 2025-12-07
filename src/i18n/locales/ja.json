@@ -102,6 +102,9 @@
     "validating": "APIキーを検証中...",
     "validationSuccess": "APIキーは有効です",
     "validationFailed": "APIキーの検証に失敗しました: {reason}",
-    "retryPrompt": "別のAPIキーを入力しますか？"
+    "retryPrompt": "別のAPIキーを入力しますか？",
+    "invalidKeyPrompt": "OpenAI APIキーが無効です。更新しますか？",
+    "errorPrompt": "OpenAI APIキーエラーです。更新しますか？",
+    "setApiKey": "APIキーを設定"
   }
 }

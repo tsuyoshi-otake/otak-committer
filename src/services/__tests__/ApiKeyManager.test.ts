@@ -59,37 +59,57 @@ suite('ApiKeyManager Unit Tests', () => {
             assert.strictEqual(ApiKeyManager.validateKeyFormat('key-' + 'a'.repeat(40)), false);
         });
 
-        test('should reject key that is too short', () => {
-            // 39 characters after sk- (one less than minimum)
-            const shortKey = 'sk-' + 'a'.repeat(39);
-            assert.strictEqual(ApiKeyManager.validateKeyFormat(shortKey), false);
+        test('should accept short keys (new permissive pattern)', () => {
+            // Short keys (1-39 chars after sk-) should now be accepted
+            const shortKey = 'sk-' + 'a'.repeat(5);
+            assert.strictEqual(ApiKeyManager.validateKeyFormat(shortKey), true);
+
+            // Minimum valid key: sk- + 1 character
+            assert.strictEqual(ApiKeyManager.validateKeyFormat('sk-a'), true);
+            assert.strictEqual(ApiKeyManager.validateKeyFormat('sk-1'), true);
         });
 
-        test('should reject key with special characters', () => {
-            const invalidKey = 'sk-' + 'a'.repeat(20) + '!' + 'a'.repeat(20);
-            assert.strictEqual(ApiKeyManager.validateKeyFormat(invalidKey), false);
+        test('should accept key with special characters (new permissive pattern)', () => {
+            // Special characters after sk- should now be accepted
+            const keyWithSpecial = 'sk-' + 'a'.repeat(20) + '!' + 'a'.repeat(20);
+            assert.strictEqual(ApiKeyManager.validateKeyFormat(keyWithSpecial), true);
         });
 
-        test('should reject key with spaces', () => {
-            const invalidKey = 'sk-' + 'a'.repeat(20) + ' ' + 'a'.repeat(20);
-            assert.strictEqual(ApiKeyManager.validateKeyFormat(invalidKey), false);
+        test('should accept key with spaces in middle (new permissive pattern)', () => {
+            // Spaces in the middle of the key are now accepted
+            const keyWithSpace = 'sk-' + 'a'.repeat(20) + ' ' + 'a'.repeat(20);
+            assert.strictEqual(ApiKeyManager.validateKeyFormat(keyWithSpace), true);
         });
 
-        test('should reject key with hyphen in suffix', () => {
-            const invalidKey = 'sk-' + 'a'.repeat(20) + '-' + 'a'.repeat(20);
-            assert.strictEqual(ApiKeyManager.validateKeyFormat(invalidKey), false);
+        test('should accept key with hyphen in suffix (new permissive pattern)', () => {
+            // Hyphens after sk- prefix should now be accepted
+            const keyWithHyphen = 'sk-' + 'a'.repeat(20) + '-' + 'a'.repeat(20);
+            assert.strictEqual(ApiKeyManager.validateKeyFormat(keyWithHyphen), true);
+
+            // Project-style keys
+            assert.strictEqual(ApiKeyManager.validateKeyFormat('sk-proj-abc123'), true);
         });
 
-        test('should reject key with underscore', () => {
-            const invalidKey = 'sk-' + 'a'.repeat(20) + '_' + 'a'.repeat(20);
-            assert.strictEqual(ApiKeyManager.validateKeyFormat(invalidKey), false);
+        test('should accept key with underscore (new permissive pattern)', () => {
+            // Underscores after sk- should now be accepted
+            const keyWithUnderscore = 'sk-' + 'a'.repeat(20) + '_' + 'a'.repeat(20);
+            assert.strictEqual(ApiKeyManager.validateKeyFormat(keyWithUnderscore), true);
         });
 
-        test('should handle key with leading/trailing whitespace by trimming', () => {
+        test('should accept key with leading/trailing whitespace after trimming', () => {
+            // Key with whitespace is trimmed before validation
+            // After trimming, it's a valid sk-... key
             const validKey = '  sk-' + 'a'.repeat(40) + '  ';
-            // The key should be trimmed before validation, so this should fail
-            // because the trimmed key doesn't start with sk-
-            assert.strictEqual(ApiKeyManager.validateKeyFormat(validKey), false);
+            assert.strictEqual(ApiKeyManager.validateKeyFormat(validKey), true);
+
+            // Short key with whitespace should also work
+            assert.strictEqual(ApiKeyManager.validateKeyFormat('  sk-test  '), true);
+        });
+
+        test('should reject sk- prefix alone without characters after', () => {
+            // sk- with nothing after should be rejected
+            assert.strictEqual(ApiKeyManager.validateKeyFormat('sk-'), false);
+            assert.strictEqual(ApiKeyManager.validateKeyFormat('  sk-  '), false);
         });
     });
 

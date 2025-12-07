@@ -102,6 +102,9 @@
     "validating": "Validating API key...",
     "validationSuccess": "API key is valid",
     "validationFailed": "API key validation failed: {reason}",
-    "retryPrompt": "Would you like to enter a different API key?"
+    "retryPrompt": "Would you like to enter a different API key?",
+    "invalidKeyPrompt": "Invalid OpenAI API key. Would you like to update it?",
+    "errorPrompt": "OpenAI API key error. Would you like to update it?",
+    "setApiKey": "Set API Key"
   }
 }

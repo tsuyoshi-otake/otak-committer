@@ -1,0 +1,12 @@
+{
+  "feature": "gpt-5.1-migration",
+  "description": "Migration from GPT-4.1 to GPT-5.1 using Responses API with unified 200K token limits",
+  "language": "ja",
+  "status": {
+    "requirements": "approved",
+    "design": "approved",
+    "tasks": "approved"
+  },
+  "created": "2025-12-07",
+  "lastUpdated": "2025-12-07"
+}

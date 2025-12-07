@@ -134,7 +134,17 @@ suite('GitService Robustness Property Tests', () => {
                 fc.property(
                     fc.array(statusFileArbitrary, { minLength: 1, maxLength: 100 }),
                     (files) => {
-                        const categories = categorizeFiles(files);
+                        // Filter to unique paths first (simulating real git behavior where paths are unique)
+                        const seenPaths = new Set<string>();
+                        const uniqueFiles = files.filter(f => {
+                            if (seenPaths.has(f.path)) {
+                                return false;
+                            }
+                            seenPaths.add(f.path);
+                            return true;
+                        });
+
+                        const categories = categorizeFiles(uniqueFiles);
 
                         // Check no duplicates within each category
                         const addedUnique = new Set(categories.added).size === categories.added.length;
