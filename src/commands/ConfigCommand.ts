@@ -3,6 +3,7 @@ import { BaseCommand } from './BaseCommand.js';
 import { LANGUAGE_CONFIGS } from '../languages/index.js';
 import { SupportedLanguage } from '../types/enums/SupportedLanguage.js';
 import { MessageStyle } from '../types/enums/MessageStyle.js';
+import { t } from '../i18n/index.js';
 
 /**
  * Command for managing extension configuration
@@ -55,7 +56,7 @@ export class ConfigCommand extends BaseCommand {
 
             // Show quick pick menu
             const selected = await vscode.window.showQuickPick(languages, {
-                placeHolder: 'Select commit message language',
+                placeHolder: t('quickPick.selectCommitLanguage'),
                 matchOnDescription: true,
                 matchOnDetail: true
             });
@@ -69,7 +70,7 @@ export class ConfigCommand extends BaseCommand {
                 );
 
                 this.logger.info(`Language changed to: ${selected.description}`);
-                vscode.window.showInformationMessage(`Language changed to ${selected.label}`);
+                vscode.window.showInformationMessage(t('messages.languageChanged', { language: selected.label }));
             } else {
                 this.logger.debug('Language change cancelled by user');
             }
@@ -98,26 +99,26 @@ export class ConfigCommand extends BaseCommand {
 
             // Build style options
             const styles = [
-                { 
-                    label: 'Simple', 
+                {
+                    label: t('messageStyles.simple'),
                     description: MessageStyle.Simple,
-                    detail: 'Brief commit messages with minimal detail'
+                    detail: t('messageStyles.simpleDetail')
                 },
-                { 
-                    label: 'Normal', 
+                {
+                    label: t('messageStyles.normal'),
                     description: MessageStyle.Normal,
-                    detail: 'Standard commit messages with moderate detail'
+                    detail: t('messageStyles.normalDetail')
                 },
-                { 
-                    label: 'Detailed', 
+                {
+                    label: t('messageStyles.detailed'),
                     description: MessageStyle.Detailed,
-                    detail: 'Comprehensive commit messages with full context'
+                    detail: t('messageStyles.detailedDetail')
                 }
             ];
 
             // Show quick pick menu
             const selected = await vscode.window.showQuickPick(styles, {
-                placeHolder: 'Select message style',
+                placeHolder: t('quickPick.selectMessageStyle'),
                 matchOnDescription: true,
                 matchOnDetail: true
             });
@@ -131,7 +132,7 @@ export class ConfigCommand extends BaseCommand {
                 );
 
                 this.logger.info(`Message style changed to: ${selected.description}`);
-                vscode.window.showInformationMessage(`Message style changed to ${selected.label}`);
+                vscode.window.showInformationMessage(t('messages.messageStyleChanged', { style: selected.label }));
             } else {
                 this.logger.debug('Message style change cancelled by user');
             }

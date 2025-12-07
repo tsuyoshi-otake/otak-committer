@@ -2,10 +2,12 @@
     "extends": "./tsconfig.json",
     "compilerOptions": {
         "noEmit": false,
-        "outDir": "out"
+        "outDir": "out",
+        "resolveJsonModule": true
     },
     "include": [
-        "src/**/*.ts"
+        "src/**/*.ts",
+        "src/**/*.json"
     ],
     "exclude": [
         "node_modules"

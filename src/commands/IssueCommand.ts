@@ -4,6 +4,7 @@ import { IssueGeneratorServiceFactory } from '../services/issueGenerator';
 import { selectFiles } from '../utils/fileSelector';
 import { IssueType, GeneratedIssueContent } from '../types/issue';
 import { ServiceError } from '../types/errors';
+import { t } from '../i18n/index.js';
 
 /**
  * Command for generating GitHub issues using AI
@@ -95,7 +96,7 @@ export class IssueCommand extends BaseCommand {
 
             if (!session) {
                 this.logger.warning('GitHub authentication failed');
-                vscode.window.showErrorMessage('GitHub authentication is required. Please sign in.');
+                vscode.window.showErrorMessage(t('messages.authRequired'));
                 return false;
             }
 
@@ -153,7 +154,7 @@ export class IssueCommand extends BaseCommand {
         const issueType = await vscode.window.showQuickPick<IssueType>(
             issueTypes,
             {
-                placeHolder: 'Select issue type'
+                placeHolder: t('quickPick.selectIssueType')
             }
         );
 
@@ -181,14 +182,14 @@ export class IssueCommand extends BaseCommand {
 
             if (selectedFiles.length === 0) {
                 this.logger.info('No files selected');
-                
+
                 const confirm = await vscode.window.showInformationMessage(
-                    'No files selected. Generate issue with repository structure only?',
-                    'Yes',
-                    'No'
+                    t('messages.noFilesSelectedConfirm'),
+                    t('buttons.yes'),
+                    t('buttons.no')
                 );
 
-                if (confirm !== 'Yes') {
+                if (confirm !== t('buttons.yes')) {
                     this.logger.info('User cancelled issue generation');
                     return undefined;
                 }
@@ -212,8 +213,8 @@ export class IssueCommand extends BaseCommand {
         this.logger.debug('Prompting user for issue description');
 
         const description = await vscode.window.showInputBox({
-            placeHolder: 'Enter issue description',
-            prompt: 'Describe the issue, problem, or task'
+            placeHolder: t('quickPick.enterIssueDescription'),
+            prompt: t('quickPick.describeIssue')
         });
 
         if (!description) {
@@ -242,12 +243,12 @@ export class IssueCommand extends BaseCommand {
         await vscode.window.withProgress(
             {
                 location: vscode.ProgressLocation.Notification,
-                title: 'Generating issue...',
+                title: t('messages.generatingIssue'),
                 cancellable: false
             },
             async (progress) => {
                 try {
-                    progress.report({ message: 'Analyzing repository...' });
+                    progress.report({ message: t('messages.analyzingRepository') });
 
                     // Generate initial preview
                     let preview = await service.generatePreview({
@@ -287,7 +288,7 @@ export class IssueCommand extends BaseCommand {
                                 continue;
                             }
 
-                            progress.report({ message: 'Updating content...' });
+                            progress.report({ message: t('messages.updatingContent') });
 
                             // Generate new preview with modifications
                             preview = await service.generatePreview({
@@ -299,7 +300,7 @@ export class IssueCommand extends BaseCommand {
                     }
 
                     // Create issue
-                    progress.report({ message: 'Creating issue...' });
+                    progress.report({ message: t('messages.creatingIssue') });
                     const issueUrl = await service.createIssue(preview, issueType);
 
                     if (issueUrl) {
@@ -347,22 +348,22 @@ export class IssueCommand extends BaseCommand {
 
         const action = await vscode.window.showQuickPick([
             {
-                label: '$(edit) Modify Content',
-                description: 'Provide feedback to improve the content',
+                label: `$(edit) ${t('issueActions.modify')}`,
+                description: t('issueActions.modifyDescription'),
                 action: 'modify'
             },
             {
-                label: '$(check) Create Issue',
-                description: 'Create issue with current content',
+                label: `$(check) ${t('issueActions.create')}`,
+                description: t('issueActions.createDescription'),
                 action: 'create'
             },
             {
-                label: '$(close) Cancel',
-                description: 'Cancel issue creation',
+                label: `$(close) ${t('issueActions.cancel')}`,
+                description: t('issueActions.cancelDescription'),
                 action: 'cancel'
             }
         ], {
-            placeHolder: 'Choose an action (↑↓ to navigate, Enter to select)',
+            placeHolder: t('quickPick.chooseAction'),
             matchOnDescription: true,
             ignoreFocusOut: true
         });
@@ -377,11 +378,11 @@ export class IssueCommand extends BaseCommand {
      * @returns Modification instructions or undefined if cancelled
      */
     private async getModificationInstructions(progress: any): Promise<string | undefined> {
-        progress.report({ message: 'Waiting for modification input...' });
+        progress.report({ message: t('messages.waitingForModificationInput') });
 
         const modifications = await vscode.window.showInputBox({
-            placeHolder: 'Enter modification instructions (press Escape to skip)',
-            prompt: 'Describe how the content should be modified'
+            placeHolder: t('quickPick.enterModificationInstructions'),
+            prompt: t('quickPick.describeModification')
         });
 
         return modifications;
@@ -402,11 +403,11 @@ export class IssueCommand extends BaseCommand {
 
         // Show success message
         const response = await vscode.window.showInformationMessage(
-            'Issue created successfully',
-            'Open Issue'
+            t('messages.issueCreatedSuccess'),
+            t('buttons.openIssue')
         );
 
-        if (response === 'Open Issue') {
+        if (response === t('buttons.openIssue')) {
             vscode.env.openExternal(vscode.Uri.parse(issueUrl));
         }
     }

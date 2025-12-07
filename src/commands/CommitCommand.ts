@@ -5,6 +5,7 @@ import { OpenAIService } from '../services/openai';
 import { MessageStyle } from '../types/enums/MessageStyle';
 import { sanitizeCommitMessage } from '../utils';
 import { ServiceError } from '../types/errors';
+import { t } from '../i18n/index.js';
 
 /**
  * Command for generating commit messages using AI
@@ -87,7 +88,7 @@ export class CommitCommand extends BaseCommand {
         
         if (!diff) {
             this.logger.info('No changes to commit');
-            await this.showNotification('No changes to commit', 3000);
+            await this.showNotification(t('messages.noChangesToCommit'), 3000);
             return undefined;
         }
 
@@ -124,14 +125,14 @@ export class CommitCommand extends BaseCommand {
 
             if (!apiKey) {
                 this.logger.warning('OpenAI API key not found in storage');
-                
+
                 const configured = await vscode.window.showWarningMessage(
-                    'OpenAI API key is not configured. Would you like to configure it now?',
-                    'Yes',
-                    'No'
+                    t('messages.apiKeyNotConfigured'),
+                    t('buttons.yes'),
+                    t('buttons.no')
                 );
 
-                if (configured === 'Yes') {
+                if (configured === t('buttons.yes')) {
                     await vscode.commands.executeCommand(
                         'workbench.action.openSettings',
                         'otakCommitter.openaiApiKey'
@@ -151,7 +152,7 @@ export class CommitCommand extends BaseCommand {
 
             if (!openai) {
                 this.logger.error('Failed to initialize OpenAIService');
-                await this.showNotification('OpenAI service initialization failed', 3000);
+                await this.showNotification(t('messages.openAIInitFailed'), 3000);
                 return undefined;
             }
 
@@ -183,7 +184,7 @@ export class CommitCommand extends BaseCommand {
         this.logger.debug('Starting commit message generation');
 
         const message = await this.withProgress(
-            'Generating commit message...',
+            t('progress.generatingCommitMessage'),
             async () => {
                 // Get configuration
                 const language = this.config.get('language') || 'english';
@@ -210,7 +211,7 @@ export class CommitCommand extends BaseCommand {
 
         if (!message) {
             this.logger.error('Failed to generate commit message: message is empty');
-            await this.showNotification('Empty message received', 3000);
+            await this.showNotification(t('messages.emptyMessageReceived'), 3000);
             return undefined;
         }
 
@@ -250,7 +251,7 @@ export class CommitCommand extends BaseCommand {
      * Show a success notification to the user
      */
     private async showSuccessNotification(): Promise<void> {
-        await this.showNotification('Commit message has been generated', 3000);
+        await this.showNotification(t('messages.commitMessageGenerated'), 3000);
     }
 
     /**

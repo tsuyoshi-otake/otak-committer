@@ -1,0 +1,91 @@
+{
+  "commands": {
+    "generateCommit": "コミットメッセージを生成",
+    "generatePR": "プルリクエストを生成",
+    "generateIssue": "イシューを生成",
+    "changeLanguage": "言語を変更",
+    "changeMessageStyle": "メッセージスタイルを変更",
+    "setApiKey": "APIキーを設定",
+    "openSettings": "設定を開く",
+    "diagnoseStorage": "APIキーストレージを診断"
+  },
+  "messages": {
+    "apiKeyNotConfigured": "OpenAI APIキーが設定されていません。今すぐ設定しますか？",
+    "apiKeySaved": "APIキーを保存しました",
+    "authRequired": "GitHubの認証が必要です。サインインしてください。",
+    "languageChanged": "言語を{language}に変更しました",
+    "messageStyleChanged": "メッセージスタイルを{style}に変更しました",
+    "noChangesToCommit": "コミットする変更がありません",
+    "commitMessageGenerated": "コミットメッセージを生成しました",
+    "openAIInitFailed": "OpenAIサービスの初期化に失敗しました",
+    "emptyMessageReceived": "空のメッセージを受信しました",
+    "noChangesBetweenBranches": "選択したブランチ間に変更がありません。PRを作成する前に変更を加えてください。",
+    "failedToGeneratePR": "PRコンテンツの生成に失敗しました。もう一度お試しください。",
+    "failedToShowPreview": "プレビューの表示に失敗しました",
+    "prCreatedSuccess": "{prType} #{number} を作成しました！",
+    "draftPRNotSupported": "ドラフトPRはGitHub TeamおよびEnterpriseでのみ利用可能です。通常のPRを作成します。",
+    "issueCreatedSuccess": "イシューを作成しました",
+    "noFilesSelectedConfirm": "ファイルが選択されていません。リポジトリ構造のみでイシューを生成しますか？",
+    "generatingIssue": "イシューを生成中...",
+    "analyzingRepository": "リポジトリを解析中...",
+    "creatingIssue": "イシューを作成中...",
+    "updatingContent": "コンテンツを更新中...",
+    "waitingForModificationInput": "修正内容の入力を待っています..."
+  },
+  "statusBar": {
+    "configuration": "設定",
+    "currentStyle": "現在のスタイル",
+    "setApiKey": "APIキーを設定",
+    "openSettings": "設定を開く"
+  },
+  "quickPick": {
+    "selectCommitLanguage": "コミットメッセージの言語を選択",
+    "selectMessageStyle": "メッセージスタイルを選択",
+    "selectRelatedIssue": "関連するイシューを選択（オプション、Escでスキップ）",
+    "selectPRType": "PRタイプを選択（Escでスキップ）",
+    "selectIssueType": "イシュータイプを選択",
+    "enterIssueDescription": "イシューの説明を入力",
+    "describeIssue": "問題、課題、またはタスクを説明してください",
+    "enterModificationInstructions": "修正指示を入力（Escでスキップ）",
+    "describeModification": "コンテンツをどのように修正するか説明してください",
+    "chooseAction": "アクションを選択",
+    "enterApiKey": "OpenAI APIキーを入力"
+  },
+  "prTypes": {
+    "draft": "ドラフトプルリクエスト",
+    "draftDescription": "マージ前にレビューが必要",
+    "regular": "通常のプルリクエスト",
+    "regularDescription": "レビューとマージの準備完了"
+  },
+  "issueActions": {
+    "modify": "コンテンツを修正",
+    "modifyDescription": "コンテンツを改善するためのフィードバックを提供",
+    "create": "イシューを作成",
+    "createDescription": "現在のコンテンツでイシューを作成",
+    "cancel": "キャンセル",
+    "cancelDescription": "イシュー作成をキャンセル"
+  },
+  "messageStyles": {
+    "simple": "シンプル",
+    "simpleDetail": "最小限の詳細で簡潔なコミットメッセージ",
+    "normal": "通常",
+    "normalDetail": "適度な詳細を含む標準的なコミットメッセージ",
+    "detailed": "詳細",
+    "detailedDetail": "完全なコンテキストを含む包括的なコミットメッセージ"
+  },
+  "buttons": {
+    "yes": "はい",
+    "no": "いいえ",
+    "openInBrowser": "ブラウザで開く",
+    "openIssue": "イシューを開く"
+  },
+  "progress": {
+    "generatingCommitMessage": "コミットメッセージを生成中...",
+    "analyzingChanges": "プルリクエスト生成 - 変更を解析中...",
+    "creatingPR": "{prType}プルリクエストを作成中..."
+  },
+  "errors": {
+    "gitExtensionNotFound": "Git拡張機能が利用できません",
+    "noGitRepository": "Gitリポジトリが見つかりません"
+  }
+}

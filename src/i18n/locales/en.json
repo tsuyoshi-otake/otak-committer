@@ -1,0 +1,91 @@
+{
+  "commands": {
+    "generateCommit": "Generate Commit Message",
+    "generatePR": "Generate Pull Request",
+    "generateIssue": "Generate Issue",
+    "changeLanguage": "Change Language",
+    "changeMessageStyle": "Change Message Style",
+    "setApiKey": "Set API Key",
+    "openSettings": "Open Settings",
+    "diagnoseStorage": "Diagnose API Key Storage"
+  },
+  "messages": {
+    "apiKeyNotConfigured": "OpenAI API key is not configured. Would you like to configure it now?",
+    "apiKeySaved": "API key saved successfully",
+    "authRequired": "GitHub authentication is required. Please sign in.",
+    "languageChanged": "Language changed to {language}",
+    "messageStyleChanged": "Message style changed to {style}",
+    "noChangesToCommit": "No changes to commit",
+    "commitMessageGenerated": "Commit message has been generated",
+    "openAIInitFailed": "OpenAI service initialization failed",
+    "emptyMessageReceived": "Empty message received",
+    "noChangesBetweenBranches": "No changes found between selected branches. Please make some changes before creating a PR.",
+    "failedToGeneratePR": "Failed to generate PR content. Please try again.",
+    "failedToShowPreview": "Failed to show preview",
+    "prCreatedSuccess": "{prType} #{number} created successfully!",
+    "draftPRNotSupported": "Draft PRs are only available in GitHub Team and Enterprise. Creating a regular PR instead.",
+    "issueCreatedSuccess": "Issue created successfully",
+    "noFilesSelectedConfirm": "No files selected. Generate issue with repository structure only?",
+    "generatingIssue": "Generating issue...",
+    "analyzingRepository": "Analyzing repository...",
+    "creatingIssue": "Creating issue...",
+    "updatingContent": "Updating content...",
+    "waitingForModificationInput": "Waiting for modification input..."
+  },
+  "statusBar": {
+    "configuration": "Configuration",
+    "currentStyle": "Current Style",
+    "setApiKey": "Set API Key",
+    "openSettings": "Open Settings"
+  },
+  "quickPick": {
+    "selectCommitLanguage": "Select commit message language",
+    "selectMessageStyle": "Select message style",
+    "selectRelatedIssue": "Select related issue (optional, press Escape to skip)",
+    "selectPRType": "Select PR type (press Escape to skip)",
+    "selectIssueType": "Select issue type",
+    "enterIssueDescription": "Enter issue description",
+    "describeIssue": "Describe the issue, problem, or task",
+    "enterModificationInstructions": "Enter modification instructions (press Escape to skip)",
+    "describeModification": "Describe how the content should be modified",
+    "chooseAction": "Choose an action",
+    "enterApiKey": "Enter your OpenAI API key"
+  },
+  "prTypes": {
+    "draft": "Draft Pull Request",
+    "draftDescription": "Review required before merge",
+    "regular": "Regular Pull Request",
+    "regularDescription": "Ready for review and merge"
+  },
+  "issueActions": {
+    "modify": "Modify Content",
+    "modifyDescription": "Provide feedback to improve the content",
+    "create": "Create Issue",
+    "createDescription": "Create issue with current content",
+    "cancel": "Cancel",
+    "cancelDescription": "Cancel issue creation"
+  },
+  "messageStyles": {
+    "simple": "Simple",
+    "simpleDetail": "Brief commit messages with minimal detail",
+    "normal": "Normal",
+    "normalDetail": "Standard commit messages with moderate detail",
+    "detailed": "Detailed",
+    "detailedDetail": "Comprehensive commit messages with full context"
+  },
+  "buttons": {
+    "yes": "Yes",
+    "no": "No",
+    "openInBrowser": "Open in Browser",
+    "openIssue": "Open Issue"
+  },
+  "progress": {
+    "generatingCommitMessage": "Generating commit message...",
+    "analyzingChanges": "Generate Pull Request - Analyzing changes...",
+    "creatingPR": "Creating {prType} Pull Request..."
+  },
+  "errors": {
+    "gitExtensionNotFound": "Git extension is not available",
+    "noGitRepository": "No Git repository found"
+  }
+}

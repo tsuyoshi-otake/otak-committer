@@ -3,6 +3,7 @@ import { ConfigManager } from '../infrastructure/config/ConfigManager.js';
 import { LANGUAGE_CONFIGS } from '../languages/index.js';
 import { MessageStyle } from '../types/enums/MessageStyle.js';
 import { Logger } from '../infrastructure/logging/Logger.js';
+import { t } from '../i18n/index.js';
 
 /**
  * Manages the status bar item for language and configuration display
@@ -78,7 +79,7 @@ export class StatusBarManager {
 
         // Set command
         this.statusBarItem.command = {
-            title: 'Change Language',
+            title: t('commands.changeLanguage'),
             command: 'otak-committer.changeLanguage'
         };
 
@@ -97,12 +98,12 @@ export class StatusBarManager {
 
         const messageStyle = this.config.get('messageStyle') || MessageStyle.Normal;
 
-        tooltip.appendMarkdown(`Configuration\n\n`);
-        tooltip.appendMarkdown(`Current Style: ${messageStyle}\n\n`);
+        tooltip.appendMarkdown(`${t('statusBar.configuration')}\n\n`);
+        tooltip.appendMarkdown(`${t('statusBar.currentStyle')}: ${messageStyle}\n\n`);
         tooltip.appendMarkdown(`---\n\n`);
         tooltip.appendMarkdown(
-            `$(key) [Set API Key](command:otak-committer.setApiKey) &nbsp;&nbsp; ` +
-            `$(gear) [Open Settings](command:otak-committer.openSettings)`
+            `$(key) [${t('statusBar.setApiKey')}](command:otak-committer.setApiKey) &nbsp;&nbsp; ` +
+            `$(gear) [${t('statusBar.openSettings')}](command:otak-committer.openSettings)`
         );
 
         return tooltip;

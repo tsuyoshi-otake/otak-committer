@@ -5,6 +5,7 @@ import { OpenAIService } from '../services/openai';
 import { GitServiceFactory } from '../services/git';
 import { ServiceError } from '../types/errors';
 import { showMarkdownPreview, closePreviewTabs, cleanupPreviewFiles } from '../utils/preview';
+import { t } from '../i18n/index.js';
 
 interface Issue {
     number: number;
@@ -135,7 +136,7 @@ export class PRCommand extends BaseCommand {
 
         if (!session) {
             this.logger.warning('GitHub authentication failed');
-            vscode.window.showErrorMessage('GitHub authentication is required. Please sign in.');
+            vscode.window.showErrorMessage(t('messages.authRequired'));
             return undefined;
         }
 
@@ -202,7 +203,7 @@ export class PRCommand extends BaseCommand {
             const selectedIssue = await vscode.window.showQuickPick(
                 issueItems,
                 {
-                    placeHolder: 'Select related issue (optional, press Escape to skip)',
+                    placeHolder: t('quickPick.selectRelatedIssue'),
                     ignoreFocusOut: true
                 }
             );
@@ -254,9 +255,7 @@ export class PRCommand extends BaseCommand {
 
             if (!diff.files.length) {
                 this.logger.info('No changes found between branches');
-                vscode.window.showErrorMessage(
-                    'No changes found between selected branches. Please make some changes before creating a PR.'
-                );
+                vscode.window.showErrorMessage(t('messages.noChangesBetweenBranches'));
                 return undefined;
             }
 
@@ -287,12 +286,12 @@ export class PRCommand extends BaseCommand {
                 this.logger.warning('OpenAI API key not found in storage');
 
                 const configured = await vscode.window.showWarningMessage(
-                    'OpenAI API key is not configured. Would you like to configure it now?',
-                    'Yes',
-                    'No'
+                    t('messages.apiKeyNotConfigured'),
+                    t('buttons.yes'),
+                    t('buttons.no')
                 );
 
-                if (configured === 'Yes') {
+                if (configured === t('buttons.yes')) {
                     await vscode.commands.executeCommand(
                         'workbench.action.openSettings',
                         'otakCommitter.openaiApiKey'
@@ -342,7 +341,7 @@ export class PRCommand extends BaseCommand {
         this.logger.debug('Generating PR content with AI');
 
         const prContent = await this.withProgress(
-            'Generate Pull Request - Analyzing changes...',
+            t('progress.analyzingChanges'),
             async () => {
                 const language = this.config.get('language') || 'english';
 
@@ -360,7 +359,7 @@ export class PRCommand extends BaseCommand {
 
         if (!prContent) {
             this.logger.error('Failed to generate PR content');
-            vscode.window.showErrorMessage('Failed to generate PR content. Please try again.');
+            vscode.window.showErrorMessage(t('messages.failedToGeneratePR'));
             return undefined;
         }
 
@@ -388,7 +387,7 @@ export class PRCommand extends BaseCommand {
         this.previewFile = await showMarkdownPreview(previewContent, 'pr');
         if (!this.previewFile) {
             this.logger.error('Failed to show preview');
-            vscode.window.showErrorMessage('Failed to show preview');
+            vscode.window.showErrorMessage(t('messages.failedToShowPreview'));
             return false;
         }
 
@@ -405,11 +404,11 @@ export class PRCommand extends BaseCommand {
 
         const prType = await vscode.window.showQuickPick(
             [
-                { label: 'Draft Pull Request', description: 'Review required before merge', value: true },
-                { label: 'Regular Pull Request', description: 'Ready for review and merge', value: false }
+                { label: t('prTypes.draft'), description: t('prTypes.draftDescription'), value: true },
+                { label: t('prTypes.regular'), description: t('prTypes.regularDescription'), value: false }
             ],
             {
-                placeHolder: 'Select PR type (press Escape to skip)',
+                placeHolder: t('quickPick.selectPRType'),
                 ignoreFocusOut: true
             }
         );
@@ -445,11 +444,11 @@ export class PRCommand extends BaseCommand {
             ? `${prContent.body}\n\nResolves #${issueNumber}`
             : prContent.body;
 
-        const prTypeStr = isDraft ? 'Draft' : 'Regular';
+        const prTypeStr = isDraft ? t('prTypes.draft') : t('prTypes.regular');
 
         try {
             const result = await this.withProgress(
-                `Creating ${prTypeStr} Pull Request...`,
+                t('progress.creatingPR', { prType: prTypeStr }),
                 async () => {
                     // Validate branch changes
                     this.logger.debug('Validating branch changes');
@@ -480,10 +479,8 @@ export class PRCommand extends BaseCommand {
                         // Handle draft PR not supported error
                         if (isDraft && error.message?.includes('Draft pull requests are not supported')) {
                             this.logger.warning('Draft PRs not supported, creating regular PR');
-                            
-                            await vscode.window.showInformationMessage(
-                                'Draft PRs are only available in GitHub Team and Enterprise. Creating a regular PR instead.'
-                            );
+
+                            await vscode.window.showInformationMessage(t('messages.draftPRNotSupported'));
 
                             const regularPr = await github.createPullRequest({
                                 base: branches.base,
@@ -515,9 +512,7 @@ export class PRCommand extends BaseCommand {
 
         } catch (error: any) {
             if (error.message === 'No changes to create a pull request') {
-                vscode.window.showErrorMessage(
-                    'No changes found between selected branches. Please make some changes before creating a PR.'
-                );
+                vscode.window.showErrorMessage(t('messages.noChangesBetweenBranches'));
                 return;
             }
 
@@ -545,14 +540,14 @@ export class PRCommand extends BaseCommand {
         pr: { number: number; html_url: string; draft?: boolean },
         isDraft: boolean
     ): Promise<void> {
-        const prTypeStr = pr.draft || isDraft ? 'Draft PR' : 'Pull Request';
-        
+        const prTypeStr = pr.draft || isDraft ? t('prTypes.draft') : t('prTypes.regular');
+
         const action = await vscode.window.showInformationMessage(
-            `${prTypeStr} #${pr.number} created successfully!`,
-            'Open in Browser'
+            t('messages.prCreatedSuccess', { prType: prTypeStr, number: pr.number }),
+            t('buttons.openInBrowser')
         );
 
-        if (action === 'Open in Browser') {
+        if (action === t('buttons.openInBrowser')) {
             await vscode.env.openExternal(vscode.Uri.parse(pr.html_url));
         }
     }
