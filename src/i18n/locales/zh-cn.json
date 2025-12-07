@@ -87,5 +87,21 @@
   "errors": {
     "gitExtensionNotFound": "Git 扩展不可用",
     "noGitRepository": "未找到 Git 仓库"
+  },
+  "apiKey": {
+    "enterKey": "请输入您的 OpenAI API 密钥",
+    "placeholder": "sk-...",
+    "invalidFormat": "API 密钥格式无效。预期格式: sk-...",
+    "keyExists": "API 密钥已配置",
+    "chooseAction": "选择操作",
+    "updateKey": "更新 API 密钥",
+    "removeKey": "删除 API 密钥",
+    "cancel": "取消",
+    "removed": "API 密钥已成功删除",
+    "validatePrompt": "您想使用 OpenAI 验证 API 密钥吗？",
+    "validating": "正在验证 API 密钥...",
+    "validationSuccess": "API 密钥有效",
+    "validationFailed": "API 密钥验证失败: {reason}",
+    "retryPrompt": "您想输入其他 API 密钥吗？"
   }
 }

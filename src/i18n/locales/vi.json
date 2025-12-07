@@ -87,5 +87,21 @@
   "errors": {
     "gitExtensionNotFound": "Phan mo rong Git khong kha dung",
     "noGitRepository": "Khong tim thay Git repository"
+  },
+  "apiKey": {
+    "enterKey": "Nhap API key OpenAI cua ban",
+    "placeholder": "sk-...",
+    "invalidFormat": "Dinh dang API key khong hop le. Dinh dang mong doi: sk-...",
+    "keyExists": "API key da duoc cau hinh",
+    "chooseAction": "Chon hanh dong",
+    "updateKey": "Cap nhat API Key",
+    "removeKey": "Xoa API Key",
+    "cancel": "Huy",
+    "removed": "API key da duoc xoa thanh cong",
+    "validatePrompt": "Ban co muon xac thuc API key voi OpenAI khong?",
+    "validating": "Dang xac thuc API key...",
+    "validationSuccess": "API key hop le",
+    "validationFailed": "Xac thuc API key that bai: {reason}",
+    "retryPrompt": "Ban co muon nhap API key khac khong?"
   }
 }

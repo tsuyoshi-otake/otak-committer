@@ -6,7 +6,7 @@ import { IssueCommand } from './IssueCommand.js';
 import { ConfigCommand } from './ConfigCommand.js';
 import { StorageManager } from '../infrastructure/storage/StorageManager.js';
 import { StatusBarManager } from '../ui/StatusBarManager.js';
-import { t } from '../i18n/index.js';
+import { ApiKeyManager } from '../services/ApiKeyManager.js';
 
 /**
  * Register all extension commands with the command registry
@@ -95,15 +95,8 @@ export function registerAllCommands(
         category: 'otak-committer',
         handler: async () => {
             const storage = new StorageManager(context);
-            const apiKey = await vscode.window.showInputBox({
-                prompt: t('quickPick.enterApiKey'),
-                password: true,
-                placeHolder: 'sk-...'
-            });
-            if (apiKey) {
-                await storage.setApiKey('openai', apiKey);
-                vscode.window.showInformationMessage(t('messages.apiKeySaved'));
-            }
+            const apiKeyManager = new ApiKeyManager(context, storage);
+            await apiKeyManager.configureApiKey();
         }
     });
 }

@@ -87,5 +87,21 @@
   "errors": {
     "gitExtensionNotFound": "Git 확장 프로그램을 사용할 수 없습니다",
     "noGitRepository": "Git 저장소를 찾을 수 없습니다"
+  },
+  "apiKey": {
+    "enterKey": "OpenAI API 키를 입력하세요",
+    "placeholder": "sk-...",
+    "invalidFormat": "API 키 형식이 잘못되었습니다. 예상 형식: sk-...",
+    "keyExists": "API 키가 이미 구성되어 있습니다",
+    "chooseAction": "작업을 선택하세요",
+    "updateKey": "API 키 업데이트",
+    "removeKey": "API 키 삭제",
+    "cancel": "취소",
+    "removed": "API 키가 성공적으로 삭제되었습니다",
+    "validatePrompt": "OpenAI로 API 키를 검증하시겠습니까?",
+    "validating": "API 키 검증 중...",
+    "validationSuccess": "API 키가 유효합니다",
+    "validationFailed": "API 키 검증 실패: {reason}",
+    "retryPrompt": "다른 API 키를 입력하시겠습니까?"
   }
 }

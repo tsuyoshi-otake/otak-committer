@@ -87,5 +87,21 @@
   "errors": {
     "gitExtensionNotFound": "Git拡張機能が利用できません",
     "noGitRepository": "Gitリポジトリが見つかりません"
+  },
+  "apiKey": {
+    "enterKey": "OpenAI APIキーを入力してください",
+    "placeholder": "sk-...",
+    "invalidFormat": "無効なAPIキー形式です。期待される形式: sk-...",
+    "keyExists": "APIキーは既に設定されています",
+    "chooseAction": "アクションを選択してください",
+    "updateKey": "APIキーを更新",
+    "removeKey": "APIキーを削除",
+    "cancel": "キャンセル",
+    "removed": "APIキーを削除しました",
+    "validatePrompt": "OpenAIでAPIキーを検証しますか？",
+    "validating": "APIキーを検証中...",
+    "validationSuccess": "APIキーは有効です",
+    "validationFailed": "APIキーの検証に失敗しました: {reason}",
+    "retryPrompt": "別のAPIキーを入力しますか？"
   }
 }

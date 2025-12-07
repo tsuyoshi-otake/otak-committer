@@ -87,5 +87,21 @@
   "errors": {
     "gitExtensionNotFound": "Git extension is not available",
     "noGitRepository": "No Git repository found"
+  },
+  "apiKey": {
+    "enterKey": "Enter your OpenAI API key",
+    "placeholder": "sk-...",
+    "invalidFormat": "Invalid API key format. Expected format: sk-...",
+    "keyExists": "An API key is already configured",
+    "chooseAction": "Choose an action",
+    "updateKey": "Update API Key",
+    "removeKey": "Remove API Key",
+    "cancel": "Cancel",
+    "removed": "API key removed successfully",
+    "validatePrompt": "Would you like to validate the API key with OpenAI?",
+    "validating": "Validating API key...",
+    "validationSuccess": "API key is valid",
+    "validationFailed": "API key validation failed: {reason}",
+    "retryPrompt": "Would you like to enter a different API key?"
   }
 }
