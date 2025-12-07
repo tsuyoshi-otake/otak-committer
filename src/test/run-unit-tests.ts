@@ -35,11 +35,15 @@ async function runUnitTests() {
         const filteredInfraTests: string[] = [];
 
         // Filter out property tests that require VS Code APIs
-        // Only include: dependencies.property, architecture.property, setup.property
+        // Include: dependencies.property, architecture.property, setup.property, and new robustness tests
         const filteredPropertyTests = propertyTests.filter(test =>
             test.includes('dependencies.property') ||
             test.includes('architecture.property') ||
-            test.includes('setup.property')
+            test.includes('setup.property') ||
+            test.includes('git-robustness.property') ||
+            test.includes('sanitization.property') ||
+            test.includes('error-handling-robustness.property') ||
+            test.includes('edge-case.property')
         );
 
         // Filter out command tests that require VS Code APIs
@@ -55,10 +59,40 @@ async function runUnitTests() {
         // Filter out service tests that require VS Code APIs
         const filteredServiceTests = serviceTests.filter(test =>
             !test.includes('services.test') &&
-            !test.includes('openai')
+            !test.includes('openai') &&
+            !test.includes('prompt.property') &&
+            !test.includes('ApiKeyManager')
         );
 
-        const allTests = [...filteredPropertyTests, ...utilTests, ...filteredCommandTests, ...filteredServiceTests, ...filteredInfraTests, ...i18nTests, ...i18nIntegrationTests];
+        // Add new robustness tests from __tests__/services and __tests__/utils and __tests__/commands
+        const robustnessServiceTests = await glob('__tests__/services/**/*.test.js', { cwd: testsRoot });
+        const robustnessUtilTests = await glob('__tests__/utils/**/*.test.js', { cwd: testsRoot });
+        const robustnessCommandTests = await glob('__tests__/commands/**/*.test.js', { cwd: testsRoot });
+
+        // Filter robustness tests to exclude those requiring vscode
+        const filteredRobustnessServiceTests = robustnessServiceTests.filter(test =>
+            test.includes('git.robustness') ||
+            test.includes('prompt-edge-cases')
+        );
+        const filteredRobustnessUtilTests = robustnessUtilTests.filter(test =>
+            test.includes('sanitization.robustness')
+        );
+        const filteredRobustnessCommandTests = robustnessCommandTests.filter(test =>
+            test.includes('commit-error-handling')
+        );
+
+        const allTests = [
+            ...filteredPropertyTests,
+            ...utilTests,
+            ...filteredCommandTests,
+            ...filteredServiceTests,
+            ...filteredInfraTests,
+            ...i18nTests,
+            ...i18nIntegrationTests,
+            ...filteredRobustnessServiceTests,
+            ...filteredRobustnessUtilTests,
+            ...filteredRobustnessCommandTests
+        ];
 
         console.log(`Found ${allTests.length} test file(s):`);
         console.log(`  - Property tests: ${filteredPropertyTests.length}`);
@@ -68,6 +102,7 @@ async function runUnitTests() {
         console.log(`  - Infrastructure tests: ${filteredInfraTests.length}`);
         console.log(`  - i18n tests: ${i18nTests.length}`);
         console.log(`  - i18n integration tests: ${i18nIntegrationTests.length}`);
+        console.log(`  - Robustness tests: ${filteredRobustnessServiceTests.length + filteredRobustnessUtilTests.length + filteredRobustnessCommandTests.length}`);
         
         // Add files to the test suite
         allTests.forEach((f: string) => {

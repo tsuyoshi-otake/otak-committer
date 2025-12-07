@@ -232,11 +232,13 @@
     "lint": "eslint src",
     "test": "node ./out/test/runTest.js",
     "test:unit": "npm run compile:test && node ./out/test/run-unit-tests.js",
+    "test:integration": "dotenvx run -- npm test",
     "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --loader:.ts=tsx",
     "esbuild": "npm run esbuild-base -- --sourcemap --tsconfig=tsconfig.json",
     "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch"
   },
   "devDependencies": {
+    "@dotenvx/dotenvx": "^1.51.1",
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",

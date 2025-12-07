@@ -28,7 +28,7 @@ suite('i18n Integration Tests', () => {
             const locale = manager.getLocale();
 
             // Should be one of supported locales
-            assert.ok(['ja', 'en', 'vi', 'ko', 'zh-cn'].includes(locale), `Expected locale to be a supported locale, got '${locale}'`);
+            assert.ok(['ja', 'en', 'vi', 'ko', 'zh-cn', 'zh-tw'].includes(locale), `Expected locale to be a supported locale, got '${locale}'`);
         });
 
         test('should provide same instance across multiple calls', () => {
@@ -131,13 +131,15 @@ suite('i18n Integration Tests', () => {
             assert.strictEqual(LocaleDetector.detectLocale('zh-hans'), 'zh-cn');
         });
 
+        test('should detect Chinese (Traditional) locale correctly', () => {
+            assert.strictEqual(LocaleDetector.detectLocale('zh-tw'), 'zh-tw');
+            assert.strictEqual(LocaleDetector.detectLocale('zh-hant'), 'zh-tw');
+        });
+
         test('should default to English for unsupported locales', () => {
             assert.strictEqual(LocaleDetector.detectLocale('fr'), 'en');
             assert.strictEqual(LocaleDetector.detectLocale('de'), 'en');
             assert.strictEqual(LocaleDetector.detectLocale('es'), 'en');
-            // Chinese Traditional should fall back to English
-            assert.strictEqual(LocaleDetector.detectLocale('zh-tw'), 'en');
-            assert.strictEqual(LocaleDetector.detectLocale('zh-hant'), 'en');
         });
 
         test('should default to English for undefined/empty', () => {
@@ -197,7 +199,7 @@ suite('i18n Integration Tests', () => {
     });
 
     suite('Translation Coverage', () => {
-        const supportedLocales = ['en', 'ja', 'vi', 'ko', 'zh-cn'] as const;
+        const supportedLocales = ['en', 'ja', 'vi', 'ko', 'zh-cn', 'zh-tw'] as const;
 
         test('should have translations for all command strings', () => {
             const manager = TranslationManager.getInstance();
