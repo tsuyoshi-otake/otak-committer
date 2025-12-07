@@ -18,42 +18,16 @@ import { t } from '../i18n';
 export type ReasoningEffort = 'none' | 'low' | 'medium' | 'high';
 
 /**
- * Responses API request format
+ * GPT-5.1 Chat Completions request format
  */
-interface ResponsesAPIRequest {
+interface GPT51Request {
     model: string;
-    input: string;
-    max_output_tokens: number;
+    messages: Array<{ role: string; content: string }>;
+    max_completion_tokens?: number;
     temperature?: number;
-    reasoning?: {
-        effort: ReasoningEffort;
-    };
-}
-
-/**
- * Responses API response format
- */
-interface ResponsesAPIResponse {
-    id: string;
-    object: string;
-    created: number;
-    model: string;
-    status?: string; // 'completed', 'incomplete', etc.
-    incomplete_details?: {
-        reason?: string; // 'max_output_tokens', 'content_filter', etc.
-    };
-    output: Array<{
-        type: string;
-        content: Array<{
-            type: string;
-            text: string;
-        }>;
-    }>;
-    usage: {
-        input_tokens: number;
-        output_tokens: number;
-        total_tokens: number;
-    };
+    reasoning_effort?: ReasoningEffort;
+    response_format?: { type: string };
+    store?: boolean;
 }
 
 /**
@@ -114,14 +88,14 @@ export class OpenAIService extends BaseService {
     }
 
     /**
-     * Make a request to the Responses API
+     * Make a request to the GPT-5.1 Chat Completions API
      *
      * @param input - The input prompt
      * @param maxOutputTokens - Maximum output tokens
      * @param temperature - Sampling temperature
      * @returns The generated output text
      */
-    private async generateWithResponsesAPI(params: {
+    private async generateWithGPT51(params: {
         input: string;
         maxOutputTokens: number;
         temperature?: number;
@@ -154,69 +128,60 @@ export class OpenAIService extends BaseService {
             params.maxOutputTokens = TokenManager.getMaxInputTokens(finalInputTokens);
         }
 
-        const request: ResponsesAPIRequest = {
+        const request: GPT51Request = {
             model: OpenAIService.MODEL,
-            input: processedInput,
-            max_output_tokens: params.maxOutputTokens,
+            messages: [
+                { role: 'user', content: processedInput }
+            ],
+            max_completion_tokens: params.maxOutputTokens,
             temperature: params.temperature ?? 0.1,
-            reasoning: {
-                effort: reasoningEffort
-            }
+            reasoning_effort: reasoningEffort,
+            response_format: { type: 'text' },
+            store: false
         };
 
-        this.logger.debug('Making Responses API call', {
+        this.logger.debug('Making GPT-5.1 Chat Completions API call', {
             model: request.model,
             inputTokens: finalInputTokens,
-            maxOutputTokens: request.max_output_tokens,
+            maxOutputTokens: request.max_completion_tokens,
             reasoningEffort
         });
 
         try {
-            // Use the OpenAI SDK's responses API
-            const response = await (this.openai as any).responses.create(request) as ResponsesAPIResponse;
+            // Use the standard chat completions API with GPT-5.1 specific parameters
+            const response = await this.openai.chat.completions.create(request as any);
 
-            this.logger.debug('Responses API raw response', {
-                status: response.status,
-                outputCount: response.output?.length,
+            this.logger.debug('GPT-5.1 API response', {
+                finishReason: response.choices?.[0]?.finish_reason,
                 usage: response.usage
             });
 
             // Check for truncation
-            if (response.status === 'incomplete' && response.incomplete_details?.reason === 'max_output_tokens') {
-                this.logger.warning('Response was truncated due to max_output_tokens limit');
+            if (response.choices?.[0]?.finish_reason === 'length') {
+                this.logger.warning('Response was truncated due to max_completion_tokens limit');
                 vscode.window.showWarningMessage('The generated message was truncated. Consider increasing max output tokens.');
             }
 
-            // Extract text from response - concatenate all output_text content
-            if (response.output && response.output.length > 0) {
-                const messageOutput = response.output.find(o => o.type === 'message');
-                if (messageOutput && messageOutput.content && messageOutput.content.length > 0) {
-                    // Concatenate all text content in case it's split
-                    const textContents = messageOutput.content
-                        .filter(c => c.type === 'output_text')
-                        .map(c => c.text)
-                        .join('');
-
-                    if (textContents) {
-                        this.logger.debug('Extracted text length', { length: textContents.length });
-                        return textContents;
-                    }
-                }
+            // Extract text from response
+            const content = response.choices?.[0]?.message?.content;
+            if (content) {
+                this.logger.debug('Extracted text length', { length: content.length });
+                return content;
             }
 
-            this.logger.warning('No output content in Responses API response');
+            this.logger.warning('No content in GPT-5.1 API response');
             return undefined;
 
         } catch (error) {
-            this.handleResponsesAPIError(error);
+            this.handleGPT51Error(error);
             return undefined;
         }
     }
 
     /**
-     * Handle Responses API errors with proper classification and user messages
+     * Handle GPT-5.1 API errors with proper classification and user messages
      */
-    private handleResponsesAPIError(error: any): void {
+    private handleGPT51Error(error: any): void {
         const errorType = this.classifyError(error);
         const userMessage = this.getUserFriendlyMessage(errorType, error);
 
@@ -323,7 +288,7 @@ export class OpenAIService extends BaseService {
                 template
             );
 
-            const response = await this.generateWithResponsesAPI({
+            const response = await this.generateWithGPT51({
                 input: userPrompt,
                 maxOutputTokens: TokenManager.OUTPUT_TOKENS.COMMIT_MESSAGE,
                 temperature: 0.1
@@ -372,12 +337,12 @@ export class OpenAIService extends BaseService {
             const prompts = await this.promptService.createPRPrompt(diff, language, template);
 
             const [titleResponse, bodyResponse] = await Promise.all([
-                this.generateWithResponsesAPI({
+                this.generateWithGPT51({
                     input: prompts.title,
                     maxOutputTokens: TokenManager.OUTPUT_TOKENS.PR_TITLE,
                     temperature: 0.1
                 }),
-                this.generateWithResponsesAPI({
+                this.generateWithGPT51({
                     input: prompts.body,
                     maxOutputTokens: TokenManager.OUTPUT_TOKENS.PR_BODY,
                     temperature: 0.1
@@ -437,7 +402,7 @@ export class OpenAIService extends BaseService {
             // Incorporate system instructions into the prompt (Responses API format)
             const fullPrompt = `Please ensure all responses are in ${language}. Use appropriate style and terminology for ${language}.\n\n${params.prompt}`;
 
-            const response = await this.generateWithResponsesAPI({
+            const response = await this.generateWithGPT51({
                 input: fullPrompt,
                 maxOutputTokens: params.maxTokens ?? 1000,
                 temperature: params.temperature ?? 0.1

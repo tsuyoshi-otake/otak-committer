@@ -3,6 +3,12 @@
 ## [2.0.2] - 2025-12-07
 
 ### Fixed
+- **GPT-5.1 API request format corrected:**
+  - Fixed API call to use `/v1/chat/completions` endpoint with proper GPT-5.1 parameters
+  - Changed from non-existent "Responses API" to standard Chat Completions API
+  - Added `reasoning_effort`, `response_format`, and `store` parameters
+  - Resolves "An unexpected error occurred" issue
+
 - **API key validation pattern relaxed:**
   - Changed validation from `/^sk-[a-zA-Z0-9]{40,}$/` to `/^sk-.+$/`
   - Now accepts test keys, project keys (`sk-proj-`), and shorter valid keys
