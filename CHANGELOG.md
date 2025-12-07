@@ -1,12 +1,16 @@
 # Change Log
 
-## [2.0.2] - 2025-12-07
+## [2.0.5] - 2025-12-07
 
 ### Fixed
-- **GPT-5.1 API request format corrected:**
-  - Fixed API call to use `/v1/chat/completions` endpoint with proper GPT-5.1 parameters
-  - Changed from non-existent "Responses API" to standard Chat Completions API
-  - Added `reasoning_effort`, `response_format`, and `store` parameters
+- **Language setting now properly respected:**
+  - Commit messages are now generated in the language selected via status bar
+  - Uses `otakCommitter.language` setting instead of UI locale
+  - Language-specific system prompts are correctly applied
+
+- **Reverted to GPT-4.1 model:**
+  - Restored stable GPT-4.1 API implementation
+  - Simplified OpenAI service to use standard chat completions format
   - Resolves "An unexpected error occurred" issue
 
 - **API key validation pattern relaxed:**

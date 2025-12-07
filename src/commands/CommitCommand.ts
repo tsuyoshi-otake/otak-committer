@@ -5,7 +5,7 @@ import { OpenAIService } from '../services/openai';
 import { MessageStyle } from '../types/enums/MessageStyle';
 import { sanitizeCommitMessage } from '../utils';
 import { ServiceError } from '../types/errors';
-import { t, LanguagePreferenceManager } from '../i18n/index.js';
+import { t } from '../i18n/index.js';
 
 /**
  * Command for generating commit messages using AI
@@ -186,8 +186,8 @@ export class CommitCommand extends BaseCommand {
         const message = await this.withProgress(
             t('progress.generatingCommitMessage'),
             async () => {
-                // Get configuration - use LanguagePreferenceManager for language
-                const language = LanguagePreferenceManager.getCommitLanguageName();
+                // Get configuration - use otakCommitter.language setting
+                const language = this.config.get('language') || 'english';
                 const messageStyle = this.config.get('messageStyle') || MessageStyle.Normal;
 
                 this.logger.debug(`Using language: ${language}, style: ${messageStyle}`);

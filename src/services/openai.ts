@@ -9,44 +9,14 @@ import { formatMarkdown, cleanMarkdown } from '../utils';
 import { StorageManager } from '../infrastructure/storage';
 import { Logger } from '../infrastructure/logging';
 import { ErrorHandler } from '../infrastructure/error';
-import { TokenManager } from './tokenManager';
 import { t } from '../i18n';
+import { getPrompt, SupportedLanguage } from '../languages';
 
 /**
- * Reasoning effort levels for GPT-5.1
- */
-export type ReasoningEffort = 'none' | 'low' | 'medium' | 'high';
-
-/**
- * GPT-5.1 Chat Completions request format
- */
-interface GPT51Request {
-    model: string;
-    messages: Array<{ role: string; content: string }>;
-    max_completion_tokens?: number;
-    temperature?: number;
-    reasoning_effort?: ReasoningEffort;
-    response_format?: { type: string };
-    store?: boolean;
-}
-
-/**
- * Responses API Error Types
- */
-export enum ResponsesAPIErrorType {
-    RATE_LIMIT = 'rate_limit',
-    INVALID_MODEL = 'invalid_model',
-    CONTEXT_LENGTH_EXCEEDED = 'context_length_exceeded',
-    NETWORK = 'network',
-    AUTHENTICATION = 'authentication',
-    UNKNOWN = 'unknown'
-}
-
-/**
- * Service for interacting with OpenAI's Responses API (GPT-5.1)
+ * Service for interacting with OpenAI's API
  *
  * Provides methods for generating commit messages, pull request content,
- * and general completions using OpenAI's GPT-5.1 model via the Responses API.
+ * and general chat completions using OpenAI's GPT models.
  *
  * @example
  * ```typescript
@@ -59,10 +29,7 @@ export class OpenAIService extends BaseService {
     private promptService: PromptService;
 
     /** Default model for all API calls */
-    private static readonly MODEL = 'gpt-5.1';
-
-    /** Default reasoning effort */
-    private static readonly DEFAULT_REASONING_EFFORT: ReasoningEffort = 'low';
+    private static readonly MODEL = 'gpt-4.1';
 
     constructor(config?: Partial<ServiceConfig>) {
         super(config);
@@ -72,190 +39,10 @@ export class OpenAIService extends BaseService {
     }
 
     /**
-     * Get reasoning effort from configuration
-     */
-    private getReasoningEffort(): ReasoningEffort {
-        const configuredEffort = vscode.workspace
-            .getConfiguration('otakCommitter')
-            .get<string>('reasoningEffort');
-
-        if (configuredEffort &&
-            ['none', 'low', 'medium', 'high'].includes(configuredEffort)) {
-            return configuredEffort as ReasoningEffort;
-        }
-
-        return OpenAIService.DEFAULT_REASONING_EFFORT;
-    }
-
-    /**
-     * Make a request to the GPT-5.1 Chat Completions API
-     *
-     * @param input - The input prompt
-     * @param maxOutputTokens - Maximum output tokens
-     * @param temperature - Sampling temperature
-     * @returns The generated output text
-     */
-    private async generateWithGPT51(params: {
-        input: string;
-        maxOutputTokens: number;
-        temperature?: number;
-    }): Promise<string | undefined> {
-        const reasoningEffort = this.getReasoningEffort();
-
-        // Check and truncate input if needed
-        const inputTokens = TokenManager.estimateTokens(params.input);
-        let processedInput = params.input;
-
-        if (inputTokens > TokenManager.MAX_INPUT_TOKENS) {
-            const estimatedKTokens = Math.floor(inputTokens / 1000);
-            const thresholdKTokens = Math.floor(TokenManager.MAX_INPUT_TOKENS / 1000);
-
-            this.logger.warning(
-                `Input size (${estimatedKTokens}K tokens) exceeds ${thresholdKTokens}K limit, truncating`
-            );
-
-            vscode.window.showWarningMessage(
-                `Input size (${estimatedKTokens}K tokens) exceeds the ${thresholdKTokens}K limit. The content will be truncated for AI processing.`
-            );
-
-            processedInput = TokenManager.truncateInput(params.input, TokenManager.MAX_INPUT_TOKENS);
-        }
-
-        // Validate token allocation
-        const finalInputTokens = TokenManager.estimateTokens(processedInput);
-        if (!TokenManager.validateAllocation(finalInputTokens, params.maxOutputTokens)) {
-            this.logger.warning('Token allocation exceeds context limit, reducing output tokens');
-            params.maxOutputTokens = TokenManager.getMaxInputTokens(finalInputTokens);
-        }
-
-        const request: GPT51Request = {
-            model: OpenAIService.MODEL,
-            messages: [
-                { role: 'user', content: processedInput }
-            ],
-            max_completion_tokens: params.maxOutputTokens,
-            temperature: params.temperature ?? 0.1,
-            reasoning_effort: reasoningEffort,
-            response_format: { type: 'text' },
-            store: false
-        };
-
-        this.logger.debug('Making GPT-5.1 Chat Completions API call', {
-            model: request.model,
-            inputTokens: finalInputTokens,
-            maxOutputTokens: request.max_completion_tokens,
-            reasoningEffort
-        });
-
-        try {
-            // Use the standard chat completions API with GPT-5.1 specific parameters
-            const response = await this.openai.chat.completions.create(request as any);
-
-            this.logger.debug('GPT-5.1 API response', {
-                finishReason: response.choices?.[0]?.finish_reason,
-                usage: response.usage
-            });
-
-            // Check for truncation
-            if (response.choices?.[0]?.finish_reason === 'length') {
-                this.logger.warning('Response was truncated due to max_completion_tokens limit');
-                vscode.window.showWarningMessage('The generated message was truncated. Consider increasing max output tokens.');
-            }
-
-            // Extract text from response
-            const content = response.choices?.[0]?.message?.content;
-            if (content) {
-                this.logger.debug('Extracted text length', { length: content.length });
-                return content;
-            }
-
-            this.logger.warning('No content in GPT-5.1 API response');
-            return undefined;
-
-        } catch (error) {
-            this.handleGPT51Error(error);
-            return undefined;
-        }
-    }
-
-    /**
-     * Handle GPT-5.1 API errors with proper classification and user messages
-     */
-    private handleGPT51Error(error: any): void {
-        const errorType = this.classifyError(error);
-        const userMessage = this.getUserFriendlyMessage(errorType, error);
-
-        // Log full error context
-        this.logger.error('Responses API error', {
-            type: errorType,
-            status: error?.status,
-            message: error?.message,
-            stack: error?.stack
-        });
-
-        // Show user-friendly message
-        vscode.window.showErrorMessage(userMessage);
-    }
-
-    /**
-     * Classify error type from API error
-     */
-    private classifyError(error: any): ResponsesAPIErrorType {
-        const status = error?.status || error?.statusCode;
-        const message = error?.message?.toLowerCase() || '';
-
-        switch (status) {
-            case 401:
-                return ResponsesAPIErrorType.AUTHENTICATION;
-            case 429:
-                return ResponsesAPIErrorType.RATE_LIMIT;
-            case 404:
-                if (message.includes('model')) {
-                    return ResponsesAPIErrorType.INVALID_MODEL;
-                }
-                return ResponsesAPIErrorType.UNKNOWN;
-            case 400:
-                if (message.includes('context') || message.includes('token')) {
-                    return ResponsesAPIErrorType.CONTEXT_LENGTH_EXCEEDED;
-                }
-                return ResponsesAPIErrorType.UNKNOWN;
-            default:
-                if (message.includes('network') || message.includes('connection') ||
-                    message.includes('econnrefused') || message.includes('timeout')) {
-                    return ResponsesAPIErrorType.NETWORK;
-                }
-                return ResponsesAPIErrorType.UNKNOWN;
-        }
-    }
-
-    /**
-     * Generate user-friendly error message
-     */
-    private getUserFriendlyMessage(errorType: ResponsesAPIErrorType, error?: any): string {
-        switch (errorType) {
-            case ResponsesAPIErrorType.RATE_LIMIT:
-                const retryAfter = error?.headers?.['retry-after'];
-                return retryAfter
-                    ? `OpenAI API rate limit reached. Please try again in ${retryAfter} seconds.`
-                    : 'OpenAI API rate limit reached. Please try again later.';
-            case ResponsesAPIErrorType.INVALID_MODEL:
-                return 'GPT-5.1 model not accessible. Please check your API key has access to GPT-5.1.';
-            case ResponsesAPIErrorType.CONTEXT_LENGTH_EXCEEDED:
-                return 'Input too large for processing. Content has been truncated.';
-            case ResponsesAPIErrorType.NETWORK:
-                return 'Network error occurred. Please check your connection and try again.';
-            case ResponsesAPIErrorType.AUTHENTICATION:
-                return 'Invalid OpenAI API key. Please update your API key in settings.';
-            default:
-                return 'An unexpected error occurred. Please try again.';
-        }
-    }
-
-    /**
      * Generate a commit message based on Git diff
      *
-     * Uses OpenAI's GPT-5.1 model via Responses API to analyze the diff and
-     * generate an appropriate commit message in the specified language and style.
+     * Uses OpenAI's GPT model to analyze the diff and generate an appropriate
+     * commit message in the specified language and style.
      *
      * @param diff - The Git diff to analyze
      * @param language - The language for the commit message
@@ -288,18 +75,24 @@ export class OpenAIService extends BaseService {
                 template
             );
 
-            const response = await this.generateWithGPT51({
-                input: userPrompt,
-                maxOutputTokens: TokenManager.OUTPUT_TOKENS.COMMIT_MESSAGE,
-                temperature: 0.1
+            const systemPrompt = getPrompt(language as SupportedLanguage, 'system');
+
+            const response = await this.openai.chat.completions.create({
+                model: OpenAIService.MODEL,
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userPrompt }
+                ],
+                temperature: 0.1,
+                max_tokens: 500
             });
 
-            if (response) {
-                const message = response.trimStart();
+            let message = response.choices[0].message.content;
+            if (message) {
+                message = message.trimStart();
                 this.logger.info('Commit message generated successfully');
                 return message;
             }
-
             this.logger.warning('No commit message content returned from API');
             return undefined;
         } catch (error) {
@@ -313,7 +106,7 @@ export class OpenAIService extends BaseService {
      * Generate pull request title and body content
      *
      * Analyzes the diff between branches and generates appropriate PR content
-     * including title and detailed description using GPT-5.1 Responses API.
+     * including title and detailed description.
      *
      * @param diff - The pull request diff information
      * @param language - The language for the PR content
@@ -335,22 +128,31 @@ export class OpenAIService extends BaseService {
             this.logger.info('Generating PR content', { language });
 
             const prompts = await this.promptService.createPRPrompt(diff, language, template);
+            const systemPrompt = getPrompt(language as SupportedLanguage, 'system');
 
             const [titleResponse, bodyResponse] = await Promise.all([
-                this.generateWithGPT51({
-                    input: prompts.title,
-                    maxOutputTokens: TokenManager.OUTPUT_TOKENS.PR_TITLE,
-                    temperature: 0.1
+                this.openai.chat.completions.create({
+                    model: OpenAIService.MODEL,
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: prompts.title }
+                    ],
+                    temperature: 0.1,
+                    max_tokens: 100
                 }),
-                this.generateWithGPT51({
-                    input: prompts.body,
-                    maxOutputTokens: TokenManager.OUTPUT_TOKENS.PR_BODY,
-                    temperature: 0.1
+                this.openai.chat.completions.create({
+                    model: OpenAIService.MODEL,
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: prompts.body }
+                    ],
+                    temperature: 0.1,
+                    max_tokens: 2000
                 })
             ]);
 
-            const title = titleResponse?.trim();
-            const body = bodyResponse?.trim();
+            const title = titleResponse.choices[0].message.content?.trim();
+            const body = bodyResponse.choices[0].message.content?.trim();
 
             if (!title || !body) {
                 throw new Error('Failed to generate PR content');
@@ -369,15 +171,16 @@ export class OpenAIService extends BaseService {
     }
 
     /**
-     * Create a general completion using Responses API
+     * Create a general chat completion
      *
-     * Provides a generic interface for creating completions with GPT-5.1.
+     * Provides a generic interface for creating chat completions with OpenAI.
      * Useful for custom prompts and specialized use cases.
      *
-     * @param params - Completion parameters
+     * @param params - Chat completion parameters
      * @param params.prompt - The prompt to send to the model
      * @param params.maxTokens - Maximum tokens in the response (default: 1000)
      * @param params.temperature - Sampling temperature (default: 0.1)
+     * @param params.model - The model to use (ignored, always uses gpt-5.1)
      * @returns The generated response or undefined if generation fails
      *
      * @example
@@ -393,30 +196,29 @@ export class OpenAIService extends BaseService {
         prompt: string;
         maxTokens?: number;
         temperature?: number;
-        model?: string;  // Ignored in GPT-5.1 migration, always uses gpt-5.1
+        model?: string;
     }): Promise<string | undefined> {
         try {
             const language = this.config.language || 'english';
-            this.logger.info('Creating completion', { model: OpenAIService.MODEL, language });
+            this.logger.info('Creating chat completion', { model: OpenAIService.MODEL, language });
 
-            // Incorporate system instructions into the prompt (Responses API format)
-            const fullPrompt = `Please ensure all responses are in ${language}. Use appropriate style and terminology for ${language}.\n\n${params.prompt}`;
+            const systemPrompt = getPrompt(language as SupportedLanguage, 'system');
 
-            const response = await this.generateWithGPT51({
-                input: fullPrompt,
-                maxOutputTokens: params.maxTokens ?? 1000,
-                temperature: params.temperature ?? 0.1
+            const response = await this.openai.chat.completions.create({
+                model: OpenAIService.MODEL,
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: params.prompt }
+                ],
+                temperature: params.temperature ?? 0.1,
+                max_tokens: params.maxTokens ?? 1000
             });
 
-            if (response) {
-                this.logger.info('Completion created successfully');
-                return response.trim();
-            }
-
-            return undefined;
+            this.logger.info('Chat completion created successfully');
+            return response.choices[0].message.content?.trim();
         } catch (error) {
-            this.logger.error('Failed to create completion', error);
-            this.showError('Failed to create completion', error);
+            this.logger.error('Failed to create chat completion', error);
+            this.showError('Failed to create chat completion', error);
             return undefined;
         }
     }
