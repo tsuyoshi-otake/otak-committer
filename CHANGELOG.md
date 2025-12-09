@@ -1,5 +1,18 @@
 # Change Log
 
+## [2.1.1] - 2025-12-09
+
+### Fixed
+- **Scope hint now included in format instruction:**
+  - Changed from optional suggestion to direct format inclusion
+  - AI now receives `<prefix>(scope): <subject>` format when scope is detected
+  - Improved consistency in commit message scope usage
+
+### Changed
+- **Default for useConventionalCommits set to false:**
+  - Traditional format remains default for backward compatibility
+  - Users can opt-in to strict Conventional Commits format
+
 ## [2.1.0] - 2025-12-09
 
 ### Fixed
