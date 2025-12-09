@@ -1,5 +1,22 @@
 # Change Log
 
+## [2.1.0] - 2025-12-09
+
+### Fixed
+- **Windows reserved filename handling:**
+  - Fixed `error: invalid path 'nul'` when files with Windows reserved names (nul, con, aux, etc.) exist in the repository
+  - Reserved name files are now skipped during `git add` instead of causing errors
+  - File names are still included in diff output as comments for AI processing
+
+- **Git index.lock error handling:**
+  - Added detection and user-friendly error message for `index.lock` errors
+  - Users now see: "Git is busy. Please wait for other Git operations to complete, or delete .git/index.lock if the problem persists."
+
+- **Status bar button not clickable after fresh install:**
+  - Fixed "Set API Key" button in status bar tooltip being unresponsive on first install
+  - Corrected command registration order: commands are now registered before status bar initialization
+  - Tooltip command links now work immediately after extension activation
+
 ## [2.0.5] - 2025-12-07
 
 ### Fixed

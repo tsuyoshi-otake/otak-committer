@@ -11,6 +11,7 @@ import { Logger } from '../infrastructure/logging';
 import { ErrorHandler } from '../infrastructure/error';
 import { t } from '../i18n';
 import { getPrompt, SupportedLanguage } from '../languages';
+import { PromptType } from '../types/enums/PromptType';
 
 /**
  * Service for interacting with OpenAI's API
@@ -75,7 +76,7 @@ export class OpenAIService extends BaseService {
                 template
             );
 
-            const systemPrompt = getPrompt(language as SupportedLanguage, 'system');
+            const systemPrompt = getPrompt(language as SupportedLanguage, PromptType.System);
 
             const response = await this.openai.chat.completions.create({
                 model: OpenAIService.MODEL,
@@ -128,7 +129,7 @@ export class OpenAIService extends BaseService {
             this.logger.info('Generating PR content', { language });
 
             const prompts = await this.promptService.createPRPrompt(diff, language, template);
-            const systemPrompt = getPrompt(language as SupportedLanguage, 'system');
+            const systemPrompt = getPrompt(language as SupportedLanguage, PromptType.System);
 
             const [titleResponse, bodyResponse] = await Promise.all([
                 this.openai.chat.completions.create({
@@ -202,7 +203,7 @@ export class OpenAIService extends BaseService {
             const language = this.config.language || 'english';
             this.logger.info('Creating chat completion', { model: OpenAIService.MODEL, language });
 
-            const systemPrompt = getPrompt(language as SupportedLanguage, 'system');
+            const systemPrompt = getPrompt(language as SupportedLanguage, PromptType.System);
 
             const response = await this.openai.chat.completions.create({
                 model: OpenAIService.MODEL,

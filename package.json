@@ -13,7 +13,7 @@
     "url": "https://github.com/tsuyoshi-otake/otak-committer/issues"
   },
   "homepage": "https://github.com/tsuyoshi-otake/otak-committer#readme",
-  "version": "2.0.5",
+  "version": "2.1.0",
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -158,6 +158,11 @@
           "minimum": 1000,
           "maximum": 400000,
           "description": "Maximum input tokens for AI processing (default: 200K)"
+        },
+        "otakCommitter.useConventionalCommits": {
+          "type": "boolean",
+          "default": false,
+          "description": "Use Conventional Commits format with scope (<type>(<scope>): <subject>)"
         }
       }
     },

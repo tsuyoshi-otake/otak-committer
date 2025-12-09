@@ -3,6 +3,20 @@ import { MessageStyle } from '../types/messageStyle';
 import { PullRequestDiff } from '../types/github';
 import { TemplateInfo } from '../types';
 import { COMMIT_PREFIXES, CommitPrefix } from '../constants/commitGuide';
+import {
+    extractFilePathsFromDiff,
+    generateScopeHint,
+    getConventionalCommitsFormat,
+    getTraditionalFormat
+} from '../utils/conventionalCommits';
+
+// Re-export for backward compatibility
+export {
+    extractFilePathsFromDiff,
+    generateScopeHint,
+    getConventionalCommitsFormat,
+    getTraditionalFormat
+} from '../utils/conventionalCommits';
 
 /**
  * Message length limits by style (in characters)
@@ -69,12 +83,15 @@ export class PromptService {
         messageStyle: MessageStyle | string,
         template?: TemplateInfo
     ): Promise<string> {
-        const useEmoji = vscode.workspace.getConfiguration('otakCommitter').get<boolean>('useEmoji') || false;
-        const customMessage = vscode.workspace.getConfiguration('otakCommitter').get<string>('customMessage') || '';
+        const config = vscode.workspace.getConfiguration('otakCommitter');
+        const useEmoji = config.get<boolean>('useEmoji') || false;
+        const customMessage = config.get<string>('customMessage') || '';
+        const useConventionalCommits = config.get<boolean>('useConventionalCommits') ?? false;
+
         const emojiInstruction = useEmoji ? 'Feel free to use emojis for emphasis and key points.' : 'DO NOT use any emojis in the content.';
         const customInstruction = customMessage ? `\nAdditional requirements: ${customMessage}` : '';
 
-        // テンプレートがある場合はそれを基に生成
+        // テンプレートがある場合はそれを基に生成 (Templates override Conventional Commits format)
         if (template) {
             return `Based on the following template and Git diff, generate a commit message:
 
@@ -96,13 +113,22 @@ Please follow the template format strictly without any leading newlines.`;
         // Get the character limit for the message style
         const charLimit = getMessageLengthLimit(messageStyle);
 
+        // Extract file paths and generate scope hint
+        const filePaths = extractFilePathsFromDiff(diff);
+        const scopeHint = generateScopeHint(filePaths);
+
+        // Determine format instruction based on configuration
+        const formatInstruction = useConventionalCommits
+            ? getConventionalCommitsFormat(scopeHint)
+            : getTraditionalFormat(scopeHint);
+
         return `Generate a commit message in ${language} for the following Git diff.
 Use one of these prefixes:
 
 ${prefixDescriptions}
 
 The commit message should follow this format without any leading newlines:
-<prefix>: <subject>
+${formatInstruction}
 
 <body>
 

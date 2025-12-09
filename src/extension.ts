@@ -21,12 +21,17 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         await config.setDefaults();
         await storage.migrateFromLegacy();
 
+        // Create status bar manager first (but don't initialize yet)
         statusBarManager = new StatusBarManager(context, config);
-        statusBarManager.initialize();
 
+        // Register commands before initializing status bar
+        // (status bar tooltip contains command links that must exist)
         const registry = new CommandRegistry();
         registerAllCommands(registry, context, statusBarManager);
         registry.registerAll(context);
+
+        // Now initialize status bar (commands are available for tooltip links)
+        statusBarManager.initialize();
 
         context.subscriptions.push(
             vscode.workspace.onDidChangeConfiguration(e => {

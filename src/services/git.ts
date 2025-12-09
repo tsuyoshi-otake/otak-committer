@@ -80,18 +80,20 @@ export class GitService extends BaseService {
 
             this.logger.debug(`Found ${modifiedFiles.length} modified files`);
 
+            // Windows予約名ファイルとそれ以外を分ける（予約名はgit addできない）
+            const reservedNameFiles = modifiedFiles.filter(file => this.isWindowsReservedName(file));
+            const addableFiles = modifiedFiles.filter(file => !this.isWindowsReservedName(file));
+
+            if (reservedNameFiles.length > 0) {
+                this.logger.warning(`Skipping Windows reserved name files during staging: ${reservedNameFiles.join(', ')}`);
+            }
+
             // ステージされていない変更があればステージング
-            if (modifiedFiles.length > 0) {
+            if (addableFiles.length > 0) {
                 // ファイルを一つずつ追加（スペースを含むパスの問題を回避）
-                for (const file of modifiedFiles) {
+                for (const file of addableFiles) {
                     try {
-                        // Windowsの予約デバイス名の場合は、--に続けてファイル名を指定
-                        if (this.isWindowsReservedName(file)) {
-                            // 予約名ファイルは明示的にパスとして指定
-                            await this.git.raw(['add', '--', file]);
-                        } else {
-                            await this.git.add(file);
-                        }
+                        await this.git.add(file);
                     } catch (error) {
                         // 削除されたファイルの場合は git rm を試みる
                         if (error instanceof Error && error.message.includes('did not match any files')) {
@@ -100,6 +102,13 @@ export class GitService extends BaseService {
                             } catch {
                                 // すでに削除されている場合は無視
                             }
+                        } else if (error instanceof Error && error.message.includes('index.lock')) {
+                            // index.lockエラーの場合は、ユーザーにわかりやすいメッセージを表示
+                            this.logger.error('Git index.lock error detected', error);
+                            vscode.window.showErrorMessage(
+                                'Git is busy. Please wait for other Git operations to complete, or delete .git/index.lock if the problem persists.'
+                            );
+                            throw error;
                         } else {
                             throw error;
                         }
@@ -113,28 +122,26 @@ export class GitService extends BaseService {
                 .filter(file => file.index !== ' ' || file.working_dir === '?')  // ステージされたファイルまたは未追跡のファイルを含める
                 .map(file => file.path);
 
-            if (stagedFiles.length === 0) {
+            // ステージされたファイルも予約名ファイルもない場合は終了
+            if (stagedFiles.length === 0 && reservedNameFiles.length === 0) {
                 this.logger.info('No staged files found');
                 return undefined;
             }
 
-            this.logger.info(`Processing diff for ${stagedFiles.length} staged files`);
+            this.logger.info(`Processing diff for ${stagedFiles.length} staged files, ${reservedNameFiles.length} reserved name files`);
 
             // 差分を取得
             let diff = '';
 
-            // 予約名ファイルとそれ以外を分ける
-            const reservedFiles = stagedFiles.filter(file => this.isWindowsReservedName(file));
-            const normalFiles = stagedFiles.filter(file => !this.isWindowsReservedName(file));
-
-            // 通常のファイルの差分を取得
-            if (normalFiles.length > 0) {
+            // ステージされたファイルの差分を取得
+            if (stagedFiles.length > 0) {
                 diff = await this.git.diff(['--cached']);
             }
 
             // 予約名ファイルがある場合は警告を表示し、ファイル名だけを差分に追加
-            if (reservedFiles.length > 0) {
-                const reservedFilesList = reservedFiles.join(', ');
+            // (ステージング段階で定義したreservedNameFilesを使用)
+            if (reservedNameFiles.length > 0) {
+                const reservedFilesList = reservedNameFiles.join(', ');
                 this.logger.warning(`Files with reserved names found: ${reservedFilesList}`);
                 vscode.window.showInformationMessage(
                     `Files with reserved names (${reservedFilesList}) will be included but their content cannot be displayed in diff.`
@@ -145,7 +152,7 @@ export class GitService extends BaseService {
                     diff += '\n\n';
                 }
                 diff += `# Files with reserved names (content not available):\n`;
-                reservedFiles.forEach(file => {
+                reservedNameFiles.forEach(file => {
                     diff += `# - ${file}\n`;
                 });
             }
