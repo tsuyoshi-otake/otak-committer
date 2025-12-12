@@ -548,7 +548,28 @@ export class PRCommand extends BaseCommand {
         );
 
         if (action === t('buttons.openInBrowser')) {
-            await vscode.env.openExternal(vscode.Uri.parse(pr.html_url));
+            await this.openExternalUrl(pr.html_url);
+        }
+    }
+
+    /**
+     * Open an external URL safely (http/https only).
+     */
+    private async openExternalUrl(url: string): Promise<void> {
+        try {
+            const uri = vscode.Uri.parse(url);
+            const scheme = uri.scheme.toLowerCase();
+
+            if (scheme !== 'https' && scheme !== 'http') {
+                this.logger.warning(`Blocked non-http(s) URL: ${url}`);
+                vscode.window.showErrorMessage('Cannot open non-http(s) URL.');
+                return;
+            }
+
+            await vscode.env.openExternal(uri);
+        } catch (error) {
+            this.logger.warning('Failed to open external URL', error);
+            vscode.window.showErrorMessage('Failed to open link.');
         }
     }
 

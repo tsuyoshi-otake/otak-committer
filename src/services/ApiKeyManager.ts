@@ -286,8 +286,9 @@ export class ApiKeyManager {
         if (!message || !apiKey) {
             return message || '';
         }
-        // Replace the API key with a placeholder if it appears in the message
-        return message.replace(new RegExp(apiKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), '[REDACTED]');
+        // Replace the API key with a placeholder if it appears in the message.
+        // Use plain string replacement to avoid dynamic RegExp construction.
+        return message.split(apiKey).join('[REDACTED]');
     }
 
     /**

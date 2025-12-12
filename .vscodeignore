@@ -42,3 +42,8 @@ TESTING.md
 TEST-QUICK-REFERENCE.md
 MIGRATION-VERIFICATION.md
 final-checkpoint-report.md
+
+# Bundled output only (avoid shipping stale compiled files)
+dist/**
+out/**
+!out/extension.js

@@ -8,3 +8,5 @@ node_modules
 .env.local
 
 .env.keys
+# Snyk Security Extension - AI Rules (auto-generated)
+.github/instructions/snyk_rules.instructions.md

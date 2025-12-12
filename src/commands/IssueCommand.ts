@@ -408,7 +408,28 @@ export class IssueCommand extends BaseCommand {
         );
 
         if (response === t('buttons.openIssue')) {
-            vscode.env.openExternal(vscode.Uri.parse(issueUrl));
+            await this.openExternalUrl(issueUrl);
+        }
+    }
+
+    /**
+     * Open an external URL safely (http/https only).
+     */
+    private async openExternalUrl(url: string): Promise<void> {
+        try {
+            const uri = vscode.Uri.parse(url);
+            const scheme = uri.scheme.toLowerCase();
+
+            if (scheme !== 'https' && scheme !== 'http') {
+                this.logger.warning(`Blocked non-http(s) URL: ${url}`);
+                vscode.window.showErrorMessage('Cannot open non-http(s) URL.');
+                return;
+            }
+
+            await vscode.env.openExternal(uri);
+        } catch (error) {
+            this.logger.warning('Failed to open external URL', error);
+            vscode.window.showErrorMessage('Failed to open link.');
         }
     }
 
