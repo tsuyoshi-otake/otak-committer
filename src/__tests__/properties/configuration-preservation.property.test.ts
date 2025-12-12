@@ -111,7 +111,7 @@ suite('Configuration Preservation Property Tests', () => {
                     // Simulate migration
                     const migratedConfig = {
                         ...originalConfig,
-                        // New GPT-5.1 specific fields
+                        // New GPT-5.2 specific fields
                         reasoningEffort: 'low',
                         maxInputTokens: 200000
                     };

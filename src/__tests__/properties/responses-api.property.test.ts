@@ -24,7 +24,7 @@ suite('Responses API Property Tests', () => {
     /**
      * Property 1: API endpoint and model consistency
      * *For any* AI generation request (commit message, PR, or issue),
-     * the system should use the `/v1/responses` endpoint with the `gpt-5.1` model
+     * the system should use the `/v1/responses` endpoint with the `gpt-5.2` model
      * Validates: Requirements 1.1, 1.2, 1.3, 1.4
      */
     test('Property 1: All API calls should use /v1/responses endpoint', async () => {
@@ -32,7 +32,7 @@ suite('Responses API Property Tests', () => {
 
         for (const requestType of requestTypes) {
             const request: ResponsesAPIRequest = {
-                model: 'gpt-5.1',
+                model: 'gpt-5.2',
                 input: `Generate ${requestType} content`,
                 max_output_tokens: 2000,
                 reasoning: { effort: 'low' }
@@ -44,7 +44,7 @@ suite('Responses API Property Tests', () => {
         assert.strictEqual(ResponsesAPIMock.verifyAllCallsUseEndpoint('/v1/responses'), true);
     });
 
-    test('Property 1: All API calls should use gpt-5.1 model', async () => {
+    test('Property 1: All API calls should use gpt-5.2 model', async () => {
         runPropertyTest(
             fc.asyncProperty(
                 fc.constantFrom('commit', 'pr_title', 'pr_body', 'issue'),
@@ -54,14 +54,14 @@ suite('Responses API Property Tests', () => {
                     ResponsesAPIMock.mockSuccess('Response');
 
                     const request: ResponsesAPIRequest = {
-                        model: 'gpt-5.1',
+                        model: 'gpt-5.2',
                         input: `${requestType}: ${content}`,
                         max_output_tokens: 2000,
                         reasoning: { effort: 'low' }
                     };
 
                     await ResponsesAPIMock.call(request);
-                    return ResponsesAPIMock.verifyAllCallsUseModel('gpt-5.1');
+                    return ResponsesAPIMock.verifyAllCallsUseModel('gpt-5.2');
                 }
             )
         );
@@ -83,7 +83,7 @@ suite('Responses API Property Tests', () => {
                     ResponsesAPIMock.mockSuccess('Response');
 
                     const request: ResponsesAPIRequest = {
-                        model: 'gpt-5.1',
+                        model: 'gpt-5.2',
                         input: `${requestType}: ${content}`,
                         max_output_tokens: 2000,
                         reasoning: { effort: 'low' }

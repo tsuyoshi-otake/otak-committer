@@ -9,7 +9,8 @@ export function getServiceConfig(): ServiceConfig {
         githubToken: config.get<string>('github.token'),
         language: config.get<string>('language') || 'english',
         messageStyle: config.get<string>('messageStyle') || 'normal',
-        useEmoji: config.get<boolean>('useEmoji') || false
+        useEmoji: config.get<boolean>('useEmoji') || false,
+        reasoningEffort: config.get<string>('reasoningEffort') || 'low'
     };
 }
 

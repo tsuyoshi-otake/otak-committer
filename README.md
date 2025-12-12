@@ -182,7 +182,7 @@ We take your security and privacy seriously. This extension is built with the hi
 2. In VS Code, run the command: `otak-committer: Set OpenAI API Key`
 3. Enter your API key when prompted
 
-The extension uses GPT-5.1 for high-quality commit message generation. Your API key is stored securely using VS Code's SecretStorage API.
+The extension uses GPT-5.2 for high-quality commit message generation. Your API key is stored securely using VS Code's SecretStorage API.
 
 ### Setting Up GitHub Access
 

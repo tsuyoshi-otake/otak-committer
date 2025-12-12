@@ -21,6 +21,8 @@ export interface ServiceConfig {
     language: string;
     messageStyle: string;
     useEmoji: boolean;
+    /** GPT reasoning effort (none/low/medium/high) */
+    reasoningEffort?: string;
 }
 
 /**

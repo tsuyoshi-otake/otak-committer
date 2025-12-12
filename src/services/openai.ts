@@ -30,13 +30,32 @@ export class OpenAIService extends BaseService {
     private promptService: PromptService;
 
     /** Default model for all API calls */
-    private static readonly MODEL = 'gpt-4.1';
+    private static readonly MODEL = 'gpt-5.2';
 
     constructor(config?: Partial<ServiceConfig>) {
         super(config);
         this.validateState(!!this.config.openaiApiKey, 'OpenAI API key is required');
         this.openai = new OpenAI({ apiKey: this.config.openaiApiKey });
         this.promptService = new PromptService();
+    }
+
+    private getReasoningEffort(): 'low' | 'medium' | 'high' | undefined {
+        const effort = (this.config.reasoningEffort || 'low').toLowerCase();
+        if (effort === 'none') {
+            return undefined;
+        }
+        if (effort === 'low' || effort === 'medium' || effort === 'high') {
+            return effort as 'low' | 'medium' | 'high';
+        }
+        return 'low';
+    }
+
+    private getTemperature(requested?: number): number | undefined {
+        // GPT-5.x chat completions currently only support default temperature.
+        if (OpenAIService.MODEL.startsWith('gpt-5')) {
+            return undefined;
+        }
+        return requested ?? 0.1;
     }
 
     /**
@@ -78,14 +97,18 @@ export class OpenAIService extends BaseService {
 
             const systemPrompt = getPrompt(language as SupportedLanguage, PromptType.System);
 
+            const temperature = this.getTemperature();
             const response = await this.openai.chat.completions.create({
                 model: OpenAIService.MODEL,
                 messages: [
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: userPrompt }
                 ],
-                temperature: 0.1,
-                max_tokens: 500
+                ...(temperature !== undefined ? { temperature } : {}),
+                reasoning_effort: this.getReasoningEffort(),
+                max_completion_tokens: 500,
+                response_format: { type: 'text' },
+                store: false
             });
 
             let message = response.choices[0].message.content;
@@ -131,6 +154,7 @@ export class OpenAIService extends BaseService {
             const prompts = await this.promptService.createPRPrompt(diff, language, template);
             const systemPrompt = getPrompt(language as SupportedLanguage, PromptType.System);
 
+            const temperature = this.getTemperature();
             const [titleResponse, bodyResponse] = await Promise.all([
                 this.openai.chat.completions.create({
                     model: OpenAIService.MODEL,
@@ -138,8 +162,11 @@ export class OpenAIService extends BaseService {
                         { role: 'system', content: systemPrompt },
                         { role: 'user', content: prompts.title }
                     ],
-                    temperature: 0.1,
-                    max_tokens: 100
+                    ...(temperature !== undefined ? { temperature } : {}),
+                    reasoning_effort: this.getReasoningEffort(),
+                    max_completion_tokens: 100,
+                    response_format: { type: 'text' },
+                    store: false
                 }),
                 this.openai.chat.completions.create({
                     model: OpenAIService.MODEL,
@@ -147,8 +174,11 @@ export class OpenAIService extends BaseService {
                         { role: 'system', content: systemPrompt },
                         { role: 'user', content: prompts.body }
                     ],
-                    temperature: 0.1,
-                    max_tokens: 2000
+                    ...(temperature !== undefined ? { temperature } : {}),
+                    reasoning_effort: this.getReasoningEffort(),
+                    max_completion_tokens: 2000,
+                    response_format: { type: 'text' },
+                    store: false
                 })
             ]);
 
@@ -181,7 +211,7 @@ export class OpenAIService extends BaseService {
      * @param params.prompt - The prompt to send to the model
      * @param params.maxTokens - Maximum tokens in the response (default: 1000)
      * @param params.temperature - Sampling temperature (default: 0.1)
-     * @param params.model - The model to use (ignored, always uses gpt-5.1)
+     * @param params.model - The model to use (ignored, always uses gpt-5.2)
      * @returns The generated response or undefined if generation fails
      *
      * @example
@@ -205,14 +235,18 @@ export class OpenAIService extends BaseService {
 
             const systemPrompt = getPrompt(language as SupportedLanguage, PromptType.System);
 
+            const temperature = this.getTemperature(params.temperature);
             const response = await this.openai.chat.completions.create({
                 model: OpenAIService.MODEL,
                 messages: [
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: params.prompt }
                 ],
-                temperature: params.temperature ?? 0.1,
-                max_tokens: params.maxTokens ?? 1000
+                ...(temperature !== undefined ? { temperature } : {}),
+                reasoning_effort: this.getReasoningEffort(),
+                max_completion_tokens: params.maxTokens ?? 1000,
+                response_format: { type: 'text' },
+                store: false
             });
 
             this.logger.info('Chat completion created successfully');

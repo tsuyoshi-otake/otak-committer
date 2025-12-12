@@ -33,7 +33,7 @@ export class GitHubService extends BaseService implements BranchManager {
     private octokit?: GitHubAPI;
     private owner: string = '';
     private repo: string = '';
-    // Unified 200K token limit for GPT-5.1 migration
+    // Unified 200K token limit for GPT-5.2 migration
     private static readonly MAX_TOKENS = 200 * 1000;
     private initialized: boolean = false;
     private gitApi: any;

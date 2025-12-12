@@ -35,7 +35,7 @@ interface FileAnalysis {
  * ```
  */
 export class IssueGeneratorService extends BaseService {
-    // Unified 200K token limit for GPT-5.1 migration
+    // Unified 200K token limit for GPT-5.2 migration
     private static readonly MAX_TOKENS = 200 * 1000;
 
     constructor(

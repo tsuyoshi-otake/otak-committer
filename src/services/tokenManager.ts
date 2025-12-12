@@ -1,8 +1,8 @@
 /**
- * TokenManager - GPT-5.1 Token Management Utility
+ * TokenManager - GPT-5.2 Token Management Utility
  *
  * Provides utilities for token estimation, input truncation, and validation
- * for the GPT-5.1 Responses API with unified 200K token limits.
+ * for the GPT-5.2 Responses API with unified 200K token limits.
  */
 
 /**
@@ -16,7 +16,7 @@ export interface OutputTokenAllocations {
 }
 
 /**
- * Token management utility class for GPT-5.1 Responses API
+ * Token management utility class for GPT-5.2 Responses API
  *
  * Provides methods for:
  * - Estimating token counts from text
@@ -30,7 +30,7 @@ export class TokenManager {
     /** Characters per token estimation ratio */
     public static readonly CHARS_PER_TOKEN = 4;
 
-    /** GPT-5.1 context window limit (400K) */
+    /** GPT-5.2 context window limit (400K) */
     public static readonly CONTEXT_LIMIT = 400 * 1000;
 
     /** Buffer reserved for reasoning tokens */
@@ -87,7 +87,7 @@ export class TokenManager {
     }
 
     /**
-     * Validate that token allocation is within GPT-5.1 context limits
+     * Validate that token allocation is within GPT-5.2 context limits
      *
      * Ensures that input + output + reasoning buffer does not exceed 400K tokens
      *

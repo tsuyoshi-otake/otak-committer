@@ -150,7 +150,7 @@
             "Medium reasoning (balanced)",
             "High reasoning (slowest, highest quality)"
           ],
-          "description": "GPT-5.1 reasoning effort level (affects response quality and latency)"
+          "description": "GPT-5.2 reasoning effort level (affects response quality and latency)"
         },
         "otakCommitter.maxInputTokens": {
           "type": "number",
