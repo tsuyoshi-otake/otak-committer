@@ -23,9 +23,9 @@ export {
  * Updated to provide longer commit messages for better context
  */
 export const MESSAGE_LENGTH_LIMITS = {
-    [MessageStyle.Simple]: 100,    // Doubled from 50
-    [MessageStyle.Normal]: 144,    // Doubled from 72
-    [MessageStyle.Detailed]: 200,  // Doubled from 100
+    [MessageStyle.Simple]: 200,
+    [MessageStyle.Normal]: 400,
+    [MessageStyle.Detailed]: 800,
 } as const;
 
 /**

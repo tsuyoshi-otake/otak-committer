@@ -2,9 +2,9 @@
  * Property-based tests for PromptService and message configuration
  *
  * Tests the correctness properties defined in design.md:
- * - Property 14: Simple style respects 100 character limit
- * - Property 15: Normal style respects 144 character limit
- * - Property 16: Detailed style respects 200 character limit
+ * - Property 14: Simple style respects 200 character limit
+ * - Property 15: Normal style respects 400 character limit
+ * - Property 16: Detailed style respects 800 character limit
  */
 
 import * as assert from 'assert';
@@ -14,110 +14,110 @@ import { MessageStyle } from '../../types/enums/MessageStyle';
 
 suite('Prompt Service Property Tests', () => {
     /**
-     * **Feature: ui-internationalization, Property 14: Simple style respects 100 character limit**
+	     * **Feature: ui-internationalization, Property 14: Simple style respects 200 character limit**
      * **Validates: Requirements 6.1**
      *
      * For any commit message generated with Simple style, the message length
-     * should not exceed 100 characters.
+	     * should not exceed 200 characters.
      */
-    test('Property 14: Simple style has 100 character limit', createTaggedPropertyTest(
+	    test('Property 14: Simple style has 200 character limit', createTaggedPropertyTest(
         'ui-internationalization',
         14,
-        'Simple style respects 100 character limit',
+	        'Simple style respects 200 character limit',
         () => {
             // Verify the constant is correctly set
             assert.strictEqual(
                 MESSAGE_LENGTH_LIMITS[MessageStyle.Simple],
-                100,
-                'Simple style should have 100 character limit'
+	                200,
+	                'Simple style should have 200 character limit'
             );
 
             // Verify the function returns the correct limit
             assert.strictEqual(
                 getMessageLengthLimit(MessageStyle.Simple),
-                100,
-                'getMessageLengthLimit should return 100 for Simple style'
+	                200,
+	                'getMessageLengthLimit should return 200 for Simple style'
             );
 
             assert.strictEqual(
                 getMessageLengthLimit('simple'),
-                100,
-                'getMessageLengthLimit should return 100 for "simple" string'
+	                200,
+	                'getMessageLengthLimit should return 200 for "simple" string'
             );
         }
     ));
 
     /**
-     * **Feature: ui-internationalization, Property 15: Normal style respects 144 character limit**
+	     * **Feature: ui-internationalization, Property 15: Normal style respects 400 character limit**
      * **Validates: Requirements 6.2**
      *
      * For any commit message generated with Normal style, the message length
-     * should not exceed 144 characters.
+	     * should not exceed 400 characters.
      */
-    test('Property 15: Normal style has 144 character limit', createTaggedPropertyTest(
+	    test('Property 15: Normal style has 400 character limit', createTaggedPropertyTest(
         'ui-internationalization',
         15,
-        'Normal style respects 144 character limit',
+	        'Normal style respects 400 character limit',
         () => {
             // Verify the constant is correctly set
             assert.strictEqual(
                 MESSAGE_LENGTH_LIMITS[MessageStyle.Normal],
-                144,
-                'Normal style should have 144 character limit'
+	                400,
+	                'Normal style should have 400 character limit'
             );
 
             // Verify the function returns the correct limit
             assert.strictEqual(
                 getMessageLengthLimit(MessageStyle.Normal),
-                144,
-                'getMessageLengthLimit should return 144 for Normal style'
+	                400,
+	                'getMessageLengthLimit should return 400 for Normal style'
             );
 
             assert.strictEqual(
                 getMessageLengthLimit('normal'),
-                144,
-                'getMessageLengthLimit should return 144 for "normal" string'
+	                400,
+	                'getMessageLengthLimit should return 400 for "normal" string'
             );
 
             // Default should be Normal
             assert.strictEqual(
                 getMessageLengthLimit('unknown'),
-                144,
-                'getMessageLengthLimit should default to 144 for unknown style'
+	                400,
+	                'getMessageLengthLimit should default to 400 for unknown style'
             );
         }
     ));
 
     /**
-     * **Feature: ui-internationalization, Property 16: Detailed style respects 200 character limit**
+	     * **Feature: ui-internationalization, Property 16: Detailed style respects 800 character limit**
      * **Validates: Requirements 6.3**
      *
      * For any commit message generated with Detailed style, the message length
-     * should not exceed 200 characters.
+	     * should not exceed 800 characters.
      */
-    test('Property 16: Detailed style has 200 character limit', createTaggedPropertyTest(
+	    test('Property 16: Detailed style has 800 character limit', createTaggedPropertyTest(
         'ui-internationalization',
         16,
-        'Detailed style respects 200 character limit',
+	        'Detailed style respects 800 character limit',
         () => {
             // Verify the constant is correctly set
             assert.strictEqual(
                 MESSAGE_LENGTH_LIMITS[MessageStyle.Detailed],
-                200,
-                'Detailed style should have 200 character limit'
+	                800,
+	                'Detailed style should have 800 character limit'
             );
 
             // Verify the function returns the correct limit
             assert.strictEqual(
                 getMessageLengthLimit(MessageStyle.Detailed),
-                200,
-                'getMessageLengthLimit should return 200 for Detailed style'
+	                800,
+	                'getMessageLengthLimit should return 800 for Detailed style'
             );
 
             assert.strictEqual(
                 getMessageLengthLimit('detailed'),
-                200,
-                'getMessageLengthLimit should return 200 for "detailed" string'
+	                800,
+	                'getMessageLengthLimit should return 800 for "detailed" string'
             );
         }
     ));

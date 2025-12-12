@@ -13,7 +13,7 @@
     "url": "https://github.com/tsuyoshi-otake/otak-committer/issues"
   },
   "homepage": "https://github.com/tsuyoshi-otake/otak-committer#readme",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -106,9 +106,9 @@
             "detailed"
           ],
           "enumDescriptions": [
-            "Simple and concise (100 tokens)",
-            "Normal length with some context (200 tokens)",
-            "Detailed explanation (500 tokens)"
+            "Simple and concise (200 chars)",
+            "Normal length with some context (400 chars)",
+            "Detailed explanation (800 chars)"
           ],
           "description": "Style and length of generated commit messages"
         },

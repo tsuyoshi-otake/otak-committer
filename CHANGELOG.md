@@ -1,5 +1,14 @@
 # Change Log
 
+## [2.1.2] - 2025-12-12
+
+### Changed
+- **Upgraded AI model to GPT-5.2:**
+  - Commit/PR/Issue generation now uses `gpt-5.2`
+  - Requests updated for GPT-5.2 chat completions (`max_completion_tokens`, `reasoning_effort`, `store: false`)
+  - System guidance is now sent as a `developer` message
+  - Temperature is omitted because GPT-5.2 only supports the default value
+
 ## [2.1.1] - 2025-12-09
 
 ### Fixed

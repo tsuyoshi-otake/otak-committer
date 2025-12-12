@@ -101,12 +101,12 @@ export class OpenAIService extends BaseService {
             const response = await this.openai.chat.completions.create({
                 model: OpenAIService.MODEL,
                 messages: [
-                    { role: 'system', content: systemPrompt },
+                    { role: 'developer', content: systemPrompt },
                     { role: 'user', content: userPrompt }
                 ],
                 ...(temperature !== undefined ? { temperature } : {}),
                 reasoning_effort: this.getReasoningEffort(),
-                max_completion_tokens: 500,
+                max_completion_tokens: 5000,
                 response_format: { type: 'text' },
                 store: false
             });
@@ -159,7 +159,7 @@ export class OpenAIService extends BaseService {
                 this.openai.chat.completions.create({
                     model: OpenAIService.MODEL,
                     messages: [
-                        { role: 'system', content: systemPrompt },
+                        { role: 'developer', content: systemPrompt },
                         { role: 'user', content: prompts.title }
                     ],
                     ...(temperature !== undefined ? { temperature } : {}),
@@ -171,7 +171,7 @@ export class OpenAIService extends BaseService {
                 this.openai.chat.completions.create({
                     model: OpenAIService.MODEL,
                     messages: [
-                        { role: 'system', content: systemPrompt },
+                        { role: 'developer', content: systemPrompt },
                         { role: 'user', content: prompts.body }
                     ],
                     ...(temperature !== undefined ? { temperature } : {}),
@@ -239,7 +239,7 @@ export class OpenAIService extends BaseService {
             const response = await this.openai.chat.completions.create({
                 model: OpenAIService.MODEL,
                 messages: [
-                    { role: 'system', content: systemPrompt },
+                    { role: 'developer', content: systemPrompt },
                     { role: 'user', content: params.prompt }
                 ],
                 ...(temperature !== undefined ? { temperature } : {}),
