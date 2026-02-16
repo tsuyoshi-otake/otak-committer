@@ -1,7 +1,7 @@
 {
   "name": "otak-committer",
   "displayName": "otak-committer",
-  "description": "VS Code extension for intelligent SCM operations - Multilingual commit message generation with AI support (25 languages supported) and future PR management features.",
+  "description": "%extension.description%",
   "publisher": "odangoo",
   "license": "MIT",
   "icon": "images/icon.png",
@@ -95,7 +95,7 @@
             "العربية",
             "עברית"
           ],
-          "description": "Language for commit messages"
+          "description": "%config.language%"
         },
         "otakCommitter.messageStyle": {
           "type": "string",
@@ -106,21 +106,21 @@
             "detailed"
           ],
           "enumDescriptions": [
-            "Simple and concise (200 chars)",
-            "Normal length with some context (400 chars)",
-            "Detailed explanation (800 chars)"
+            "%config.messageStyle.simple%",
+            "%config.messageStyle.normal%",
+            "%config.messageStyle.detailed%"
           ],
-          "description": "Style and length of generated commit messages"
+          "description": "%config.messageStyle%"
         },
         "otakCommitter.customMessage": {
           "type": "string",
           "default": "",
-          "description": "Custom message to append to the system prompt (added after the diff message)"
+          "description": "%config.customMessage%"
         },
         "otakCommitter.useEmoji": {
           "type": "boolean",
           "default": false,
-          "description": "Use emoji in commit messages and PR descriptions"
+          "description": "%config.useEmoji%"
         },
         "otakCommitter.emojiStyle": {
           "type": "string",
@@ -130,10 +130,10 @@
             "unicode"
           ],
           "enumDescriptions": [
-            "GitHub style emoji codes (:smile:)",
-            "Unicode emoji characters"
+            "%config.emojiStyle.github%",
+            "%config.emojiStyle.unicode%"
           ],
-          "description": "Style of emoji to use in messages"
+          "description": "%config.emojiStyle%"
         },
         "otakCommitter.reasoningEffort": {
           "type": "string",
@@ -145,69 +145,69 @@
             "high"
           ],
           "enumDescriptions": [
-            "No reasoning (fastest, lowest quality)",
-            "Low reasoning (fast, good quality) - Recommended",
-            "Medium reasoning (balanced)",
-            "High reasoning (slowest, highest quality)"
+            "%config.reasoningEffort.none%",
+            "%config.reasoningEffort.low%",
+            "%config.reasoningEffort.medium%",
+            "%config.reasoningEffort.high%"
           ],
-          "description": "GPT-5.2 reasoning effort level (affects response quality and latency)"
+          "description": "%config.reasoningEffort%"
         },
         "otakCommitter.maxInputTokens": {
           "type": "number",
           "default": 200000,
           "minimum": 1000,
           "maximum": 400000,
-          "description": "Maximum input tokens for AI processing (default: 200K)"
+          "description": "%config.maxInputTokens%"
         },
         "otakCommitter.useConventionalCommits": {
           "type": "boolean",
           "default": false,
-          "description": "Use Conventional Commits format with scope (<type>(<scope>): <subject>)"
+          "description": "%config.useConventionalCommits%"
         }
       }
     },
     "commands": [
       {
         "command": "otak-committer.generateMessage",
-        "title": "Generate Commit Message",
+        "title": "%command.generateMessage%",
         "category": "otak-committer",
         "icon": "$(symbol-constant)"
       },
       {
         "command": "otak-committer.generatePR",
-        "title": "Generate Pull Request",
+        "title": "%command.generatePR%",
         "category": "otak-committer",
         "icon": "$(git-pull-request)"
       },
       {
         "command": "otak-committer.generateIssue",
-        "title": "Generate Issue",
+        "title": "%command.generateIssue%",
         "category": "otak-committer",
         "icon": "$(issue-opened)"
       },
       {
         "command": "otak-committer.openSettings",
-        "title": "Open otak-committer Settings",
+        "title": "%command.openSettings%",
         "category": "otak-committer"
       },
       {
         "command": "otak-committer.changeLanguage",
-        "title": "Change Commit Message Language",
+        "title": "%command.changeLanguage%",
         "category": "otak-committer"
       },
       {
         "command": "otak-committer.changeMessageStyle",
-        "title": "Change Commit Message Style",
+        "title": "%command.changeMessageStyle%",
         "category": "otak-committer"
       },
       {
         "command": "otak-committer.setApiKey",
-        "title": "Set OpenAI API Key",
+        "title": "%command.setApiKey%",
         "category": "otak-committer"
       },
       {
         "command": "otak-committer.diagnoseStorage",
-        "title": "Diagnose API Key Storage",
+        "title": "%command.diagnoseStorage%",
         "category": "otak-committer"
       }
     ],

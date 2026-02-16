@@ -1,0 +1,31 @@
+{
+  "extension.description": "インテリジェントなSCM操作のためのVS Code拡張機能。AIによる多言語（25言語）コミットメッセージ生成と、将来のPR管理機能を提供します。",
+
+  "command.generateMessage": "コミットメッセージを生成",
+  "command.generatePR": "プルリクエストを生成",
+  "command.generateIssue": "イシューを生成",
+  "command.openSettings": "otak-committer の設定を開く",
+  "command.changeLanguage": "コミットメッセージの言語を変更",
+  "command.changeMessageStyle": "コミットメッセージのスタイルを変更",
+  "command.setApiKey": "OpenAI APIキーを設定",
+  "command.diagnoseStorage": "APIキーストレージを診断",
+
+  "config.language": "コミットメッセージの言語",
+  "config.messageStyle": "生成するコミットメッセージのスタイルと長さ",
+  "config.messageStyle.simple": "シンプルで簡潔（200文字）",
+  "config.messageStyle.normal": "標準（400文字、文脈を少し含む）",
+  "config.messageStyle.detailed": "詳細（800文字、詳しい説明）",
+  "config.customMessage": "システムプロンプトに追加するカスタムメッセージ（差分メッセージの後に追加）",
+  "config.useEmoji": "コミットメッセージとPR説明で絵文字を使用",
+  "config.emojiStyle": "メッセージで使用する絵文字の形式",
+  "config.emojiStyle.github": "GitHub形式の絵文字コード（:smile:）",
+  "config.emojiStyle.unicode": "Unicode絵文字",
+  "config.reasoningEffort": "GPT-5.2 の reasoning effort レベル（品質とレイテンシに影響）",
+  "config.reasoningEffort.none": "推論なし（最速、品質低）",
+  "config.reasoningEffort.low": "低（速い、品質良）- 推奨",
+  "config.reasoningEffort.medium": "中（バランス）",
+  "config.reasoningEffort.high": "高（最も遅い、品質最高）",
+  "config.maxInputTokens": "AI処理の最大入力トークン数（デフォルト: 200K）",
+  "config.useConventionalCommits": "スコープ付きの Conventional Commits 形式を使用（<type>(<scope>): <subject>）"
+}
+

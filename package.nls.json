@@ -1,0 +1,31 @@
+{
+  "extension.description": "VS Code extension for intelligent SCM operations - Multilingual commit message generation with AI support (25 languages supported) and future PR management features.",
+
+  "command.generateMessage": "Generate Commit Message",
+  "command.generatePR": "Generate Pull Request",
+  "command.generateIssue": "Generate Issue",
+  "command.openSettings": "Open otak-committer Settings",
+  "command.changeLanguage": "Change Commit Message Language",
+  "command.changeMessageStyle": "Change Commit Message Style",
+  "command.setApiKey": "Set OpenAI API Key",
+  "command.diagnoseStorage": "Diagnose API Key Storage",
+
+  "config.language": "Language for commit messages",
+  "config.messageStyle": "Style and length of generated commit messages",
+  "config.messageStyle.simple": "Simple and concise (200 chars)",
+  "config.messageStyle.normal": "Normal length with some context (400 chars)",
+  "config.messageStyle.detailed": "Detailed explanation (800 chars)",
+  "config.customMessage": "Custom message to append to the system prompt (added after the diff message)",
+  "config.useEmoji": "Use emoji in commit messages and PR descriptions",
+  "config.emojiStyle": "Style of emoji to use in messages",
+  "config.emojiStyle.github": "GitHub style emoji codes (:smile:)",
+  "config.emojiStyle.unicode": "Unicode emoji characters",
+  "config.reasoningEffort": "GPT-5.2 reasoning effort level (affects response quality and latency)",
+  "config.reasoningEffort.none": "No reasoning (fastest, lowest quality)",
+  "config.reasoningEffort.low": "Low reasoning (fast, good quality) - Recommended",
+  "config.reasoningEffort.medium": "Medium reasoning (balanced)",
+  "config.reasoningEffort.high": "High reasoning (slowest, highest quality)",
+  "config.maxInputTokens": "Maximum input tokens for AI processing (default: 200K)",
+  "config.useConventionalCommits": "Use Conventional Commits format with scope (<type>(<scope>): <subject>)"
+}
+

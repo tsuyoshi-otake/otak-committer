@@ -1,0 +1,31 @@
+{
+  "extension.description": "VS Code extension cho cac thao tac SCM thong minh - Tao thong diep commit da ngon ngu voi ho tro AI (25 ngon ngu) va cac tinh nang quan ly PR trong tuong lai.",
+
+  "command.generateMessage": "Tao Thong Diep Commit",
+  "command.generatePR": "Tao Pull Request",
+  "command.generateIssue": "Tao Issue",
+  "command.openSettings": "Mo Cai Dat otak-committer",
+  "command.changeLanguage": "Thay Doi Ngon Ngu Thong Diep Commit",
+  "command.changeMessageStyle": "Thay Doi Kieu Thong Diep Commit",
+  "command.setApiKey": "Cai Dat OpenAI API Key",
+  "command.diagnoseStorage": "Chan Doan Luu Tru API Key",
+
+  "config.language": "Ngon ngu cho thong diep commit",
+  "config.messageStyle": "Kieu va do dai cua thong diep commit duoc tao",
+  "config.messageStyle.simple": "Don gian va ngan gon (200 ky tu)",
+  "config.messageStyle.normal": "Do dai binh thuong co mot chut ngu canh (400 ky tu)",
+  "config.messageStyle.detailed": "Giai thich chi tiet (800 ky tu)",
+  "config.customMessage": "Thong diep tuy chinh de them vao system prompt (them sau diff message)",
+  "config.useEmoji": "Su dung emoji trong thong diep commit va mo ta PR",
+  "config.emojiStyle": "Kieu emoji su dung trong thong diep",
+  "config.emojiStyle.github": "Ma emoji kieu GitHub (:smile:)",
+  "config.emojiStyle.unicode": "Ky tu emoji Unicode",
+  "config.reasoningEffort": "Muc reasoning effort cua GPT-5.2 (anh huong chat luong va do tre)",
+  "config.reasoningEffort.none": "Khong reasoning (nhanh nhat, chat luong thap nhat)",
+  "config.reasoningEffort.low": "Reasoning thap (nhanh, chat luong tot) - De xuat",
+  "config.reasoningEffort.medium": "Reasoning vua (can bang)",
+  "config.reasoningEffort.high": "Reasoning cao (cham nhat, chat luong cao nhat)",
+  "config.maxInputTokens": "So token dau vao toi da cho AI xu ly (mac dinh: 200K)",
+  "config.useConventionalCommits": "Su dung dinh dang Conventional Commits voi scope (<type>(<scope>): <subject>)"
+}
+

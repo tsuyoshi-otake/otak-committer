@@ -1,0 +1,31 @@
+{
+  "extension.description": "用于智能 SCM 操作的 VS Code 扩展：基于 AI 的多语言（支持 25 种语言）提交消息生成，以及未来的 PR 管理功能。",
+
+  "command.generateMessage": "生成提交消息",
+  "command.generatePR": "生成 Pull Request",
+  "command.generateIssue": "生成 Issue",
+  "command.openSettings": "打开 otak-committer 设置",
+  "command.changeLanguage": "更改提交消息语言",
+  "command.changeMessageStyle": "更改提交消息风格",
+  "command.setApiKey": "设置 OpenAI API 密钥",
+  "command.diagnoseStorage": "诊断 API 密钥存储",
+
+  "config.language": "提交消息语言",
+  "config.messageStyle": "生成的提交消息的风格和长度",
+  "config.messageStyle.simple": "简单精炼（200 字符）",
+  "config.messageStyle.normal": "正常长度，带少量上下文（400 字符）",
+  "config.messageStyle.detailed": "详细说明（800 字符）",
+  "config.customMessage": "要追加到系统提示中的自定义消息（添加在 diff 消息之后）",
+  "config.useEmoji": "在提交消息和 PR 描述中使用表情符号",
+  "config.emojiStyle": "消息中使用的表情符号风格",
+  "config.emojiStyle.github": "GitHub 风格表情代码（:smile:）",
+  "config.emojiStyle.unicode": "Unicode 表情字符",
+  "config.reasoningEffort": "GPT-5.2 推理力度级别（影响质量和延迟）",
+  "config.reasoningEffort.none": "无推理（最快，质量最低）",
+  "config.reasoningEffort.low": "低（快，质量好）- 推荐",
+  "config.reasoningEffort.medium": "中（均衡）",
+  "config.reasoningEffort.high": "高（最慢，质量最高）",
+  "config.maxInputTokens": "AI 处理的最大输入 token 数（默认：200K）",
+  "config.useConventionalCommits": "使用带 scope 的 Conventional Commits 格式（<type>(<scope>): <subject>）"
+}
+
