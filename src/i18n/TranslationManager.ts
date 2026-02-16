@@ -10,10 +10,6 @@
  * Supported languages:
  * - Japanese (ja)
  * - English (en)
- * - Vietnamese (vi)
- * - Korean (ko)
- * - Chinese Simplified (zh-cn)
- * - Chinese Traditional (zh-tw)
  *
  * @example
  * ```typescript
@@ -26,10 +22,6 @@
 import { SupportedLocale, LocaleDetector } from './LocaleDetector';
 import en from './locales/en.json';
 import ja from './locales/ja.json';
-import vi from './locales/vi.json';
-import ko from './locales/ko.json';
-import zhCn from './locales/zh-cn.json';
-import zhTw from './locales/zh-tw.json';
 
 /**
  * Translation dictionary type
@@ -60,11 +52,7 @@ export class TranslationManager {
     constructor() {
         this.translations = {
             en: en as TranslationDictionary,
-            ja: ja as TranslationDictionary,
-            vi: vi as TranslationDictionary,
-            ko: ko as TranslationDictionary,
-            'zh-cn': zhCn as TranslationDictionary,
-            'zh-tw': zhTw as TranslationDictionary
+            ja: ja as TranslationDictionary
         };
         this.locale = LocaleDetector.getLocale();
     }
@@ -91,7 +79,7 @@ export class TranslationManager {
     /**
      * Get the current locale
      *
-     * @returns Current locale ('ja', 'en', 'vi', 'ko', 'zh-cn', or 'zh-tw')
+     * @returns Current locale ('ja' or 'en')
      */
     getLocale(): SupportedLocale {
         return this.locale;
@@ -100,7 +88,7 @@ export class TranslationManager {
     /**
      * Update locale and reload translations
      *
-     * @param locale - New locale ('ja', 'en', 'vi', 'ko', 'zh-cn', or 'zh-tw')
+     * @param locale - New locale ('ja' or 'en')
      */
     setLocale(locale: SupportedLocale): void {
         this.locale = locale;

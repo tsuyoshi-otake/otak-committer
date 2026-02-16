@@ -8,21 +8,20 @@
  * Supported languages:
  * - Japanese (ja)
  * - English (en)
- * - Vietnamese (vi)
- * - Korean (ko)
- * - Chinese Simplified (zh-cn)
- * - Chinese Traditional (zh-tw)
+ *
+ * Note: We intentionally only localize the extension UI to Japanese and English.
+ * For any other VS Code display language, the extension UI falls back to English.
  *
  * @example
  * ```typescript
- * const locale = LocaleDetector.getLocale(); // Returns 'ja', 'en', 'vi', 'ko', 'zh-cn', or 'zh-tw'
+ * const locale = LocaleDetector.getLocale(); // Returns 'ja' or 'en'
  * ```
  */
 
 /**
  * Supported locale types
  */
-export type SupportedLocale = 'ja' | 'en' | 'vi' | 'ko' | 'zh-cn' | 'zh-tw';
+export type SupportedLocale = 'ja' | 'en';
 
 /**
  * @deprecated Use SupportedLocale instead
@@ -36,7 +35,7 @@ export class LocaleDetector {
     /**
      * Get the current locale based on VS Code's display language
      *
-     * @returns Supported locale code ('ja', 'en', 'vi', 'ko', 'zh-cn', 'zh-tw')
+     * @returns Supported locale code ('ja' or 'en')
      */
     static getLocale(): SupportedLocale {
         try {
@@ -54,8 +53,8 @@ export class LocaleDetector {
      *
      * This method is public for testing purposes.
      *
-     * @param language - The language code to detect (e.g., 'ja', 'ja-JP', 'vi', 'vi-VN', 'ko', 'ko-KR', 'zh-cn', 'zh-hans', 'zh-tw', 'zh-hant', 'en', 'en-US')
-     * @returns Supported locale code ('ja', 'en', 'vi', 'ko', 'zh-cn', 'zh-tw')
+     * @param language - The language code to detect (e.g., 'ja', 'ja-JP', 'en', 'en-US')
+     * @returns Supported locale code ('ja' or 'en')
      */
     static detectLocale(language: string | undefined): SupportedLocale {
         if (!language) {
@@ -67,26 +66,6 @@ export class LocaleDetector {
         // Check if language starts with 'ja' (handles 'ja', 'ja-JP', etc.)
         if (lowerLang.startsWith('ja')) {
             return 'ja';
-        }
-
-        // Check if language starts with 'vi' (handles 'vi', 'vi-VN', etc.)
-        if (lowerLang.startsWith('vi')) {
-            return 'vi';
-        }
-
-        // Check if language starts with 'ko' (handles 'ko', 'ko-KR', etc.)
-        if (lowerLang.startsWith('ko')) {
-            return 'ko';
-        }
-
-        // Check if language is Chinese Simplified (zh-cn or zh-hans)
-        if (lowerLang === 'zh-cn' || lowerLang === 'zh-hans') {
-            return 'zh-cn';
-        }
-
-        // Check if language is Chinese Traditional (zh-tw or zh-hant)
-        if (lowerLang === 'zh-tw' || lowerLang === 'zh-hant') {
-            return 'zh-tw';
         }
 
         // Default to English for all other languages

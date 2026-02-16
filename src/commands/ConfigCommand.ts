@@ -32,9 +32,9 @@ export class ConfigCommand extends BaseCommand {
     /**
      * Change the language setting
      *
-     * Displays a quick pick menu with all available languages and updates
-     * the configuration when the user makes a selection. Also updates
-     * the LanguagePreferenceManager to use this language for commit messages.
+ * Displays a quick pick menu with all available languages and updates
+ * the configuration when the user makes a selection. Also updates
+ * the language setting used for commit message generation.
      *
      * @returns A promise that resolves when the language is changed or the user cancels
      *
@@ -70,14 +70,11 @@ export class ConfigCommand extends BaseCommand {
                     vscode.ConfigurationTarget.Global
                 );
 
-                // Map the selected language to a SupportedLocale and update preference
-                const localeMap: Record<string, SupportedLocale> = {
+                // UI localization is only supported for English and Japanese.
+                // Keep the stored "preferred locale" in sync for these two languages.
+                const localeMap: Record<string, SupportedLocale | undefined> = {
                     'japanese': 'ja',
-                    'english': 'en',
-                    'vietnamese': 'vi',
-                    'korean': 'ko',
-                    'chinese': 'zh-cn',
-                    'traditionalChinese': 'zh-tw'
+                    'english': 'en'
                 };
                 const locale = localeMap[selected.description as string];
                 if (locale) {
