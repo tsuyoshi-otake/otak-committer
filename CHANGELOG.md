@@ -1,5 +1,12 @@
 # Change Log
 
+## [2.2.0] - 2026-02-16
+
+### Added
+- **UI localization expanded:**
+  - Added Vietnamese (vi), Korean (ko), Simplified Chinese (zh-cn), and Traditional Chinese (zh-tw) UI translations
+  - Locale detection now maps common Chinese variants (zh-Hant/zh-HK/zh-MO) to Traditional Chinese UI
+
 ## [2.1.2] - 2025-12-12
 
 ### Changed
