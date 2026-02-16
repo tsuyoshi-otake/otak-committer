@@ -12,6 +12,7 @@
   "messages": {
     "apiKeyNotConfigured": "OpenAI APIキーが設定されていません。今すぐ設定しますか？",
     "apiKeySaved": "APIキーを保存しました",
+    "storageDiagnosisWritten": "ストレージ診断結果を出力（otak-committer）に表示しました",
     "authRequired": "GitHubの認証が必要です。サインインしてください。",
     "languageChanged": "言語を{language}に変更しました",
     "messageStyleChanged": "メッセージスタイルを{style}に変更しました",
@@ -78,6 +79,13 @@
     "no": "いいえ",
     "openInBrowser": "ブラウザで開く",
     "openIssue": "イシューを開く"
+  },
+  "git": {
+    "stageAll": "すべてをステージ",
+    "stageAllPrompt": "ステージされた変更がありません。すべての変更をステージして続行しますか？",
+    "busyIndexLock": "Git がビジー状態です。他の Git 操作が完了するまで待つか、問題が続く場合は .git/index.lock を削除してください。",
+    "reservedNamesInfo": "予約名のファイル（{files}）は含めますが、その内容は diff に表示できません。",
+    "diffTruncatedWarning": "差分サイズ（推定 {estimatedKTokens}K トークン）が上限 {thresholdKTokens}K を超えています。AI 処理のため内容を切り詰めます。"
   },
   "progress": {
     "generatingCommitMessage": "コミットメッセージを生成中...",

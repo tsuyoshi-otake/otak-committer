@@ -285,7 +285,6 @@
   },
   "dependencies": {
     "@octokit/rest": "^21.1.1",
-    "axios": "^1.6.7",
     "https-proxy-agent": "^7.0.2",
     "openai": "^4.85.4",
     "simple-git": "^3.27.0"

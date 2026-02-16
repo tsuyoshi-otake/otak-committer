@@ -12,6 +12,7 @@
   "messages": {
     "apiKeyNotConfigured": "OpenAI API key is not configured. Would you like to configure it now?",
     "apiKeySaved": "API key saved successfully",
+    "storageDiagnosisWritten": "Storage diagnosis written to Output: otak-committer",
     "authRequired": "GitHub authentication is required. Please sign in.",
     "languageChanged": "Language changed to {language}",
     "messageStyleChanged": "Message style changed to {style}",
@@ -78,6 +79,13 @@
     "no": "No",
     "openInBrowser": "Open in Browser",
     "openIssue": "Open Issue"
+  },
+  "git": {
+    "stageAll": "Stage All",
+    "stageAllPrompt": "No staged changes found. Stage all changes and continue?",
+    "busyIndexLock": "Git is busy. Please wait for other Git operations to complete, or delete .git/index.lock if the problem persists.",
+    "reservedNamesInfo": "Files with reserved names ({files}) will be included but their content cannot be displayed in diff.",
+    "diffTruncatedWarning": "Diff size ({estimatedKTokens}K tokens) exceeds the {thresholdKTokens}K limit. The content will be truncated for AI processing."
   },
   "progress": {
     "generatingCommitMessage": "Generating commit message...",

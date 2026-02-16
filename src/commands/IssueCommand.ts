@@ -122,7 +122,7 @@ export class IssueCommand extends BaseCommand {
         this.logger.debug('Initializing IssueGeneratorService');
 
         try {
-            const service = await IssueGeneratorServiceFactory.initialize();
+            const service = await IssueGeneratorServiceFactory.initialize(undefined, this.context);
             
             if (!service) {
                 this.logger.error('Failed to initialize IssueGeneratorService');
@@ -179,6 +179,11 @@ export class IssueCommand extends BaseCommand {
         try {
             const files = await service.getTrackedFiles();
             const selectedFiles = await selectFiles(files);
+
+            if (selectedFiles === undefined) {
+                this.logger.info('File selection cancelled');
+                return undefined;
+            }
 
             if (selectedFiles.length === 0) {
                 this.logger.info('No files selected');

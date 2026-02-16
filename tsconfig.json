@@ -5,6 +5,7 @@
         "outDir": "out",
         "lib": ["ES2020"],
         "moduleResolution": "node",
+        "resolveJsonModule": true,
         "sourceMap": true,
         "rootDir": "src",
         "strict": true,

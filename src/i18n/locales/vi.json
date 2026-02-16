@@ -12,6 +12,7 @@
   "messages": {
     "apiKeyNotConfigured": "API key OpenAI chua duoc cau hinh. Ban co muon cau hinh ngay bay gio khong?",
     "apiKeySaved": "API key da duoc luu thanh cong",
+    "storageDiagnosisWritten": "Chan doan luu tru da duoc ghi vao Output: otak-committer",
     "authRequired": "Can xac thuc GitHub. Vui long dang nhap.",
     "languageChanged": "Ngon ngu da duoc thay doi thanh {language}",
     "messageStyleChanged": "Kieu thong diep da duoc thay doi thanh {style}",
@@ -78,6 +79,13 @@
     "no": "Khong",
     "openInBrowser": "Mo Trong Trinh Duyet",
     "openIssue": "Mo Issue"
+  },
+  "git": {
+    "stageAll": "Stage Tat Ca",
+    "stageAllPrompt": "Khong co thay doi da duoc stage. Stage tat ca thay doi va tiep tuc?",
+    "busyIndexLock": "Git dang ban. Vui long doi cac thao tac Git khac hoan tat, hoac xoa .git/index.lock neu van con loi.",
+    "reservedNamesInfo": "Cac tep co ten du tru ({files}) se duoc bao gom nhung noi dung khong the hien thi trong diff.",
+    "diffTruncatedWarning": "Kich thuoc diff (uoc tinh {estimatedKTokens}K tokens) vuot qua gioi han {thresholdKTokens}K. Noi dung se bi cat bot de AI xu ly."
   },
   "progress": {
     "generatingCommitMessage": "Dang tao thong diep commit...",

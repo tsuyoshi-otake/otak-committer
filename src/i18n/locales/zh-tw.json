@@ -12,6 +12,7 @@
   "messages": {
     "apiKeyNotConfigured": "OpenAI API 金鑰尚未設定。您想現在設定嗎？",
     "apiKeySaved": "API 金鑰儲存成功",
+    "storageDiagnosisWritten": "儲存診斷結果已寫入輸出: otak-committer",
     "authRequired": "需要 GitHub 身份驗證。請登入。",
     "languageChanged": "語言已變更為 {language}",
     "messageStyleChanged": "訊息風格已變更為 {style}",
@@ -78,6 +79,13 @@
     "no": "否",
     "openInBrowser": "在瀏覽器中開啟",
     "openIssue": "開啟 Issue"
+  },
+  "git": {
+    "stageAll": "全部暫存",
+    "stageAllPrompt": "未找到已暫存的變更。是否暫存所有變更並繼續？",
+    "busyIndexLock": "Git 正在忙碌。請等待其他 Git 操作完成；如果問題仍然存在，請刪除 .git/index.lock。",
+    "reservedNamesInfo": "將包含保留名稱的檔案（{files}），但其內容無法在 diff 中顯示。",
+    "diffTruncatedWarning": "diff 大小（估計 {estimatedKTokens}K tokens）超過上限 {thresholdKTokens}K。將為 AI 處理截斷內容。"
   },
   "progress": {
     "generatingCommitMessage": "正在產生提交訊息...",

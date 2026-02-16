@@ -1,10 +1,3 @@
-import { PromptType } from '../types/language';
-import { getEuropeanPrompt } from './european';
-import { getAsianPrompt } from './asian';
-import { getMiddleEasternPrompt } from './middleEastern';
-import { getEnglishPrompt } from './english';
-import { getJapanesePrompt } from './japanese';
-
 type EuropeanLanguages = 
     | 'french'
     | 'german'
@@ -15,6 +8,7 @@ type EuropeanLanguages =
     | 'hungarian'
     | 'bulgarian'
     | 'turkish'
+    | 'polish'
     | 'russian';
 
 type AsianLanguages = 
@@ -63,6 +57,7 @@ export const LANGUAGE_CONFIGS: Record<SupportedLanguage, LanguageConfig> = {
     hungarian: { name: 'Hungarian', label: 'Magyar', description: 'Hungarian' },
     bulgarian: { name: 'Bulgarian', label: 'Български', description: 'Bulgarian' },
     turkish: { name: 'Turkish', label: 'Türkçe', description: 'Turkish' },
+    polish: { name: 'Polish', label: 'Polski', description: 'Polish' },
     russian: { name: 'Russian', label: 'Русский', description: 'Russian' },
     
     // Asian languages
@@ -80,64 +75,4 @@ export const LANGUAGE_CONFIGS: Record<SupportedLanguage, LanguageConfig> = {
     // Middle Eastern languages (RTL)
     arabic: { name: 'Arabic', label: 'العربية', description: 'Arabic', isRTL: true },
     hebrew: { name: 'Hebrew', label: 'עברית', description: 'Hebrew', isRTL: true }
-};
-
-/**
- * 指定された言語とタイプに基づいてプロンプトを取得する
- * @param language サポートされている言語
- * @param type プロンプトタイプ
- * @returns プロンプト文字列
- */
-export const getPrompt = (language: SupportedLanguage, type: PromptType): string => {
-    // 言語グループの判定
-    if (language === 'japanese') {
-        return getJapanesePrompt(type);
-    }
-
-    if (language === 'english') {
-        return getEnglishPrompt(type);
-    }
-
-    // 言語コードのマッピング
-    const europeanLangToCode: Record<string, string> = {
-        'french': 'fr',
-        'german': 'de',
-        'italian': 'it',
-        'spanish': 'es',
-        'portuguese': 'pt',
-        'czech': 'cs',
-        'hungarian': 'hu',
-        'bulgarian': 'bg',
-        'russian': 'ru'
-    };
-
-    const asianLangToCode: Record<string, string> = {
-        'chinese': 'zh',
-        'traditionalChinese': 'zh-tw',
-        'korean': 'ko',
-        'vietnamese': 'vi',
-        'thai': 'th',
-        'hindi': 'hi',
-        'bengali': 'bn',
-        'javanese': 'jv',
-        'tamil': 'ta',
-        'burmese': 'my'
-    };
-
-    const middleEasternLangToCode: Record<string, string> = {
-        'arabic': 'ar',
-        'hebrew': 'he'
-    };
-
-    // 言語グループに基づいて適切なプロンプト生成関数を選択
-    if (language in europeanLangToCode) {
-        return getEuropeanPrompt(europeanLangToCode[language] as any, type);
-    } else if (language in asianLangToCode) {
-        return getAsianPrompt(asianLangToCode[language] as any, type);
-    } else if (language in middleEasternLangToCode) {
-        return getMiddleEasternPrompt(middleEasternLangToCode[language] as any, type);
-    }
-
-    // デフォルトは英語を返す
-    return getEnglishPrompt(type);
 };

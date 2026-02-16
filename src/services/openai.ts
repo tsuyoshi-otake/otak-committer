@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import OpenAI from 'openai';
+import * as crypto from 'crypto';
 import { BaseService, BaseServiceFactory } from './base';
 import { PromptService } from './prompt';
 import { ServiceConfig, TemplateInfo } from '../types';
@@ -10,7 +11,8 @@ import { StorageManager } from '../infrastructure/storage';
 import { Logger } from '../infrastructure/logging';
 import { ErrorHandler } from '../infrastructure/error';
 import { t } from '../i18n';
-import { getPrompt, SupportedLanguage } from '../languages';
+import { getPrompt } from '../languages/prompts';
+import type { SupportedLanguage } from '../languages';
 import { PromptType } from '../types/enums/PromptType';
 
 /**
@@ -37,6 +39,42 @@ export class OpenAIService extends BaseService {
         this.validateState(!!this.config.openaiApiKey, 'OpenAI API key is required');
         this.openai = new OpenAI({ apiKey: this.config.openaiApiKey });
         this.promptService = new PromptService();
+    }
+
+    private isAuthenticationError(error: unknown): boolean {
+        const status = (error as { status?: unknown } | null | undefined)?.status;
+        if (status === 401) {
+            return true;
+        }
+
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const lower = errorMessage.toLowerCase();
+
+        return (
+            lower.includes('unauthorized') ||
+            lower.includes('authentication') ||
+            lower.includes('api key') ||
+            lower.includes('401')
+        );
+    }
+
+    private async promptToUpdateApiKey(): Promise<void> {
+        const apiKey = this.config.openaiApiKey?.trim();
+        if (apiKey) {
+            // Key might have been revoked mid-session; re-validate next time.
+            OpenAIServiceFactory.invalidateValidatedKey(apiKey);
+        }
+
+        const setApiKeyLabel = t('apiKey.setApiKey');
+        const action = await vscode.window.showErrorMessage(
+            t('apiKey.errorPrompt'),
+            setApiKeyLabel,
+            t('apiKey.cancel')
+        );
+
+        if (action === setApiKeyLabel) {
+            await vscode.commands.executeCommand('otak-committer.setApiKey');
+        }
     }
 
     private getReasoningEffort(): 'low' | 'medium' | 'high' | undefined {
@@ -121,6 +159,10 @@ export class OpenAIService extends BaseService {
             return undefined;
         } catch (error) {
             this.logger.error('Failed to generate commit message', error);
+            if (this.isAuthenticationError(error)) {
+                await this.promptToUpdateApiKey();
+                return undefined;
+            }
             this.showError('Failed to generate commit message', error);
             return undefined;
         }
@@ -196,6 +238,10 @@ export class OpenAIService extends BaseService {
             };
         } catch (error) {
             this.logger.error('Failed to generate PR content', error);
+            if (this.isAuthenticationError(error)) {
+                await this.promptToUpdateApiKey();
+                return undefined;
+            }
             this.showError('Failed to generate PR content', error);
             return undefined;
         }
@@ -253,6 +299,10 @@ export class OpenAIService extends BaseService {
             return response.choices[0].message.content?.trim();
         } catch (error) {
             this.logger.error('Failed to create chat completion', error);
+            if (this.isAuthenticationError(error)) {
+                await this.promptToUpdateApiKey();
+                return undefined;
+            }
             this.showError('Failed to create chat completion', error);
             return undefined;
         }
@@ -314,6 +364,20 @@ export class OpenAIService extends BaseService {
  * Handles service initialization and API key retrieval from storage.
  */
 export class OpenAIServiceFactory extends BaseServiceFactory<OpenAIService> {
+    private static readonly validatedKeyHashes = new Set<string>();
+
+    private static hashKey(apiKey: string): string {
+        return crypto.createHash('sha256').update(apiKey).digest('hex');
+    }
+
+    static invalidateValidatedKey(apiKey: string): void {
+        const trimmed = apiKey.trim();
+        if (!trimmed) {
+            return;
+        }
+        OpenAIServiceFactory.validatedKeyHashes.delete(OpenAIServiceFactory.hashKey(trimmed));
+    }
+
     async create(config?: Partial<ServiceConfig>): Promise<OpenAIService> {
         return new OpenAIService(config);
     }
@@ -324,50 +388,52 @@ export class OpenAIServiceFactory extends BaseServiceFactory<OpenAIService> {
         try {
             logger.info('Initializing OpenAI service');
 
-            // Get extension context - required for StorageManager
-            if (!context) {
-                throw new Error('Extension context is required for OpenAI service initialization');
+            const providedKey = config?.openaiApiKey;
+            let apiKey = providedKey?.trim();
+            let storage: StorageManager | undefined;
+
+            // If the caller explicitly provided an empty key, fail fast without prompting.
+            if (providedKey !== undefined && !apiKey) {
+                logger.warning('OpenAI API key is empty');
+                return undefined;
             }
 
-            const storage = new StorageManager(context);
-
-            // Try to get API key from storage (handles migration automatically)
-            let apiKey = await storage.getApiKey('openai');
-
-            // If still no API key, prompt user
+            // Try storage only if an API key wasn't provided explicitly
             if (!apiKey) {
-                const configured = await vscode.window.showWarningMessage(
-                    'OpenAI API key is not configured. Would you like to configure it now?',
-                    'Yes',
-                    'No'
+                if (!context) {
+                    throw new Error('Extension context is required when OpenAI API key is not provided');
+                }
+
+                storage = new StorageManager(context);
+
+                // Try to get API key from storage (handles migration automatically)
+                apiKey = (await storage.getApiKey('openai'))?.trim();
+            }
+
+            // If still no API key, offer to configure via the dedicated command
+            if (!apiKey) {
+                const setApiKeyLabel = t('apiKey.setApiKey');
+                const action = await vscode.window.showWarningMessage(
+                    t('messages.apiKeyNotConfigured'),
+                    setApiKeyLabel,
+                    t('apiKey.cancel')
                 );
 
-                if (configured === 'Yes') {
-                    apiKey = await vscode.window.showInputBox({
-                        prompt: 'Enter your OpenAI API Key',
-                        placeHolder: 'sk-...',
-                        password: true,
-                        ignoreFocusOut: true,
-                        validateInput: (value) => {
-                            if (!value || value.trim() === '') {
-                                return 'API Key is required';
-                            }
-                            if (!value.startsWith('sk-')) {
-                                return 'Invalid API Key format (should start with sk-)';
-                            }
+                if (action === setApiKeyLabel) {
+                    await vscode.commands.executeCommand('otak-committer.setApiKey');
+
+                    // Re-read from storage after configuration
+                    if (!storage) {
+                        if (!context) {
                             return undefined;
                         }
-                    });
-
-                    if (apiKey) {
-                        await storage.setApiKey('openai', apiKey);
-                        vscode.window.showInformationMessage('OpenAI API Key has been securely saved');
-                    } else {
-                        logger.warning('User declined to configure OpenAI API key');
-                        return undefined;
+                        storage = new StorageManager(context);
                     }
-                } else {
-                    logger.warning('User declined to configure OpenAI API key');
+                    apiKey = (await storage.getApiKey('openai'))?.trim();
+                }
+
+                if (!apiKey) {
+                    logger.warning('OpenAI API key is not configured');
                     return undefined;
                 }
             }
@@ -381,18 +447,22 @@ export class OpenAIServiceFactory extends BaseServiceFactory<OpenAIService> {
             const service = await factory.create(serviceConfig);
 
             // Validate API key
-            if (!await service.validateApiKey()) {
-                const setApiKeyLabel = t('apiKey.setApiKey');
-                const action = await vscode.window.showErrorMessage(
-                    t('apiKey.invalidKeyPrompt'),
-                    setApiKeyLabel,
-                    t('apiKey.cancel')
-                );
+            const keyHash = OpenAIServiceFactory.hashKey(apiKey);
+            if (!OpenAIServiceFactory.validatedKeyHashes.has(keyHash)) {
+                if (!await service.validateApiKey()) {
+                    const setApiKeyLabel = t('apiKey.setApiKey');
+                    const action = await vscode.window.showErrorMessage(
+                        t('apiKey.invalidKeyPrompt'),
+                        setApiKeyLabel,
+                        t('apiKey.cancel')
+                    );
 
-                if (action === setApiKeyLabel) {
-                    await vscode.commands.executeCommand('otak-committer.setApiKey');
+                    if (action === setApiKeyLabel) {
+                        await vscode.commands.executeCommand('otak-committer.setApiKey');
+                    }
+                    return undefined;
                 }
-                return undefined;
+                OpenAIServiceFactory.validatedKeyHashes.add(keyHash);
             }
 
             logger.info('OpenAI service initialized successfully');

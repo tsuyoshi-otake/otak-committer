@@ -12,6 +12,7 @@
   "messages": {
     "apiKeyNotConfigured": "OpenAI API 키가 구성되지 않았습니다. 지금 구성하시겠습니까?",
     "apiKeySaved": "API 키가 성공적으로 저장되었습니다",
+    "storageDiagnosisWritten": "스토리지 진단 결과를 출력(otak-committer)에 기록했습니다",
     "authRequired": "GitHub 인증이 필요합니다. 로그인해 주세요.",
     "languageChanged": "언어가 {language}(으)로 변경되었습니다",
     "messageStyleChanged": "메시지 스타일이 {style}(으)로 변경되었습니다",
@@ -78,6 +79,13 @@
     "no": "아니오",
     "openInBrowser": "브라우저에서 열기",
     "openIssue": "Issue 열기"
+  },
+  "git": {
+    "stageAll": "모두 스테이징",
+    "stageAllPrompt": "스테이징된 변경 사항이 없습니다. 모든 변경 사항을 스테이징하고 계속하시겠습니까?",
+    "busyIndexLock": "Git이 사용 중입니다. 다른 Git 작업이 완료될 때까지 기다리거나 문제가 계속되면 .git/index.lock을 삭제하세요.",
+    "reservedNamesInfo": "예약된 이름의 파일({files})은 포함되지만 내용은 diff에 표시할 수 없습니다.",
+    "diffTruncatedWarning": "diff 크기(추정 {estimatedKTokens}K tokens)가 한도 {thresholdKTokens}K를 초과합니다. AI 처리를 위해 내용을 잘라냅니다."
   },
   "progress": {
     "generatingCommitMessage": "커밋 메시지 생성 중...",

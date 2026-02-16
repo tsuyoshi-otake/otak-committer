@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { BaseCommand } from './BaseCommand';
 import { GitHubService, GitHubServiceFactory } from '../services/github';
+import { BranchSelector, BranchSelection } from '../services/branch';
 import { OpenAIService } from '../services/openai';
 import { GitServiceFactory } from '../services/git';
 import { ServiceError } from '../types/errors';
@@ -12,11 +13,6 @@ interface Issue {
     title: string;
     labels: string[];
     html_url?: string;
-}
-
-interface BranchSelection {
-    base: string;
-    compare: string;
 }
 
 /**
@@ -54,21 +50,15 @@ export class PRCommand extends BaseCommand {
         try {
             this.logger.info('Starting PR generation');
 
-            // Authenticate with GitHub
-            const session = await this.authenticateGitHub();
-            if (!session) {
-                return;
-            }
-
-            // Select branches
-            const branches = await this.selectBranches();
-            if (!branches) {
-                return;
-            }
-
             // Initialize GitHub service
             const github = await this.initializeGitHub();
             if (!github) {
+                return;
+            }
+
+            // Select branches (uses the already-initialized GitHub service)
+            const branches = await this.selectBranches(github);
+            if (!branches) {
                 return;
             }
 
@@ -121,37 +111,14 @@ export class PRCommand extends BaseCommand {
     }
 
     /**
-     * Authenticate with GitHub
-     * 
-     * @returns GitHub authentication session or undefined if authentication fails
-     */
-    private async authenticateGitHub(): Promise<vscode.AuthenticationSession | undefined> {
-        this.logger.debug('Authenticating with GitHub');
-
-        const session = await vscode.authentication.getSession(
-            'github',
-            ['repo'],
-            { createIfNone: true }
-        );
-
-        if (!session) {
-            this.logger.warning('GitHub authentication failed');
-            vscode.window.showErrorMessage(t('messages.authRequired'));
-            return undefined;
-        }
-
-        return session;
-    }
-
-    /**
      * Select base and compare branches for the PR
      * 
      * @returns Branch selection or undefined if cancelled
      */
-    private async selectBranches(): Promise<BranchSelection | undefined> {
+    private async selectBranches(github: GitHubService): Promise<BranchSelection | undefined> {
         this.logger.debug('Selecting branches for PR');
 
-        const branches = await GitHubService.selectBranches();
+        const branches = await BranchSelector.selectBranches(github);
         if (!branches) {
             this.logger.info('Branch selection cancelled');
             return undefined;
@@ -280,29 +247,7 @@ export class PRCommand extends BaseCommand {
         this.logger.debug('Initializing OpenAI service');
 
         try {
-            const apiKey = await this.storage.getApiKey('openai');
-
-            if (!apiKey) {
-                this.logger.warning('OpenAI API key not found in storage');
-
-                const configured = await vscode.window.showWarningMessage(
-                    t('messages.apiKeyNotConfigured'),
-                    t('buttons.yes'),
-                    t('buttons.no')
-                );
-
-                if (configured === t('buttons.yes')) {
-                    await vscode.commands.executeCommand(
-                        'workbench.action.openSettings',
-                        'otakCommitter.openaiApiKey'
-                    );
-                }
-
-                return undefined;
-            }
-
             const openai = await OpenAIService.initialize({
-                openaiApiKey: apiKey,
                 language: this.config.get('language'),
                 messageStyle: this.config.get('messageStyle'),
                 useEmoji: this.config.get('useEmoji')
@@ -450,13 +395,6 @@ export class PRCommand extends BaseCommand {
             const result = await this.withProgress(
                 t('progress.creatingPR', { prType: prTypeStr }),
                 async () => {
-                    // Validate branch changes
-                    this.logger.debug('Validating branch changes');
-                    const changes = await github.getBranchDiffDetails(branches.base, branches.compare);
-                    if (!changes.files.length) {
-                        throw new Error('No changes to create a pull request');
-                    }
-
                     try {
                         this.logger.debug('Creating PR with GitHub API');
                         const pr = await github.createPullRequest({

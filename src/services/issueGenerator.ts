@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
 import { OpenAIService, OpenAIServiceFactory } from './openai';
 import { GitService, GitServiceFactory } from './git';
 import { GitHubService, GitHubServiceFactory } from './github';
@@ -37,6 +38,7 @@ interface FileAnalysis {
 export class IssueGeneratorService extends BaseService {
     // Unified 200K token limit for GPT-5.2 migration
     private static readonly MAX_TOKENS = 200 * 1000;
+    private static readonly MAX_FILE_BYTES = 1024 * 1024; // 1 MiB safety cap
 
     constructor(
         private readonly openai: OpenAIService,
@@ -120,22 +122,59 @@ export class IssueGeneratorService extends BaseService {
         }
     }
 
+    private getMaxTokensLimit(): number {
+        const configuredMaxTokens = vscode.workspace.getConfiguration('otakCommitter').get<number>('maxInputTokens');
+        if (typeof configuredMaxTokens === 'number' && configuredMaxTokens >= 1000) {
+            return configuredMaxTokens;
+        }
+        return IssueGeneratorService.MAX_TOKENS;
+    }
+
     private async analyzeFiles(files: string[]): Promise<FileAnalysis[]> {
         this.logger.info(`Analyzing ${files.length} files`);
         const analyses: FileAnalysis[] = [];
         const maxPreviewLength = 1000; // ファイルごとのプレビュー最大文字数
         let totalTokens = 0; // トークン数をトラッキング
+        const maxTokensLimit = this.getMaxTokensLimit();
+        const decoder = new TextDecoder();
+        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 
         for (const file of files) {
-            try {
-                const fileUri = vscode.Uri.file(file);
-                const fileContent = await vscode.workspace.fs.readFile(fileUri);
-                const decoder = new TextDecoder();
-                let content = decoder.decode(fileContent);
+            // ファイル拡張子から種類を判定
+            const extension = file.split('.').pop()?.toLowerCase();
+            const type = this.getFileType(extension);
+            const displayPath = workspaceRoot ? path.relative(workspaceRoot, file).replace(/\\/g, '/') : file;
 
-                // ファイル拡張子から種類を判定
-                const extension = file.split('.').pop()?.toLowerCase();
-                const type = this.getFileType(extension);
+            try {
+                // If we already hit the token budget, avoid further I/O work.
+                if (totalTokens >= maxTokensLimit) {
+                    analyses.push({
+                        path: displayPath,
+                        content: '... (content omitted due to token limit)',
+                        type
+                    });
+                    continue;
+                }
+
+                const fileUri = vscode.Uri.file(file);
+
+                // Avoid reading extremely large files into memory; include only metadata.
+                try {
+                    const stat = await vscode.workspace.fs.stat(fileUri);
+                    if (typeof stat.size === 'number' && stat.size > IssueGeneratorService.MAX_FILE_BYTES) {
+                        analyses.push({
+                            path: displayPath,
+                            content: `... (content omitted: file larger than ${Math.floor(IssueGeneratorService.MAX_FILE_BYTES / 1024)}KB)`,
+                            type
+                        });
+                        continue;
+                    }
+                } catch {
+                    // Ignore stat errors and attempt to read content below.
+                }
+
+                const fileContent = await vscode.workspace.fs.readFile(fileUri);
+                let content = decoder.decode(fileContent);
 
                 // ファイルの内容を要約（最初の1000文字まで）
                 if (content.length > maxPreviewLength) {
@@ -146,22 +185,23 @@ export class IssueGeneratorService extends BaseService {
                 const estimatedTokens = Math.ceil(content.length / 4);
 
                 // トークン制限を超える場合は制限
-                if (totalTokens + estimatedTokens > IssueGeneratorService.MAX_TOKENS) {
-                    this.logger.warning(`Token limit reached, omitting content for ${file}`);
+                if (totalTokens + estimatedTokens > maxTokensLimit) {
+                    this.logger.warning(`Token limit reached, omitting content for ${displayPath}`);
                     content = '... (content omitted due to token limit)';
                 } else {
                     totalTokens += estimatedTokens;
                 }
 
                 analyses.push({
-                    path: file,
+                    path: displayPath,
                     content: content,
                     type: type
                 });
             } catch (error) {
-                this.logger.warning(`Failed to analyze file ${file}`, error);
+                this.logger.warning(`Failed to analyze file ${displayPath}`, error);
                 analyses.push({
-                    path: file,
+                    path: displayPath,
+                    type,
                     error: error instanceof Error ? error.message : 'Unknown error'
                 });
             }
@@ -196,7 +236,7 @@ export class IssueGeneratorService extends BaseService {
     }
 
     private formatAnalysisResult(analyses: FileAnalysis[]): string {
-        let result = '# Repository Analysis\n\n';
+        const parts: string[] = ['# Repository Analysis', ''];
 
         // ファイルタイプごとにグループ化
         const groupedByType = analyses.reduce((groups: { [key: string]: FileAnalysis[] }, analysis) => {
@@ -210,20 +250,20 @@ export class IssueGeneratorService extends BaseService {
 
         // 各タイプのファイルをまとめて表示
         for (const [type, files] of Object.entries(groupedByType)) {
-            result += `## ${type} Files\n\n`;
+            parts.push(`## ${type} Files`, '');
             for (const file of files) {
-                result += `### ${file.path}\n\n`;
+                parts.push(`### ${file.path}`, '');
                 if (file.error) {
-                    result += `Error: ${file.error}\n\n`;
+                    parts.push(`Error: ${file.error}`, '');
                 } else if (file.content) {
-                    result += '```' + (type.toLowerCase().includes('typescript') ? 'typescript' : '') + '\n';
-                    result += file.content;
-                    result += '\n```\n\n';
+                    parts.push('```' + (type.toLowerCase().includes('typescript') ? 'typescript' : ''));
+                    parts.push(file.content);
+                    parts.push('```', '');
                 }
             }
         }
 
-        return result;
+        return parts.join('\n');
     }
 
     /**
@@ -255,9 +295,10 @@ export class IssueGeneratorService extends BaseService {
             if (fileAnalyses.length > 0) {
                 const estimatedTokens = Math.ceil(fileAnalyses.reduce((sum, analysis) => 
                     sum + (analysis.content?.length || 0), 0) / 4);
-                if (estimatedTokens > IssueGeneratorService.MAX_TOKENS) {
+                const maxTokensLimit = this.getMaxTokensLimit();
+                if (estimatedTokens > maxTokensLimit) {
                     this.logger.warning(
-                        `Analysis content exceeds 100K tokens limit (estimated ${Math.floor(estimatedTokens/1000)}K tokens). Some content will be truncated.`
+                        `Analysis content exceeds ${Math.floor(maxTokensLimit / 1000)}K tokens limit (estimated ${Math.floor(estimatedTokens / 1000)}K tokens). Some content will be truncated.`
                     );
                 }
             }
@@ -268,18 +309,19 @@ export class IssueGeneratorService extends BaseService {
             const customMessage = vscode.workspace.getConfiguration('otakCommitter').get<string>('customMessage') || '';
             const customInstruction = customMessage ? `\n\nAdditional requirements: ${customMessage}` : '';
 
-            const body = await this.openai.createChatCompletion({
-                prompt: `Generate a GitHub issue in recommended format for the following analysis and description. Include appropriate sections like Background, Problem Statement, Expected Behavior, Steps to Reproduce (if applicable), and Additional Context. Keep the technical details but organize them well.\n\n${emojiInstruction}${customInstruction}\n\nRepository Analysis:\n${analysisResult}\n\nUser Description: ${params.description}`,
-                maxTokens: 1000,
-                temperature: 0.1
-            });
+            const [body, title] = await Promise.all([
+                this.openai.createChatCompletion({
+                    prompt: `Generate a GitHub issue in recommended format for the following analysis and description. Include appropriate sections like Background, Problem Statement, Expected Behavior, Steps to Reproduce (if applicable), and Additional Context. Keep the technical details but organize them well.\n\n${emojiInstruction}${customInstruction}\n\nRepository Analysis:\n${analysisResult}\n\nUser Description: ${params.description}`,
+                    maxTokens: 1000,
+                    temperature: 0.1
+                }),
+                this.generateTitle(params.type.type, params.description)
+            ]);
 
             if (!body) {
                 this.logger.error('Failed to generate issue body content');
                 throw new Error('Failed to generate content');
             }
-
-            const title = await this.generateTitle(params.type.type, params.description);
 
             this.logger.info('Issue preview generated successfully');
             return { title, body };
@@ -334,6 +376,10 @@ export class IssueGeneratorService extends BaseService {
  * Handles initialization of all required services (OpenAI, GitHub, Git).
  */
 export class IssueGeneratorServiceFactory extends BaseServiceFactory<IssueGeneratorService> {
+    constructor(private readonly context: vscode.ExtensionContext) {
+        super();
+    }
+
     async create(config?: Partial<ServiceConfig>): Promise<IssueGeneratorService> {
         // GitHubの初期化を先に行い、認証状態を確認
         const github = await GitHubServiceFactory.initialize();
@@ -344,7 +390,7 @@ export class IssueGeneratorServiceFactory extends BaseServiceFactory<IssueGenera
 
         // 認証が成功したら他のサービスを初期化
         const [openai, git] = await Promise.all([
-            OpenAIServiceFactory.initialize(config),
+            OpenAIServiceFactory.initialize(config, this.context),
             GitServiceFactory.initialize(config)
         ]);
 
@@ -356,9 +402,12 @@ export class IssueGeneratorServiceFactory extends BaseServiceFactory<IssueGenera
         return new IssueGeneratorService(openai, github, git, config);
     }
 
-    static async initialize(config?: Partial<ServiceConfig>): Promise<IssueGeneratorService | undefined> {
+    static async initialize(config?: Partial<ServiceConfig>, context?: vscode.ExtensionContext): Promise<IssueGeneratorService | undefined> {
         try {
-            const factory = new IssueGeneratorServiceFactory();
+            if (!context) {
+                throw new Error('Extension context is required for Issue Generator service initialization');
+            }
+            const factory = new IssueGeneratorServiceFactory(context);
             return await factory.create(config);
         } catch (error) {
             ErrorHandler.handle(error, {

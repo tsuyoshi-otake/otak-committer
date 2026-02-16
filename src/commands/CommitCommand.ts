@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { BaseCommand } from './BaseCommand';
-import { GitServiceFactory } from '../services/git';
+import { GitService, GitServiceFactory } from '../services/git';
 import { OpenAIService } from '../services/openai';
 import { MessageStyle } from '../types/enums/MessageStyle';
 import { sanitizeCommitMessage } from '../utils';
@@ -37,14 +37,21 @@ export class CommitCommand extends BaseCommand {
         try {
             this.logger.info('Starting commit message generation');
 
-            // Initialize Git service and get diff
-            const diff = await this.getDiff();
+            // Initialize Git service once and reuse for diff + templates
+            const git = await GitServiceFactory.initialize();
+            if (!git) {
+                this.logger.error('Failed to initialize GitService');
+                return;
+            }
+
+            // Get diff
+            const diff = await this.getDiff(git);
             if (!diff) {
                 return;
             }
 
             // Find commit message templates
-            const templates = await this.findTemplates();
+            const templates = await this.findTemplates(git);
 
             // Initialize OpenAI service
             const openai = await this.initializeOpenAI();
@@ -74,15 +81,7 @@ export class CommitCommand extends BaseCommand {
      * 
      * @returns The diff string or undefined if no changes
      */
-    private async getDiff(): Promise<string | undefined> {
-        this.logger.debug('Initializing GitService');
-        
-        const git = await GitServiceFactory.initialize();
-        if (!git) {
-            this.logger.error('Failed to initialize GitService');
-            return undefined;
-        }
-
+    private async getDiff(git: GitService): Promise<string | undefined> {
         this.logger.debug('Getting Git diff');
         const diff = await git.getDiff();
         
@@ -100,13 +99,8 @@ export class CommitCommand extends BaseCommand {
      * 
      * @returns Template information
      */
-    private async findTemplates(): Promise<{ commit?: any; pr?: any }> {
+    private async findTemplates(git: GitService): Promise<{ commit?: any; pr?: any }> {
         this.logger.debug('Looking for commit message templates');
-        
-        const git = await GitServiceFactory.initialize();
-        if (!git) {
-            return {};
-        }
 
         return await git.findTemplates();
     }
@@ -120,31 +114,7 @@ export class CommitCommand extends BaseCommand {
         this.logger.debug('Initializing OpenAIService');
 
         try {
-            // Get API key from storage
-            const apiKey = await this.storage.getApiKey('openai');
-
-            if (!apiKey) {
-                this.logger.warning('OpenAI API key not found in storage');
-
-                const configured = await vscode.window.showWarningMessage(
-                    t('messages.apiKeyNotConfigured'),
-                    t('buttons.yes'),
-                    t('buttons.no')
-                );
-
-                if (configured === t('buttons.yes')) {
-                    await vscode.commands.executeCommand(
-                        'workbench.action.openSettings',
-                        'otakCommitter.openaiApiKey'
-                    );
-                }
-
-                return undefined;
-            }
-
-            // Initialize service with API key
             const openai = await OpenAIService.initialize({
-                openaiApiKey: apiKey,
                 language: this.config.get('language'),
                 messageStyle: this.config.get('messageStyle'),
                 useEmoji: this.config.get('useEmoji')
@@ -183,7 +153,7 @@ export class CommitCommand extends BaseCommand {
     ): Promise<string | undefined> {
         this.logger.debug('Starting commit message generation');
 
-        const message = await this.withProgress(
+        const message = await this.withProgress<string | undefined>(
             t('progress.generatingCommitMessage'),
             async () => {
                 // Get configuration - use otakCommitter.language setting
@@ -201,13 +171,18 @@ export class CommitCommand extends BaseCommand {
                 );
 
                 if (!generatedMessage) {
-                    return '';
+                    return undefined;
                 }
 
                 // Sanitize the message (escape dangerous characters, remove markdown blocks, etc.)
-                return sanitizeCommitMessage(generatedMessage);
+                return sanitizeCommitMessage(generatedMessage) || '';
             }
         );
+
+        if (message === undefined) {
+            // OpenAIService already surfaced an error or the user cancelled key setup.
+            return undefined;
+        }
 
         if (!message) {
             this.logger.error('Failed to generate commit message: message is empty');

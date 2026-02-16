@@ -217,15 +217,21 @@ export class GitHubService extends BaseService implements BranchManager {
 
             this.logger.info(`Retrieved diff for ${files.length} files`);
 
+            const configuredMaxTokens = vscode.workspace.getConfiguration('otakCommitter').get<number>('maxInputTokens');
+            const maxTokensLimit =
+                typeof configuredMaxTokens === 'number' && configuredMaxTokens >= 1000
+                    ? configuredMaxTokens
+                    : GitHubService.MAX_TOKENS;
+
             // Calculate the total size of patches (approximation: 1 token ≈ 4 characters)
             for (const file of files) {
                 totalTokens += Math.ceil(file.patch.length / 4);
             }
 
             // Truncate patches if the size limit is exceeded
-            if (totalTokens > GitHubService.MAX_TOKENS) {
-                this.logger.warning(`Diff size (${totalTokens} tokens) exceeds limit (${GitHubService.MAX_TOKENS}), truncating`);
-                const ratio = GitHubService.MAX_TOKENS / totalTokens;
+            if (totalTokens > maxTokensLimit) {
+                this.logger.warning(`Diff size (${totalTokens} tokens) exceeds limit (${maxTokensLimit}), truncating`);
+                const ratio = maxTokensLimit / totalTokens;
                 for (const file of files) {
                     const maxLength = Math.floor(file.patch.length * ratio);
                     if (file.patch.length > maxLength) {
@@ -330,12 +336,6 @@ export class GitHubService extends BaseService implements BranchManager {
                 body = body || `Closes #${issue.number}\n\n${issue.body}`;
             }
 
-            const diff = await this.getBranchDiffDetails(params.base, params.compare);
-            if (diff.files.length === 0) {
-                this.logger.warning('No changes found for pull request');
-                throw new Error('No changes to create a pull request');
-            }
-
             const response = await this.octokit.pulls.create({
                 owner: this.owner,
                 repo: this.repo,
@@ -357,10 +357,19 @@ export class GitHubService extends BaseService implements BranchManager {
                 html_url: response.data.html_url,
                 draft: params.draft || false
             };
-        } catch (error) {
-            if (error instanceof Error && error.message === 'No changes to create a pull request') {
-                throw error;
+        } catch (error: any) {
+            // GitHub returns 422 if there are no commits between branches.
+            // Avoid an extra compareCommits call; map this to a stable, user-friendly error.
+            const status = error?.status ?? error?.response?.status;
+            const message =
+                (typeof error?.message === 'string' && error.message) ||
+                (typeof error?.response?.data?.message === 'string' && error.response.data.message) ||
+                '';
+
+            if (status === 422 && message.includes('No commits between')) {
+                throw new Error('No changes to create a pull request');
             }
+
             this.logger.error('Failed to create pull request', error);
             this.handleError(error);
         }

@@ -82,7 +82,7 @@ suite('Services Unit Tests', () => {
             );
         });
 
-        test('OpenAIService should return null without API key', async () => {
+        test('OpenAIService should return undefined without API key', async () => {
             const { OpenAIService } = require('../openai');
 
             const service = await OpenAIService.initialize({
@@ -92,7 +92,7 @@ suite('Services Unit Tests', () => {
                 useEmoji: false
             }, mockContext);
 
-            assert.strictEqual(service, null, 'Should return null without API key');
+            assert.strictEqual(service, undefined, 'Should return undefined without API key');
         });
     });
 

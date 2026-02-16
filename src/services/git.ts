@@ -6,6 +6,7 @@ import { BaseService, BaseServiceFactory } from './base';
 import { ServiceConfig, TemplateInfo } from '../types';
 import { cleanPath, isSourceFile } from '../utils';
 import { ErrorHandler } from '../infrastructure/error';
+import { t } from '../i18n/index.js';
 
 /**
  * Git status result
@@ -75,68 +76,87 @@ export class GitService extends BaseService {
 
             // 変更されたファイルのパスを取得（削除やリネームを含むすべての変更を対象に）
             const modifiedFiles = status.files
-                .filter(file => file.working_dir !== ' ' || file.index !== ' ')  // 変更されたファイルまたは未追跡のファイルを含める
+                .filter(file => file.working_dir !== ' ' || file.index !== ' ')
                 .map(file => file.path);
 
             this.logger.debug(`Found ${modifiedFiles.length} modified files`);
 
             // Windows予約名ファイルとそれ以外を分ける（予約名はgit addできない）
             const reservedNameFiles = modifiedFiles.filter(file => this.isWindowsReservedName(file));
-            const addableFiles = modifiedFiles.filter(file => !this.isWindowsReservedName(file));
 
-            if (reservedNameFiles.length > 0) {
-                this.logger.warning(`Skipping Windows reserved name files during staging: ${reservedNameFiles.join(', ')}`);
-            }
+            // If there are already staged changes, prefer the staged diff and do not mutate the index.
+            const hasStagedChanges = status.files.some(
+                file => file.index !== ' ' && file.index !== '?' && file.index !== '!'
+            );
 
-            // ステージされていない変更があればステージング
-            if (addableFiles.length > 0) {
-                // ファイルを一つずつ追加（スペースを含むパスの問題を回避）
-                for (const file of addableFiles) {
-                    try {
-                        await this.git.add(file);
-                    } catch (error) {
-                        // 削除されたファイルの場合は git rm を試みる
-                        if (error instanceof Error && error.message.includes('did not match any files')) {
-                            try {
-                                await this.git.rm(file);
-                            } catch {
-                                // すでに削除されている場合は無視
+            // Obtain staged diff (may be empty)
+            let diff = hasStagedChanges ? await this.git.diff(['--cached']) : '';
+
+            // If nothing is staged but there are working tree changes, ask before staging (safety + lower CPU).
+            if (!hasStagedChanges && modifiedFiles.length > 0) {
+                const stageAllLabel = t('git.stageAll');
+                const action = await vscode.window.showInformationMessage(
+                    t('git.stageAllPrompt'),
+                    stageAllLabel,
+                    t('apiKey.cancel')
+                );
+
+                if (action !== stageAllLabel) {
+                    this.logger.info('User cancelled staging changes for diff generation');
+                    return undefined;
+                }
+
+                // Try a single git add -A first (fast path). Fall back to per-file staging if needed.
+                try {
+                    await this.git.add(['-A']);
+                } catch (error) {
+                    if (error instanceof Error && error.message.includes('index.lock')) {
+                        this.logger.error('Git index.lock error detected', error);
+                        vscode.window.showErrorMessage(
+                            t('git.busyIndexLock')
+                        );
+                        throw error;
+                    }
+
+                    // Fall back: stage addable files one by one (handles spaces/reserved names better)
+                    const addableFiles = modifiedFiles.filter(file => !this.isWindowsReservedName(file));
+                    if (reservedNameFiles.length > 0) {
+                        this.logger.warning(`Skipping Windows reserved name files during staging: ${reservedNameFiles.join(', ')}`);
+                    }
+
+                    for (const file of addableFiles) {
+                        try {
+                            await this.git.add(file);
+                        } catch (perFileError) {
+                            if (perFileError instanceof Error && perFileError.message.includes('did not match any files')) {
+                                try {
+                                    await this.git.rm(file);
+                                } catch {
+                                    // Ignore if already deleted
+                                }
+                            } else if (perFileError instanceof Error && perFileError.message.includes('index.lock')) {
+                                this.logger.error('Git index.lock error detected', perFileError);
+                                vscode.window.showErrorMessage(
+                                    t('git.busyIndexLock')
+                                );
+                                throw perFileError;
+                            } else {
+                                throw perFileError;
                             }
-                        } else if (error instanceof Error && error.message.includes('index.lock')) {
-                            // index.lockエラーの場合は、ユーザーにわかりやすいメッセージを表示
-                            this.logger.error('Git index.lock error detected', error);
-                            vscode.window.showErrorMessage(
-                                'Git is busy. Please wait for other Git operations to complete, or delete .git/index.lock if the problem persists.'
-                            );
-                            throw error;
-                        } else {
-                            throw error;
                         }
                     }
                 }
+
+                diff = await this.git.diff(['--cached']);
             }
 
-            // 新しいステータスを取得
-            const newStatus = await this.git.status();
-            const stagedFiles = newStatus.files
-                .filter(file => file.index !== ' ' || file.working_dir === '?')  // ステージされたファイルまたは未追跡のファイルを含める
-                .map(file => file.path);
-
             // ステージされたファイルも予約名ファイルもない場合は終了
-            if (stagedFiles.length === 0 && reservedNameFiles.length === 0) {
+            if ((!diff || diff.trim() === '') && reservedNameFiles.length === 0) {
                 this.logger.info('No staged files found');
                 return undefined;
             }
 
-            this.logger.info(`Processing diff for ${stagedFiles.length} staged files, ${reservedNameFiles.length} reserved name files`);
-
-            // 差分を取得
-            let diff = '';
-
-            // ステージされたファイルの差分を取得
-            if (stagedFiles.length > 0) {
-                diff = await this.git.diff(['--cached']);
-            }
+            this.logger.info(`Processing diff, ${reservedNameFiles.length} reserved name files`);
 
             // 予約名ファイルがある場合は警告を表示し、ファイル名だけを差分に追加
             // (ステージング段階で定義したreservedNameFilesを使用)
@@ -144,11 +164,11 @@ export class GitService extends BaseService {
                 const reservedFilesList = reservedNameFiles.join(', ');
                 this.logger.warning(`Files with reserved names found: ${reservedFilesList}`);
                 vscode.window.showInformationMessage(
-                    `Files with reserved names (${reservedFilesList}) will be included but their content cannot be displayed in diff.`
+                    t('git.reservedNamesInfo', { files: reservedFilesList })
                 );
 
                 // ファイル名だけを差分に追加
-                if (diff) {
+                if (diff && diff.trim() !== '') {
                     diff += '\n\n';
                 }
                 diff += `# Files with reserved names (content not available):\n`;
@@ -157,17 +177,23 @@ export class GitService extends BaseService {
                 });
             }
 
+            const configuredMaxTokens = vscode.workspace.getConfiguration('otakCommitter').get<number>('maxInputTokens');
+            const truncateThresholdTokens =
+                typeof configuredMaxTokens === 'number' && configuredMaxTokens >= 1000
+                    ? configuredMaxTokens
+                    : GitService.TRUNCATE_THRESHOLD_TOKENS;
+
             const tokenCount = Math.ceil(diff.length / GitService.CHARS_PER_TOKEN); // 大まかな推定
 
             // トークン数が閾値を超えた場合、切り詰めて警告を表示
-            if (tokenCount > GitService.TRUNCATE_THRESHOLD_TOKENS) {
+            if (tokenCount > truncateThresholdTokens) {
                 const estimatedKTokens = Math.floor(tokenCount / 1000);
-                const thresholdKTokens = Math.floor(GitService.TRUNCATE_THRESHOLD_TOKENS / 1000);
-                const truncatedLength = GitService.TRUNCATE_THRESHOLD_TOKENS * GitService.CHARS_PER_TOKEN;
+                const thresholdKTokens = Math.floor(truncateThresholdTokens / 1000);
+                const truncatedLength = truncateThresholdTokens * GitService.CHARS_PER_TOKEN;
                 
                 this.logger.warning(`Diff size (${estimatedKTokens}K tokens) exceeds ${thresholdKTokens}K limit, truncating`);
                 vscode.window.showWarningMessage(
-                    `Diff size (${estimatedKTokens}K tokens) exceeds the ${thresholdKTokens}K limit. The content will be truncated for AI processing.`
+                    t('git.diffTruncatedWarning', { estimatedKTokens, thresholdKTokens })
                 );
                 diff = diff.substring(0, truncatedLength);
             }
