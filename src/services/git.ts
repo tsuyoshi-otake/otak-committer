@@ -69,7 +69,7 @@ export class GitService extends BaseService {
      * }
      * ```
      */
-    async getDiff(): Promise<string | undefined> {
+    async getDiff(globalState?: vscode.Memento): Promise<string | undefined> {
         try {
             this.logger.debug('Getting git diff');
             const status = await this.git.status();
@@ -94,16 +94,25 @@ export class GitService extends BaseService {
 
             // If nothing is staged but there are working tree changes, ask before staging (safety + lower CPU).
             if (!hasStagedChanges && modifiedFiles.length > 0) {
-                const stageAllLabel = t('git.stageAll');
-                const action = await vscode.window.showInformationMessage(
-                    t('git.stageAllPrompt'),
-                    stageAllLabel,
-                    t('apiKey.cancel')
-                );
+                const alwaysStage = globalState?.get<boolean>('otak-committer.alwaysStageAll', false);
 
-                if (action !== stageAllLabel) {
-                    this.logger.info('User cancelled staging changes for diff generation');
-                    return undefined;
+                if (!alwaysStage) {
+                    const stageAllLabel = t('git.stageAll');
+                    const alwaysStageLabel = t('git.alwaysStageAll');
+                    const action = await vscode.window.showInformationMessage(
+                        t('git.stageAllPrompt'),
+                        stageAllLabel,
+                        alwaysStageLabel,
+                        t('apiKey.cancel')
+                    );
+
+                    if (action === alwaysStageLabel) {
+                        await globalState?.update('otak-committer.alwaysStageAll', true);
+                        this.logger.info('User chose to always stage changes');
+                    } else if (action !== stageAllLabel) {
+                        this.logger.info('User cancelled staging changes for diff generation');
+                        return undefined;
+                    }
                 }
 
                 // Try a single git add -A first (fast path). Fall back to per-file staging if needed.

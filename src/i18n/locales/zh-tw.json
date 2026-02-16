@@ -82,6 +82,7 @@
   },
   "git": {
     "stageAll": "全部暫存",
+    "alwaysStageAll": "始終暫存",
     "stageAllPrompt": "未找到已暫存的變更。是否暫存所有變更並繼續？",
     "busyIndexLock": "Git 正在忙碌。請等待其他 Git 操作完成；如果問題仍然存在，請刪除 .git/index.lock。",
     "reservedNamesInfo": "將包含保留名稱的檔案（{files}），但其內容無法在 diff 中顯示。",

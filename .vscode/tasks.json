@@ -22,7 +22,7 @@
                 "background": {
                     "activeOnStart": true,
                     "beginsPattern": "^\\[watch\\]",
-                    "endsPattern": "^⚡ Done in \\d+ms$"
+                    "endsPattern": "build finished"
                 }
             },
             "isBackground": true,

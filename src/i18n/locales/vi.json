@@ -82,6 +82,7 @@
   },
   "git": {
     "stageAll": "Stage Tat Ca",
+    "alwaysStageAll": "Luon Stage",
     "stageAllPrompt": "Khong co thay doi da duoc stage. Stage tat ca thay doi va tiep tuc?",
     "busyIndexLock": "Git dang ban. Vui long doi cac thao tac Git khac hoan tat, hoac xoa .git/index.lock neu van con loi.",
     "reservedNamesInfo": "Cac tep co ten du tru ({files}) se duoc bao gom nhung noi dung khong the hien thi trong diff.",

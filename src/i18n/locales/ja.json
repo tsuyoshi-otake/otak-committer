@@ -82,6 +82,7 @@
   },
   "git": {
     "stageAll": "すべてをステージ",
+    "alwaysStageAll": "常にステージする",
     "stageAllPrompt": "ステージされた変更がありません。すべての変更をステージして続行しますか？",
     "busyIndexLock": "Git がビジー状態です。他の Git 操作が完了するまで待つか、問題が続く場合は .git/index.lock を削除してください。",
     "reservedNamesInfo": "予約名のファイル（{files}）は含めますが、その内容は diff に表示できません。",

@@ -82,6 +82,7 @@
   },
   "git": {
     "stageAll": "Stage All",
+    "alwaysStageAll": "Always Stage",
     "stageAllPrompt": "No staged changes found. Stage all changes and continue?",
     "busyIndexLock": "Git is busy. Please wait for other Git operations to complete, or delete .git/index.lock if the problem persists.",
     "reservedNamesInfo": "Files with reserved names ({files}) will be included but their content cannot be displayed in diff.",

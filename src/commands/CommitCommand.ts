@@ -83,7 +83,7 @@ export class CommitCommand extends BaseCommand {
      */
     private async getDiff(git: GitService): Promise<string | undefined> {
         this.logger.debug('Getting Git diff');
-        const diff = await git.getDiff();
+        const diff = await git.getDiff(this.context.globalState);
         
         if (!diff) {
             this.logger.info('No changes to commit');
