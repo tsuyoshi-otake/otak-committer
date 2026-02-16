@@ -12,6 +12,13 @@ type ValidateApiKeyResult =
     | { ok: true }
     | { ok: false; kind: ValidationKind; status?: number; reason: string; retryAfterSeconds?: number };
 
+function redactApiKey(message: string, apiKey: string): string {
+    if (!message || !apiKey) {
+        return message || '';
+    }
+    return message.split(apiKey).join('[REDACTED]');
+}
+
 function getErrorStatus(error: unknown): number | undefined {
     const status = (error as { status?: unknown } | null | undefined)?.status;
     if (typeof status === 'number') {
@@ -75,7 +82,7 @@ async function validateApiKey(apiKey: string): Promise<ValidateApiKeyResult> {
         return { ok: true };
     } catch (error) {
         const status = getErrorStatus(error);
-        const reason = getErrorMessage(error) || 'Unknown error';
+        const reason = redactApiKey(getErrorMessage(error) || 'Unknown error', apiKey);
         const retryAfterSeconds = getRetryAfterSeconds(error);
 
         if (status === 401) {
@@ -301,4 +308,3 @@ export async function initializeOpenAIService<T>(
         return undefined;
     }
 }
-
