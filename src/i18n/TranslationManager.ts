@@ -9,6 +9,7 @@
  *
  * Supported languages:
  * - Japanese (ja)
+ * - Vietnamese (vi)
  * - English (en)
  *
  * @example
@@ -22,6 +23,7 @@
 import { SupportedLocale, LocaleDetector } from './LocaleDetector';
 import en from './locales/en.json';
 import ja from './locales/ja.json';
+import vi from './locales/vi.json';
 
 /**
  * Translation dictionary type
@@ -52,7 +54,8 @@ export class TranslationManager {
     constructor() {
         this.translations = {
             en: en as TranslationDictionary,
-            ja: ja as TranslationDictionary
+            ja: ja as TranslationDictionary,
+            vi: vi as TranslationDictionary
         };
         this.locale = LocaleDetector.getLocale();
     }
@@ -79,7 +82,7 @@ export class TranslationManager {
     /**
      * Get the current locale
      *
-     * @returns Current locale ('ja' or 'en')
+     * @returns Current locale ('ja', 'vi', or 'en')
      */
     getLocale(): SupportedLocale {
         return this.locale;
@@ -88,7 +91,7 @@ export class TranslationManager {
     /**
      * Update locale and reload translations
      *
-     * @param locale - New locale ('ja' or 'en')
+     * @param locale - New locale ('ja', 'vi', or 'en')
      */
     setLocale(locale: SupportedLocale): void {
         this.locale = locale;

@@ -70,10 +70,11 @@ export class ConfigCommand extends BaseCommand {
                     vscode.ConfigurationTarget.Global
                 );
 
-                // UI localization is only supported for English and Japanese.
-                // Keep the stored "preferred locale" in sync for these two languages.
+                // UI localization is supported for English, Japanese, and Vietnamese.
+                // Keep the stored "preferred locale" in sync for these languages.
                 const localeMap: Record<string, SupportedLocale | undefined> = {
                     'japanese': 'ja',
+                    'vietnamese': 'vi',
                     'english': 'en'
                 };
                 const locale = localeMap[selected.description as string];

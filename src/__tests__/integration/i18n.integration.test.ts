@@ -28,7 +28,7 @@ suite('i18n Integration Tests', () => {
             const locale = manager.getLocale();
 
             // Should be one of supported locales
-            assert.ok(['ja', 'en'].includes(locale), `Expected locale to be a supported locale, got '${locale}'`);
+            assert.ok(['ja', 'vi', 'en'].includes(locale), `Expected locale to be a supported locale, got '${locale}'`);
         });
 
         test('should provide same instance across multiple calls', () => {
@@ -60,6 +60,18 @@ suite('i18n Integration Tests', () => {
 
             const configuration = manager.t('statusBar.configuration');
             assert.strictEqual(configuration, '設定');
+        });
+
+        test('should translate keys correctly for Vietnamese locale', () => {
+            const manager = TranslationManager.getInstance();
+            manager.setLocale('vi');
+
+            // Test various translation keys
+            const apiKeySaved = manager.t('messages.apiKeySaved');
+            assert.strictEqual(apiKeySaved, 'API key da duoc luu thanh cong');
+
+            const configuration = manager.t('statusBar.configuration');
+            assert.strictEqual(configuration, 'Cau Hinh');
         });
 
         test('should handle parameter interpolation', () => {
@@ -110,6 +122,12 @@ suite('i18n Integration Tests', () => {
             assert.strictEqual(LocaleDetector.detectLocale('ja-jp'), 'ja');
         });
 
+        test('should detect Vietnamese locale correctly', () => {
+            assert.strictEqual(LocaleDetector.detectLocale('vi'), 'vi');
+            assert.strictEqual(LocaleDetector.detectLocale('vi-VN'), 'vi');
+            assert.strictEqual(LocaleDetector.detectLocale('vi-vn'), 'vi');
+        });
+
         test('should detect English locale correctly', () => {
             assert.strictEqual(LocaleDetector.detectLocale('en'), 'en');
             assert.strictEqual(LocaleDetector.detectLocale('en-US'), 'en');
@@ -120,7 +138,6 @@ suite('i18n Integration Tests', () => {
             assert.strictEqual(LocaleDetector.detectLocale('fr'), 'en');
             assert.strictEqual(LocaleDetector.detectLocale('de'), 'en');
             assert.strictEqual(LocaleDetector.detectLocale('es'), 'en');
-            assert.strictEqual(LocaleDetector.detectLocale('vi'), 'en');
             assert.strictEqual(LocaleDetector.detectLocale('ko'), 'en');
             assert.strictEqual(LocaleDetector.detectLocale('zh-cn'), 'en');
             assert.strictEqual(LocaleDetector.detectLocale('zh-tw'), 'en');
@@ -143,6 +160,10 @@ suite('i18n Integration Tests', () => {
             // Switch to Japanese
             manager.setLocale('ja');
             assert.strictEqual(manager.t('statusBar.configuration'), '設定');
+
+            // Switch to Vietnamese
+            manager.setLocale('vi');
+            assert.strictEqual(manager.t('statusBar.configuration'), 'Cau Hinh');
 
             // Switch back to English
             manager.setLocale('en');
@@ -183,7 +204,7 @@ suite('i18n Integration Tests', () => {
     });
 
     suite('Translation Coverage', () => {
-        const supportedLocales = ['en', 'ja'] as const;
+        const supportedLocales = ['en', 'ja', 'vi'] as const;
 
         test('should have translations for all command strings', () => {
             const manager = TranslationManager.getInstance();

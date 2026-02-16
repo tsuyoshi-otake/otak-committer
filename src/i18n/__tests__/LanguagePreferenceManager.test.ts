@@ -1,7 +1,7 @@
 /**
  * Tests for LanguagePreferenceManager
  *
- * Note: UI localization only supports English and Japanese.
+ * Note: UI localization supports English, Japanese, and Vietnamese.
  * Other VS Code display languages fall back to English.
  */
 
@@ -42,7 +42,7 @@ suite('LanguagePreferenceManager Property Tests', () => {
         13,
         'Manual language preference overrides UI language',
         async () => {
-            const supportedLocales: SupportedLocale[] = ['ja', 'en'];
+            const supportedLocales: SupportedLocale[] = ['ja', 'vi', 'en'];
 
             for (const preferredLocale of supportedLocales) {
                 LanguagePreferenceManager.resetForTesting();
@@ -82,7 +82,7 @@ suite('LanguagePreferenceManager Unit Tests', () => {
     });
 
     test('LOCALE_TO_LANGUAGE_MAP should have all supported locales', () => {
-        const supportedLocales: SupportedLocale[] = ['ja', 'en'];
+        const supportedLocales: SupportedLocale[] = ['ja', 'vi', 'en'];
         for (const locale of supportedLocales) {
             assert.ok(LOCALE_TO_LANGUAGE_MAP[locale], `LOCALE_TO_LANGUAGE_MAP should have entry for ${locale}`);
         }
@@ -91,6 +91,7 @@ suite('LanguagePreferenceManager Unit Tests', () => {
     test('getCommitLanguageName should return correct language names', async () => {
         const testCases: Array<{ locale: SupportedLocale; expected: string }> = [
             { locale: 'ja', expected: 'japanese' },
+            { locale: 'vi', expected: 'vietnamese' },
             { locale: 'en', expected: 'english' }
         ];
 
@@ -102,4 +103,3 @@ suite('LanguagePreferenceManager Unit Tests', () => {
         }
     });
 });
-

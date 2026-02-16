@@ -7,9 +7,10 @@
  *
  * Supported languages:
  * - Japanese (ja)
+ * - Vietnamese (vi)
  * - English (en)
  *
- * Note: We intentionally only localize the extension UI to Japanese and English.
+ * Note: We intentionally only localize the extension UI to Japanese, Vietnamese, and English.
  * For any other VS Code display language, the extension UI falls back to English.
  *
  * @example
@@ -21,7 +22,7 @@
 /**
  * Supported locale types
  */
-export type SupportedLocale = 'ja' | 'en';
+export type SupportedLocale = 'ja' | 'vi' | 'en';
 
 /**
  * @deprecated Use SupportedLocale instead
@@ -35,7 +36,7 @@ export class LocaleDetector {
     /**
      * Get the current locale based on VS Code's display language
      *
-     * @returns Supported locale code ('ja' or 'en')
+     * @returns Supported locale code ('ja', 'vi', or 'en')
      */
     static getLocale(): SupportedLocale {
         try {
@@ -54,7 +55,7 @@ export class LocaleDetector {
      * This method is public for testing purposes.
      *
      * @param language - The language code to detect (e.g., 'ja', 'ja-JP', 'en', 'en-US')
-     * @returns Supported locale code ('ja' or 'en')
+     * @returns Supported locale code ('ja', 'vi', or 'en')
      */
     static detectLocale(language: string | undefined): SupportedLocale {
         if (!language) {
@@ -66,6 +67,11 @@ export class LocaleDetector {
         // Check if language starts with 'ja' (handles 'ja', 'ja-JP', etc.)
         if (lowerLang.startsWith('ja')) {
             return 'ja';
+        }
+
+        // Check if language starts with 'vi' (handles 'vi', 'vi-VN', etc.)
+        if (lowerLang.startsWith('vi')) {
+            return 'vi';
         }
 
         // Default to English for all other languages

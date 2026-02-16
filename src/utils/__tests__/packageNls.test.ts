@@ -50,7 +50,8 @@ suite('Manifest Localization (package.nls) Tests', () => {
 
         const nlsFiles = [
             'package.nls.json',
-            'package.nls.ja.json'
+            'package.nls.ja.json',
+            'package.nls.vi.json'
         ];
 
         for (const fileName of nlsFiles) {

@@ -14,6 +14,7 @@ import { createTaggedPropertyTest, runPropertyTest } from '../../test/helpers/pr
 import { TranslationManager, LocaleDetector, SupportedLocale } from '../index';
 import en from '../locales/en.json';
 import ja from '../locales/ja.json';
+import vi from '../locales/vi.json';
 
 suite('i18n Property Tests', () => {
     /**
@@ -82,19 +83,21 @@ suite('i18n Property Tests', () => {
             const manager = new TranslationManager();
 
             const validKeys = getAllKeys(en).filter(key =>
-                getNestedValue(ja, key) !== undefined
+                getNestedValue(ja, key) !== undefined &&
+                getNestedValue(vi, key) !== undefined
             );
 
             const localeToTranslation: Record<SupportedLocale, Record<string, any>> = {
                 en,
-                ja
+                ja,
+                vi
             };
 
             runPropertyTest(
                 fc.property(
                     fc.constantFrom(...validKeys),
-                    fc.constantFrom<SupportedLocale>('en', 'ja'),
-                    fc.constantFrom<SupportedLocale>('en', 'ja'),
+                    fc.constantFrom<SupportedLocale>('en', 'ja', 'vi'),
+                    fc.constantFrom<SupportedLocale>('en', 'ja', 'vi'),
                     (key: string, initialLocale: SupportedLocale, newLocale: SupportedLocale) => {
                         manager.setLocale(initialLocale);
                         const initialTranslation = manager.t(key);
@@ -122,15 +125,23 @@ suite('i18n Property Tests', () => {
         () => {
             const manager = new TranslationManager();
 
-            const englishOnlyKeys = getAllKeys(en).filter(key =>
-                getNestedValue(ja, key) === undefined
-            );
+            const missingPairs: Array<{ locale: SupportedLocale; key: string }> = [];
+            const englishKeys = getAllKeys(en);
 
-            // If there are no English-only keys, test fallback with a non-existent key.
-            if (englishOnlyKeys.length === 0) {
+            for (const key of englishKeys) {
+                if (getNestedValue(ja, key) === undefined) {
+                    missingPairs.push({ locale: 'ja', key });
+                }
+                if (getNestedValue(vi, key) === undefined) {
+                    missingPairs.push({ locale: 'vi', key });
+                }
+            }
+
+            // If there are no missing keys, test fallback with a non-existent key.
+            if (missingPairs.length === 0) {
                 console.log('All keys are translated in all languages, testing fallback with non-existent key');
 
-                manager.setLocale('ja');
+                manager.setLocale('vi');
                 const fallbackKey = 'test.fallbackKey';
                 const translation = manager.t(fallbackKey);
                 assert.strictEqual(translation, fallbackKey, 'Missing key should return the key itself as fallback');
@@ -139,9 +150,9 @@ suite('i18n Property Tests', () => {
 
             runPropertyTest(
                 fc.property(
-                    fc.constantFrom(...englishOnlyKeys),
-                    (key: string) => {
-                        manager.setLocale('ja');
+                    fc.constantFrom(...missingPairs),
+                    ({ locale, key }: { locale: SupportedLocale; key: string }) => {
+                        manager.setLocale(locale);
                         const translation = manager.t(key);
                         const englishValue = getNestedValue(en, key);
                         return translation === englishValue;
@@ -206,14 +217,18 @@ suite('LocaleDetector Unit Tests', () => {
         assert.strictEqual(LocaleDetector.detectLocale('ja-JP'), 'ja');
     });
 
-    test('should fall back to English for all non-Japanese locales', () => {
+    test('should detect Vietnamese locale when language starts with vi', () => {
+        assert.strictEqual(LocaleDetector.detectLocale('vi'), 'vi');
+        assert.strictEqual(LocaleDetector.detectLocale('vi-VN'), 'vi');
+    });
+
+    test('should return English for all other locales', () => {
         assert.strictEqual(LocaleDetector.detectLocale('en'), 'en');
         assert.strictEqual(LocaleDetector.detectLocale('en-US'), 'en');
         assert.strictEqual(LocaleDetector.detectLocale('fr'), 'en');
         assert.strictEqual(LocaleDetector.detectLocale('de-DE'), 'en');
 
-        // Previously-supported locales should also fall back to English.
-        assert.strictEqual(LocaleDetector.detectLocale('vi'), 'en');
+        // Unsupported locales should fall back to English.
         assert.strictEqual(LocaleDetector.detectLocale('ko'), 'en');
         assert.strictEqual(LocaleDetector.detectLocale('zh-cn'), 'en');
         assert.strictEqual(LocaleDetector.detectLocale('zh-tw'), 'en');
@@ -256,4 +271,3 @@ function getNestedValue(obj: Record<string, any>, key: string): string | undefin
 
     return typeof current === 'string' ? current : undefined;
 }
-

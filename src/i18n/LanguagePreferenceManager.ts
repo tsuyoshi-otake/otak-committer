@@ -41,6 +41,7 @@ const CONFIG_SECTION = 'otakCommitter';
  */
 export const LOCALE_TO_LANGUAGE_MAP: Record<SupportedLocale, string> = {
     'ja': 'japanese',
+    'vi': 'vietnamese',
     'en': 'english'
 };
 
@@ -140,7 +141,7 @@ export class LanguagePreferenceManager {
      * @returns True if the locale is valid
      */
     private static isValidLocale(locale: string): boolean {
-        const validLocales: SupportedLocale[] = ['ja', 'en'];
+        const validLocales: SupportedLocale[] = ['ja', 'vi', 'en'];
         return validLocales.includes(locale as SupportedLocale);
     }
 

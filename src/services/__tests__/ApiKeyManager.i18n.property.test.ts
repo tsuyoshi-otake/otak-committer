@@ -6,7 +6,7 @@
  * For all user-facing messages in the API key management flow,
  * the messages should use the i18n translation system rather than hardcoded strings.
  *
- * Note: UI localization only supports English and Japanese.
+ * Note: UI localization supports English, Japanese, and Vietnamese.
  */
 
 import * as assert from 'assert';
@@ -15,6 +15,7 @@ import { runPropertyTest } from '../../test/helpers/property-test.helper';
 
 import en from '../../i18n/locales/en.json';
 import ja from '../../i18n/locales/ja.json';
+import vi from '../../i18n/locales/vi.json';
 
 suite('ApiKeyManager i18n Property Tests', () => {
     suite('Property 4: Internationalization completeness', () => {
@@ -43,7 +44,8 @@ suite('ApiKeyManager i18n Property Tests', () => {
 
         const locales = [
             { name: 'English', data: en },
-            { name: 'Japanese', data: ja }
+            { name: 'Japanese', data: ja },
+            { name: 'Vietnamese', data: vi }
         ];
 
         test('all API key translation keys should exist in all locales', () => {
@@ -130,4 +132,3 @@ suite('ApiKeyManager i18n Property Tests', () => {
         });
     });
 });
-
