@@ -1,0 +1,121 @@
+{
+  "commands": {
+    "generateCommit": "커밋 메시지 생성",
+    "generatePR": "Pull Request 생성",
+    "generateIssue": "Issue 생성",
+    "changeLanguage": "언어 변경",
+    "changeMessageStyle": "메시지 스타일 변경",
+    "setApiKey": "API 키 설정",
+    "openSettings": "설정 열기",
+    "diagnoseStorage": "API 키 저장소 진단"
+  },
+  "messages": {
+    "apiKeyNotConfigured": "OpenAI API 키가 구성되지 않았습니다. 지금 구성하시겠습니까?",
+    "apiKeySaved": "API 키가 성공적으로 저장되었습니다",
+    "storageDiagnosisWritten": "스토리지 진단 결과를 출력(otak-committer)에 기록했습니다",
+    "authRequired": "GitHub 인증이 필요합니다. 로그인해 주세요.",
+    "languageChanged": "언어가 {language}(으)로 변경되었습니다",
+    "messageStyleChanged": "메시지 스타일이 {style}(으)로 변경되었습니다",
+    "noChangesToCommit": "커밋할 변경 사항이 없습니다",
+    "commitMessageGenerated": "커밋 메시지가 생성되었습니다",
+    "openAIInitFailed": "OpenAI 서비스 초기화 실패",
+    "emptyMessageReceived": "빈 메시지를 받았습니다",
+    "noChangesBetweenBranches": "선택한 브랜치 간에 변경 사항이 없습니다. PR을 생성하기 전에 변경 사항을 만들어 주세요.",
+    "failedToGeneratePR": "PR 내용 생성에 실패했습니다. 다시 시도해 주세요.",
+    "failedToShowPreview": "미리보기 표시 실패",
+    "prCreatedSuccess": "{prType} #{number}이(가) 성공적으로 생성되었습니다!",
+    "draftPRNotSupported": "Draft PR은 GitHub Team 및 Enterprise에서만 사용할 수 있습니다. 대신 일반 PR을 생성합니다.",
+    "issueCreatedSuccess": "Issue가 성공적으로 생성되었습니다",
+    "noFilesSelectedConfirm": "선택된 파일이 없습니다. 저장소 구조만으로 Issue를 생성하시겠습니까?",
+    "generatingIssue": "Issue 생성 중...",
+    "analyzingRepository": "저장소 분석 중...",
+    "creatingIssue": "Issue 생성 중...",
+    "updatingContent": "내용 업데이트 중...",
+    "waitingForModificationInput": "수정 입력 대기 중..."
+  },
+  "statusBar": {
+    "configuration": "구성",
+    "currentStyle": "현재 스타일",
+    "setApiKey": "API 키 설정",
+    "openSettings": "설정 열기"
+  },
+  "quickPick": {
+    "selectCommitLanguage": "커밋 메시지 언어 선택",
+    "selectMessageStyle": "메시지 스타일 선택",
+    "selectRelatedIssue": "관련 Issue 선택 (선택 사항, Escape 키로 건너뛰기)",
+    "selectPRType": "PR 유형 선택 (Escape 키로 건너뛰기)",
+    "selectIssueType": "Issue 유형 선택",
+    "enterIssueDescription": "Issue 설명 입력",
+    "describeIssue": "Issue, 문제 또는 작업을 설명하세요",
+    "enterModificationInstructions": "수정 지침 입력 (Escape 키로 건너뛰기)",
+    "describeModification": "내용을 어떻게 수정할지 설명하세요",
+    "chooseAction": "작업 선택",
+    "enterApiKey": "OpenAI API 키를 입력하세요"
+  },
+  "prTypes": {
+    "draft": "Draft Pull Request",
+    "draftDescription": "병합 전 검토 필요",
+    "regular": "일반 Pull Request",
+    "regularDescription": "검토 및 병합 준비 완료"
+  },
+  "issueActions": {
+    "modify": "내용 수정",
+    "modifyDescription": "내용 개선을 위한 피드백 제공",
+    "create": "Issue 생성",
+    "createDescription": "현재 내용으로 Issue 생성",
+    "cancel": "취소",
+    "cancelDescription": "Issue 생성 취소"
+  },
+  "messageStyles": {
+    "simple": "간단",
+    "simpleDetail": "최소한의 세부 정보를 포함한 간략한 커밋 메시지",
+    "normal": "보통",
+    "normalDetail": "적당한 세부 정보를 포함한 표준 커밋 메시지",
+    "detailed": "상세",
+    "detailedDetail": "전체 컨텍스트를 포함한 포괄적인 커밋 메시지"
+  },
+  "buttons": {
+    "yes": "예",
+    "no": "아니오",
+    "openInBrowser": "브라우저에서 열기",
+    "openIssue": "Issue 열기"
+  },
+  "git": {
+    "stageAll": "모두 스테이징",
+    "stageAllPrompt": "스테이징된 변경 사항이 없습니다. 모든 변경 사항을 스테이징하고 계속하시겠습니까?",
+    "busyIndexLock": "Git이 사용 중입니다. 다른 Git 작업이 완료될 때까지 기다리거나 문제가 계속되면 .git/index.lock을 삭제하세요.",
+    "reservedNamesInfo": "예약된 이름의 파일({files})은 포함되지만 내용은 diff에 표시할 수 없습니다.",
+    "diffTruncatedWarning": "diff 크기(추정 {estimatedKTokens}K tokens)가 한도 {thresholdKTokens}K를 초과합니다. AI 처리를 위해 내용을 잘라냅니다."
+  },
+  "progress": {
+    "generatingCommitMessage": "커밋 메시지 생성 중...",
+    "analyzingChanges": "Pull Request 생성 - 변경 사항 분석 중...",
+    "creatingPR": "{prType} Pull Request 생성 중..."
+  },
+  "errors": {
+    "gitExtensionNotFound": "Git 확장 프로그램을 사용할 수 없습니다",
+    "noGitRepository": "Git 저장소를 찾을 수 없습니다"
+  },
+  "apiKey": {
+    "enterKey": "OpenAI API 키를 입력하세요",
+    "placeholder": "sk-...",
+    "invalidFormat": "API 키 형식이 잘못되었습니다. 예상 형식: sk-...",
+    "keyExists": "API 키가 이미 구성되어 있습니다",
+    "chooseAction": "작업을 선택하세요",
+    "updateKey": "API 키 업데이트",
+    "validateKey": "API 키 검증",
+    "removeKey": "API 키 삭제",
+    "cancel": "취소",
+    "removed": "API 키가 성공적으로 삭제되었습니다",
+    "validatePrompt": "OpenAI로 API 키를 검증하시겠습니까?",
+    "validating": "API 키 검증 중...",
+    "validationSuccess": "API 키가 유효합니다",
+    "validationFailed": "API 키 검증 실패: {reason}",
+    "retryValidation": "검증 다시 시도",
+    "continueWithoutValidation": "검증 없이 계속",
+    "retryPrompt": "다른 API 키를 입력하시겠습니까?",
+    "invalidKeyPrompt": "OpenAI API 키가 유효하지 않습니다. 업데이트하시겠습니까?",
+    "errorPrompt": "OpenAI API 키 오류입니다. 업데이트하시겠습니까?",
+    "setApiKey": "API 키 설정"
+  }
+}

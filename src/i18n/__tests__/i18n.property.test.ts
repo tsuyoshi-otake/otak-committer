@@ -15,6 +15,9 @@ import { TranslationManager, LocaleDetector, SupportedLocale } from '../index';
 import en from '../locales/en.json';
 import ja from '../locales/ja.json';
 import vi from '../locales/vi.json';
+import ko from '../locales/ko.json';
+import zhCN from '../locales/zh-cn.json';
+import zhTW from '../locales/zh-tw.json';
 
 suite('i18n Property Tests', () => {
     /**
@@ -82,22 +85,25 @@ suite('i18n Property Tests', () => {
         () => {
             const manager = new TranslationManager();
 
-            const validKeys = getAllKeys(en).filter(key =>
-                getNestedValue(ja, key) !== undefined &&
-                getNestedValue(vi, key) !== undefined
-            );
+            const validKeys = getAllKeys(en).filter(key => {
+                const targetLocales = [ja, vi, ko, zhCN, zhTW];
+                return targetLocales.every(locale => getNestedValue(locale, key) !== undefined);
+            });
 
             const localeToTranslation: Record<SupportedLocale, Record<string, any>> = {
                 en,
                 ja,
-                vi
+                vi,
+                ko,
+                'zh-cn': zhCN,
+                'zh-tw': zhTW
             };
 
             runPropertyTest(
                 fc.property(
                     fc.constantFrom(...validKeys),
-                    fc.constantFrom<SupportedLocale>('en', 'ja', 'vi'),
-                    fc.constantFrom<SupportedLocale>('en', 'ja', 'vi'),
+                    fc.constantFrom<SupportedLocale>('en', 'ja', 'vi', 'ko', 'zh-cn', 'zh-tw'),
+                    fc.constantFrom<SupportedLocale>('en', 'ja', 'vi', 'ko', 'zh-cn', 'zh-tw'),
                     (key: string, initialLocale: SupportedLocale, newLocale: SupportedLocale) => {
                         manager.setLocale(initialLocale);
                         const initialTranslation = manager.t(key);
@@ -135,13 +141,22 @@ suite('i18n Property Tests', () => {
                 if (getNestedValue(vi, key) === undefined) {
                     missingPairs.push({ locale: 'vi', key });
                 }
+                if (getNestedValue(ko, key) === undefined) {
+                    missingPairs.push({ locale: 'ko', key });
+                }
+                if (getNestedValue(zhCN, key) === undefined) {
+                    missingPairs.push({ locale: 'zh-cn', key });
+                }
+                if (getNestedValue(zhTW, key) === undefined) {
+                    missingPairs.push({ locale: 'zh-tw', key });
+                }
             }
 
             // If there are no missing keys, test fallback with a non-existent key.
             if (missingPairs.length === 0) {
                 console.log('All keys are translated in all languages, testing fallback with non-existent key');
 
-                manager.setLocale('vi');
+                manager.setLocale('zh-cn');
                 const fallbackKey = 'test.fallbackKey';
                 const translation = manager.t(fallbackKey);
                 assert.strictEqual(translation, fallbackKey, 'Missing key should return the key itself as fallback');
@@ -222,16 +237,26 @@ suite('LocaleDetector Unit Tests', () => {
         assert.strictEqual(LocaleDetector.detectLocale('vi-VN'), 'vi');
     });
 
-    test('should return English for all other locales', () => {
+    test('should detect Korean locale when language starts with ko', () => {
+        assert.strictEqual(LocaleDetector.detectLocale('ko'), 'ko');
+        assert.strictEqual(LocaleDetector.detectLocale('ko-KR'), 'ko');
+    });
+
+    test('should detect Chinese locales correctly', () => {
+        assert.strictEqual(LocaleDetector.detectLocale('zh-cn'), 'zh-cn');
+        assert.strictEqual(LocaleDetector.detectLocale('zh-CN'), 'zh-cn');
+        assert.strictEqual(LocaleDetector.detectLocale('zh-hans'), 'zh-cn');
+
+        assert.strictEqual(LocaleDetector.detectLocale('zh-tw'), 'zh-tw');
+        assert.strictEqual(LocaleDetector.detectLocale('zh-TW'), 'zh-tw');
+        assert.strictEqual(LocaleDetector.detectLocale('zh-hant'), 'zh-tw');
+    });
+
+    test('should return English for other locales', () => {
         assert.strictEqual(LocaleDetector.detectLocale('en'), 'en');
         assert.strictEqual(LocaleDetector.detectLocale('en-US'), 'en');
         assert.strictEqual(LocaleDetector.detectLocale('fr'), 'en');
         assert.strictEqual(LocaleDetector.detectLocale('de-DE'), 'en');
-
-        // Unsupported locales should fall back to English.
-        assert.strictEqual(LocaleDetector.detectLocale('ko'), 'en');
-        assert.strictEqual(LocaleDetector.detectLocale('zh-cn'), 'en');
-        assert.strictEqual(LocaleDetector.detectLocale('zh-tw'), 'en');
     });
 
     test('should handle undefined or empty locale', () => {

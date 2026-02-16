@@ -10,6 +10,9 @@
  * Supported languages:
  * - Japanese (ja)
  * - Vietnamese (vi)
+ * - Korean (ko)
+ * - Simplified Chinese (zh-cn)
+ * - Traditional Chinese (zh-tw)
  * - English (en)
  *
  * @example
@@ -24,6 +27,9 @@ import { SupportedLocale, LocaleDetector } from './LocaleDetector';
 import en from './locales/en.json';
 import ja from './locales/ja.json';
 import vi from './locales/vi.json';
+import ko from './locales/ko.json';
+import zhCN from './locales/zh-cn.json';
+import zhTW from './locales/zh-tw.json';
 
 /**
  * Translation dictionary type
@@ -55,7 +61,10 @@ export class TranslationManager {
         this.translations = {
             en: en as TranslationDictionary,
             ja: ja as TranslationDictionary,
-            vi: vi as TranslationDictionary
+            vi: vi as TranslationDictionary,
+            ko: ko as TranslationDictionary,
+            'zh-cn': zhCN as TranslationDictionary,
+            'zh-tw': zhTW as TranslationDictionary
         };
         this.locale = LocaleDetector.getLocale();
     }
@@ -82,7 +91,7 @@ export class TranslationManager {
     /**
      * Get the current locale
      *
-     * @returns Current locale ('ja', 'vi', or 'en')
+     * @returns Current locale ('ja', 'vi', 'ko', 'zh-cn', 'zh-tw', or 'en')
      */
     getLocale(): SupportedLocale {
         return this.locale;
@@ -91,7 +100,7 @@ export class TranslationManager {
     /**
      * Update locale and reload translations
      *
-     * @param locale - New locale ('ja', 'vi', or 'en')
+     * @param locale - New locale ('ja', 'vi', 'ko', 'zh-cn', 'zh-tw', or 'en')
      */
     setLocale(locale: SupportedLocale): void {
         this.locale = locale;

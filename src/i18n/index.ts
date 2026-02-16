@@ -2,7 +2,7 @@
  * Internationalization (i18n) module for otak-committer extension
  *
  * Provides multi-language support for the extension UI.
- * Supports Japanese, Vietnamese, and English.
+ * Supports Japanese, Vietnamese, Korean, Chinese (Simplified/Traditional), and English.
  *
  * @example
  * ```typescript
@@ -16,7 +16,7 @@
  *
  * // Access the singleton instance for more control
  * const manager = TranslationManager.getInstance();
- * manager.setLocale('ja'); // or 'vi', 'en'
+ * manager.setLocale('ja'); // or 'vi', 'ko', 'zh-cn', 'zh-tw', 'en'
  * ```
  */
 

@@ -1,0 +1,31 @@
+{
+  "extension.description": "지능형 SCM 작업을 위한 VS Code 확장 프로그램입니다. AI 기반 다국어(25개 언어) 커밋 메시지 생성과 향후 PR 관리 기능을 제공합니다.",
+
+  "command.generateMessage": "커밋 메시지 생성",
+  "command.generatePR": "Pull Request 생성",
+  "command.generateIssue": "Issue 생성",
+  "command.openSettings": "otak-committer 설정 열기",
+  "command.changeLanguage": "커밋 메시지 언어 변경",
+  "command.changeMessageStyle": "커밋 메시지 스타일 변경",
+  "command.setApiKey": "OpenAI API 키 설정",
+  "command.diagnoseStorage": "API 키 저장소 진단",
+
+  "config.language": "커밋 메시지 언어",
+  "config.messageStyle": "생성된 커밋 메시지의 스타일과 길이",
+  "config.messageStyle.simple": "간단하고 간결함 (200자)",
+  "config.messageStyle.normal": "보통 길이, 일부 컨텍스트 포함 (400자)",
+  "config.messageStyle.detailed": "상세한 설명 (800자)",
+  "config.customMessage": "시스템 프롬프트에 추가할 사용자 메시지 (diff 메시지 뒤에 추가됨)",
+  "config.useEmoji": "커밋 메시지와 PR 설명에 이모지 사용",
+  "config.emojiStyle": "메시지에 사용할 이모지 스타일",
+  "config.emojiStyle.github": "GitHub 스타일 이모지 코드 (:smile:)",
+  "config.emojiStyle.unicode": "유니코드 이모지 문자",
+  "config.reasoningEffort": "GPT-5.2 reasoning effort 수준 (응답 품질과 지연 시간에 영향을 줌)",
+  "config.reasoningEffort.none": "추론 없음 (가장 빠름, 최저 품질)",
+  "config.reasoningEffort.low": "낮음 (빠름, 좋은 품질) - 권장",
+  "config.reasoningEffort.medium": "중간 (균형)",
+  "config.reasoningEffort.high": "높음 (가장 느림, 최고 품질)",
+  "config.maxInputTokens": "AI 처리 최대 입력 토큰 수 (기본값: 200K)",
+  "config.useConventionalCommits": "스코프가 있는 Conventional Commits 형식 사용 (<type>(<scope>): <subject>)"
+}
+

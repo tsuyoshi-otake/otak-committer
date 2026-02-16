@@ -1,0 +1,121 @@
+{
+  "commands": {
+    "generateCommit": "生成提交消息",
+    "generatePR": "生成 Pull Request",
+    "generateIssue": "生成 Issue",
+    "changeLanguage": "更改语言",
+    "changeMessageStyle": "更改消息风格",
+    "setApiKey": "设置 API 密钥",
+    "openSettings": "打开设置",
+    "diagnoseStorage": "诊断 API 密钥存储"
+  },
+  "messages": {
+    "apiKeyNotConfigured": "OpenAI API 密钥未配置。您想现在配置吗？",
+    "apiKeySaved": "API 密钥保存成功",
+    "storageDiagnosisWritten": "存储诊断结果已写入输出: otak-committer",
+    "authRequired": "需要 GitHub 身份验证。请登录。",
+    "languageChanged": "语言已更改为 {language}",
+    "messageStyleChanged": "消息风格已更改为 {style}",
+    "noChangesToCommit": "没有要提交的更改",
+    "commitMessageGenerated": "提交消息已生成",
+    "openAIInitFailed": "OpenAI 服务初始化失败",
+    "emptyMessageReceived": "收到空消息",
+    "noChangesBetweenBranches": "所选分支之间没有更改。请在创建 PR 之前进行一些更改。",
+    "failedToGeneratePR": "无法生成 PR 内容。请重试。",
+    "failedToShowPreview": "无法显示预览",
+    "prCreatedSuccess": "{prType} #{number} 创建成功！",
+    "draftPRNotSupported": "草稿 PR 仅在 GitHub Team 和 Enterprise 中可用。将创建普通 PR。",
+    "issueCreatedSuccess": "Issue 创建成功",
+    "noFilesSelectedConfirm": "未选择任何文件。仅使用仓库结构生成 Issue？",
+    "generatingIssue": "正在生成 Issue...",
+    "analyzingRepository": "正在分析仓库...",
+    "creatingIssue": "正在创建 Issue...",
+    "updatingContent": "正在更新内容...",
+    "waitingForModificationInput": "等待修改输入..."
+  },
+  "statusBar": {
+    "configuration": "配置",
+    "currentStyle": "当前风格",
+    "setApiKey": "设置 API 密钥",
+    "openSettings": "打开设置"
+  },
+  "quickPick": {
+    "selectCommitLanguage": "选择提交消息语言",
+    "selectMessageStyle": "选择消息风格",
+    "selectRelatedIssue": "选择相关 Issue（可选，按 Escape 跳过）",
+    "selectPRType": "选择 PR 类型（按 Escape 跳过）",
+    "selectIssueType": "选择 Issue 类型",
+    "enterIssueDescription": "输入 Issue 描述",
+    "describeIssue": "描述 Issue、问题或任务",
+    "enterModificationInstructions": "输入修改说明（按 Escape 跳过）",
+    "describeModification": "描述如何修改内容",
+    "chooseAction": "选择操作",
+    "enterApiKey": "输入您的 OpenAI API 密钥"
+  },
+  "prTypes": {
+    "draft": "草稿 Pull Request",
+    "draftDescription": "合并前需要审核",
+    "regular": "普通 Pull Request",
+    "regularDescription": "准备好进行审核和合并"
+  },
+  "issueActions": {
+    "modify": "修改内容",
+    "modifyDescription": "提供反馈以改进内容",
+    "create": "创建 Issue",
+    "createDescription": "使用当前内容创建 Issue",
+    "cancel": "取消",
+    "cancelDescription": "取消创建 Issue"
+  },
+  "messageStyles": {
+    "simple": "简单",
+    "simpleDetail": "包含最少细节的简短提交消息",
+    "normal": "普通",
+    "normalDetail": "包含适量细节的标准提交消息",
+    "detailed": "详细",
+    "detailedDetail": "包含完整上下文的全面提交消息"
+  },
+  "buttons": {
+    "yes": "是",
+    "no": "否",
+    "openInBrowser": "在浏览器中打开",
+    "openIssue": "打开 Issue"
+  },
+  "git": {
+    "stageAll": "全部暂存",
+    "stageAllPrompt": "未找到已暂存的更改。是否暂存所有更改并继续？",
+    "busyIndexLock": "Git 正在忙。请等待其他 Git 操作完成；如果问题仍然存在，请删除 .git/index.lock。",
+    "reservedNamesInfo": "将包含保留名称的文件（{files}），但其内容无法在 diff 中显示。",
+    "diffTruncatedWarning": "diff 大小（估计 {estimatedKTokens}K tokens）超过上限 {thresholdKTokens}K。将为 AI 处理截断内容。"
+  },
+  "progress": {
+    "generatingCommitMessage": "正在生成提交消息...",
+    "analyzingChanges": "生成 Pull Request - 正在分析更改...",
+    "creatingPR": "正在创建 {prType} Pull Request..."
+  },
+  "errors": {
+    "gitExtensionNotFound": "Git 扩展不可用",
+    "noGitRepository": "未找到 Git 仓库"
+  },
+  "apiKey": {
+    "enterKey": "请输入您的 OpenAI API 密钥",
+    "placeholder": "sk-...",
+    "invalidFormat": "API 密钥格式无效。预期格式: sk-...",
+    "keyExists": "API 密钥已配置",
+    "chooseAction": "选择操作",
+    "updateKey": "更新 API 密钥",
+    "validateKey": "验证 API 密钥",
+    "removeKey": "删除 API 密钥",
+    "cancel": "取消",
+    "removed": "API 密钥已成功删除",
+    "validatePrompt": "您想使用 OpenAI 验证 API 密钥吗？",
+    "validating": "正在验证 API 密钥...",
+    "validationSuccess": "API 密钥有效",
+    "validationFailed": "API 密钥验证失败: {reason}",
+    "retryValidation": "重新验证",
+    "continueWithoutValidation": "跳过验证继续",
+    "retryPrompt": "您想输入其他 API 密钥吗？",
+    "invalidKeyPrompt": "OpenAI API 密钥无效。是否要更新？",
+    "errorPrompt": "OpenAI API 密钥错误。是否要更新？",
+    "setApiKey": "设置 API 密钥"
+  }
+}

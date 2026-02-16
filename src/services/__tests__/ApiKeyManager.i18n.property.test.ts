@@ -16,6 +16,9 @@ import { runPropertyTest } from '../../test/helpers/property-test.helper';
 import en from '../../i18n/locales/en.json';
 import ja from '../../i18n/locales/ja.json';
 import vi from '../../i18n/locales/vi.json';
+import ko from '../../i18n/locales/ko.json';
+import zhCN from '../../i18n/locales/zh-cn.json';
+import zhTW from '../../i18n/locales/zh-tw.json';
 
 suite('ApiKeyManager i18n Property Tests', () => {
     suite('Property 4: Internationalization completeness', () => {
@@ -45,7 +48,10 @@ suite('ApiKeyManager i18n Property Tests', () => {
         const locales = [
             { name: 'English', data: en },
             { name: 'Japanese', data: ja },
-            { name: 'Vietnamese', data: vi }
+            { name: 'Vietnamese', data: vi },
+            { name: 'Korean', data: ko },
+            { name: 'Chinese (Simplified)', data: zhCN },
+            { name: 'Chinese (Traditional)', data: zhTW }
         ];
 
         test('all API key translation keys should exist in all locales', () => {

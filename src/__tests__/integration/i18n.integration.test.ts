@@ -28,7 +28,10 @@ suite('i18n Integration Tests', () => {
             const locale = manager.getLocale();
 
             // Should be one of supported locales
-            assert.ok(['ja', 'vi', 'en'].includes(locale), `Expected locale to be a supported locale, got '${locale}'`);
+            assert.ok(
+                ['ja', 'vi', 'ko', 'zh-cn', 'zh-tw', 'en'].includes(locale),
+                `Expected locale to be a supported locale, got '${locale}'`
+            );
         });
 
         test('should provide same instance across multiple calls', () => {
@@ -72,6 +75,42 @@ suite('i18n Integration Tests', () => {
 
             const configuration = manager.t('statusBar.configuration');
             assert.strictEqual(configuration, 'Cau Hinh');
+        });
+
+        test('should translate keys correctly for Korean locale', () => {
+            const manager = TranslationManager.getInstance();
+            manager.setLocale('ko');
+
+            // Test various translation keys
+            const apiKeySaved = manager.t('messages.apiKeySaved');
+            assert.strictEqual(apiKeySaved, 'API 키가 성공적으로 저장되었습니다');
+
+            const configuration = manager.t('statusBar.configuration');
+            assert.strictEqual(configuration, '구성');
+        });
+
+        test('should translate keys correctly for Simplified Chinese locale', () => {
+            const manager = TranslationManager.getInstance();
+            manager.setLocale('zh-cn');
+
+            // Test various translation keys
+            const apiKeySaved = manager.t('messages.apiKeySaved');
+            assert.strictEqual(apiKeySaved, 'API 密钥保存成功');
+
+            const configuration = manager.t('statusBar.configuration');
+            assert.strictEqual(configuration, '配置');
+        });
+
+        test('should translate keys correctly for Traditional Chinese locale', () => {
+            const manager = TranslationManager.getInstance();
+            manager.setLocale('zh-tw');
+
+            // Test various translation keys
+            const apiKeySaved = manager.t('messages.apiKeySaved');
+            assert.strictEqual(apiKeySaved, 'API 金鑰儲存成功');
+
+            const configuration = manager.t('statusBar.configuration');
+            assert.strictEqual(configuration, '設定');
         });
 
         test('should handle parameter interpolation', () => {
@@ -128,6 +167,22 @@ suite('i18n Integration Tests', () => {
             assert.strictEqual(LocaleDetector.detectLocale('vi-vn'), 'vi');
         });
 
+        test('should detect Korean locale correctly', () => {
+            assert.strictEqual(LocaleDetector.detectLocale('ko'), 'ko');
+            assert.strictEqual(LocaleDetector.detectLocale('ko-KR'), 'ko');
+            assert.strictEqual(LocaleDetector.detectLocale('ko-kr'), 'ko');
+        });
+
+        test('should detect Chinese locales correctly', () => {
+            assert.strictEqual(LocaleDetector.detectLocale('zh-cn'), 'zh-cn');
+            assert.strictEqual(LocaleDetector.detectLocale('zh-CN'), 'zh-cn');
+            assert.strictEqual(LocaleDetector.detectLocale('zh-hans'), 'zh-cn');
+
+            assert.strictEqual(LocaleDetector.detectLocale('zh-tw'), 'zh-tw');
+            assert.strictEqual(LocaleDetector.detectLocale('zh-TW'), 'zh-tw');
+            assert.strictEqual(LocaleDetector.detectLocale('zh-hant'), 'zh-tw');
+        });
+
         test('should detect English locale correctly', () => {
             assert.strictEqual(LocaleDetector.detectLocale('en'), 'en');
             assert.strictEqual(LocaleDetector.detectLocale('en-US'), 'en');
@@ -138,9 +193,6 @@ suite('i18n Integration Tests', () => {
             assert.strictEqual(LocaleDetector.detectLocale('fr'), 'en');
             assert.strictEqual(LocaleDetector.detectLocale('de'), 'en');
             assert.strictEqual(LocaleDetector.detectLocale('es'), 'en');
-            assert.strictEqual(LocaleDetector.detectLocale('ko'), 'en');
-            assert.strictEqual(LocaleDetector.detectLocale('zh-cn'), 'en');
-            assert.strictEqual(LocaleDetector.detectLocale('zh-tw'), 'en');
         });
 
         test('should default to English for undefined/empty', () => {
@@ -164,6 +216,18 @@ suite('i18n Integration Tests', () => {
             // Switch to Vietnamese
             manager.setLocale('vi');
             assert.strictEqual(manager.t('statusBar.configuration'), 'Cau Hinh');
+
+            // Switch to Korean
+            manager.setLocale('ko');
+            assert.strictEqual(manager.t('statusBar.configuration'), '구성');
+
+            // Switch to Simplified Chinese
+            manager.setLocale('zh-cn');
+            assert.strictEqual(manager.t('statusBar.configuration'), '配置');
+
+            // Switch to Traditional Chinese
+            manager.setLocale('zh-tw');
+            assert.strictEqual(manager.t('statusBar.configuration'), '設定');
 
             // Switch back to English
             manager.setLocale('en');
@@ -204,7 +268,7 @@ suite('i18n Integration Tests', () => {
     });
 
     suite('Translation Coverage', () => {
-        const supportedLocales = ['en', 'ja', 'vi'] as const;
+        const supportedLocales = ['en', 'ja', 'vi', 'ko', 'zh-cn', 'zh-tw'] as const;
 
         test('should have translations for all command strings', () => {
             const manager = TranslationManager.getInstance();
