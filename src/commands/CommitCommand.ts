@@ -121,8 +121,9 @@ export class CommitCommand extends BaseCommand {
             }, this.context);
 
             if (!openai) {
-                this.logger.error('Failed to initialize OpenAIService');
-                await this.showNotification(t('messages.openAIInitFailed'), 3000);
+                // OpenAIServiceFactory is responsible for prompting the user and showing errors.
+                // Avoid double-notifying here (especially on user cancellation).
+                this.logger.info('OpenAIService initialization returned undefined');
                 return undefined;
             }
 

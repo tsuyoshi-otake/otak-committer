@@ -23,13 +23,15 @@ import { t } from '../i18n/index';
 /**
  * User action types for existing key management
  */
-export type ApiKeyAction = 'update' | 'remove' | 'cancel';
+export type ApiKeyAction = 'update' | 'validate' | 'remove' | 'cancel';
 
 /**
  * Validation result interface
  */
 export interface ValidationResult {
     isValid: boolean;
+    status?: number;
+    isNetworkError?: boolean;
     error?: string;
 }
 
@@ -171,6 +173,10 @@ export class ApiKeyManager {
                 description: ''
             },
             {
+                label: t('apiKey.validateKey'),
+                description: ''
+            },
+            {
                 label: t('apiKey.removeKey'),
                 description: ''
             },
@@ -191,6 +197,8 @@ export class ApiKeyManager {
 
         if (selected.label === t('apiKey.updateKey')) {
             return 'update';
+        } else if (selected.label === t('apiKey.validateKey')) {
+            return 'validate';
         } else if (selected.label === t('apiKey.removeKey')) {
             return 'remove';
         }
@@ -237,7 +245,7 @@ export class ApiKeyManager {
      * }
      * ```
      */
-    async validateWithOpenAI(apiKey: string): Promise<boolean> {
+    async validateWithOpenAI(apiKey: string): Promise<ValidationResult> {
         this.logger.info('Validating API key with OpenAI');
 
         try {
@@ -252,23 +260,152 @@ export class ApiKeyManager {
 
             if (response.ok) {
                 this.logger.info('API key validation successful');
-                return true;
-            } else {
-                const errorData = await response.json().catch(() => ({}));
-                const errorMessage = (errorData as { error?: { message?: string } }).error?.message || 'Unknown error';
-                this.logger.warning(`API key validation failed: ${response.status}`);
-                // Sanitize error message to never include the API key
-                const sanitizedMessage = this.sanitizeErrorMessage(errorMessage, apiKey);
-                vscode.window.showErrorMessage(t('apiKey.validationFailed', { reason: sanitizedMessage }));
-                return false;
+                return { isValid: true, status: response.status };
             }
+
+            const errorData = await response.json().catch(() => ({}));
+            const errorMessage = (errorData as { error?: { message?: string } }).error?.message || 'Unknown error';
+            this.logger.warning(`API key validation failed: ${response.status}`);
+            // Sanitize error message to never include the API key
+            const sanitizedMessage = this.sanitizeErrorMessage(errorMessage, apiKey);
+            return { isValid: false, status: response.status, error: sanitizedMessage };
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Network error';
             this.logger.error('API key validation error:', error);
             // Sanitize error message to never include the API key
             const sanitizedMessage = this.sanitizeErrorMessage(errorMessage, apiKey);
-            vscode.window.showErrorMessage(t('apiKey.validationFailed', { reason: sanitizedMessage }));
-            return false;
+            return { isValid: false, status: 0, isNetworkError: true, error: sanitizedMessage };
+        }
+    }
+
+    private async validateWithProgress(apiKey: string): Promise<ValidationResult> {
+        return await vscode.window.withProgress(
+            {
+                location: vscode.ProgressLocation.Notification,
+                title: t('apiKey.validating'),
+                cancellable: false
+            },
+            async () => this.validateWithOpenAI(apiKey)
+        );
+    }
+
+    private async promptAndSaveApiKey(): Promise<void> {
+        while (true) {
+            const apiKey = await this.promptForApiKey();
+
+            if (!apiKey) {
+                this.logger.info('User cancelled API key input');
+                return;
+            }
+
+            if (!ApiKeyManager.validateKeyFormat(apiKey)) {
+                vscode.window.showErrorMessage(t('apiKey.invalidFormat'));
+                continue;
+            }
+
+            const validateChoice = await vscode.window.showInformationMessage(
+                t('apiKey.validatePrompt'),
+                t('buttons.yes'),
+                t('buttons.no')
+            );
+
+            if (validateChoice === t('buttons.yes')) {
+                const result = await this.validateWithProgress(apiKey);
+
+                if (result.isValid) {
+                    await this.storage.setApiKey('openai', apiKey);
+                    vscode.window.showInformationMessage(t('messages.apiKeySaved'));
+                    vscode.window.showInformationMessage(t('apiKey.validationSuccess'));
+                    this.logger.info('API key saved and validated successfully');
+                    return;
+                }
+
+                const reason = result.error || 'Unknown error';
+                const retryLabel = t('apiKey.retryValidation');
+                const continueLabel = t('apiKey.continueWithoutValidation');
+                const cancelLabel = t('apiKey.cancel');
+
+                const action = result.status === 401
+                    ? await vscode.window.showWarningMessage(
+                        t('apiKey.validationFailed', { reason }),
+                        retryLabel,
+                        cancelLabel
+                    )
+                    : await vscode.window.showWarningMessage(
+                        t('apiKey.validationFailed', { reason }),
+                        retryLabel,
+                        continueLabel,
+                        cancelLabel
+                    );
+
+                if (action === retryLabel) {
+                    continue;
+                }
+
+                if (action === continueLabel) {
+                    await this.storage.setApiKey('openai', apiKey);
+                    vscode.window.showInformationMessage(t('messages.apiKeySaved'));
+                    this.logger.info('API key saved without validation');
+                }
+
+                return;
+            }
+
+            await this.storage.setApiKey('openai', apiKey);
+            vscode.window.showInformationMessage(t('messages.apiKeySaved'));
+            this.logger.info('API key saved successfully');
+            return;
+        }
+    }
+
+    private async validateCurrentApiKey(): Promise<void> {
+        const currentKey = (await this.storage.getApiKey('openai'))?.trim();
+
+        if (!currentKey) {
+            const setApiKeyLabel = t('apiKey.setApiKey');
+            const action = await vscode.window.showWarningMessage(
+                t('messages.apiKeyNotConfigured'),
+                setApiKeyLabel,
+                t('apiKey.cancel')
+            );
+
+            if (action === setApiKeyLabel) {
+                await this.promptAndSaveApiKey();
+            }
+            return;
+        }
+
+        let attempts = 0;
+        const retryLabel = t('apiKey.retryValidation');
+        const updateLabel = t('apiKey.updateKey');
+        const cancelLabel = t('apiKey.cancel');
+
+        while (attempts < 3) {
+            attempts += 1;
+
+            const result = await this.validateWithProgress(currentKey);
+            if (result.isValid) {
+                vscode.window.showInformationMessage(t('apiKey.validationSuccess'));
+                return;
+            }
+
+            const reason = result.error || 'Unknown error';
+            const action = await vscode.window.showErrorMessage(
+                t('apiKey.validationFailed', { reason }),
+                retryLabel,
+                updateLabel,
+                cancelLabel
+            );
+
+            if (action === retryLabel) {
+                continue;
+            }
+
+            if (action === updateLabel) {
+                await this.promptAndSaveApiKey();
+            }
+
+            return;
         }
     }
 
@@ -322,6 +459,9 @@ export class ApiKeyManager {
                     case 'remove':
                         await this.removeApiKey();
                         return;
+                    case 'validate':
+                        await this.validateCurrentApiKey();
+                        return;
                     case 'cancel':
                         this.logger.info('User cancelled API key configuration');
                         return;
@@ -331,57 +471,7 @@ export class ApiKeyManager {
                 }
             }
 
-            // Prompt for API key
-            const apiKey = await this.promptForApiKey();
-
-            if (!apiKey) {
-                this.logger.info('User cancelled API key input');
-                return;
-            }
-
-            // Validate format (should already be valid due to input validation)
-            if (!ApiKeyManager.validateKeyFormat(apiKey)) {
-                vscode.window.showErrorMessage(t('apiKey.invalidFormat'));
-                return;
-            }
-
-            // Store the API key
-            await this.storage.setApiKey('openai', apiKey);
-            vscode.window.showInformationMessage(t('messages.apiKeySaved'));
-            this.logger.info('API key saved successfully');
-
-            // Offer to validate with OpenAI
-            const validateChoice = await vscode.window.showInformationMessage(
-                t('apiKey.validatePrompt'),
-                t('buttons.yes'),
-                t('buttons.no')
-            );
-
-            if (validateChoice === t('buttons.yes')) {
-                await vscode.window.withProgress(
-                    {
-                        location: vscode.ProgressLocation.Notification,
-                        title: t('apiKey.validating'),
-                        cancellable: false
-                    },
-                    async () => {
-                        const isValid = await this.validateWithOpenAI(apiKey);
-                        if (isValid) {
-                            vscode.window.showInformationMessage(t('apiKey.validationSuccess'));
-                        } else {
-                            // Offer to retry
-                            const retryChoice = await vscode.window.showWarningMessage(
-                                t('apiKey.retryPrompt'),
-                                t('buttons.yes'),
-                                t('buttons.no')
-                            );
-                            if (retryChoice === t('buttons.yes')) {
-                                await this.configureApiKey();
-                            }
-                        }
-                    }
-                );
-            }
+            await this.promptAndSaveApiKey();
         } catch (error) {
             this.logger.error('Error during API key configuration:', error);
             throw error;

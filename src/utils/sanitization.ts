@@ -146,20 +146,31 @@ export function sanitizeCommitMessage(
     result = result.replace(/\n\s*\n/g, '\n\n');
 
     // Step 7: Remove trailing period from subject line (first line) - only if not part of ellipsis
+    // Keep the operation idempotent by removing only a single trailing period (not "..", not "...").
+    const shouldRemoveTrailingPeriod = (line: string): boolean => {
+        if (!line.endsWith('.') || line.endsWith('...')) {
+            return false;
+        }
+        // Do not trim if it ends with two periods (would otherwise strip one per pass).
+        return !(line.length >= 2 && line[line.length - 2] === '.');
+    };
     const firstNewline = result.indexOf('\n');
     if (firstNewline === -1) {
         // Single line - remove trailing single period (but not ellipsis)
-        if (result.endsWith('.') && !result.endsWith('...')) {
+        if (shouldRemoveTrailingPeriod(result)) {
             result = result.slice(0, -1);
         }
     } else {
         // Multi-line - remove trailing period from first line only (but not ellipsis)
         const firstLine = result.substring(0, firstNewline);
         const rest = result.substring(firstNewline);
-        if (firstLine.endsWith('.') && !firstLine.endsWith('...')) {
+        if (shouldRemoveTrailingPeriod(firstLine)) {
             result = firstLine.slice(0, -1) + rest;
         }
     }
+
+    // Step 8: Trim again because removing punctuation can introduce trailing whitespace (e.g. "! ." -> "! ").
+    result = result.trim();
 
     return result;
 }
