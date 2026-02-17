@@ -27,5 +27,6 @@
   "config.reasoningEffort.high": "높음 (가장 느림, 최고 품질)",
   "config.maxInputTokens": "AI 처리 최대 입력 토큰 수 (기본값: 200K)",
   "config.useConventionalCommits": "스코프가 있는 Conventional Commits 형식 사용 (<type>(<scope>): <subject>)",
-  "config.appendCommitTrailer": "생성된 커밋 메시지에 'Commit-Message-By: otak-committer' 트레일러 추가"
+  "config.appendCommitTrailer": "생성된 커밋 메시지에 'Commit-Message-By: otak-committer' 트레일러 추가",
+  "config.syncApiKeys": "VS Code 설정 동기화를 통해 API 키 동기화 (동기화된 확장 상태에 키 저장)"
 }

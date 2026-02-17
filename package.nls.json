@@ -27,5 +27,6 @@
   "config.reasoningEffort.high": "High reasoning (slowest, highest quality)",
   "config.maxInputTokens": "Maximum input tokens for AI processing (default: 200K)",
   "config.useConventionalCommits": "Use Conventional Commits format with scope (<type>(<scope>): <subject>)",
-  "config.appendCommitTrailer": "Append 'Commit-Message-By: otak-committer' trailer to generated commit messages"
+  "config.appendCommitTrailer": "Append 'Commit-Message-By: otak-committer' trailer to generated commit messages",
+  "config.syncApiKeys": "Sync API keys via VS Code Settings Sync (stores keys in synced extension state)"
 }

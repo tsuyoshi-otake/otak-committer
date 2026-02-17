@@ -27,5 +27,6 @@
   "config.reasoningEffort.high": "Reasoning cao (cham nhat, chat luong cao nhat)",
   "config.maxInputTokens": "So token dau vao toi da cho AI xu ly (mac dinh: 200K)",
   "config.useConventionalCommits": "Su dung dinh dang Conventional Commits voi scope (<type>(<scope>): <subject>)",
-  "config.appendCommitTrailer": "Them dong 'Commit-Message-By: otak-committer' vao cuoi thong diep commit da tao"
+  "config.appendCommitTrailer": "Them dong 'Commit-Message-By: otak-committer' vao cuoi thong diep commit da tao",
+  "config.syncApiKeys": "Dong bo API key qua VS Code Settings Sync (luu key trong trang thai mo rong duoc dong bo)"
 }

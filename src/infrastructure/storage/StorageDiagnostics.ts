@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { SecretStorageProvider } from './SecretStorageProvider';
 import { ConfigStorageProvider } from './ConfigStorageProvider';
+import { SyncedStateProvider } from './SyncedStateProvider';
 import { StorageMigrationService } from './StorageMigrationService';
 import { Logger } from '../logging/Logger';
 
@@ -33,6 +34,7 @@ export class StorageDiagnostics {
     constructor(
         private readonly context: vscode.ExtensionContext,
         private readonly secretStorage: SecretStorageProvider,
+        private readonly syncedState: SyncedStateProvider,
         private readonly configStorage: ConfigStorageProvider,
         private readonly migrationService: StorageMigrationService,
     ) {
@@ -118,6 +120,14 @@ export class StorageDiagnostics {
         }
 
         try {
+            if (this.syncedState.hasApiKey('openai')) {
+                diagnostics.openaiKeyLocations.push('Settings Sync');
+            }
+        } catch (error) {
+            this.logger.error('[StorageManager] Error checking OpenAI key in Settings Sync', error);
+        }
+
+        try {
             if (await this.configStorage.has('otakCommitter.openaiApiKey')) {
                 diagnostics.openaiKeyLocations.push('Configuration (legacy)');
             }
@@ -132,6 +142,14 @@ export class StorageDiagnostics {
             }
         } catch (error) {
             this.logger.error('[StorageManager] Error checking GitHub key in SecretStorage', error);
+        }
+
+        try {
+            if (this.syncedState.hasApiKey('github')) {
+                diagnostics.githubKeyLocations.push('Settings Sync');
+            }
+        } catch (error) {
+            this.logger.error('[StorageManager] Error checking GitHub key in Settings Sync', error);
         }
 
         try {

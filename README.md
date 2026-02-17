@@ -97,6 +97,7 @@ Uses VS Code's built-in GitHub authentication. Sign in and out through the Accou
 - **`otakCommitter.maxInputTokens`**: Maximum input tokens for diff analysis (default: `200000`)
 - **`otakCommitter.useConventionalCommits`**: Use strict Conventional Commits format (default: `false`)
 - **`otakCommitter.appendCommitTrailer`**: Append `Commit-Message-By: otak-committer` trailer (default: `true`)
+- **`otakCommitter.syncApiKeys`**: Sync API keys via VS Code Settings Sync (default: `false`)
 
 ### Custom Instructions Examples
 
@@ -142,10 +143,11 @@ The extension uses GPT-5.2 for high-quality commit message generation.
 
 ### API Key Protection
 
-- **Secure Storage**: API keys are stored using VS Code SecretStorage, never in plain text.
+- **Secure Storage (default)**: API keys are stored using VS Code SecretStorage.
+- **Settings Sync (optional)**: If `otakCommitter.syncApiKeys` is enabled, a copy of your API keys is stored in synced extension state for cross-device usage.
 - **Encrypted Backups**: Redundant storage uses AES-256-GCM encryption with machine-specific keys.
 - **Automatic Migration**: Legacy API keys in settings are migrated to secure storage and deleted.
-- **No Configuration Files**: Keys never appear in `settings.json` or other config files.
+- **No `settings.json` secrets**: Keys never appear in `settings.json`.
 - **Diagnostic Tools**: Built-in diagnostics verify storage health.
 
 ### Data Handling

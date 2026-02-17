@@ -22,6 +22,7 @@ class ExtensionApp {
 
         await this.config.setDefaults();
         await this.storage.migrateFromLegacy();
+        await this.storage.configureSettingsSync();
 
         // Register commands before initializing status bar.
         // (status bar tooltip contains command links that must exist)
@@ -36,6 +37,10 @@ class ExtensionApp {
             vscode.workspace.onDidChangeConfiguration((e) => {
                 if (e.affectsConfiguration('otakCommitter')) {
                     this.statusBarManager.update();
+                }
+
+                if (e.affectsConfiguration('otakCommitter.syncApiKeys')) {
+                    void this.storage.configureSettingsSync();
                 }
             }),
         );

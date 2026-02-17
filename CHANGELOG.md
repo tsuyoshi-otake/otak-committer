@@ -1,5 +1,14 @@
 # Change Log
 
+## [2.4.2] - 2026-02-17
+
+### Added
+
+- **Settings Sync integration:**
+  - Added `otakCommitter.syncApiKeys` to optionally sync API keys via VS Code Settings Sync (synced extension state)
+  - Synced the `alwaysStageAll` preference across devices (extension globalState)
+  - Storage diagnostics now report "Settings Sync" as a key location when present
+
 ## [2.4.1] - 2026-02-17
 
 ### Improved

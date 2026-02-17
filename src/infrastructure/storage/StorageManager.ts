@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { SecretStorageProvider } from './SecretStorageProvider';
 import { ConfigStorageProvider } from './ConfigStorageProvider';
+import { SyncedStateProvider } from './SyncedStateProvider';
 import { StorageMigrationService } from './StorageMigrationService';
 import {
     StorageDiagnostics,
@@ -27,14 +28,20 @@ import { t } from '../../i18n';
  * ```
  */
 export class StorageManager {
+    private static readonly ALWAYS_STAGE_ALL_KEY = 'otak-committer.alwaysStageAll';
+
+    private readonly context: vscode.ExtensionContext;
     private secretStorage: SecretStorageProvider;
+    private syncedState: SyncedStateProvider;
     private configStorage: ConfigStorageProvider;
     private migrationService: StorageMigrationService;
     private diagnosticsService: StorageDiagnostics;
     private logger: Logger;
 
     constructor(context: vscode.ExtensionContext) {
+        this.context = context;
         this.secretStorage = new SecretStorageProvider(context);
+        this.syncedState = new SyncedStateProvider(context);
         this.configStorage = new ConfigStorageProvider();
         this.logger = Logger.getInstance();
         this.migrationService = new StorageMigrationService(
@@ -45,9 +52,113 @@ export class StorageManager {
         this.diagnosticsService = new StorageDiagnostics(
             context,
             this.secretStorage,
+            this.syncedState,
             this.configStorage,
             this.migrationService,
         );
+
+        this.registerKeysForSync();
+    }
+
+    private isApiKeySyncEnabled(): boolean {
+        const config = vscode.workspace.getConfiguration('otakCommitter');
+        return config.get<boolean>('syncApiKeys') === true;
+    }
+
+    private setKeysForSync(keys: readonly string[]): void {
+        const memento = this.context.globalState as vscode.Memento & {
+            setKeysForSync?: (keys: readonly string[]) => void;
+        };
+
+        if (typeof memento.setKeysForSync !== 'function') {
+            return;
+        }
+
+        try {
+            memento.setKeysForSync(keys);
+        } catch (error) {
+            this.logger.warning(
+                '[StorageManager] Failed to register keys for Settings Sync',
+                error,
+            );
+        }
+    }
+
+    private registerKeysForSync(): void {
+        const keys: string[] = [StorageManager.ALWAYS_STAGE_ALL_KEY];
+
+        if (this.isApiKeySyncEnabled()) {
+            keys.push(
+                SyncedStateProvider.getApiKeyKey(ServiceProvider.OpenAI),
+                SyncedStateProvider.getApiKeyKey(ServiceProvider.GitHub),
+            );
+        }
+
+        this.setKeysForSync(keys);
+    }
+
+    /**
+     * Configures VS Code Settings Sync integration.
+     *
+     * When `otakCommitter.syncApiKeys` is enabled, this:
+     * - Registers sync keys via `setKeysForSync`
+     * - Publishes existing SecretStorage API keys into synced extension state
+     * - Restores synced keys into SecretStorage if missing locally
+     */
+    async configureSettingsSync(): Promise<void> {
+        this.registerKeysForSync();
+
+        if (!this.isApiKeySyncEnabled()) {
+            return;
+        }
+
+        const services: ServiceProvider[] = [ServiceProvider.OpenAI, ServiceProvider.GitHub];
+        for (const service of services) {
+            const secretKey = `${service}.apiKey`;
+            const localValue = (await this.secretStorage.get(secretKey))?.trim();
+
+            if (localValue) {
+                try {
+                    await this.syncedState.setApiKey(service, localValue);
+                } catch (error) {
+                    this.logger.error(
+                        `[StorageManager] Failed to publish ${service} API key to Settings Sync`,
+                        error,
+                    );
+                }
+                continue;
+            }
+
+            const syncedValue = this.syncedState.getApiKey(service)?.trim();
+            if (!syncedValue) {
+                continue;
+            }
+
+            // Best-effort restore to SecretStorage for secure local usage.
+            this.logger.info(
+                `[StorageManager] Restoring ${service} API key from Settings Sync to SecretStorage`,
+            );
+
+            try {
+                await this.secretStorage.set(secretKey, syncedValue);
+            } catch (error) {
+                this.logger.error(
+                    `[StorageManager] Failed to restore ${service} API key to SecretStorage`,
+                    error,
+                );
+            }
+
+            // Clean up legacy plaintext config if it exists.
+            try {
+                const legacyKey = StorageMigrationService.getLegacyConfigKey(service);
+                await this.configStorage.delete(legacyKey);
+            } catch (error) {
+                this.logger.error(
+                    `[StorageManager] Failed to clean up legacy storage after Settings Sync restore`,
+                    error,
+                );
+            }
+        }
     }
 
     /**
@@ -56,8 +167,9 @@ export class StorageManager {
      * Fallback chain:
      * 1. SecretStorage (primary)
      * 2. Encrypted GlobalState backup (automatic fallback in SecretStorageProvider)
-     * 3. Legacy Configuration storage (for migration scenarios)
-     * 4. Returns undefined (graceful degradation)
+     * 3. Settings Sync (optional, opt-in via configuration)
+     * 4. Legacy Configuration storage (for migration scenarios)
+     * 5. Returns undefined (graceful degradation)
      */
     async getApiKey(service: ServiceProvider): Promise<string | undefined> {
         try {
@@ -66,6 +178,23 @@ export class StorageManager {
             const value = await this.secretStorage.get(key);
             if (value && value.trim() !== '') {
                 return value;
+            }
+
+            if (this.isApiKeySyncEnabled()) {
+                const syncedValue = this.syncedState.getApiKey(service);
+                if (syncedValue && syncedValue.trim() !== '') {
+                    // Best-effort restore to SecretStorage; ignore failures and still return the key.
+                    try {
+                        await this.secretStorage.set(key, syncedValue);
+                    } catch (restoreError) {
+                        this.logger.error(
+                            `[StorageManager] Failed to restore ${service} API key from Settings Sync`,
+                            restoreError,
+                        );
+                    }
+
+                    return syncedValue;
+                }
             }
 
             const legacyKey = StorageMigrationService.getLegacyConfigKey(service);
@@ -88,6 +217,21 @@ export class StorageManager {
             return undefined;
         } catch (error) {
             this.logger.error(`Error retrieving API key for ${service}`, error);
+
+            if (this.isApiKeySyncEnabled()) {
+                try {
+                    const syncedValue = this.syncedState.getApiKey(service);
+                    if (syncedValue && syncedValue.trim() !== '') {
+                        this.logger.info(`Falling back to Settings Sync for ${service}`);
+                        return syncedValue;
+                    }
+                } catch (syncFallbackError) {
+                    this.logger.error(
+                        `Settings Sync fallback retrieval also failed`,
+                        syncFallbackError,
+                    );
+                }
+            }
 
             try {
                 const legacyKey = StorageMigrationService.getLegacyConfigKey(service);
@@ -113,6 +257,19 @@ export class StorageManager {
             const key = `${service}.apiKey`;
             await this.secretStorage.set(key, value);
 
+            if (this.isApiKeySyncEnabled()) {
+                try {
+                    // Ensure keys are registered when toggled at runtime.
+                    this.registerKeysForSync();
+                    await this.syncedState.setApiKey(service, value);
+                } catch (syncError) {
+                    this.logger.error(
+                        `[StorageManager] Failed to store ${service} API key in Settings Sync state`,
+                        syncError,
+                    );
+                }
+            }
+
             try {
                 const legacyKey = StorageMigrationService.getLegacyConfigKey(service);
                 await this.configStorage.delete(legacyKey);
@@ -121,6 +278,18 @@ export class StorageManager {
             }
         } catch (error) {
             this.logger.error(`Error storing API key for ${service}`, error);
+
+            if (this.isApiKeySyncEnabled()) {
+                try {
+                    this.registerKeysForSync();
+                    await this.syncedState.setApiKey(service, value);
+                } catch (syncError) {
+                    this.logger.error(
+                        `[StorageManager] Failed to store ${service} API key in Settings Sync state`,
+                        syncError,
+                    );
+                }
+            }
 
             try {
                 const legacyKey = StorageMigrationService.getLegacyConfigKey(service);
@@ -153,6 +322,13 @@ export class StorageManager {
         }
 
         try {
+            await this.syncedState.deleteApiKey(service);
+        } catch (error) {
+            this.logger.error(`Error deleting API key from Settings Sync for ${service}`, error);
+            errors.push(error);
+        }
+
+        try {
             const legacyKey = StorageMigrationService.getLegacyConfigKey(service);
             await this.configStorage.delete(legacyKey);
         } catch (error) {
@@ -160,7 +336,7 @@ export class StorageManager {
             errors.push(error);
         }
 
-        if (errors.length === 2) {
+        if (errors.length === 3) {
             throw new StorageError(
                 `Failed to delete API key for service: ${service} from all storage locations`,
                 {
@@ -170,7 +346,7 @@ export class StorageManager {
             );
         }
 
-        if (errors.length === 1) {
+        if (errors.length > 0) {
             this.logger.info(`Partially deleted API key for ${service} (some locations failed)`);
         }
     }
@@ -184,6 +360,10 @@ export class StorageManager {
 
             const hasInSecret = await this.secretStorage.has(key);
             if (hasInSecret) {
+                return true;
+            }
+
+            if (this.isApiKeySyncEnabled() && this.syncedState.hasApiKey(service)) {
                 return true;
             }
 
