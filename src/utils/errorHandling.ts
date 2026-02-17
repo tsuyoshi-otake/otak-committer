@@ -9,7 +9,7 @@
 /**
  * Error context for commit operations
  */
-export interface ErrorContext {
+export interface CommitErrorContext {
     /** The operation that failed */
     operation: string;
     /** Additional details about the error */
@@ -52,9 +52,9 @@ export type CommitErrorCode =
  */
 export class CommitError extends Error {
     public readonly code: CommitErrorCode;
-    public readonly context?: ErrorContext;
+    public readonly context?: CommitErrorContext;
 
-    constructor(message: string, code: CommitErrorCode, context?: ErrorContext) {
+    constructor(message: string, code: CommitErrorCode, context?: CommitErrorContext) {
         super(message);
         this.name = 'CommitError';
         this.code = code;
@@ -67,12 +67,12 @@ export class CommitError extends Error {
  *
  * @param operation - The operation name
  * @param details - Additional details
- * @returns ErrorContext object
+ * @returns CommitErrorContext object
  */
-export function createErrorContext(
+export function createCommitErrorContext(
     operation: string,
-    details?: ErrorContext['details']
-): ErrorContext {
+    details?: CommitErrorContext['details']
+): CommitErrorContext {
     return {
         operation,
         details: details ? { ...details } : undefined
@@ -90,7 +90,7 @@ export function createErrorContext(
  */
 export function formatErrorMessage(
     error: Error | CommitError | unknown,
-    context: ErrorContext
+    context: CommitErrorContext
 ): string {
     const parts: string[] = [];
 
@@ -220,7 +220,7 @@ export function isEmptyDiffError(error: Error | CommitError): boolean {
  */
 export function handleCommitError(
     error: Error | CommitError,
-    context: ErrorContext
+    context: CommitErrorContext
 ): ErrorHandlerResult {
     const message = formatErrorMessage(error, context);
 
@@ -257,7 +257,7 @@ export function handleCommitError(
  */
 export function logErrorDetails(
     error: Error | CommitError,
-    context: ErrorContext
+    context: CommitErrorContext
 ): void {
     console.error('Commit Error Details:', {
         operation: context.operation,

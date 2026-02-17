@@ -182,13 +182,8 @@ export function sanitizeCommitMessage(
  * @returns true if dangerous patterns are found
  */
 export function containsDangerousPatterns(text: string): boolean {
-    const dangerousPatterns = [
-        /\$\([^)]*\)/, // Command substitution $(...)
-        /\$\{[^}]*\}/, // Variable expansion ${...}
-        /`[^`]*`/,     // Backtick execution
-    ];
-
-    return dangerousPatterns.some(pattern => pattern.test(text));
+    // Use simple indexOf checks instead of regex to avoid ReDoS risk
+    return text.includes('$(') || text.includes('${') || text.includes('`');
 }
 
 /**

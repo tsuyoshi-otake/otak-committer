@@ -1,23 +1,8 @@
 import * as vscode from 'vscode';
 import { Logger } from '../logging/Logger';
-import {
-    BaseError,
-    ValidationError,
-    ServiceError,
-    StorageError,
-    CommandError,
-    CriticalError
-} from '../../types/errors';
+import { BaseError, ErrorSeverity } from '../../types/errors/BaseError';
 
-/**
- * Error severity levels for determining how to handle and display errors
- */
-export enum ErrorSeverity {
-    Info = 'info',
-    Warning = 'warning',
-    Error = 'error',
-    Critical = 'critical'
-}
+export { ErrorSeverity };
 
 /**
  * Context information for error handling
@@ -56,9 +41,6 @@ export class ErrorHandler {
         
         // Show user notification
         this.showUserNotification(severity, message);
-        
-        // Report to telemetry (if enabled)
-        this.reportToTelemetry(error, ctx);
     }
     
     /**
@@ -67,31 +49,9 @@ export class ErrorHandler {
      * @returns The determined severity level
      */
     private static determineSeverity(error: unknown): ErrorSeverity {
-        if (error instanceof CriticalError) {
-            return ErrorSeverity.Critical;
-        }
-        
-        if (error instanceof ValidationError) {
-            return ErrorSeverity.Warning;
-        }
-        
-        if (error instanceof CommandError) {
-            return ErrorSeverity.Error;
-        }
-        
-        if (error instanceof ServiceError) {
-            return ErrorSeverity.Error;
-        }
-        
-        if (error instanceof StorageError) {
-            return ErrorSeverity.Error;
-        }
-        
         if (error instanceof BaseError) {
-            return ErrorSeverity.Error;
+            return error.severity;
         }
-        
-        // Unknown errors are treated as regular errors
         return ErrorSeverity.Error;
     }
     
@@ -174,18 +134,5 @@ export class ErrorHandler {
         
         return cleaned;
     }
-    
-    /**
-     * Report error to telemetry (placeholder for future implementation)
-     * @param error The error to report
-     * @param ctx The error context
-     */
-    private static reportToTelemetry(error: unknown, ctx: ErrorContext): void {
-        // Telemetry reporting logic (opt-in)
-        // This is a placeholder for future implementation
-        // When implemented, this should:
-        // 1. Check if telemetry is enabled in user settings
-        // 2. Sanitize error data to remove sensitive information
-        // 3. Send anonymized error data to telemetry service
-    }
+
 }

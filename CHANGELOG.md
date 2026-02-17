@@ -1,5 +1,81 @@
 # Change Log
 
+## [2.4.0] - 2026-02-17
+
+### Added
+- **Commit message trailer:**
+  - Generated commit messages now include `Commit-Message-By: otak-committer` trailer
+  - Configurable via `otakCommitter.appendCommitTrailer` setting (default: enabled)
+
+### Refactored
+- **Code duplication elimination:**
+  - Consolidated duplicate `openExternalUrl()` and `initializeOpenAI()` into `BaseCommand`
+  - Removed 5 duplicate preview methods (~90 lines) from `IssueCommand`, now shared via `utils/preview`
+  - Unified token constants (`MAX_INPUT_TOKENS`, `CHARS_PER_TOKEN`) into `constants/tokenLimits.ts`
+  - Removed duplicate `isWindowsReservedName()` from `GitService`, imported from `diffUtils`
+
+- **God Object splitting (SRP):**
+  - Decomposed `getDiff()` (144 lines) into focused orchestrator + 5 extracted methods
+  - Split `StorageManager` (603 lines) into `StorageManager` + `StorageMigrationService` + `StorageDiagnostics`
+  - Extracted `ApiKeyValidator` from `ApiKeyManager` for validation logic
+
+- **Error handling unification:**
+  - Renamed `BaseService.handleError()` to `handleErrorAndRethrow()` (return type `never`)
+  - Renamed `BaseCommand.handleError()` to `handleErrorSilently()` (return type `void`)
+  - Simplified `ErrorHandler.determineSeverity()` via polymorphic `severity` property on `BaseError`
+
+- **Complex condition flattening:**
+  - Simplified `generateAndCreateIssue()` loop by extracting `runIssueGenerationLoop()`
+
+- **Type safety improvements:**
+  - Replaced `any` types with proper types (`GitExtensionAPI`, `PullRequestDiff`, `TemplateInfo`, `unknown`)
+  - Created `ServiceProvider` type for type-safe service identifiers
+  - Added named constants for magic numbers (`MAX_VALIDATION_RETRIES`, `GITHUB_PAGE_SIZE`, etc.)
+
+### Improved (Round 2 - Quality Hardening)
+- **Type safety improvements:**
+  - Changed `any[]` to `unknown[]` in `BaseCommand.execute()` and `CommandRegistry` handler signatures
+  - Fixed unsafe `as Error` casts in `StorageManager.deleteApiKey()` to use `unknown[]`
+  - Extracted `isNoCommitsBetweenBranchesError()` type guard in `GitHubService`, replacing unsafe `as` cast
+
+- **Method splitting and complexity reduction:**
+  - Split `analyzeFiles()` (79 lines) in `IssueGeneratorService` into `analyzeFiles()` + `analyzeOneFile()` + `isFileOversized()`
+  - Made `FILE_TYPE_MAP` a static class property instead of recreated per call
+  - Unified token estimation in `generatePreview()` to use `TokenManager.estimateTokens()`
+
+- **Security hardening:**
+  - Added template file size limit (100 KB) in `GitService.tryReadFirstTemplate()`
+  - Added `PromptService.sanitizeTemplateContent()` (10,000 char limit) for commit and PR templates
+  - Added 30-second timeout with `AbortController` to API key validation in `ApiKeyValidator`
+  - Changed `SecretStorageProvider.set()` and `delete()` from `Promise.all()` to sequential execution for consistency
+  - Added `index.lock` retry with 1-second delay in `GitService.stageFiles()`
+
+### Security
+- **Logger sensitive field redaction:**
+  - Added automatic redaction of `apikey`, `token`, `secret`, `password` fields in log output
+  - Error objects now logged as `name` + `message` only (no stack traces in output channel)
+
+- **BaseError context sanitization:**
+  - Error context objects now automatically redact sensitive fields in `toString()`
+
+- **OpenAI response validation:**
+  - Added structural validation of API response (`choices` array, `content` type check)
+
+- **Configuration injection mitigation:**
+  - Added 500-character length limit on `customMessage` workspace setting before prompt injection
+
+- **SecretStorageProvider logging unified:**
+  - Replaced `console.log`/`console.error` with `Logger` (redaction applies automatically)
+
+- **TOCTOU fix in preview:**
+  - Removed `stat()` check before `delete()` to eliminate race condition
+
+- **ReDoS mitigation:**
+  - Replaced regex-based `containsDangerousPatterns()` with simple `indexOf` checks
+
+- **Dependency vulnerabilities patched:**
+  - Updated `glob`, `diff`, `js-yaml` to fix known CVEs (0 vulnerabilities remaining)
+
 ## [2.2.0] - 2026-02-16
 
 ### Added

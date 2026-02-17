@@ -160,7 +160,9 @@ export async function activate(context: vscode.ExtensionContext) {
 **Key Features**:
 - Access to Logger, ConfigManager, StorageManager
 - `withProgress()` helper for progress notifications
-- `handleError()` helper for consistent error handling
+- `handleErrorSilently()` helper for consistent error handling (swallows errors)
+- `initializeOpenAI()` helper for OpenAI service initialization
+- `openExternalUrl()` helper for opening URLs in browser
 
 **Usage**:
 ```typescript
@@ -171,7 +173,7 @@ export class CommitCommand extends BaseCommand {
                 // Command logic
             });
         } catch (error) {
-            this.handleError(error, 'generate commit message');
+            this.handleErrorSilently(error, 'generate commit message');
         }
     }
 }
@@ -274,13 +276,25 @@ export class CommitCommand extends BaseCommand {
 **Key Features**:
 - Secure API key storage in SecretStorage
 - Encrypted backup in GlobalState
-- Automatic migration from legacy Configuration storage
 - Fallback mechanisms for storage failures
 
 **Key Methods**:
 - `getApiKey(service)`: Retrieve API key with fallback
 - `setApiKey(service, value)`: Store API key securely
+
+#### StorageMigrationService
+**Responsibility**: Legacy data migration
+
+**Key Methods**:
 - `migrateFromLegacy()`: Migrate old data formats
+- `migrateLegacyKey()`: Migrate a single legacy key
+
+#### StorageDiagnostics
+**Responsibility**: Storage health checks and diagnostics
+
+**Key Methods**:
+- `checkStorageHealth()`: Verify storage subsystems
+- `getStorageDiagnostics()`: Get detailed diagnostic info
 
 **Storage Hierarchy**:
 1. Primary: VS Code SecretStorage (encrypted)
@@ -308,7 +322,7 @@ export class CommitCommand extends BaseCommand {
 - Error severity determination
 - User notifications based on severity
 - Error logging integration
-- Telemetry reporting (opt-in)
+- Sensitive field redaction in log output
 
 **Error Severities**:
 - **Info**: Informational messages
@@ -318,8 +332,9 @@ export class CommitCommand extends BaseCommand {
 
 **Key Methods**:
 - `handle(error, context)`: Process and handle error
-- `determineSeverity(error)`: Classify error severity
 - `showUserNotification(severity, message)`: Notify user
+
+**Note**: Error severity is determined polymorphically via `BaseError.severity` property, not a standalone method.
 
 #### Logger
 **Responsibility**: Unified logging interface
@@ -484,8 +499,8 @@ Error occurs in any component
         ├────────────────┬────────────────┐
         ▼                ▼                ▼
 ┌──────────┐    ┌──────────┐    ┌──────────┐
-│  Logger  │    │ VS Code  │    │Telemetry │
-│  - Log   │    │ - Notify │    │ - Report │
+│  Logger  │    │ VS Code  │    │  Redact  │
+│  - Log   │    │ - Notify │    │ - Filter │
 └──────────┘    └──────────┘    └──────────┘
 ```
 
@@ -502,7 +517,9 @@ src/types/
 │   ├── SupportedLanguage.ts  # Language options
 │   ├── GitStatus.ts      # Git file status
 │   ├── IssueType.ts      # GitHub issue types
-│   └── PromptType.ts     # Prompt template types
+│   ├── PromptType.ts     # Prompt template types
+│   ├── ReasoningEffort.ts # OpenAI reasoning effort levels
+│   └── ServiceProvider.ts # Service provider identifiers (openai, github)
 ├── interfaces/
 │   ├── index.ts
 │   ├── Config.ts         # Configuration interfaces
@@ -536,14 +553,15 @@ import { MessageStyle } from '../types/enums/MessageStyle';
 
 ```
 BaseError (abstract)
-├── ValidationError      # Input validation failures
-├── ServiceError         # External service failures
+│   severity: ErrorSeverity  (polymorphic - each subclass defines its severity)
+├── ValidationError      # Input validation failures (Warning)
+├── ServiceError         # External service failures (Error)
 │   ├── OpenAIServiceError
 │   ├── GitHubServiceError
 │   └── GitServiceError
-├── StorageError         # Storage operation failures
-├── CommandError         # Command execution failures
-└── CriticalError        # System-level failures
+├── StorageError         # Storage operation failures (Error)
+├── CommandError         # Command execution failures (Error)
+└── CriticalError        # System-level failures (Critical)
 ```
 
 ## Error Handling
@@ -579,7 +597,7 @@ try {
 | API Key Retrieval | SecretStorage | Encrypted GlobalState | Prompt User |
 | Configuration | Workspace Config | Global Config | Default Values |
 | Git Operations | simple-git | VS Code Git API | Manual Input |
-| OpenAI API | gpt-4 | gpt-3.5-turbo | Cached Response |
+| OpenAI API | gpt-5.2 | Error message | Cached Response |
 
 ## Storage Architecture
 
@@ -720,20 +738,20 @@ npm test -- --testPathPattern="properties"
 import { BaseCommand } from './BaseCommand';
 
 export class MyCommand extends BaseCommand {
-    async execute(...args: any[]): Promise<void> {
+    async execute(...args: unknown[]): Promise<void> {
         try {
             await this.withProgress('Doing something...', async () => {
                 // Your logic here
                 const config = this.config.get('someKey');
                 const apiKey = await this.storage.getApiKey('openai');
-                
+
                 // Use services
                 const result = await someService.doSomething();
-                
+
                 this.logger.info('Command completed');
             });
         } catch (error) {
-            this.handleError(error, 'my operation');
+            this.handleErrorSilently(error, 'my operation');
         }
     }
 }
@@ -882,7 +900,9 @@ async migrateFromLegacy(): Promise<void> {
 import { BaseError } from './BaseError';
 
 export class MyError extends BaseError {
-    constructor(message: string, context?: Record<string, any>) {
+    readonly severity = ErrorSeverity.Error;
+
+    constructor(message: string, context?: Record<string, unknown>) {
         super(message, 'MY_ERROR', context);
     }
 }
@@ -938,7 +958,7 @@ describe('My Feature Properties', () => {
 5. **Imports**: Use absolute imports from `src/` when possible
 6. **Error Handling**: Always use try-catch with ErrorHandler
 7. **Logging**: Log important operations and errors
-8. **Types**: Avoid `any`, use proper TypeScript types
+8. **Types**: Avoid `any`, use `unknown` for untyped values; use proper TypeScript types
 
 ### Debugging Tips
 
@@ -993,7 +1013,7 @@ Before submitting a PR:
 - [ ] Property tests written if applicable
 - [ ] Error handling implemented correctly
 - [ ] Logging added for important operations
-- [ ] Types properly defined (no `any`)
+- [ ] Types properly defined (no `any`; use `unknown` where needed)
 - [ ] Code formatted with Prettier
 - [ ] Linting passes (ESLint)
 - [ ] Manual testing completed
@@ -1001,6 +1021,18 @@ Before submitting a PR:
 
 ---
 
-**Last Updated**: December 2025  
-**Version**: 1.0.0  
+### Security Considerations in Code
+
+- **Template size limits**: Template files are capped at 100 KB to prevent resource exhaustion
+- **Prompt sanitization**: `customMessage` is limited to 500 chars, template content to 10,000 chars before inclusion in prompts
+- **API validation timeout**: API key validation requests have a 30-second timeout via `AbortController`
+- **Sequential storage operations**: `SecretStorageProvider.set()` and `delete()` execute primary and backup operations sequentially for consistency
+- **Git index.lock retry**: Automatic 1-second delay retry when `index.lock` is detected during staging
+- **Sensitive field redaction**: Logger automatically redacts `apikey`, `token`, `secret`, `password` fields
+- **Error context sanitization**: `BaseError.toString()` redacts sensitive fields in error context
+
+---
+
+**Last Updated**: February 2026
+**Version**: 2.4.0
 **Maintainers**: otak-committer team

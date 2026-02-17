@@ -24,9 +24,7 @@ export class ConfigCommand extends BaseCommand {
      * ConfigCommand uses specific methods instead
      */
     async execute(): Promise<void> {
-        // ConfigCommand doesn't use the generic execute method
-        // It provides specific methods for different configuration operations
-        throw new Error('ConfigCommand should use specific methods like changeLanguage() or changeMessageStyle()');
+        this.logger.debug('ConfigCommand.execute() called - use changeLanguage() or changeMessageStyle() instead');
     }
 
     /**
@@ -92,7 +90,7 @@ export class ConfigCommand extends BaseCommand {
                 this.logger.debug('Language change cancelled by user');
             }
         } catch (error) {
-            this.handleError(error, 'changing language');
+            this.handleErrorSilently(error, 'changing language');
         }
     }
 
@@ -154,7 +152,7 @@ export class ConfigCommand extends BaseCommand {
                 this.logger.debug('Message style change cancelled by user');
             }
         } catch (error) {
-            this.handleError(error, 'changing message style');
+            this.handleErrorSilently(error, 'changing message style');
         }
     }
 }

@@ -5,14 +5,16 @@ import { BranchSelector, BranchSelection } from '../services/branch';
 import { OpenAIService } from '../services/openai';
 import { GitServiceFactory } from '../services/git';
 import { ServiceError } from '../types/errors';
-import { showMarkdownPreview, closePreviewTabs, cleanupPreviewFiles } from '../utils/preview';
+import { PullRequestDiff, TemplateInfo, IssueInfo } from '../types';
+import { showMarkdownPreview } from '../utils/preview';
 import { t } from '../i18n/index.js';
 
-interface Issue {
-    number: number;
-    title: string;
-    labels: string[];
-    html_url?: string;
+function isGitHubApiError(error: unknown): error is { response: { errors: Array<{ message: string }> } } {
+    if (typeof error !== 'object' || error === null) { return false; }
+    const obj = error as Record<string, unknown>;
+    if (typeof obj.response !== 'object' || obj.response === null) { return false; }
+    const resp = obj.response as Record<string, unknown>;
+    return Array.isArray(resp.errors);
 }
 
 /**
@@ -28,7 +30,6 @@ interface Issue {
  * ```
  */
 export class PRCommand extends BaseCommand {
-    private previewFile?: { uri: vscode.Uri; document: vscode.TextDocument };
 
     /**
      * Execute the PR generation command
@@ -104,9 +105,9 @@ export class PRCommand extends BaseCommand {
             this.logger.info('Successfully created PR');
 
         } catch (error) {
-            this.handleError(error, 'generating pull request');
+            this.handleErrorSilently(error, 'generating pull request');
         } finally {
-            await this.cleanup();
+            await this.cleanupPreview();
         }
     }
 
@@ -161,7 +162,7 @@ export class PRCommand extends BaseCommand {
                 return undefined;
             }
 
-            const issueItems = issues.map((issue: Issue) => ({
+            const issueItems = issues.map((issue: IssueInfo) => ({
                 label: `#${issue.number} ${issue.title}`,
                 description: issue.labels.join(', '),
                 issue
@@ -193,7 +194,7 @@ export class PRCommand extends BaseCommand {
      * 
      * @returns Template information
      */
-    private async findTemplates(): Promise<{ commit?: any; pr?: any }> {
+    private async findTemplates(): Promise<{ commit?: TemplateInfo; pr?: TemplateInfo }> {
         this.logger.debug('Looking for PR templates');
 
         const git = await GitServiceFactory.initialize();
@@ -214,7 +215,7 @@ export class PRCommand extends BaseCommand {
     private async getBranchDiff(
         github: GitHubService,
         branches: BranchSelection
-    ): Promise<any | undefined> {
+    ): Promise<PullRequestDiff | undefined> {
         this.logger.debug(`Getting diff between ${branches.base} and ${branches.compare}`);
 
         try {
@@ -239,38 +240,6 @@ export class PRCommand extends BaseCommand {
     }
 
     /**
-     * Initialize OpenAI service with API key from storage
-     * 
-     * @returns OpenAI service instance or undefined if initialization fails
-     */
-    private async initializeOpenAI(): Promise<OpenAIService | undefined> {
-        this.logger.debug('Initializing OpenAI service');
-
-        try {
-            const openai = await OpenAIService.initialize({
-                language: this.config.get('language'),
-                messageStyle: this.config.get('messageStyle'),
-                useEmoji: this.config.get('useEmoji')
-            }, this.context);
-
-            if (!openai) {
-                this.logger.error('Failed to initialize OpenAI service');
-                return undefined;
-            }
-
-            return openai;
-
-        } catch (error) {
-            this.logger.error('Error initializing OpenAI service', error);
-            throw new ServiceError(
-                'Failed to initialize OpenAI service',
-                'openai',
-                { originalError: error }
-            );
-        }
-    }
-
-    /**
      * Generate PR content using OpenAI
      * 
      * @param openai - OpenAI service instance
@@ -280,8 +249,8 @@ export class PRCommand extends BaseCommand {
      */
     private async generatePRContent(
         openai: OpenAIService,
-        diff: any,
-        template?: any
+        diff: PullRequestDiff,
+        template?: TemplateInfo
     ): Promise<{ title: string; body: string } | undefined> {
         this.logger.debug('Generating PR content with AI');
 
@@ -390,82 +359,79 @@ export class PRCommand extends BaseCommand {
             : prContent.body;
 
         const prTypeStr = isDraft ? t('prTypes.draft') : t('prTypes.regular');
+        const params = {
+            base: branches.base,
+            compare: branches.compare,
+            title: prContent.title,
+            body: description,
+            issueNumber,
+            draft: isDraft
+        };
 
         try {
             const result = await this.withProgress(
                 t('progress.creatingPR', { prType: prTypeStr }),
-                async () => {
-                    try {
-                        this.logger.debug('Creating PR with GitHub API');
-                        const pr = await github.createPullRequest({
-                            base: branches.base,
-                            compare: branches.compare,
-                            title: prContent.title,
-                            body: description,
-                            issueNumber,
-                            draft: isDraft
-                        });
-
-                        if (!pr || !pr.number) {
-                            throw new Error('Failed to create PR: Invalid response from GitHub');
-                        }
-
-                        this.logger.info(`PR #${pr.number} created successfully`);
-                        return pr;
-
-                    } catch (error: any) {
-                        // Handle draft PR not supported error
-                        if (isDraft && error.message?.includes('Draft pull requests are not supported')) {
-                            this.logger.warning('Draft PRs not supported, creating regular PR');
-
-                            await vscode.window.showInformationMessage(t('messages.draftPRNotSupported'));
-
-                            const regularPr = await github.createPullRequest({
-                                base: branches.base,
-                                compare: branches.compare,
-                                title: prContent.title,
-                                body: description,
-                                issueNumber,
-                                draft: false
-                            });
-
-                            if (!regularPr || !regularPr.number) {
-                                throw new Error('Failed to create regular PR: Invalid response from GitHub');
-                            }
-
-                            this.logger.info(`Regular PR #${regularPr.number} created successfully`);
-                            return regularPr;
-                        }
-                        throw error;
-                    }
-                }
+                () => this.createPRWithDraftFallback(github, params, isDraft)
             );
 
-            // Show success notification
-            if (result && result.number) {
-                await this.showSuccessNotification(result, isDraft);
-            } else {
+            if (!result?.number) {
                 throw new Error('PR creation failed: No PR details received');
             }
 
-        } catch (error: any) {
-            if (error.message === 'No changes to create a pull request') {
-                vscode.window.showErrorMessage(t('messages.noChangesBetweenBranches'));
-                return;
-            }
+            await this.showSuccessNotification(result, isDraft);
 
-            // Handle GitHub API errors
-            if (error.response?.errors) {
-                const messages = error.response.errors.map((e: { message: string }) => e.message).join(', ');
-                throw new ServiceError(
-                    `Failed to create PR: ${messages}`,
-                    'github',
-                    { originalError: error }
-                );
-            }
-
-            throw error;
+        } catch (error: unknown) {
+            this.handleCreatePRError(error);
         }
+    }
+
+    /**
+     * Create PR with automatic fallback from draft to regular if not supported
+     */
+    private async createPRWithDraftFallback(
+        github: GitHubService,
+        params: { base: string; compare: string; title: string; body: string; issueNumber?: number; draft: boolean },
+        isDraft: boolean
+    ): Promise<{ number: number; html_url: string; draft?: boolean }> {
+        try {
+            const pr = await github.createPullRequest(params);
+            if (!pr?.number) {
+                throw new Error('Failed to create PR: Invalid response from GitHub');
+            }
+            this.logger.info(`PR #${pr.number} created successfully`);
+            return pr;
+        } catch (error: unknown) {
+            if (!isDraft || !(error instanceof Error) || !error.message?.includes('Draft pull requests are not supported')) {
+                throw error;
+            }
+
+            this.logger.warning('Draft PRs not supported, creating regular PR');
+            await vscode.window.showInformationMessage(t('messages.draftPRNotSupported'));
+
+            const regularPr = await github.createPullRequest({ ...params, draft: false });
+            if (!regularPr?.number) {
+                throw new Error('Failed to create regular PR: Invalid response from GitHub');
+            }
+            this.logger.info(`Regular PR #${regularPr.number} created successfully`);
+            return regularPr;
+        }
+    }
+
+    /**
+     * Handle errors from PR creation
+     */
+    private handleCreatePRError(error: unknown): never | void {
+        if (error instanceof Error && error.message === 'No changes to create a pull request') {
+            vscode.window.showErrorMessage(t('messages.noChangesBetweenBranches'));
+            return;
+        }
+
+        if (isGitHubApiError(error)) {
+            const messages = error.response.errors.map((e: { message: string }) => e.message).join(', ');
+            throw new ServiceError(`Failed to create PR: ${messages}`, 'github', { originalError: error });
+        }
+
+        throw error;
     }
 
     /**
@@ -490,40 +456,4 @@ export class PRCommand extends BaseCommand {
         }
     }
 
-    /**
-     * Open an external URL safely (http/https only).
-     */
-    private async openExternalUrl(url: string): Promise<void> {
-        try {
-            const uri = vscode.Uri.parse(url);
-            const scheme = uri.scheme.toLowerCase();
-
-            if (scheme !== 'https' && scheme !== 'http') {
-                this.logger.warning(`Blocked non-http(s) URL: ${url}`);
-                vscode.window.showErrorMessage('Cannot open non-http(s) URL.');
-                return;
-            }
-
-            await vscode.env.openExternal(uri);
-        } catch (error) {
-            this.logger.warning('Failed to open external URL', error);
-            vscode.window.showErrorMessage('Failed to open link.');
-        }
-    }
-
-    /**
-     * Clean up preview files and tabs
-     */
-    private async cleanup(): Promise<void> {
-        if (this.previewFile) {
-            try {
-                this.logger.debug('Cleaning up preview files');
-                await closePreviewTabs();
-                await cleanupPreviewFiles();
-                this.previewFile = undefined;
-            } catch (error) {
-                this.logger.warning('Error cleaning up preview files', error);
-            }
-        }
-    }
 }

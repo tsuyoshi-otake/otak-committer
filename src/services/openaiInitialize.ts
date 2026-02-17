@@ -7,6 +7,33 @@ import { ErrorHandler } from '../infrastructure/error';
 import { t } from '../i18n';
 import { isApiKeyValidated, markApiKeyValidated } from './openaiKeyValidationCache';
 
+const MAX_INITIALIZATION_ATTEMPTS = 3;
+
+/**
+ * Show the shared API key error dialog with Set/Diagnose/Settings options.
+ * Returns when the user has taken an action or cancelled.
+ */
+export async function showApiKeyErrorDialog(): Promise<void> {
+    const setApiKeyLabel = t('apiKey.setApiKey');
+    const diagnoseStorageLabel = t('commands.diagnoseStorage');
+    const openSettingsLabel = t('commands.openSettings');
+    const action = await vscode.window.showErrorMessage(
+        t('apiKey.errorPrompt'),
+        setApiKeyLabel,
+        diagnoseStorageLabel,
+        openSettingsLabel,
+        t('apiKey.cancel')
+    );
+
+    if (action === setApiKeyLabel) {
+        await vscode.commands.executeCommand('otak-committer.setApiKey');
+    } else if (action === diagnoseStorageLabel) {
+        await vscode.commands.executeCommand('otak-committer.diagnoseStorage');
+    } else if (action === openSettingsLabel) {
+        await vscode.commands.executeCommand('otak-committer.openSettings');
+    }
+}
+
 type ValidationKind = 'auth' | 'rate_limit' | 'network' | 'server' | 'unknown';
 type ValidateApiKeyResult =
     | { ok: true }
@@ -140,7 +167,7 @@ export async function initializeOpenAIService<T>(
             throw new Error('Extension context is required when OpenAI API key is not provided');
         }
 
-        for (let attempts = 0; attempts < 3; attempts++) {
+        for (let attempts = 0; attempts < MAX_INITIALIZATION_ATTEMPTS; attempts++) {
             // Try storage only if an API key wasn't provided explicitly.
             if (!apiKey && storage) {
                 apiKey = (await storage.getApiKey('openai'))?.trim();
@@ -274,30 +301,7 @@ export async function initializeOpenAIService<T>(
         // Check if it's an API key related error.
         const errorMessage = error instanceof Error ? error.message : String(error);
         if (errorMessage.includes('API key') || errorMessage.includes('401') || errorMessage.includes('Unauthorized')) {
-            const setApiKeyLabel = t('apiKey.setApiKey');
-            const diagnoseStorageLabel = t('commands.diagnoseStorage');
-            const openSettingsLabel = t('commands.openSettings');
-            const action = await vscode.window.showErrorMessage(
-                t('apiKey.errorPrompt'),
-                setApiKeyLabel,
-                diagnoseStorageLabel,
-                openSettingsLabel,
-                t('apiKey.cancel')
-            );
-
-            if (action === setApiKeyLabel) {
-                await vscode.commands.executeCommand('otak-committer.setApiKey');
-                return undefined;
-            }
-
-            if (action === diagnoseStorageLabel) {
-                await vscode.commands.executeCommand('otak-committer.diagnoseStorage');
-                return undefined;
-            }
-
-            if (action === openSettingsLabel) {
-                await vscode.commands.executeCommand('otak-committer.openSettings');
-            }
+            await showApiKeyErrorDialog();
             return undefined;
         }
 

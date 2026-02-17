@@ -26,6 +26,7 @@
   "config.reasoningEffort.medium": "中（均衡）",
   "config.reasoningEffort.high": "高（最慢，质量最高）",
   "config.maxInputTokens": "AI 处理的最大输入 token 数（默认：200K）",
-  "config.useConventionalCommits": "使用带 scope 的 Conventional Commits 格式（<type>(<scope>): <subject>）"
+  "config.useConventionalCommits": "使用带 scope 的 Conventional Commits 格式（<type>(<scope>): <subject>）",
+  "config.appendCommitTrailer": "在生成的提交消息末尾追加 'Commit-Message-By: otak-committer' 标记"
 }
 

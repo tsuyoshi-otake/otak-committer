@@ -9,6 +9,7 @@ import { ErrorHandler } from '../ErrorHandler.js';
 import { Logger } from '../../logging/Logger.js';
 import {
     BaseError,
+    ErrorSeverity,
     ValidationError,
     ServiceError,
     StorageError,
@@ -133,6 +134,7 @@ suite('ErrorHandler Unit Tests', () => {
 
         test('should map generic BaseError to Error severity', () => {
             class CustomError extends BaseError {
+                readonly severity = ErrorSeverity.Error;
                 constructor(message: string) {
                     super(message, 'CUSTOM_ERROR');
                 }

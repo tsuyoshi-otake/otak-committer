@@ -1,16 +1,12 @@
-import { BaseError } from './BaseError';
+import { BaseError, ErrorSeverity } from './BaseError';
 
 /**
  * Error thrown when a command execution fails
  * Used for VS Code command operations
  */
 export class CommandError extends BaseError {
-    /**
-     * Creates a new CommandError
-     * @param message - Description of the command failure
-     * @param commandId - ID of the command that failed
-     * @param context - Additional context
-     */
+    readonly severity = ErrorSeverity.Error;
+
     constructor(
         message: string,
         public readonly commandId: string,

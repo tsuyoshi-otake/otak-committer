@@ -14,6 +14,7 @@
     "apiKeySaved": "API 키가 성공적으로 저장되었습니다",
     "storageDiagnosisWritten": "스토리지 진단 결과를 출력(otak-committer)에 기록했습니다",
     "authRequired": "GitHub 인증이 필요합니다. 로그인해 주세요.",
+    "githubAuthPrompt": "GitHub 작업에는 인증이 필요합니다. 인증하시겠습니까?",
     "languageChanged": "언어가 {language}(으)로 변경되었습니다",
     "messageStyleChanged": "메시지 스타일이 {style}(으)로 변경되었습니다",
     "noChangesToCommit": "커밋할 변경 사항이 없습니다",
@@ -31,7 +32,8 @@
     "analyzingRepository": "저장소 분석 중...",
     "creatingIssue": "Issue 생성 중...",
     "updatingContent": "내용 업데이트 중...",
-    "waitingForModificationInput": "수정 입력 대기 중..."
+    "waitingForModificationInput": "수정 입력 대기 중...",
+    "storageFallbackWarning": "otak-committer: API 키가 대체 저장소에 저장되었습니다. 보안 저장소를 사용할 수 없습니다."
   },
   "statusBar": {
     "configuration": "구성",

@@ -8,9 +8,9 @@
 import * as assert from 'assert';
 import {
     CommitError,
-    createErrorContext,
+    createCommitErrorContext,
     formatErrorMessage,
-    ErrorContext,
+    CommitErrorContext,
     handleCommitError,
     isApiKeyError,
     isNetworkError,
@@ -25,28 +25,28 @@ suite('Commit Error Handling Tests', () => {
          * Validates: Requirement 4.5
          */
         test('should create context with operation name', () => {
-            const context = createErrorContext('getDiff');
+            const context = createCommitErrorContext('getDiff');
             assert.strictEqual(context.operation, 'getDiff');
         });
 
         test('should create context with file count', () => {
-            const context = createErrorContext('getDiff', { fileCount: 10 });
+            const context = createCommitErrorContext('getDiff', { fileCount: 10 });
             assert.strictEqual(context.details?.fileCount, 10);
         });
 
         test('should create context with token count', () => {
-            const context = createErrorContext('generateMessage', { tokenCount: 50000 });
+            const context = createCommitErrorContext('generateMessage', { tokenCount: 50000 });
             assert.strictEqual(context.details?.tokenCount, 50000);
         });
 
         test('should create context with error type', () => {
-            const context = createErrorContext('apiCall', { errorType: 'RATE_LIMIT' });
+            const context = createCommitErrorContext('apiCall', { errorType: 'RATE_LIMIT' });
             assert.strictEqual(context.details?.errorType, 'RATE_LIMIT');
         });
 
         test('should create context with API error details', () => {
             const apiError = { status: 401, message: 'Unauthorized' };
-            const context = createErrorContext('apiCall', { apiError });
+            const context = createCommitErrorContext('apiCall', { apiError });
             assert.deepStrictEqual(context.details?.apiError, apiError);
         });
     });
@@ -57,14 +57,14 @@ suite('Commit Error Handling Tests', () => {
          * Validates: Requirements 4.1, 4.2
          */
         test('should format message with operation name', () => {
-            const context: ErrorContext = { operation: 'getDiff' };
+            const context: CommitErrorContext = { operation: 'getDiff' };
             const error = new Error('Git error');
             const formatted = formatErrorMessage(error, context);
             assert.ok(formatted.includes('getDiff'));
         });
 
         test('should format message with file count when available', () => {
-            const context: ErrorContext = {
+            const context: CommitErrorContext = {
                 operation: 'getDiff',
                 details: { fileCount: 50 }
             };
@@ -74,7 +74,7 @@ suite('Commit Error Handling Tests', () => {
         });
 
         test('should format message with token count when available', () => {
-            const context: ErrorContext = {
+            const context: CommitErrorContext = {
                 operation: 'truncateDiff',
                 details: { tokenCount: 300000 }
             };
@@ -84,7 +84,7 @@ suite('Commit Error Handling Tests', () => {
         });
 
         test('should include original error message', () => {
-            const context: ErrorContext = { operation: 'test' };
+            const context: CommitErrorContext = { operation: 'test' };
             const error = new Error('Original error message');
             const formatted = formatErrorMessage(error, context);
             assert.ok(formatted.includes('Original error message'));
@@ -98,7 +98,7 @@ suite('Commit Error Handling Tests', () => {
         });
 
         test('should format diff error with reason', () => {
-            const context: ErrorContext = {
+            const context: CommitErrorContext = {
                 operation: 'getDiff',
                 details: { errorType: 'NO_REPO' }
             };
@@ -115,7 +115,7 @@ suite('Commit Error Handling Tests', () => {
 
     suite('API Errors (Requirement 4.2)', () => {
         test('should format API error with status code', () => {
-            const context: ErrorContext = {
+            const context: CommitErrorContext = {
                 operation: 'generateMessage',
                 details: {
                     apiError: { status: 500, message: 'Internal Server Error' }
@@ -133,7 +133,7 @@ suite('Commit Error Handling Tests', () => {
 
         test('should identify rate limit errors', () => {
             const error = new CommitError('Rate limited', 'RATE_LIMIT');
-            const context: ErrorContext = {
+            const context: CommitErrorContext = {
                 operation: 'generateMessage',
                 details: { errorType: 'RATE_LIMIT' }
             };
@@ -155,7 +155,7 @@ suite('Commit Error Handling Tests', () => {
 
         test('should format API key error with configuration hint', () => {
             const error = new CommitError('Invalid API key', 'INVALID_API_KEY');
-            const context: ErrorContext = { operation: 'validateApiKey' };
+            const context: CommitErrorContext = { operation: 'validateApiKey' };
             const formatted = formatErrorMessage(error, context);
             assert.ok(
                 formatted.includes('API key') ||
@@ -173,7 +173,7 @@ suite('Commit Error Handling Tests', () => {
 
         test('should format empty diff error clearly', () => {
             const error = new CommitError('No changes detected', 'EMPTY_DIFF');
-            const context: ErrorContext = { operation: 'getDiff' };
+            const context: CommitErrorContext = { operation: 'getDiff' };
             const formatted = formatErrorMessage(error, context);
             assert.ok(
                 formatted.includes('changes') ||
@@ -187,7 +187,7 @@ suite('Commit Error Handling Tests', () => {
         test('should log full error details for debugging', () => {
             const error = new Error('Unexpected failure');
             (error as any).stack = 'Error stack trace here';
-            const context: ErrorContext = {
+            const context: CommitErrorContext = {
                 operation: 'unknown',
                 details: {
                     fileCount: 5,
@@ -203,14 +203,14 @@ suite('Commit Error Handling Tests', () => {
         test('should handle errors without stack traces', () => {
             const error = new Error('Simple error');
             delete error.stack;
-            const context: ErrorContext = { operation: 'test' };
+            const context: CommitErrorContext = { operation: 'test' };
             const formatted = formatErrorMessage(error, context);
             assert.ok(formatted.includes('Simple error'));
         });
 
         test('should handle non-Error objects', () => {
             const error = 'String error';
-            const context: ErrorContext = { operation: 'test' };
+            const context: CommitErrorContext = { operation: 'test' };
             const formatted = formatErrorMessage(error as any, context);
             assert.ok(formatted.length > 0);
         });
@@ -224,7 +224,7 @@ suite('Commit Error Handling Tests', () => {
         });
 
         test('should create error with context', () => {
-            const context: ErrorContext = {
+            const context: CommitErrorContext = {
                 operation: 'test',
                 details: { fileCount: 10 }
             };
@@ -241,7 +241,7 @@ suite('Commit Error Handling Tests', () => {
     suite('Error Handler Function', () => {
         test('should return formatted message for known errors', () => {
             const error = new CommitError('API failed', 'API_ERROR');
-            const context: ErrorContext = { operation: 'apiCall' };
+            const context: CommitErrorContext = { operation: 'apiCall' };
             const result = handleCommitError(error, context);
             assert.ok(result.message.length > 0);
             assert.ok(result.isRecoverable !== undefined);
@@ -249,14 +249,14 @@ suite('Commit Error Handling Tests', () => {
 
         test('should mark API key errors as recoverable', () => {
             const error = new CommitError('Invalid key', 'INVALID_API_KEY');
-            const context: ErrorContext = { operation: 'validate' };
+            const context: CommitErrorContext = { operation: 'validate' };
             const result = handleCommitError(error, context);
             assert.strictEqual(result.isRecoverable, true);
         });
 
         test('should mark network errors as potentially recoverable', () => {
             const error = new CommitError('Timeout', 'NETWORK_ERROR');
-            const context: ErrorContext = { operation: 'apiCall' };
+            const context: CommitErrorContext = { operation: 'apiCall' };
             const result = handleCommitError(error, context);
             assert.strictEqual(result.isRecoverable, true);
         });

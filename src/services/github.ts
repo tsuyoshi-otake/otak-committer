@@ -13,8 +13,20 @@ import {
     GitHubLabel
 } from '../types';
 import { authentication } from 'vscode';
+import { t } from '../i18n';
 import { BranchManager, BranchSelector, BranchSelection } from './branch';
 import { ErrorHandler } from '../infrastructure/error';
+import { TokenManager } from './tokenManager';
+
+/**
+ * Minimal interface for the VS Code Git extension API
+ */
+interface GitExtensionAPI {
+    repositories: Array<{
+        state: { HEAD?: { name?: string } };
+        getConfig(key: string): Promise<string | undefined>;
+    }>;
+}
 
 /**
  * Service for GitHub API operations
@@ -30,13 +42,12 @@ import { ErrorHandler } from '../infrastructure/error';
  * ```
  */
 export class GitHubService extends BaseService implements BranchManager {
+    private static readonly GITHUB_PAGE_SIZE = 100;
     private octokit?: GitHubAPI;
     private owner: string = '';
     private repo: string = '';
-    // Unified 200K token limit for GPT-5.2 migration
-    private static readonly MAX_TOKENS = 200 * 1000;
     private initialized: boolean = false;
-    private gitApi: any;
+    private gitApi!: GitExtensionAPI;
 
     constructor() {
         super();
@@ -54,12 +65,12 @@ export class GitHubService extends BaseService implements BranchManager {
             if (!authSession) {
                 this.logger.info('No GitHub authentication session found, prompting user');
                 const choice = await vscode.window.showInformationMessage(
-                    'GitHub operations require authentication. Please authenticate.',
-                    'Yes',
-                    'No'
+                    t('messages.githubAuthPrompt'),
+                    t('buttons.yes'),
+                    t('buttons.no')
                 );
 
-                if (choice !== 'Yes') {
+                if (choice !== t('buttons.yes')) {
                     this.logger.warning('User declined GitHub authentication');
                     throw new Error('GitHub authentication is required.');
                 }
@@ -115,6 +126,25 @@ export class GitHubService extends BaseService implements BranchManager {
             });
             throw error;
         }
+    }
+
+    /**
+     * Check if a GitHub API error indicates no commits between branches (422)
+     */
+    private isNoCommitsBetweenBranchesError(error: unknown): boolean {
+        if (typeof error !== 'object' || error === null) { return false; }
+        const status = 'status' in error ? error.status : undefined;
+        const respStatus = 'response' in error && typeof error.response === 'object' && error.response !== null && 'status' in error.response ? error.response.status : undefined;
+        const effectiveStatus = status ?? respStatus;
+        if (effectiveStatus !== 422) { return false; }
+
+        const message = error instanceof Error ? error.message : '';
+        const dataMessage = 'response' in error && typeof error.response === 'object' && error.response !== null
+            && 'data' in error.response && typeof error.response.data === 'object' && error.response.data !== null
+            && 'message' in error.response.data && typeof error.response.data.message === 'string'
+            ? error.response.data.message : '';
+
+        return message.includes('No commits between') || dataMessage.includes('No commits between');
     }
 
     private async detectRepositoryInfo(): Promise<void> {
@@ -217,15 +247,11 @@ export class GitHubService extends BaseService implements BranchManager {
 
             this.logger.info(`Retrieved diff for ${files.length} files`);
 
-            const configuredMaxTokens = vscode.workspace.getConfiguration('otakCommitter').get<number>('maxInputTokens');
-            const maxTokensLimit =
-                typeof configuredMaxTokens === 'number' && configuredMaxTokens >= 1000
-                    ? configuredMaxTokens
-                    : GitHubService.MAX_TOKENS;
+            const maxTokensLimit = TokenManager.getConfiguredMaxTokens();
 
-            // Calculate the total size of patches (approximation: 1 token ≈ 4 characters)
+            // Calculate the total size of patches
             for (const file of files) {
-                totalTokens += Math.ceil(file.patch.length / 4);
+                totalTokens += TokenManager.estimateTokens(file.patch);
             }
 
             // Truncate patches if the size limit is exceeded
@@ -249,7 +275,7 @@ export class GitHubService extends BaseService implements BranchManager {
             };
         } catch (error) {
             this.logger.error('Failed to get branch diff details', error);
-            this.handleError(error);
+            this.handleErrorAndRethrow(error);
         }
     }
 
@@ -294,7 +320,7 @@ export class GitHubService extends BaseService implements BranchManager {
             };
         } catch (error) {
             this.logger.error(`Failed to get issue #${number}`, error);
-            this.handleError(error);
+            this.handleErrorAndRethrow(error);
         }
     }
 
@@ -357,21 +383,13 @@ export class GitHubService extends BaseService implements BranchManager {
                 html_url: response.data.html_url,
                 draft: params.draft || false
             };
-        } catch (error: any) {
-            // GitHub returns 422 if there are no commits between branches.
-            // Avoid an extra compareCommits call; map this to a stable, user-friendly error.
-            const status = error?.status ?? error?.response?.status;
-            const message =
-                (typeof error?.message === 'string' && error.message) ||
-                (typeof error?.response?.data?.message === 'string' && error.response.data.message) ||
-                '';
-
-            if (status === 422 && message.includes('No commits between')) {
+        } catch (error: unknown) {
+            if (this.isNoCommitsBetweenBranchesError(error)) {
                 throw new Error('No changes to create a pull request');
             }
 
             this.logger.error('Failed to create pull request', error);
-            this.handleError(error);
+            this.handleErrorAndRethrow(error);
         }
     }
 
@@ -417,7 +435,7 @@ export class GitHubService extends BaseService implements BranchManager {
             };
         } catch (error) {
             this.logger.error('Failed to create issue', error);
-            this.handleError(error);
+            this.handleErrorAndRethrow(error);
         }
     }
 
@@ -442,7 +460,7 @@ export class GitHubService extends BaseService implements BranchManager {
             const response = await this.octokit.repos.listBranches({
                 owner: this.owner,
                 repo: this.repo,
-                per_page: 100
+                per_page: GitHubService.GITHUB_PAGE_SIZE
             });
 
             if (response.status !== 200) {
@@ -455,7 +473,7 @@ export class GitHubService extends BaseService implements BranchManager {
             return branches;
         } catch (error) {
             this.logger.error('Failed to get branches', error);
-            this.handleError(error);
+            this.handleErrorAndRethrow(error);
         }
     }
 
@@ -483,7 +501,7 @@ export class GitHubService extends BaseService implements BranchManager {
                 state: 'open',
                 sort: 'updated',
                 direction: 'desc',
-                per_page: 100
+                per_page: GitHubService.GITHUB_PAGE_SIZE
             });
 
             if (response.status !== 200) {
@@ -506,7 +524,7 @@ export class GitHubService extends BaseService implements BranchManager {
             return issues;
         } catch (error) {
             this.logger.error('Failed to get issues', error);
-            this.handleError(error);
+            this.handleErrorAndRethrow(error);
         }
     }
 }

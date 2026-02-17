@@ -39,7 +39,7 @@ class ErrorThrowingCommand extends BaseCommand {
                 throw this.errorToThrow;
             }
         } catch (error) {
-            this.handleError(error, 'executing command');
+            this.handleErrorSilently(error, 'executing command');
         }
     }
 }

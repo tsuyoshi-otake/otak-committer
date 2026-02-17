@@ -3,8 +3,8 @@ import { BaseCommand } from './BaseCommand';
 import { GitService, GitServiceFactory } from '../services/git';
 import { OpenAIService } from '../services/openai';
 import { MessageStyle } from '../types/enums/MessageStyle';
+import { TemplateInfo } from '../types';
 import { sanitizeCommitMessage } from '../utils';
-import { ServiceError } from '../types/errors';
 import { t } from '../i18n/index.js';
 
 /**
@@ -65,14 +65,17 @@ export class CommitCommand extends BaseCommand {
                 return;
             }
 
+            // Append trailer if enabled
+            const finalMessage = this.appendTrailerIfEnabled(message);
+
             // Set message in source control
-            await this.setCommitMessage(message);
+            await this.setCommitMessage(finalMessage);
 
             this.logger.info('Successfully generated and set commit message');
             await this.showSuccessNotification();
 
         } catch (error) {
-            this.handleError(error, 'generating commit message');
+            this.handleErrorSilently(error, 'generating commit message');
         }
     }
 
@@ -96,47 +99,13 @@ export class CommitCommand extends BaseCommand {
 
     /**
      * Find commit message templates in the repository
-     * 
+     *
      * @returns Template information
      */
-    private async findTemplates(git: GitService): Promise<{ commit?: any; pr?: any }> {
+    private async findTemplates(git: GitService): Promise<{ commit?: TemplateInfo; pr?: TemplateInfo }> {
         this.logger.debug('Looking for commit message templates');
 
         return await git.findTemplates();
-    }
-
-    /**
-     * Initialize OpenAI service with API key from storage
-     * 
-     * @returns OpenAI service instance or undefined if initialization fails
-     */
-    private async initializeOpenAI(): Promise<OpenAIService | undefined> {
-        this.logger.debug('Initializing OpenAIService');
-
-        try {
-            const openai = await OpenAIService.initialize({
-                language: this.config.get('language'),
-                messageStyle: this.config.get('messageStyle'),
-                useEmoji: this.config.get('useEmoji')
-            }, this.context);
-
-            if (!openai) {
-                // OpenAIServiceFactory is responsible for prompting the user and showing errors.
-                // Avoid double-notifying here (especially on user cancellation).
-                this.logger.info('OpenAIService initialization returned undefined');
-                return undefined;
-            }
-
-            return openai;
-
-        } catch (error) {
-            this.logger.error('Error initializing OpenAI service', error);
-            throw new ServiceError(
-                'Failed to initialize OpenAI service',
-                'openai',
-                { originalError: error }
-            );
-        }
     }
 
     /**
@@ -150,7 +119,7 @@ export class CommitCommand extends BaseCommand {
     private async generateMessage(
         openai: OpenAIService,
         diff: string,
-        template?: any
+        template?: TemplateInfo
     ): Promise<string | undefined> {
         this.logger.debug('Starting commit message generation');
 
@@ -192,6 +161,17 @@ export class CommitCommand extends BaseCommand {
         }
 
         return message;
+    }
+
+    /**
+     * Append the Commit-Message-By trailer if the setting is enabled
+     */
+    private appendTrailerIfEnabled(message: string): string {
+        const appendTrailer = this.config.get('appendCommitTrailer') ?? true;
+        if (!appendTrailer) {
+            return message;
+        }
+        return `${message}\n\nCommit-Message-By: otak-committer`;
     }
 
     /**

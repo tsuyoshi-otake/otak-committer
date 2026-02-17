@@ -34,7 +34,7 @@ class TestableConfigCommand extends ConfigCommand {
     }
 
     public testHandleError(error: unknown, operation: string): void {
-        this.handleError(error, operation);
+        this.handleErrorSilently(error, operation);
     }
 }
 

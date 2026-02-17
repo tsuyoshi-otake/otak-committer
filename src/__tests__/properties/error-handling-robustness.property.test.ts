@@ -9,10 +9,10 @@
 import * as fc from 'fast-check';
 import {
     CommitError,
-    createErrorContext,
+    createCommitErrorContext,
     formatErrorMessage,
     handleCommitError,
-    ErrorContext
+    CommitErrorContext
 } from '../../utils/errorHandling';
 import { runPropertyTest } from '../../test/helpers/property-test.helper';
 
@@ -52,7 +52,7 @@ suite('Error Handling Robustness Property Tests', () => {
                         fc.string({ minLength: 1, maxLength: 100 })
                     ),
                     ([operation, errorMsg]) => {
-                        const context = createErrorContext(operation);
+                        const context = createCommitErrorContext(operation);
                         const error = new Error(errorMsg);
                         const formatted = formatErrorMessage(error, context);
 
@@ -73,7 +73,7 @@ suite('Error Handling Robustness Property Tests', () => {
                         fc.string({ minLength: 1, maxLength: 50 })
                     ),
                     ([operation, fileCount, errorMsg]) => {
-                        const context = createErrorContext(operation, { fileCount });
+                        const context = createCommitErrorContext(operation, { fileCount });
                         const error = new Error(errorMsg);
                         const formatted = formatErrorMessage(error, context);
 
@@ -95,7 +95,7 @@ suite('Error Handling Robustness Property Tests', () => {
                         fc.string({ minLength: 1, maxLength: 50 })
                     ),
                     ([operation, tokenCount, errorMsg]) => {
-                        const context = createErrorContext(operation, { tokenCount });
+                        const context = createCommitErrorContext(operation, { tokenCount });
                         const error = new Error(errorMsg);
                         const formatted = formatErrorMessage(error, context);
 
@@ -115,7 +115,7 @@ suite('Error Handling Robustness Property Tests', () => {
                     ),
                     ([message, code, operation]) => {
                         const error = new CommitError(message, code);
-                        const context: ErrorContext = { operation };
+                        const context: CommitErrorContext = { operation };
                         const result = handleCommitError(error, context);
 
                         return (
@@ -137,7 +137,7 @@ suite('Error Handling Robustness Property Tests', () => {
                     ),
                     ([message, code]) => {
                         const error = new CommitError(message, code);
-                        const context: ErrorContext = { operation: 'validateApiKey' };
+                        const context: CommitErrorContext = { operation: 'validateApiKey' };
                         const result = handleCommitError(error, context);
 
                         return result.isRecoverable === true;
@@ -161,7 +161,7 @@ suite('Error Handling Robustness Property Tests', () => {
                         if (input.tokenCount !== null) { details.tokenCount = input.tokenCount; }
                         if (input.errorType !== null) { details.errorType = input.errorType; }
 
-                        const context = createErrorContext(input.operation, details);
+                        const context = createCommitErrorContext(input.operation, details);
 
                         // Verify context preserves operation
                         if (context.operation !== input.operation) { return false; }

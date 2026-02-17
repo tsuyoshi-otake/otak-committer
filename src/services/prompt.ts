@@ -10,14 +10,6 @@ import {
     getTraditionalFormat
 } from '../utils/conventionalCommits';
 
-// Re-export for backward compatibility
-export {
-    extractFilePathsFromDiff,
-    generateScopeHint,
-    getConventionalCommitsFormat,
-    getTraditionalFormat
-} from '../utils/conventionalCommits';
-
 /**
  * Message length limits by style (in characters)
  * Updated to provide longer commit messages for better context
@@ -34,10 +26,10 @@ export const MESSAGE_LENGTH_LIMITS = {
  * @returns The character limit
  */
 export function getMessageLengthLimit(style: MessageStyle | string): number {
-    if (style === MessageStyle.Simple || style === 'simple') {
+    if (style === MessageStyle.Simple) {
         return MESSAGE_LENGTH_LIMITS[MessageStyle.Simple];
     }
-    if (style === MessageStyle.Detailed || style === 'detailed') {
+    if (style === MessageStyle.Detailed) {
         return MESSAGE_LENGTH_LIMITS[MessageStyle.Detailed];
     }
     return MESSAGE_LENGTH_LIMITS[MessageStyle.Normal];
@@ -56,6 +48,28 @@ export function getMessageLengthLimit(style: MessageStyle | string): number {
  * ```
  */
 export class PromptService {
+    /** Maximum allowed length for customMessage configuration value */
+    private static readonly MAX_CUSTOM_MESSAGE_LENGTH = 500;
+
+    /** Maximum allowed length for template content included in prompts */
+    private static readonly MAX_TEMPLATE_CONTENT_LENGTH = 10000;
+
+    /**
+     * Sanitize user-provided configuration input to limit prompt injection risk
+     */
+    static sanitizeConfigInput(input: string): string {
+        if (!input) { return ''; }
+        return input.slice(0, PromptService.MAX_CUSTOM_MESSAGE_LENGTH).trim();
+    }
+
+    /**
+     * Sanitize template content before including in prompts
+     */
+    static sanitizeTemplateContent(content: string): string {
+        if (!content) { return ''; }
+        return content.slice(0, PromptService.MAX_TEMPLATE_CONTENT_LENGTH).trim();
+    }
+
     /**
      * Create a prompt for generating commit messages
      * 
@@ -85,18 +99,20 @@ export class PromptService {
     ): Promise<string> {
         const config = vscode.workspace.getConfiguration('otakCommitter');
         const useEmoji = config.get<boolean>('useEmoji') || false;
-        const customMessage = config.get<string>('customMessage') || '';
+        const rawCustomMessage = config.get<string>('customMessage') || '';
         const useConventionalCommits = config.get<boolean>('useConventionalCommits') ?? false;
 
         const emojiInstruction = useEmoji ? 'Feel free to use emojis for emphasis and key points.' : 'DO NOT use any emojis in the content.';
+        const customMessage = PromptService.sanitizeConfigInput(rawCustomMessage);
         const customInstruction = customMessage ? `\nAdditional requirements: ${customMessage}` : '';
 
         // テンプレートがある場合はそれを基に生成 (Templates override Conventional Commits format)
         if (template) {
+            const sanitizedTemplate = PromptService.sanitizeTemplateContent(template.content);
             return `Based on the following template and Git diff, generate a commit message:
 
 Template:
-${template.content}
+${sanitizedTemplate}
 
 Git diff:
 ${diff}
@@ -191,8 +207,9 @@ ${file.patch}`).join('\n')}`;
     ): Promise<{ title: string; body: string }> {
         const diffSummary = await this.generateDiffSummary(diff);
         const useEmoji = vscode.workspace.getConfiguration('otakCommitter').get<boolean>('useEmoji') || false;
-        const customMessage = vscode.workspace.getConfiguration('otakCommitter').get<string>('customMessage') || '';
+        const rawCustomMessage = vscode.workspace.getConfiguration('otakCommitter').get<string>('customMessage') || '';
         const emojiInstruction = useEmoji ? '' : 'DO NOT use any emojis in the content. ';
+        const customMessage = PromptService.sanitizeConfigInput(rawCustomMessage);
         const customInstruction = customMessage ? `Additional requirements: ${customMessage}\n\n` : '';
 
         const titlePrompt = `Generate a Pull Request title in ${language}.
@@ -209,7 +226,7 @@ ${customInstruction}Git diff: ${diffSummary}`;
 NOTE: Generate the content in ${language}.
 
 Template:
-${template.content}
+${PromptService.sanitizeTemplateContent(template.content)}
 
 Git diff:
 ${diffSummary}

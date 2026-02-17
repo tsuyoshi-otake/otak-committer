@@ -14,6 +14,7 @@
     "apiKeySaved": "API 金鑰儲存成功",
     "storageDiagnosisWritten": "儲存診斷結果已寫入輸出: otak-committer",
     "authRequired": "需要 GitHub 身份驗證。請登入。",
+    "githubAuthPrompt": "GitHub 操作需要身份驗證。請進行認證。",
     "languageChanged": "語言已變更為 {language}",
     "messageStyleChanged": "訊息風格已變更為 {style}",
     "noChangesToCommit": "沒有要提交的變更",
@@ -31,7 +32,8 @@
     "analyzingRepository": "正在分析倉庫...",
     "creatingIssue": "正在建立 Issue...",
     "updatingContent": "正在更新內容...",
-    "waitingForModificationInput": "等待修改輸入..."
+    "waitingForModificationInput": "等待修改輸入...",
+    "storageFallbackWarning": "otak-committer: API 金鑰已儲存在備用儲存中。安全儲存不可用。"
   },
   "statusBar": {
     "configuration": "設定",

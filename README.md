@@ -32,7 +32,7 @@ Uses your repo's commit templates (`.gitmessage`, `.github/commit_template`, etc
 4. Review the generated description.
 5. Submit as draft or ready for review.
 
-Automatically uses PR templates, links issues, and applies labels/milestones when available. Requires a GitHub token with `repo` scope.
+Automatically uses PR templates, links issues, and applies labels/milestones when available. Requires GitHub sign-in via VS Code.
 
 ### Issues
 
@@ -90,10 +90,13 @@ Uses VS Code's built-in GitHub authentication. Sign in and out through the Accou
 - **`otakCommitter.messageStyle`**: Message detail level (default: `normal`)
 - **`otakCommitter.i18n.uiLanguage`**: UI language preference (default: `auto`)
   - `auto`, `en`, `ja`, `ko`, `vi`, `zh-cn`, `zh-tw`
-- **`otakCommitter.github.token`**: GitHub token for PR/issue features
 - **`otakCommitter.customMessage`**: Custom AI instructions (optional)
 - **`otakCommitter.useEmoji`**: Enable emoji prefixes (default: `false`)
 - **`otakCommitter.emojiStyle`**: Emoji format (`github` or `unicode`)
+- **`otakCommitter.reasoningEffort`**: AI reasoning depth — `none`, `low`, `medium`, `high` (default: `low`)
+- **`otakCommitter.maxInputTokens`**: Maximum input tokens for diff analysis (default: `200000`)
+- **`otakCommitter.useConventionalCommits`**: Use strict Conventional Commits format (default: `false`)
+- **`otakCommitter.appendCommitTrailer`**: Append `Commit-Message-By: otak-committer` trailer (default: `true`)
 
 ### Custom Instructions Examples
 
@@ -122,14 +125,14 @@ Access via the Command Palette (`Cmd/Ctrl+Shift+P`):
 - Visual Studio Code 1.90.0 or higher
 - Git
 - OpenAI API key (for AI features)
-- GitHub access for PR/issue features (token with `repo` scope)
+- GitHub sign-in via VS Code for PR/issue features
 
 ## Installation
 
 1. Install from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=odangoo.otak-committer).
 2. Get an OpenAI API key from [OpenAI](https://platform.openai.com/api-keys).
 3. Run `otak-committer: Set OpenAI API Key`.
-4. (Optional) Create a GitHub Personal Access Token with `repo` scope and set `otakCommitter.github.token`.
+4. (Optional) Sign in to GitHub via the Accounts icon in the Activity Bar for PR/issue features.
 
 Default: English + Normal style. Change anytime from the status bar.
 
@@ -172,7 +175,7 @@ The extension uses GPT-5.2 for high-quality commit message generation.
 ## Troubleshooting
 
 - **No output or empty results**: Ensure you have staged changes and an OpenAI API key configured.
-- **PR/issue creation fails**: Verify `otakCommitter.github.token` has `repo` scope and GitHub auth is signed in.
+- **PR/issue creation fails**: Verify GitHub auth is signed in via the Accounts icon in the Activity Bar.
 - **Wrong UI language**: Check `otakCommitter.i18n.uiLanguage` (default: `auto`).
 
 ## Related Extensions

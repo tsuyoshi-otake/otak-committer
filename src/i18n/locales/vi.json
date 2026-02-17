@@ -14,6 +14,7 @@
     "apiKeySaved": "API key da duoc luu thanh cong",
     "storageDiagnosisWritten": "Chan doan luu tru da duoc ghi vao Output: otak-committer",
     "authRequired": "Can xac thuc GitHub. Vui long dang nhap.",
+    "githubAuthPrompt": "Thao tac GitHub yeu cau xac thuc. Vui long xac thuc.",
     "languageChanged": "Ngon ngu da duoc thay doi thanh {language}",
     "messageStyleChanged": "Kieu thong diep da duoc thay doi thanh {style}",
     "noChangesToCommit": "Khong co thay doi de commit",
@@ -31,7 +32,8 @@
     "analyzingRepository": "Dang phan tich repository...",
     "creatingIssue": "Dang tao issue...",
     "updatingContent": "Dang cap nhat noi dung...",
-    "waitingForModificationInput": "Dang cho nhap sua doi..."
+    "waitingForModificationInput": "Dang cho nhap sua doi...",
+    "storageFallbackWarning": "otak-committer: API key da duoc luu vao bo nho du phong. Bo nho bao mat khong kha dung."
   },
   "statusBar": {
     "configuration": "Cau Hinh",

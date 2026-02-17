@@ -7,14 +7,9 @@ const PREVIEW_DIR = path.join(os.tmpdir(), 'otak-committer');
 
 export async function cleanupPreviewFiles() {
     try {
-        const stats = await vscode.workspace.fs.stat(vscode.Uri.file(PREVIEW_DIR));
-        if (stats) {
-            await vscode.workspace.fs.delete(vscode.Uri.file(PREVIEW_DIR), { recursive: true });
-        }
-    } catch (error) {
-        if (error instanceof vscode.FileSystemError && error.code !== 'FileNotFound') {
-            console.error('Error cleaning up preview directory:', error);
-        }
+        await vscode.workspace.fs.delete(vscode.Uri.file(PREVIEW_DIR), { recursive: true });
+    } catch {
+        // Ignore errors - directory may not exist
     }
 }
 
@@ -51,7 +46,7 @@ export async function showMarkdownPreview(content: string, prefix: string = 'tem
 
         return { uri: tempUri, document };
     } catch (error) {
-        console.error('Error showing markdown preview:', error);
+        console.error('Error showing markdown preview', error);
         return undefined;
     }
 }

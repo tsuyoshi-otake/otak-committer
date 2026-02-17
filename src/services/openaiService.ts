@@ -6,12 +6,11 @@ import { ServiceConfig, TemplateInfo } from '../types';
 import { MessageStyle } from '../types/messageStyle';
 import { PullRequestDiff } from '../types/github';
 import { formatMarkdown, cleanMarkdown } from '../utils';
-import { t } from '../i18n';
 import { getPrompt } from '../languages/prompts';
 import type { SupportedLanguage } from '../languages';
 import { PromptType } from '../types/enums/PromptType';
 import { invalidateValidatedApiKey } from './openaiKeyValidationCache';
-import { initializeOpenAIService } from './openaiInitialize';
+import { initializeOpenAIService, showApiKeyErrorDialog } from './openaiInitialize';
 
 /**
  * Service for interacting with OpenAI's API
@@ -40,8 +39,7 @@ export class OpenAIService extends BaseService {
     }
 
     private isAuthenticationError(error: unknown): boolean {
-        const status = (error as { status?: unknown } | null | undefined)?.status;
-        if (status === 401) {
+        if (typeof error === 'object' && error !== null && 'status' in error && error.status === 401) {
             return true;
         }
 
@@ -51,53 +49,24 @@ export class OpenAIService extends BaseService {
         return (
             lower.includes('unauthorized') ||
             lower.includes('authentication') ||
-            lower.includes('api key') ||
-            lower.includes('401')
+            lower.includes('api key')
         );
     }
 
     private async promptToUpdateApiKey(): Promise<void> {
         const apiKey = this.config.openaiApiKey?.trim();
         if (apiKey) {
-            // Key might have been revoked mid-session; re-validate next time.
             invalidateValidatedApiKey(apiKey);
         }
-
-        const setApiKeyLabel = t('apiKey.setApiKey');
-        const diagnoseStorageLabel = t('commands.diagnoseStorage');
-        const openSettingsLabel = t('commands.openSettings');
-        const action = await vscode.window.showErrorMessage(
-            t('apiKey.errorPrompt'),
-            setApiKeyLabel,
-            diagnoseStorageLabel,
-            openSettingsLabel,
-            t('apiKey.cancel')
-        );
-
-        if (action === setApiKeyLabel) {
-            await vscode.commands.executeCommand('otak-committer.setApiKey');
-            return;
-        }
-
-        if (action === diagnoseStorageLabel) {
-            await vscode.commands.executeCommand('otak-committer.diagnoseStorage');
-            return;
-        }
-
-        if (action === openSettingsLabel) {
-            await vscode.commands.executeCommand('otak-committer.openSettings');
-        }
+        await showApiKeyErrorDialog();
     }
 
     private getReasoningEffort(): 'low' | 'medium' | 'high' | undefined {
-        const effort = (this.config.reasoningEffort || 'low').toLowerCase();
+        const effort = this.config.reasoningEffort || 'low';
         if (effort === 'none') {
             return undefined;
         }
-        if (effort === 'low' || effort === 'medium' || effort === 'high') {
-            return effort as 'low' | 'medium' | 'high';
-        }
-        return 'low';
+        return effort;
     }
 
     private getTemperature(requested?: number): number | undefined {
@@ -161,14 +130,19 @@ export class OpenAIService extends BaseService {
                 store: false
             });
 
-            let message = response.choices[0].message.content;
-            if (message) {
-                message = message.trimStart();
-                this.logger.info('Commit message generated successfully');
-                return message;
+            if (!response.choices || response.choices.length === 0) {
+                this.logger.warning('No choices returned from API');
+                return undefined;
             }
-            this.logger.warning('No commit message content returned from API');
-            return undefined;
+
+            let message = response.choices[0].message.content;
+            if (typeof message !== 'string' || !message.trim()) {
+                this.logger.warning('No commit message content returned from API');
+                return undefined;
+            }
+            message = message.trimStart();
+            this.logger.info('Commit message generated successfully');
+            return message;
         } catch (error) {
             this.logger.error('Failed to generate commit message', error);
             if (this.isAuthenticationError(error)) {
@@ -236,10 +210,10 @@ export class OpenAIService extends BaseService {
                 })
             ]);
 
-            const title = titleResponse.choices[0].message.content?.trim();
-            const body = bodyResponse.choices[0].message.content?.trim();
+            const title = titleResponse.choices?.[0]?.message?.content?.trim();
+            const body = bodyResponse.choices?.[0]?.message?.content?.trim();
 
-            if (!title || !body) {
+            if (typeof title !== 'string' || !title || typeof body !== 'string' || !body) {
                 throw new Error('Failed to generate PR content');
             }
 

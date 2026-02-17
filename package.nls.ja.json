@@ -26,6 +26,7 @@
   "config.reasoningEffort.medium": "中（バランス）",
   "config.reasoningEffort.high": "高（最も遅い、品質最高）",
   "config.maxInputTokens": "AI処理の最大入力トークン数（デフォルト: 200K）",
-  "config.useConventionalCommits": "スコープ付きの Conventional Commits 形式を使用（<type>(<scope>): <subject>）"
+  "config.useConventionalCommits": "スコープ付きの Conventional Commits 形式を使用（<type>(<scope>): <subject>）",
+  "config.appendCommitTrailer": "生成されたコミットメッセージに 'Commit-Message-By: otak-committer' トレーラーを追加"
 }
 

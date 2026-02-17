@@ -13,7 +13,7 @@
     "url": "https://github.com/tsuyoshi-otake/otak-committer/issues"
   },
   "homepage": "https://github.com/tsuyoshi-otake/otak-committer#readme",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -163,6 +163,11 @@
           "type": "boolean",
           "default": false,
           "description": "%config.useConventionalCommits%"
+        },
+        "otakCommitter.appendCommitTrailer": {
+          "type": "boolean",
+          "default": true,
+          "description": "%config.appendCommitTrailer%"
         }
       }
     },

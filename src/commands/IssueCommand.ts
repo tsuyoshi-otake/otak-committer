@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
 import { BaseCommand } from './BaseCommand';
-import { IssueGeneratorServiceFactory } from '../services/issueGenerator';
+import { IssueGeneratorServiceFactory, IssueGeneratorService } from '../services/issueGenerator';
 import { selectFiles } from '../utils/fileSelector';
 import { IssueType, GeneratedIssueContent } from '../types/issue';
 import { ServiceError } from '../types/errors';
+import { showMarkdownPreview } from '../utils/preview';
 import { t } from '../i18n/index.js';
 
 /**
@@ -19,7 +20,6 @@ import { t } from '../i18n/index.js';
  * ```
  */
 export class IssueCommand extends BaseCommand {
-    private previewFile?: { uri: vscode.Uri; document: vscode.TextDocument };
 
     /**
      * Execute the issue generation command
@@ -73,9 +73,9 @@ export class IssueCommand extends BaseCommand {
             this.logger.info('Successfully completed issue generation');
 
         } catch (error) {
-            this.handleError(error, 'generating issue');
+            this.handleErrorSilently(error, 'generating issue');
         } finally {
-            await this.cleanup();
+            await this.cleanupPreview();
         }
     }
 
@@ -118,7 +118,7 @@ export class IssueCommand extends BaseCommand {
      * 
      * @returns Issue generator service instance or undefined if initialization fails
      */
-    private async initializeService() {
+    private async initializeService(): Promise<IssueGeneratorService | undefined> {
         this.logger.debug('Initializing IssueGeneratorService');
 
         try {
@@ -147,7 +147,7 @@ export class IssueCommand extends BaseCommand {
      * @param service - Issue generator service instance
      * @returns Selected issue type or undefined if cancelled
      */
-    private async selectIssueType(service: any): Promise<IssueType | undefined> {
+    private async selectIssueType(service: IssueGeneratorService): Promise<IssueType | undefined> {
         this.logger.debug('Prompting user to select issue type');
 
         const issueTypes: IssueType[] = service.getAvailableTypes();
@@ -173,7 +173,7 @@ export class IssueCommand extends BaseCommand {
      * @param service - Issue generator service instance
      * @returns Array of selected file paths or undefined if cancelled
      */
-    private async selectFilesForAnalysis(service: any): Promise<string[] | undefined> {
+    private async selectFilesForAnalysis(service: IssueGeneratorService): Promise<string[] | undefined> {
         this.logger.debug('Getting tracked files');
 
         try {
@@ -240,7 +240,7 @@ export class IssueCommand extends BaseCommand {
      * @param selectedFiles - Files selected for analysis
      */
     private async generateAndCreateIssue(
-        service: any,
+        service: IssueGeneratorService,
         issueType: IssueType,
         description: string,
         selectedFiles: string[]
@@ -252,72 +252,71 @@ export class IssueCommand extends BaseCommand {
                 cancellable: false
             },
             async (progress) => {
-                try {
-                    progress.report({ message: t('messages.analyzingRepository') });
+                const preview = await this.runIssueGenerationLoop(
+                    service, issueType, description, selectedFiles, progress
+                );
+                if (!preview) {
+                    return;
+                }
 
-                    // Generate initial preview
-                    let preview = await service.generatePreview({
-                        type: issueType,
-                        description,
-                        files: selectedFiles
-                    });
+                progress.report({ message: t('messages.creatingIssue') });
+                const issueUrl = await service.createIssue(preview, issueType);
 
-                    // Preview and modification loop
-                    let isContentFinalized = false;
-                    while (!isContentFinalized) {
-                        // Show preview
-                        await this.showPreview(issueType, preview);
-
-                        // Get user action
-                        const action = await this.getUserAction();
-
-                        if (!action || action === 'cancel') {
-                            this.logger.info('Issue creation cancelled by user');
-                            return;
-                        }
-
-                        if (action === 'create') {
-                            isContentFinalized = true;
-                        } else if (action === 'modify') {
-                            // Get modification instructions
-                            const modifications = await this.getModificationInstructions(progress);
-
-                            if (modifications === undefined) {
-                                // Escape pressed - finalize with current content
-                                isContentFinalized = true;
-                                continue;
-                            }
-
-                            if (!modifications.trim()) {
-                                // Empty input - continue loop
-                                continue;
-                            }
-
-                            progress.report({ message: t('messages.updatingContent') });
-
-                            // Generate new preview with modifications
-                            preview = await service.generatePreview({
-                                type: issueType,
-                                description: `${description}\n\nModification instructions: ${modifications}`,
-                                files: selectedFiles
-                            });
-                        }
-                    }
-
-                    // Create issue
-                    progress.report({ message: t('messages.creatingIssue') });
-                    const issueUrl = await service.createIssue(preview, issueType);
-
-                    if (issueUrl) {
-                        await this.handleSuccessfulCreation(issueUrl);
-                    }
-
-                } catch (error) {
-                    this.logger.error('Error during issue generation', error);
-                    throw error;
+                if (issueUrl) {
+                    await this.handleSuccessfulCreation(issueUrl);
                 }
             }
         );
+    }
+
+    /**
+     * Run the issue preview/modification loop
+     * @returns Finalized preview content, or undefined if cancelled
+     */
+    private async runIssueGenerationLoop(
+        service: IssueGeneratorService,
+        issueType: IssueType,
+        description: string,
+        selectedFiles: string[],
+        progress: vscode.Progress<{ message?: string }>
+    ): Promise<GeneratedIssueContent | undefined> {
+        progress.report({ message: t('messages.analyzingRepository') });
+
+        let preview = await service.generatePreview({
+            type: issueType,
+            description,
+            files: selectedFiles
+        });
+
+        while (true) {
+            await this.showPreview(issueType, preview);
+            const action = await this.getUserAction();
+
+            if (!action || action === 'cancel') {
+                this.logger.info('Issue creation cancelled by user');
+                return undefined;
+            }
+
+            if (action === 'create') {
+                return preview;
+            }
+
+            // action === 'modify'
+            const modifications = await this.getModificationInstructions(progress);
+            if (modifications === undefined) {
+                return preview; // Escape pressed - finalize with current content
+            }
+            if (!modifications.trim()) {
+                continue; // Empty input - continue loop
+            }
+
+            progress.report({ message: t('messages.updatingContent') });
+            preview = await service.generatePreview({
+                type: issueType,
+                description: `${description}\n\nModification instructions: ${modifications}`,
+                files: selectedFiles
+            });
+        }
     }
 
     /**
@@ -331,7 +330,7 @@ export class IssueCommand extends BaseCommand {
 
         try {
             const previewContent = `# Preview of ${issueType.label}\n\nTitle: ${preview.title}\n\n${preview.body}`;
-            this.previewFile = await this.showMarkdownPreview(previewContent);
+            this.previewFile = await showMarkdownPreview(previewContent, 'issue');
 
             if (!this.previewFile) {
                 throw new Error('Failed to show preview');
@@ -382,7 +381,7 @@ export class IssueCommand extends BaseCommand {
      * @param progress - Progress reporter
      * @returns Modification instructions or undefined if cancelled
      */
-    private async getModificationInstructions(progress: any): Promise<string | undefined> {
+    private async getModificationInstructions(progress: vscode.Progress<{ message?: string }>): Promise<string | undefined> {
         progress.report({ message: t('messages.waitingForModificationInput') });
 
         const modifications = await vscode.window.showInputBox({
@@ -402,9 +401,7 @@ export class IssueCommand extends BaseCommand {
         this.logger.info(`Issue created successfully: ${issueUrl}`);
 
         // Close preview and cleanup
-        await this.closePreviewTabs();
-        await this.cleanupPreviewFiles();
-        this.previewFile = undefined;
+        await this.cleanupPreview();
 
         // Show success message
         const response = await vscode.window.showInformationMessage(
@@ -417,135 +414,4 @@ export class IssueCommand extends BaseCommand {
         }
     }
 
-    /**
-     * Open an external URL safely (http/https only).
-     */
-    private async openExternalUrl(url: string): Promise<void> {
-        try {
-            const uri = vscode.Uri.parse(url);
-            const scheme = uri.scheme.toLowerCase();
-
-            if (scheme !== 'https' && scheme !== 'http') {
-                this.logger.warning(`Blocked non-http(s) URL: ${url}`);
-                vscode.window.showErrorMessage('Cannot open non-http(s) URL.');
-                return;
-            }
-
-            await vscode.env.openExternal(uri);
-        } catch (error) {
-            this.logger.warning('Failed to open external URL', error);
-            vscode.window.showErrorMessage('Failed to open link.');
-        }
-    }
-
-    /**
-     * Show markdown preview in a temporary file
-     * 
-     * @param content - Markdown content to preview
-     * @returns Preview file information or undefined if failed
-     */
-    private async showMarkdownPreview(content: string): Promise<{ uri: vscode.Uri; document: vscode.TextDocument } | undefined> {
-        try {
-            // Cleanup and recreate temp directory
-            await this.cleanupPreviewFiles();
-            const previewDir = this.getTempDir();
-            await vscode.workspace.fs.createDirectory(vscode.Uri.file(previewDir));
-
-            // Create temp file with random name
-            const tempUri = vscode.Uri.file(this.getPreviewFilePath());
-
-            // Close previous preview
-            await this.closePreviewTabs();
-
-            // Write file
-            const encoder = new TextEncoder();
-            await vscode.workspace.fs.writeFile(tempUri, encoder.encode(content));
-
-            // Open document (without showing)
-            const document = await vscode.workspace.openTextDocument(tempUri);
-
-            // Show preview
-            await vscode.commands.executeCommand('markdown.showPreview', tempUri);
-
-            return { uri: tempUri, document };
-
-        } catch (error) {
-            this.logger.error('Error showing markdown preview', error);
-            return undefined;
-        }
-    }
-
-    /**
-     * Close all preview tabs
-     */
-    private async closePreviewTabs(): Promise<void> {
-        const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs);
-        const closeTasks = tabs
-            .filter(tab =>
-                (tab.label.includes('Preview') || tab.label.includes('プレビュー')) &&
-                tab.input instanceof vscode.TabInputWebview
-            )
-            .map(tab => vscode.window.tabGroups.close(tab));
-        
-        await Promise.all(closeTasks);
-    }
-
-    /**
-     * Cleanup preview files
-     */
-    private async cleanupPreviewFiles(): Promise<void> {
-        const previewDir = this.getTempDir();
-        
-        try {
-            const stats = await vscode.workspace.fs.stat(vscode.Uri.file(previewDir));
-            if (stats) {
-                await vscode.workspace.fs.delete(vscode.Uri.file(previewDir), { recursive: true });
-            }
-        } catch (error) {
-            // Ignore if directory doesn't exist
-            if (error instanceof vscode.FileSystemError && error.code !== 'FileNotFound') {
-                this.logger.error('Error cleaning up preview directory', error);
-            }
-        }
-    }
-
-    /**
-     * Get temporary directory path
-     * 
-     * @returns Temporary directory path
-     */
-    private getTempDir(): string {
-        return vscode.Uri.joinPath(
-            vscode.Uri.file(require('os').tmpdir()),
-            'otak-committer'
-        ).fsPath;
-    }
-
-    /**
-     * Generate preview file path
-     * 
-     * @returns Preview file path
-     */
-    private getPreviewFilePath(): string {
-        const timestamp = Date.now();
-        const random = require('crypto').randomBytes(4).toString('hex');
-        return vscode.Uri.joinPath(
-            vscode.Uri.file(this.getTempDir()),
-            `issue-preview-${timestamp}-${random}.md`
-        ).fsPath;
-    }
-
-    /**
-     * Cleanup resources
-     */
-    private async cleanup(): Promise<void> {
-        if (this.previewFile) {
-            try {
-                await this.closePreviewTabs();
-                await this.cleanupPreviewFiles();
-            } catch (error) {
-                this.logger.error('Error cleaning up preview files', error);
-            }
-        }
-    }
 }

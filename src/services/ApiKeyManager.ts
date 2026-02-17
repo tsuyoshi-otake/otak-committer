@@ -18,6 +18,7 @@
 import * as vscode from 'vscode';
 import { StorageManager } from '../infrastructure/storage/StorageManager';
 import { Logger } from '../infrastructure/logging/Logger';
+import { ApiKeyValidator } from './ApiKeyValidator';
 import { t } from '../i18n/index';
 
 /**
@@ -45,14 +46,8 @@ export interface ValidationResult {
  * - Optional API validation
  */
 export class ApiKeyManager {
+    private static readonly MAX_VALIDATION_RETRIES = 3;
     private readonly logger: Logger;
-
-    /**
-     * Regular expression for validating OpenAI API key format
-     * Format: sk- followed by at least one character
-     * This permissive pattern accepts test keys, development keys, and all valid OpenAI API keys
-     */
-    private static readonly API_KEY_PATTERN = /^sk-.+$/;
 
     /**
      * Creates a new ApiKeyManager instance
@@ -61,12 +56,10 @@ export class ApiKeyManager {
      * @param storage - Storage manager for secure key storage
      */
     constructor(
-        private readonly context: vscode.ExtensionContext,
+        _context: vscode.ExtensionContext,
         private readonly storage: StorageManager
     ) {
         this.logger = Logger.getInstance();
-        // Context is stored for future extensibility (e.g., accessing globalState)
-        void this.context;
     }
 
     /**
@@ -92,16 +85,7 @@ export class ApiKeyManager {
      * ```
      */
     static validateKeyFormat(key: string): boolean {
-        if (!key || typeof key !== 'string') {
-            return false;
-        }
-
-        const trimmedKey = key.trim();
-        if (trimmedKey.length === 0) {
-            return false;
-        }
-
-        return ApiKeyManager.API_KEY_PATTERN.test(trimmedKey);
+        return ApiKeyValidator.validateKeyFormat(key);
     }
 
     /**
@@ -167,23 +151,11 @@ export class ApiKeyManager {
     async handleExistingKey(): Promise<ApiKeyAction> {
         this.logger.info('Handling existing API key scenario');
 
-        const items: vscode.QuickPickItem[] = [
-            {
-                label: t('apiKey.updateKey'),
-                description: ''
-            },
-            {
-                label: t('apiKey.validateKey'),
-                description: ''
-            },
-            {
-                label: t('apiKey.removeKey'),
-                description: ''
-            },
-            {
-                label: t('apiKey.cancel'),
-                description: ''
-            }
+        const items: (vscode.QuickPickItem & { action: ApiKeyAction })[] = [
+            { label: t('apiKey.updateKey'), description: '', action: 'update' },
+            { label: t('apiKey.validateKey'), description: '', action: 'validate' },
+            { label: t('apiKey.removeKey'), description: '', action: 'remove' },
+            { label: t('apiKey.cancel'), description: '', action: 'cancel' }
         ];
 
         const selected = await vscode.window.showQuickPick(items, {
@@ -191,19 +163,7 @@ export class ApiKeyManager {
             title: t('apiKey.chooseAction')
         });
 
-        if (!selected) {
-            return 'cancel';
-        }
-
-        if (selected.label === t('apiKey.updateKey')) {
-            return 'update';
-        } else if (selected.label === t('apiKey.validateKey')) {
-            return 'validate';
-        } else if (selected.label === t('apiKey.removeKey')) {
-            return 'remove';
-        }
-
-        return 'cancel';
+        return selected?.action ?? 'cancel';
     }
 
     /**
@@ -246,36 +206,7 @@ export class ApiKeyManager {
      * ```
      */
     async validateWithOpenAI(apiKey: string): Promise<ValidationResult> {
-        this.logger.info('Validating API key with OpenAI');
-
-        try {
-            // Use OpenAI models endpoint for validation (lightweight call)
-            const response = await fetch('https://api.openai.com/v1/models', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${apiKey}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (response.ok) {
-                this.logger.info('API key validation successful');
-                return { isValid: true, status: response.status };
-            }
-
-            const errorData = await response.json().catch(() => ({}));
-            const errorMessage = (errorData as { error?: { message?: string } }).error?.message || 'Unknown error';
-            this.logger.warning(`API key validation failed: ${response.status}`);
-            // Sanitize error message to never include the API key
-            const sanitizedMessage = this.sanitizeErrorMessage(errorMessage, apiKey);
-            return { isValid: false, status: response.status, error: sanitizedMessage };
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Network error';
-            this.logger.error('API key validation error:', error);
-            // Sanitize error message to never include the API key
-            const sanitizedMessage = this.sanitizeErrorMessage(errorMessage, apiKey);
-            return { isValid: false, status: 0, isNetworkError: true, error: sanitizedMessage };
-        }
+        return ApiKeyValidator.validateWithOpenAI(apiKey);
     }
 
     private async validateWithProgress(apiKey: string): Promise<ValidationResult> {
@@ -380,7 +311,7 @@ export class ApiKeyManager {
         const updateLabel = t('apiKey.updateKey');
         const cancelLabel = t('apiKey.cancel');
 
-        while (attempts < 3) {
+        while (attempts < ApiKeyManager.MAX_VALIDATION_RETRIES) {
             attempts += 1;
 
             const result = await this.validateWithProgress(currentKey);
@@ -420,12 +351,7 @@ export class ApiKeyManager {
      * @returns Sanitized error message
      */
     sanitizeErrorMessage(message: string, apiKey: string): string {
-        if (!message || !apiKey) {
-            return message || '';
-        }
-        // Replace the API key with a placeholder if it appears in the message.
-        // Use plain string replacement to avoid dynamic RegExp construction.
-        return message.split(apiKey).join('[REDACTED]');
+        return ApiKeyValidator.sanitizeErrorMessage(message, apiKey);
     }
 
     /**

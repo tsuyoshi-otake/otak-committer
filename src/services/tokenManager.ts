@@ -5,6 +5,11 @@
  * for the GPT-5.2 Responses API with unified 200K token limits.
  */
 
+import {
+    MAX_INPUT_TOKENS as _MAX_INPUT_TOKENS,
+    CHARS_PER_TOKEN as _CHARS_PER_TOKEN
+} from '../constants/tokenLimits';
+
 /**
  * Output token allocations for different content types
  */
@@ -25,10 +30,10 @@ export interface OutputTokenAllocations {
  */
 export class TokenManager {
     /** Maximum input tokens (200K unified limit) */
-    public static readonly MAX_INPUT_TOKENS = 200 * 1000;
+    public static readonly MAX_INPUT_TOKENS = _MAX_INPUT_TOKENS;
 
     /** Characters per token estimation ratio */
-    public static readonly CHARS_PER_TOKEN = 4;
+    public static readonly CHARS_PER_TOKEN = _CHARS_PER_TOKEN;
 
     /** GPT-5.2 context window limit (400K) */
     public static readonly CONTEXT_LIMIT = 400 * 1000;
@@ -117,5 +122,23 @@ export class TokenManager {
             this.MAX_INPUT_TOKENS,
             this.CONTEXT_LIMIT - outputTokens - this.REASONING_BUFFER
         );
+    }
+
+    /**
+     * Get the configured max tokens from user settings, falling back to MAX_INPUT_TOKENS
+     *
+     * @returns The configured max token limit
+     */
+    public static getConfiguredMaxTokens(): number {
+        try {
+            const vscode = require('vscode'); // eslint-disable-line @typescript-eslint/no-require-imports
+            const configuredMaxTokens: unknown = vscode.workspace.getConfiguration('otakCommitter').get('maxInputTokens');
+            if (typeof configuredMaxTokens === 'number' && configuredMaxTokens >= 1000) {
+                return configuredMaxTokens;
+            }
+        } catch {
+            // Not running in VS Code context (e.g., unit tests)
+        }
+        return this.MAX_INPUT_TOKENS;
     }
 }

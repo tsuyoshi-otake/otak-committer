@@ -13,7 +13,7 @@ export interface Command {
     id: string;
     
     /** The function to execute when the command is invoked */
-    handler: (...args: any[]) => Promise<void> | void;
+    handler: (...args: unknown[]) => Promise<void> | void;
     
     /** The human-readable title for the command */
     title: string;
@@ -119,7 +119,7 @@ export class CommandRegistry {
         for (const [id, command] of this.commands) {
             const disposable = vscode.commands.registerCommand(
                 id,
-                async (...args: any[]) => {
+                async (...args: unknown[]) => {
                     this.logger.debug(`Executing command: ${id}`);
                     
                     try {

@@ -1,15 +1,12 @@
-import { BaseError } from './BaseError';
+import { BaseError, ErrorSeverity } from './BaseError';
 
 /**
  * Error thrown when storage operations fail
  * Used for SecretStorage, Configuration, and GlobalState operations
  */
 export class StorageError extends BaseError {
-    /**
-     * Creates a new StorageError
-     * @param message - Description of the storage failure
-     * @param context - Additional context (e.g., key name, operation type)
-     */
+    readonly severity = ErrorSeverity.Error;
+
     constructor(message: string, context?: Record<string, any>) {
         super(message, 'STORAGE_ERROR', context);
     }

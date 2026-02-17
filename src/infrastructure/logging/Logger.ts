@@ -84,23 +84,54 @@ export class Logger {
      * @param message The message to log
      * @param args Additional arguments to log
      */
+    /**
+     * JSON replacer that redacts sensitive fields from log output
+     */
+    private static sensitiveFieldReplacer(_key: string, value: unknown): unknown {
+        if (typeof _key === 'string') {
+            const lower = _key.toLowerCase();
+            if (lower.includes('apikey') || lower.includes('api_key') ||
+                lower.includes('token') || lower.includes('secret') ||
+                lower.includes('password') || lower.includes('authorization') ||
+                lower.includes('credential')) {
+                return typeof value === 'string' ? '[REDACTED]' : value;
+            }
+        }
+        return value;
+    }
+
     log(level: LogLevel, message: string, ...args: any[]): void {
         if (level < this.logLevel) {
             return;
         }
-        
+
         const timestamp = new Date().toISOString();
         const levelStr = LogLevel[level].toUpperCase();
         const formattedMessage = `[${timestamp}] [${levelStr}] ${message}`;
-        
+
         this.outputChannel.appendLine(formattedMessage);
-        
+
         if (args.length > 0) {
-            this.outputChannel.appendLine(JSON.stringify(args, null, 2));
+            const sanitized = args.map(arg => {
+                if (arg instanceof Error) {
+                    return { name: arg.name, message: arg.message };
+                }
+                return arg;
+            });
+            this.outputChannel.appendLine(
+                JSON.stringify(sanitized, Logger.sensitiveFieldReplacer, 2)
+            );
         }
-        
-        // Also log to console for development
-        console.log(formattedMessage, ...args);
+
+        // Also log to console for development (with same sanitization)
+        if (args.length > 0) {
+            const sanitized = args.map(arg =>
+                arg instanceof Error ? { name: arg.name, message: arg.message } : arg
+            );
+            console.log(formattedMessage, ...sanitized);
+        } else {
+            console.log(formattedMessage);
+        }
     }
     
     /**

@@ -1,16 +1,12 @@
-import { BaseError } from './BaseError';
+import { BaseError, ErrorSeverity } from './BaseError';
 
 /**
  * Error thrown when a service operation fails
  * Used for external API calls, Git operations, etc.
  */
 export class ServiceError extends BaseError {
-    /**
-     * Creates a new ServiceError
-     * @param message - Description of the service failure
-     * @param service - Name of the service that failed (e.g., 'OpenAI', 'GitHub', 'Git')
-     * @param context - Additional context (e.g., status code, request details)
-     */
+    readonly severity = ErrorSeverity.Error;
+
     constructor(
         message: string,
         public readonly service: string,

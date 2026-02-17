@@ -51,7 +51,7 @@ class TestCommand extends BaseCommand {
     }
 
     public testHandleError(error: unknown, operation: string): void {
-        this.handleError(error, operation);
+        this.handleErrorSilently(error, operation);
     }
 }
 

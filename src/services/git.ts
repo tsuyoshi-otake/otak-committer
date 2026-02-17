@@ -6,6 +6,8 @@ import { BaseService, BaseServiceFactory } from './base';
 import { ServiceConfig, TemplateInfo } from '../types';
 import { cleanPath, isSourceFile } from '../utils';
 import { ErrorHandler } from '../infrastructure/error';
+import { TokenManager } from './tokenManager';
+import { isWindowsReservedName } from '../utils/diffUtils';
 import { t } from '../i18n/index.js';
 
 /**
@@ -40,11 +42,6 @@ interface StatusResult {
 export class GitService extends BaseService {
     protected git: SimpleGit;
     private workspaceRoot: string;
-    // 100Kトークン制限
-    // トークン切り詰め閾値 (200K)
-    private static readonly TRUNCATE_THRESHOLD_TOKENS = 200 * 1000;
-    // 1トークンあたりの推定文字数
-    private static readonly CHARS_PER_TOKEN = 4;
 
     constructor(workspaceRoot: string, config?: Partial<ServiceConfig>) {
         super(config);
@@ -74,145 +71,180 @@ export class GitService extends BaseService {
             this.logger.debug('Getting git diff');
             const status = await this.git.status();
 
-            // 変更されたファイルのパスを取得（削除やリネームを含むすべての変更を対象に）
             const modifiedFiles = status.files
                 .filter(file => file.working_dir !== ' ' || file.index !== ' ')
                 .map(file => file.path);
 
             this.logger.debug(`Found ${modifiedFiles.length} modified files`);
 
-            // Windows予約名ファイルとそれ以外を分ける（予約名はgit addできない）
-            const reservedNameFiles = modifiedFiles.filter(file => this.isWindowsReservedName(file));
-
-            // If there are already staged changes, prefer the staged diff and do not mutate the index.
+            const reservedNameFiles = modifiedFiles.filter(file => isWindowsReservedName(file));
             const hasStagedChanges = status.files.some(
                 file => file.index !== ' ' && file.index !== '?' && file.index !== '!'
             );
 
-            // Obtain staged diff (may be empty)
             let diff = hasStagedChanges ? await this.git.diff(['--cached']) : '';
 
-            // If nothing is staged but there are working tree changes, ask before staging (safety + lower CPU).
             if (!hasStagedChanges && modifiedFiles.length > 0) {
-                const alwaysStage = globalState?.get<boolean>('otak-committer.alwaysStageAll', false);
-
-                if (!alwaysStage) {
-                    const stageAllLabel = t('git.stageAll');
-                    const alwaysStageLabel = t('git.alwaysStageAll');
-                    const action = await vscode.window.showInformationMessage(
-                        t('git.stageAllPrompt'),
-                        stageAllLabel,
-                        alwaysStageLabel,
-                        t('apiKey.cancel')
-                    );
-
-                    if (action === alwaysStageLabel) {
-                        await globalState?.update('otak-committer.alwaysStageAll', true);
-                        this.logger.info('User chose to always stage changes');
-                    } else if (action !== stageAllLabel) {
-                        this.logger.info('User cancelled staging changes for diff generation');
-                        return undefined;
-                    }
+                const shouldStage = await this.promptForStaging(globalState);
+                if (!shouldStage) {
+                    return undefined;
                 }
-
-                // Try a single git add -A first (fast path). Fall back to per-file staging if needed.
-                try {
-                    await this.git.add(['-A']);
-                } catch (error) {
-                    if (error instanceof Error && error.message.includes('index.lock')) {
-                        this.logger.error('Git index.lock error detected', error);
-                        vscode.window.showErrorMessage(
-                            t('git.busyIndexLock')
-                        );
-                        throw error;
-                    }
-
-                    // Fall back: stage addable files one by one (handles spaces/reserved names better)
-                    const addableFiles = modifiedFiles.filter(file => !this.isWindowsReservedName(file));
-                    if (reservedNameFiles.length > 0) {
-                        this.logger.warning(`Skipping Windows reserved name files during staging: ${reservedNameFiles.join(', ')}`);
-                    }
-
-                    for (const file of addableFiles) {
-                        try {
-                            await this.git.add(file);
-                        } catch (perFileError) {
-                            if (perFileError instanceof Error && perFileError.message.includes('did not match any files')) {
-                                try {
-                                    await this.git.rm(file);
-                                } catch {
-                                    // Ignore if already deleted
-                                }
-                            } else if (perFileError instanceof Error && perFileError.message.includes('index.lock')) {
-                                this.logger.error('Git index.lock error detected', perFileError);
-                                vscode.window.showErrorMessage(
-                                    t('git.busyIndexLock')
-                                );
-                                throw perFileError;
-                            } else {
-                                throw perFileError;
-                            }
-                        }
-                    }
-                }
-
+                await this.stageFiles(modifiedFiles, reservedNameFiles);
                 diff = await this.git.diff(['--cached']);
             }
 
-            // ステージされたファイルも予約名ファイルもない場合は終了
             if ((!diff || diff.trim() === '') && reservedNameFiles.length === 0) {
                 this.logger.info('No staged files found');
                 return undefined;
             }
 
             this.logger.info(`Processing diff, ${reservedNameFiles.length} reserved name files`);
+            diff = this.appendReservedFileInfo(diff, reservedNameFiles);
+            diff = this.truncateDiffByTokenLimit(diff);
 
-            // 予約名ファイルがある場合は警告を表示し、ファイル名だけを差分に追加
-            // (ステージング段階で定義したreservedNameFilesを使用)
-            if (reservedNameFiles.length > 0) {
-                const reservedFilesList = reservedNameFiles.join(', ');
-                this.logger.warning(`Files with reserved names found: ${reservedFilesList}`);
-                vscode.window.showInformationMessage(
-                    t('git.reservedNamesInfo', { files: reservedFilesList })
-                );
-
-                // ファイル名だけを差分に追加
-                if (diff && diff.trim() !== '') {
-                    diff += '\n\n';
-                }
-                diff += `# Files with reserved names (content not available):\n`;
-                reservedNameFiles.forEach(file => {
-                    diff += `# - ${file}\n`;
-                });
-            }
-
-            const configuredMaxTokens = vscode.workspace.getConfiguration('otakCommitter').get<number>('maxInputTokens');
-            const truncateThresholdTokens =
-                typeof configuredMaxTokens === 'number' && configuredMaxTokens >= 1000
-                    ? configuredMaxTokens
-                    : GitService.TRUNCATE_THRESHOLD_TOKENS;
-
-            const tokenCount = Math.ceil(diff.length / GitService.CHARS_PER_TOKEN); // 大まかな推定
-
-            // トークン数が閾値を超えた場合、切り詰めて警告を表示
-            if (tokenCount > truncateThresholdTokens) {
-                const estimatedKTokens = Math.floor(tokenCount / 1000);
-                const thresholdKTokens = Math.floor(truncateThresholdTokens / 1000);
-                const truncatedLength = truncateThresholdTokens * GitService.CHARS_PER_TOKEN;
-                
-                this.logger.warning(`Diff size (${estimatedKTokens}K tokens) exceeds ${thresholdKTokens}K limit, truncating`);
-                vscode.window.showWarningMessage(
-                    t('git.diffTruncatedWarning', { estimatedKTokens, thresholdKTokens })
-                );
-                diff = diff.substring(0, truncatedLength);
-            }
-            
             this.logger.info('Git diff retrieved successfully');
             return diff;
         } catch (error) {
             this.logger.error('Failed to get git diff', error);
-            this.handleError(error);
+            this.handleErrorAndRethrow(error);
         }
+    }
+
+    /**
+     * Prompt user for staging confirmation
+     * @returns true if user agrees to stage, false if cancelled
+     */
+    private async promptForStaging(globalState?: vscode.Memento): Promise<boolean> {
+        const alwaysStage = globalState?.get<boolean>('otak-committer.alwaysStageAll', false);
+        if (alwaysStage) {
+            return true;
+        }
+
+        const stageAllLabel = t('git.stageAll');
+        const alwaysStageLabel = t('git.alwaysStageAll');
+        const action = await vscode.window.showInformationMessage(
+            t('git.stageAllPrompt'),
+            stageAllLabel,
+            alwaysStageLabel,
+            t('apiKey.cancel')
+        );
+
+        if (action === alwaysStageLabel) {
+            await globalState?.update('otak-committer.alwaysStageAll', true);
+            this.logger.info('User chose to always stage changes');
+            return true;
+        }
+
+        if (action !== stageAllLabel) {
+            this.logger.info('User cancelled staging changes for diff generation');
+            return false;
+        }
+
+        return true;
+    }
+
+    /** Delay before retrying after index.lock error (ms) */
+    private static readonly INDEX_LOCK_RETRY_DELAY_MS = 1000;
+
+    /**
+     * Stage files for commit, with fallback to per-file staging
+     */
+    private async stageFiles(modifiedFiles: string[], reservedNameFiles: string[]): Promise<void> {
+        try {
+            await this.git.add(['-A']);
+        } catch (error) {
+            if (error instanceof Error && error.message.includes('index.lock')) {
+                this.logger.warning('Git index.lock detected, retrying after delay...');
+                await new Promise(resolve => setTimeout(resolve, GitService.INDEX_LOCK_RETRY_DELAY_MS));
+                try {
+                    await this.git.add(['-A']);
+                    return;
+                } catch (retryError) {
+                    this.logger.error('Git index.lock error persists after retry', retryError);
+                    vscode.window.showErrorMessage(t('git.busyIndexLock'));
+                    throw retryError;
+                }
+            }
+
+            const addableFiles = modifiedFiles.filter(file => !isWindowsReservedName(file));
+            if (reservedNameFiles.length > 0) {
+                this.logger.warning(`Skipping Windows reserved name files during staging: ${reservedNameFiles.join(', ')}`);
+            }
+
+            for (const file of addableFiles) {
+                await this.stageFile(file);
+            }
+        }
+    }
+
+    /**
+     * Stage a single file with error handling
+     */
+    private async stageFile(file: string): Promise<void> {
+        try {
+            await this.git.add(file);
+        } catch (error) {
+            if (!(error instanceof Error)) {
+                throw error;
+            }
+            if (error.message.includes('index.lock')) {
+                this.logger.error('Git index.lock error detected', error);
+                vscode.window.showErrorMessage(t('git.busyIndexLock'));
+                throw error;
+            }
+            if (error.message.includes('did not match any files')) {
+                try { await this.git.rm(file); } catch { /* Ignore if already deleted */ }
+                return;
+            }
+            throw error;
+        }
+    }
+
+    /**
+     * Append reserved file names info to the diff
+     */
+    private appendReservedFileInfo(diff: string, reservedNameFiles: string[]): string {
+        if (reservedNameFiles.length === 0) {
+            return diff;
+        }
+
+        const reservedFilesList = reservedNameFiles.join(', ');
+        this.logger.warning(`Files with reserved names found: ${reservedFilesList}`);
+        vscode.window.showInformationMessage(
+            t('git.reservedNamesInfo', { files: reservedFilesList })
+        );
+
+        let result = diff;
+        if (result && result.trim() !== '') {
+            result += '\n\n';
+        }
+        result += `# Files with reserved names (content not available):\n`;
+        reservedNameFiles.forEach(file => {
+            result += `# - ${file}\n`;
+        });
+        return result;
+    }
+
+    /**
+     * Truncate diff content if it exceeds the token limit
+     */
+    private truncateDiffByTokenLimit(diff: string): string {
+        const truncateThresholdTokens = TokenManager.getConfiguredMaxTokens();
+        const tokenCount = TokenManager.estimateTokens(diff);
+
+        if (tokenCount <= truncateThresholdTokens) {
+            return diff;
+        }
+
+        const estimatedKTokens = Math.floor(tokenCount / 1000);
+        const thresholdKTokens = Math.floor(truncateThresholdTokens / 1000);
+        const truncatedLength = truncateThresholdTokens * TokenManager.CHARS_PER_TOKEN;
+
+        this.logger.warning(`Diff size (${estimatedKTokens}K tokens) exceeds ${thresholdKTokens}K limit, truncating`);
+        vscode.window.showWarningMessage(
+            t('git.diffTruncatedWarning', { estimatedKTokens, thresholdKTokens })
+        );
+        return diff.substring(0, truncatedLength);
     }
 
     /**
@@ -243,7 +275,7 @@ export class GitService extends BaseService {
             return files;
         } catch (error) {
             this.logger.error('Failed to get tracked files', error);
-            this.handleError(error);
+            this.handleErrorAndRethrow(error);
         }
     }
 
@@ -275,7 +307,7 @@ export class GitService extends BaseService {
             };
         } catch (error) {
             this.logger.error('Failed to get git status', error);
-            this.handleError(error);
+            this.handleErrorAndRethrow(error);
         }
     }
 
@@ -295,67 +327,48 @@ export class GitService extends BaseService {
      * ```
      */
     async findTemplates(): Promise<{ commit?: TemplateInfo; pr?: TemplateInfo }> {
-        const templates: { commit?: TemplateInfo; pr?: TemplateInfo } = {};
-        const possiblePaths = [
-            // コミットメッセージのテンプレート
-            {
-                type: 'commit' as const,
-                paths: [
-                    '.gitmessage',
-                    '.github/commit_template',
-                    '.github/templates/commit_template.md',
-                    'docs/templates/commit_template.md'
-                ]
-            },
-            // PRのテンプレート
-            {
-                type: 'pr' as const,
-                paths: [
-                    '.github/pull_request_template.md',
-                    '.github/templates/pull_request_template.md',
-                    'docs/templates/pull_request_template.md'
-                ]
-            }
+        const templateDefs = [
+            { type: 'commit' as const, paths: ['.gitmessage', '.github/commit_template', '.github/templates/commit_template.md', 'docs/templates/commit_template.md'] },
+            { type: 'pr' as const, paths: ['.github/pull_request_template.md', '.github/templates/pull_request_template.md', 'docs/templates/pull_request_template.md'] }
         ];
 
-        try {
-            this.logger.debug('Searching for templates');
-            for (const template of possiblePaths) {
-                for (const templatePath of template.paths) {
-                    const fullPath = path.join(this.workspaceRoot, templatePath);
-                    try {
-                        const content = await readFile(fullPath, 'utf-8');
-                        if (content) {
-                            if (template.type === 'commit') {
-                                templates.commit = {
-                                    type: 'commit',
-                                    content: content,
-                                    path: templatePath
-                                };
-                                this.logger.info(`Found commit template at ${templatePath}`);
-                                break; // コミットテンプレートが見つかったら他は探さない
-                            } else {
-                                templates.pr = {
-                                    type: 'pr',
-                                    content: content,
-                                    path: templatePath
-                                };
-                                this.logger.info(`Found PR template at ${templatePath}`);
-                                break; // PRテンプレートが見つかったら他は探さない
-                            }
-                        }
-                    } catch (err) {
-                        // ファイルが存在しない場合は次のパスを試す
-                        continue;
-                    }
-                }
+        const templates: { commit?: TemplateInfo; pr?: TemplateInfo } = {};
+
+        this.logger.debug('Searching for templates');
+        for (const def of templateDefs) {
+            const found = await this.tryReadFirstTemplate(def.type, def.paths);
+            if (found) {
+                templates[def.type] = found;
             }
-        } catch (error) {
-            this.logger.error('Error finding templates', error);
-            this.showError('Error finding templates', error);
         }
 
         return templates;
+    }
+
+    /**
+     * Try to read the first available template from a list of paths
+     */
+    /** Maximum template file size (100 KB) to prevent resource exhaustion */
+    private static readonly MAX_TEMPLATE_BYTES = 100 * 1024;
+
+    private async tryReadFirstTemplate(type: 'commit' | 'pr', paths: string[]): Promise<TemplateInfo | undefined> {
+        for (const templatePath of paths) {
+            const fullPath = path.join(this.workspaceRoot, templatePath);
+            try {
+                const content = await readFile(fullPath, 'utf-8');
+                if (content) {
+                    if (Buffer.byteLength(content, 'utf-8') > GitService.MAX_TEMPLATE_BYTES) {
+                        this.logger.warning(`Template at ${templatePath} exceeds size limit, skipping`);
+                        continue;
+                    }
+                    this.logger.info(`Found ${type} template at ${templatePath}`);
+                    return { type, content, path: templatePath };
+                }
+            } catch {
+                // File doesn't exist, try next path
+            }
+        }
+        return undefined;
     }
 
     /**
@@ -382,24 +395,6 @@ export class GitService extends BaseService {
         }
     }
 
-    private isWindowsReservedName(filePath: string): boolean {
-        // Windowsの予約デバイス名
-        const reservedNames = [
-            'CON', 'PRN', 'AUX', 'NUL',
-            'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
-            'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9'
-        ];
-
-        // ファイル名部分を取得（パスの最後の部分）
-        const fileName = path.basename(filePath);
-        // 拡張子を除いたファイル名を取得
-        const nameWithoutExt = fileName.split('.')[0];
-
-        // 大文字小文字を無視して比較
-        return reservedNames.some(reserved =>
-            nameWithoutExt.toUpperCase() === reserved
-        );
-    }
 }
 
 /**

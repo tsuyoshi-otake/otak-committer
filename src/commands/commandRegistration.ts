@@ -105,34 +105,18 @@ export function registerAllCommands(
         title: 'Diagnose API Key Storage',
         category: 'otak-committer',
         handler: async () => {
+            const { StorageManager } = await import('../infrastructure/storage/StorageManager.js');
             const { Logger } = await import('../infrastructure/logging/Logger.js');
             const logger = Logger.getInstance();
 
+            const storage = new StorageManager(context);
+            const diagnostics = await storage.getStorageDiagnostics();
+
             logger.info('Storage diagnosis started');
-
-            const legacyConfig = vscode.workspace.getConfiguration();
-
-            const secretOpenAI = await context.secrets.get('openai.apiKey');
-            const secretGitHub = await context.secrets.get('github.apiKey');
-
-            const backupOpenAI = context.globalState.get<string>('otak-committer.backup.openai.apiKey');
-            const backupGitHub = context.globalState.get<string>('otak-committer.backup.github.apiKey');
-
-            const legacyOpenAI = (legacyConfig.get<string>('otakCommitter.openaiApiKey') || '').trim();
-            const legacyGitHub = (legacyConfig.get<string>('otakCommitter.githubToken') || '').trim();
-
-            logger.info('SecretStorage');
-            logger.info(`- openai.apiKey: ${secretOpenAI ? 'present' : 'absent'} (${secretOpenAI?.length ?? 0} chars)`);
-            logger.info(`- github.apiKey: ${secretGitHub ? 'present' : 'absent'} (${secretGitHub?.length ?? 0} chars)`);
-
-            logger.info('GlobalState backup (encrypted)');
-            logger.info(`- openai.apiKey: ${backupOpenAI ? 'present' : 'absent'} (${backupOpenAI?.length ?? 0} chars)`);
-            logger.info(`- github.apiKey: ${backupGitHub ? 'present' : 'absent'} (${backupGitHub?.length ?? 0} chars)`);
-
-            logger.info('Legacy settings');
-            logger.info(`- otakCommitter.openaiApiKey: ${legacyOpenAI ? 'present' : 'absent'} (${legacyOpenAI.length} chars)`);
-            logger.info(`- otakCommitter.githubToken: ${legacyGitHub ? 'present' : 'absent'} (${legacyGitHub.length} chars)`);
-
+            logger.info(`OpenAI key locations: ${diagnostics.openaiKeyLocations.join(', ') || 'none'}`);
+            logger.info(`GitHub key locations: ${diagnostics.githubKeyLocations.join(', ') || 'none'}`);
+            logger.info(`Migration completed: ${diagnostics.migrationCompleted}`);
+            logger.info(`Storage health - SecretStorage: ${diagnostics.storageHealth.secretStorage}, Config: ${diagnostics.storageHealth.configStorage}, GlobalState: ${diagnostics.storageHealth.globalState}, Encryption: ${diagnostics.storageHealth.encryption}`);
             logger.info('Storage diagnosis completed');
             logger.show();
 

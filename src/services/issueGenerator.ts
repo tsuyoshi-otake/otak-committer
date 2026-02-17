@@ -5,12 +5,14 @@ import { GitService, GitServiceFactory } from './git';
 import { GitHubService, GitHubServiceFactory } from './github';
 import { BaseService, BaseServiceFactory } from './base';
 import { ServiceConfig } from '../types';
+import { t } from '../i18n';
 import {
     IssueType,
     IssueGenerationParams,
     GeneratedIssueContent
 } from '../types/issue';
 import { ErrorHandler } from '../infrastructure/error';
+import { TokenManager } from './tokenManager';
 
 interface FileAnalysis {
     path: string;
@@ -36,9 +38,15 @@ interface FileAnalysis {
  * ```
  */
 export class IssueGeneratorService extends BaseService {
-    // Unified 200K token limit for GPT-5.2 migration
-    private static readonly MAX_TOKENS = 200 * 1000;
     private static readonly MAX_FILE_BYTES = 1024 * 1024; // 1 MiB safety cap
+    private static readonly MAX_TITLE_TOKENS = 50;
+    private static readonly MAX_FILE_PREVIEW_CHARS = 1000;
+
+    private static readonly FILE_TYPE_MAP: Record<string, string> = {
+        ts: 'TypeScript', js: 'JavaScript', jsx: 'React JavaScript', tsx: 'React TypeScript',
+        css: 'CSS', scss: 'SCSS', html: 'HTML', json: 'JSON', md: 'Markdown',
+        py: 'Python', java: 'Java', cpp: 'C++', c: 'C', go: 'Go', rs: 'Rust', php: 'PHP', rb: 'Ruby'
+    };
 
     constructor(
         private readonly openai: OpenAIService,
@@ -108,131 +116,100 @@ export class IssueGeneratorService extends BaseService {
             this.logger.debug(`Generating title for ${type}`);
             
             const title = await this.openai.createChatCompletion({
-                prompt: `Create a concise title (maximum 50 characters) in ${this.config.language || 'english'} for this ${type} based on the following description:\n\n${description}\n\nRequirements:\n- Must be in ${this.config.language || 'english'}\n- Maximum 50 characters\n- Clear and descriptive\n- No technical jargon unless necessary`,
+                prompt: `Create a concise title (maximum ${IssueGeneratorService.MAX_TITLE_TOKENS} characters) in ${this.config.language || 'english'} for this ${type} based on the following description:\n\n${description}\n\nRequirements:\n- Must be in ${this.config.language || 'english'}\n- Maximum ${IssueGeneratorService.MAX_TITLE_TOKENS} characters\n- Clear and descriptive\n- No technical jargon unless necessary`,
                 temperature: 0.1,
-                maxTokens: 50
+                maxTokens: IssueGeneratorService.MAX_TITLE_TOKENS
             });
 
             this.logger.info('Title generated successfully');
-            return title || description.slice(0, 50);
+            return title || description.slice(0, IssueGeneratorService.MAX_TITLE_TOKENS);
         } catch (error) {
             this.logger.error('Failed to generate title', error);
             this.showError('Failed to generate title', error);
-            return description.slice(0, 50);
+            return description.slice(0, IssueGeneratorService.MAX_TITLE_TOKENS);
         }
     }
 
     private getMaxTokensLimit(): number {
-        const configuredMaxTokens = vscode.workspace.getConfiguration('otakCommitter').get<number>('maxInputTokens');
-        if (typeof configuredMaxTokens === 'number' && configuredMaxTokens >= 1000) {
-            return configuredMaxTokens;
-        }
-        return IssueGeneratorService.MAX_TOKENS;
+        return TokenManager.getConfiguredMaxTokens();
     }
 
     private async analyzeFiles(files: string[]): Promise<FileAnalysis[]> {
         this.logger.info(`Analyzing ${files.length} files`);
         const analyses: FileAnalysis[] = [];
-        const maxPreviewLength = 1000; // ファイルごとのプレビュー最大文字数
-        let totalTokens = 0; // トークン数をトラッキング
+        let totalTokens = 0;
         const maxTokensLimit = this.getMaxTokensLimit();
-        const decoder = new TextDecoder();
         const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 
         for (const file of files) {
-            // ファイル拡張子から種類を判定
             const extension = file.split('.').pop()?.toLowerCase();
             const type = this.getFileType(extension);
             const displayPath = workspaceRoot ? path.relative(workspaceRoot, file).replace(/\\/g, '/') : file;
 
-            try {
-                // If we already hit the token budget, avoid further I/O work.
-                if (totalTokens >= maxTokensLimit) {
-                    analyses.push({
-                        path: displayPath,
-                        content: '... (content omitted due to token limit)',
-                        type
-                    });
-                    continue;
-                }
-
-                const fileUri = vscode.Uri.file(file);
-
-                // Avoid reading extremely large files into memory; include only metadata.
-                try {
-                    const stat = await vscode.workspace.fs.stat(fileUri);
-                    if (typeof stat.size === 'number' && stat.size > IssueGeneratorService.MAX_FILE_BYTES) {
-                        analyses.push({
-                            path: displayPath,
-                            content: `... (content omitted: file larger than ${Math.floor(IssueGeneratorService.MAX_FILE_BYTES / 1024)}KB)`,
-                            type
-                        });
-                        continue;
-                    }
-                } catch {
-                    // Ignore stat errors and attempt to read content below.
-                }
-
-                const fileContent = await vscode.workspace.fs.readFile(fileUri);
-                let content = decoder.decode(fileContent);
-
-                // ファイルの内容を要約（最初の1000文字まで）
-                if (content.length > maxPreviewLength) {
-                    content = content.substring(0, maxPreviewLength) + '\n... (content truncated)';
-                }
-
-                // トークン数を推定（1トークン≈4文字）
-                const estimatedTokens = Math.ceil(content.length / 4);
-
-                // トークン制限を超える場合は制限
-                if (totalTokens + estimatedTokens > maxTokensLimit) {
-                    this.logger.warning(`Token limit reached, omitting content for ${displayPath}`);
-                    content = '... (content omitted due to token limit)';
-                } else {
-                    totalTokens += estimatedTokens;
-                }
-
-                analyses.push({
-                    path: displayPath,
-                    content: content,
-                    type: type
-                });
-            } catch (error) {
-                this.logger.warning(`Failed to analyze file ${displayPath}`, error);
-                analyses.push({
-                    path: displayPath,
-                    type,
-                    error: error instanceof Error ? error.message : 'Unknown error'
-                });
+            if (totalTokens >= maxTokensLimit) {
+                analyses.push({ path: displayPath, content: '... (content omitted due to token limit)', type });
+                continue;
             }
+
+            const result = await this.analyzeOneFile(file, displayPath, type, totalTokens, maxTokensLimit);
+            totalTokens = result.totalTokens;
+            analyses.push(result.analysis);
         }
 
         this.logger.info(`File analysis complete: ${analyses.length} files analyzed, ${totalTokens} tokens`);
         return analyses;
     }
 
-    private getFileType(extension: string | undefined): string {
-        const typeMap: { [key: string]: string } = {
-            ts: 'TypeScript',
-            js: 'JavaScript',
-            jsx: 'React JavaScript',
-            tsx: 'React TypeScript',
-            css: 'CSS',
-            scss: 'SCSS',
-            html: 'HTML',
-            json: 'JSON',
-            md: 'Markdown',
-            py: 'Python',
-            java: 'Java',
-            cpp: 'C++',
-            c: 'C',
-            go: 'Go',
-            rs: 'Rust',
-            php: 'PHP',
-            rb: 'Ruby'
-        };
+    private async analyzeOneFile(
+        file: string, displayPath: string, type: string,
+        totalTokens: number, maxTokensLimit: number
+    ): Promise<{ analysis: FileAnalysis; totalTokens: number }> {
+        try {
+            const fileUri = vscode.Uri.file(file);
 
-        return extension ? (typeMap[extension] || 'Unknown') : 'Unknown';
+            if (await this.isFileOversized(fileUri)) {
+                return {
+                    analysis: { path: displayPath, content: `... (content omitted: file larger than ${Math.floor(IssueGeneratorService.MAX_FILE_BYTES / 1024)}KB)`, type },
+                    totalTokens
+                };
+            }
+
+            const fileContent = await vscode.workspace.fs.readFile(fileUri);
+            let content = new TextDecoder().decode(fileContent);
+
+            if (content.length > IssueGeneratorService.MAX_FILE_PREVIEW_CHARS) {
+                content = content.substring(0, IssueGeneratorService.MAX_FILE_PREVIEW_CHARS) + '\n... (content truncated)';
+            }
+
+            const estimatedTokens = TokenManager.estimateTokens(content);
+            if (totalTokens + estimatedTokens > maxTokensLimit) {
+                this.logger.warning(`Token limit reached, omitting content for ${displayPath}`);
+                content = '... (content omitted due to token limit)';
+            } else {
+                totalTokens += estimatedTokens;
+            }
+
+            return { analysis: { path: displayPath, content, type }, totalTokens };
+        } catch (error) {
+            this.logger.warning(`Failed to analyze file ${displayPath}`, error);
+            return {
+                analysis: { path: displayPath, type, error: error instanceof Error ? error.message : 'Unknown error' },
+                totalTokens
+            };
+        }
+    }
+
+    private async isFileOversized(fileUri: vscode.Uri): Promise<boolean> {
+        try {
+            const stat = await vscode.workspace.fs.stat(fileUri);
+            return typeof stat.size === 'number' && stat.size > IssueGeneratorService.MAX_FILE_BYTES;
+        } catch {
+            return false;
+        }
+    }
+
+    private getFileType(extension: string | undefined): string {
+        return extension ? (IssueGeneratorService.FILE_TYPE_MAP[extension] || 'Unknown') : 'Unknown';
     }
 
     private formatAnalysisResult(analyses: FileAnalysis[]): string {
@@ -293,8 +270,8 @@ export class IssueGeneratorService extends BaseService {
                 : [];
 
             if (fileAnalyses.length > 0) {
-                const estimatedTokens = Math.ceil(fileAnalyses.reduce((sum, analysis) => 
-                    sum + (analysis.content?.length || 0), 0) / 4);
+                const combinedContent = fileAnalyses.map(a => a.content || '').join('');
+                const estimatedTokens = TokenManager.estimateTokens(combinedContent);
                 const maxTokensLimit = this.getMaxTokensLimit();
                 if (estimatedTokens > maxTokensLimit) {
                     this.logger.warning(
@@ -384,8 +361,8 @@ export class IssueGeneratorServiceFactory extends BaseServiceFactory<IssueGenera
         // GitHubの初期化を先に行い、認証状態を確認
         const github = await GitHubServiceFactory.initialize();
         if (!github) {
-            vscode.window.showErrorMessage('GitHubの操作にはGitHub認証が必要です。認証を行ってから再度お試しください。');
-            throw new Error('GitHub認証が必要です');
+            vscode.window.showErrorMessage(t('messages.authRequired'));
+            throw new Error('GitHub authentication is required');
         }
 
         // 認証が成功したら他のサービスを初期化

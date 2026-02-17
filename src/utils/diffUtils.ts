@@ -6,6 +6,7 @@
  */
 
 import * as path from 'path';
+import { MAX_INPUT_TOKENS, CHARS_PER_TOKEN as TOKEN_RATIO } from '../constants/tokenLimits';
 
 /**
  * File status from git status
@@ -58,9 +59,9 @@ export interface TruncationResult {
     truncatedTokens?: number;
 }
 
-// Constants
-const TRUNCATE_THRESHOLD_TOKENS = 200 * 1000; // 200K tokens
-const CHARS_PER_TOKEN = 4; // Approximate characters per token
+const TRUNCATE_THRESHOLD_TOKENS = MAX_INPUT_TOKENS;
+const CHARS_PER_TOKEN = TOKEN_RATIO;
+const LINE_BOUNDARY_SEARCH_RANGE = 200;
 
 /**
  * Windows reserved device names
@@ -127,7 +128,7 @@ export function truncateDiff(diff: string): TruncationResult {
 
     // Ensure we don't cut in the middle of a line
     const nextNewline = diff.indexOf('\n', cutPoint);
-    if (nextNewline !== -1 && nextNewline < cutPoint + 200) {
+    if (nextNewline !== -1 && nextNewline < cutPoint + LINE_BOUNDARY_SEARCH_RANGE) {
         cutPoint = nextNewline + 1;
     }
 

@@ -1,16 +1,4 @@
-import { SupportedLanguage } from '../enums/SupportedLanguage';
-import { MessageStyle, EmojiStyle } from '../enums/MessageStyle';
-
-/**
- * Extension configuration interface
- */
-export interface ExtensionConfig {
-    language: SupportedLanguage;
-    messageStyle: MessageStyle;
-    useEmoji: boolean;
-    emojiStyle: EmojiStyle;
-    customMessage: string;
-}
+import { ReasoningEffort } from '../enums/ReasoningEffort';
 
 /**
  * Service configuration with API keys and settings
@@ -22,7 +10,7 @@ export interface ServiceConfig {
     messageStyle: string;
     useEmoji: boolean;
     /** GPT reasoning effort (none/low/medium/high) */
-    reasoningEffort?: string;
+    reasoningEffort?: ReasoningEffort;
 }
 
 /**

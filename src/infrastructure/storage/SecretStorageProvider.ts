@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { StorageProvider } from './StorageProvider';
 import { SecretStorageError } from '../../types/errors';
 import { EncryptionUtil } from '../../utils/encryption';
+import { Logger } from '../logging/Logger';
 
 /**
  * Storage provider implementation using VS Code's SecretStorage API
@@ -18,8 +19,11 @@ import { EncryptionUtil } from '../../utils/encryption';
  */
 export class SecretStorageProvider implements StorageProvider {
     private static readonly BACKUP_PREFIX = 'otak-committer.backup.';
+    private readonly logger: Logger;
 
-    constructor(private readonly context: vscode.ExtensionContext) {}
+    constructor(private readonly context: vscode.ExtensionContext) {
+        this.logger = Logger.getInstance();
+    }
 
     /**
      * Retrieves a value from SecretStorage with encrypted fallback
@@ -33,14 +37,14 @@ export class SecretStorageProvider implements StorageProvider {
             // Try SecretStorage first
             const value = await this.context.secrets.get(key);
             if (value && value.trim() !== '') {
-                console.log(`[SecretStorageProvider] Retrieved value for key: ${key}`);
+                this.logger.debug(`[SecretStorageProvider] Retrieved value for key: ${key}`);
                 return value;
             }
 
             // Fallback to encrypted backup in GlobalState
             return await this.getFromBackup(key);
         } catch (error) {
-            console.error(`[SecretStorageProvider] Error retrieving key ${key}:`, error);
+            this.logger.error(`[SecretStorageProvider] Error retrieving key ${key}:`, error);
             // Try backup as fallback
             try {
                 return await this.getFromBackup(key);
@@ -62,24 +66,21 @@ export class SecretStorageProvider implements StorageProvider {
      */
     async set(key: string, value: string): Promise<void> {
         try {
-            // Encrypt the value for backup
             const encryptedValue = EncryptionUtil.encrypt(value);
 
-            // Store in both SecretStorage and encrypted GlobalState for redundancy
-            await Promise.all([
-                this.context.secrets.store(key, value),
-                this.setBackup(key, encryptedValue)
-            ]);
+            // Store sequentially: primary first, then backup
+            await this.context.secrets.store(key, value);
+            await this.setBackup(key, encryptedValue);
 
-            console.log(`[SecretStorageProvider] Stored value for key: ${key}`);
+            this.logger.debug(`[SecretStorageProvider] Stored value for key: ${key}`);
         } catch (error) {
-            console.error(`[SecretStorageProvider] Error storing key ${key}:`, error);
+            this.logger.error(`[SecretStorageProvider] Error storing key ${key}:`, error);
 
             // At least try to save encrypted to GlobalState
             try {
                 const encryptedValue = EncryptionUtil.encrypt(value);
                 await this.setBackup(key, encryptedValue);
-                console.log(`[SecretStorageProvider] Stored value in backup only for key: ${key}`);
+                this.logger.debug(`[SecretStorageProvider] Stored value in backup only for key: ${key}`);
             } catch (backupError) {
                 throw new SecretStorageError(
                     `Failed to store value for key: ${key}`,
@@ -97,13 +98,12 @@ export class SecretStorageProvider implements StorageProvider {
      */
     async delete(key: string): Promise<void> {
         try {
-            await Promise.all([
-                this.context.secrets.delete(key),
-                this.deleteBackup(key)
-            ]);
-            console.log(`[SecretStorageProvider] Deleted value for key: ${key}`);
+            // Delete sequentially: primary first, then backup
+            await this.context.secrets.delete(key);
+            await this.deleteBackup(key);
+            this.logger.debug(`[SecretStorageProvider] Deleted value for key: ${key}`);
         } catch (error) {
-            console.error(`[SecretStorageProvider] Error deleting key ${key}:`, error);
+            this.logger.error(`[SecretStorageProvider] Error deleting key ${key}:`, error);
             // Try to delete from at least one location
             try {
                 await this.deleteBackup(key);
@@ -127,7 +127,7 @@ export class SecretStorageProvider implements StorageProvider {
             const value = await this.get(key);
             return value !== undefined && value.trim() !== '';
         } catch (error) {
-            console.error(`[SecretStorageProvider] Error checking key ${key}:`, error);
+            this.logger.error(`[SecretStorageProvider] Error checking key ${key}:`, error);
             return false;
         }
     }
@@ -148,19 +148,19 @@ export class SecretStorageProvider implements StorageProvider {
 
         try {
             const decryptedValue = EncryptionUtil.decrypt(encryptedValue);
-            console.log(`[SecretStorageProvider] Retrieved value from backup for key: ${key}`);
+            this.logger.debug(`[SecretStorageProvider] Retrieved value from backup for key: ${key}`);
 
             // Try to restore to SecretStorage
             try {
                 await this.context.secrets.store(key, decryptedValue);
-                console.log(`[SecretStorageProvider] Restored value to SecretStorage for key: ${key}`);
+                this.logger.debug(`[SecretStorageProvider] Restored value to SecretStorage for key: ${key}`);
             } catch (restoreError) {
-                console.error(`[SecretStorageProvider] Failed to restore to SecretStorage:`, restoreError);
+                this.logger.error(`[SecretStorageProvider] Failed to restore to SecretStorage:`, restoreError);
             }
 
             return decryptedValue;
         } catch (decryptError) {
-            console.error(`[SecretStorageProvider] Failed to decrypt backup for key ${key}:`, decryptError);
+            this.logger.error(`[SecretStorageProvider] Failed to decrypt backup for key ${key}:`, decryptError);
             // Clear corrupted backup
             await this.deleteBackup(key);
             return undefined;

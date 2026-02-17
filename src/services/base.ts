@@ -1,5 +1,5 @@
 import { ServiceConfig } from '../types';
-import { getServiceConfig, showConfigurationPrompt } from '../utils';
+import { getServiceConfig } from '../utils';
 import { Logger } from '../infrastructure/logging';
 import { ErrorHandler } from '../infrastructure/error';
 
@@ -31,25 +31,6 @@ export abstract class BaseService {
     }
 
     /**
-     * Ensure a configuration value is set, prompting user if necessary
-     * 
-     * @param key - The configuration key to check
-     * @param promptMessage - Message to show if configuration is missing
-     * @returns True if configuration is set, false otherwise
-     */
-    protected async ensureConfig(key: keyof ServiceConfig, promptMessage: string): Promise<boolean> {
-        if (!this.config[key]) {
-            const settingKey = `otakCommitter.${key}`;
-            const configured = await showConfigurationPrompt(promptMessage, settingKey);
-            if (configured) {
-                this.config = getServiceConfig();
-            }
-            return !!this.config[key];
-        }
-        return true;
-    }
-
-    /**
      * Handle an error and rethrow it
      * 
      * Routes the error through centralized error handling before rethrowing.
@@ -57,7 +38,7 @@ export abstract class BaseService {
      * @param error - The error to handle
      * @throws Always throws the error after handling
      */
-    protected handleError(error: any): never {
+    protected handleErrorAndRethrow(error: unknown): never {
         ErrorHandler.handle(error, {
             operation: 'Service operation',
             component: this.constructor.name
@@ -71,7 +52,7 @@ export abstract class BaseService {
      * @param message - The error message
      * @param error - Optional error object
      */
-    protected showError(message: string, error?: any): void {
+    protected showError(message: string, error?: unknown): void {
         ErrorHandler.handle(error || new Error(message), {
             operation: message,
             component: this.constructor.name
@@ -142,35 +123,4 @@ export abstract class BaseServiceFactory<T extends BaseService> implements Servi
      */
     abstract create(config?: Partial<ServiceConfig>): Promise<T>;
 
-    /**
-     * Validate that all required service dependencies are available
-     * 
-     * @param services - Array of service instances to validate
-     * @returns True if all services are defined, false otherwise
-     */
-    protected async validateDependencies(...services: (BaseService | undefined)[]): Promise<boolean> {
-        for (const service of services) {
-            if (!service) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Handle initialization errors
-     * 
-     * Routes errors through centralized error handling and returns undefined.
-     * 
-     * @param error - The error that occurred
-     * @param message - Description of the initialization operation
-     * @returns Always returns undefined
-     */
-    protected handleInitError(error: any, message: string): undefined {
-        ErrorHandler.handle(error, {
-            operation: message,
-            component: this.constructor.name
-        });
-        return undefined;
-    }
 }
