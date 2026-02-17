@@ -1,5 +1,21 @@
 # Change Log
 
+## [2.4.1] - 2026-02-17
+
+### Improved
+
+- **Developer experience:**
+  - Added Prettier formatting and EditorConfig
+  - Added ESLint CI mode (`lint:ci`) and GitHub Actions CI workflow
+
+- **Maintainability:**
+  - Refactored extension activation lifecycle via `ExtensionApp`
+  - Removed stray `console` usage; improved `Logger` error sanitization
+
+- **Type safety:**
+  - Replaced remaining `any` in error contexts with `unknown`
+  - Removed deprecated `PromptType` imports and tightened prompt map types
+
 ## [2.4.0] - 2026-02-17
 
 ### Added
