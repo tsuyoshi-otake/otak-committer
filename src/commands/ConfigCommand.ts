@@ -7,10 +7,10 @@ import { t, LanguagePreferenceManager, SupportedLocale } from '../i18n/index.js'
 
 /**
  * Command for managing extension configuration
- * 
+ *
  * Handles language and message style changes through the ConfigManager,
  * providing a unified interface for configuration operations.
- * 
+ *
  * @example
  * ```typescript
  * const configCommand = new ConfigCommand(context);
@@ -24,15 +24,17 @@ export class ConfigCommand extends BaseCommand {
      * ConfigCommand uses specific methods instead
      */
     async execute(): Promise<void> {
-        this.logger.debug('ConfigCommand.execute() called - use changeLanguage() or changeMessageStyle() instead');
+        this.logger.debug(
+            'ConfigCommand.execute() called - use changeLanguage() or changeMessageStyle() instead',
+        );
     }
 
     /**
      * Change the language setting
      *
- * Displays a quick pick menu with all available languages and updates
- * the configuration when the user makes a selection. Also updates
- * the language setting used for commit message generation.
+     * Displays a quick pick menu with all available languages and updates
+     * the configuration when the user makes a selection. Also updates
+     * the language setting used for commit message generation.
      *
      * @returns A promise that resolves when the language is changed or the user cancels
      *
@@ -50,14 +52,14 @@ export class ConfigCommand extends BaseCommand {
             const languages = Object.entries(LANGUAGE_CONFIGS).map(([key, config]) => ({
                 label: config.label,
                 description: key,
-                detail: config.description
+                detail: config.description,
             }));
 
             // Show quick pick menu
             const selected = await vscode.window.showQuickPick(languages, {
                 placeHolder: t('quickPick.selectCommitLanguage'),
                 matchOnDescription: true,
-                matchOnDetail: true
+                matchOnDetail: true,
             });
 
             if (selected) {
@@ -65,19 +67,19 @@ export class ConfigCommand extends BaseCommand {
                 await this.config.set(
                     'language',
                     selected.description as SupportedLanguage,
-                    vscode.ConfigurationTarget.Global
+                    vscode.ConfigurationTarget.Global,
                 );
 
                 // UI localization is supported for English, Japanese, Vietnamese, Korean,
                 // and Chinese (Simplified/Traditional).
                 // Keep the stored "preferred locale" in sync for these languages.
                 const localeMap: Record<string, SupportedLocale | undefined> = {
-                    'japanese': 'ja',
-                    'vietnamese': 'vi',
-                    'korean': 'ko',
-                    'chinese': 'zh-cn',
-                    'traditionalChinese': 'zh-tw',
-                    'english': 'en'
+                    japanese: 'ja',
+                    vietnamese: 'vi',
+                    korean: 'ko',
+                    chinese: 'zh-cn',
+                    traditionalChinese: 'zh-tw',
+                    english: 'en',
                 };
                 const locale = localeMap[selected.description as string];
                 if (locale) {
@@ -85,7 +87,9 @@ export class ConfigCommand extends BaseCommand {
                 }
 
                 this.logger.info(`Language changed to: ${selected.description}`);
-                vscode.window.showInformationMessage(t('messages.languageChanged', { language: selected.label }));
+                vscode.window.showInformationMessage(
+                    t('messages.languageChanged', { language: selected.label }),
+                );
             } else {
                 this.logger.debug('Language change cancelled by user');
             }
@@ -96,12 +100,12 @@ export class ConfigCommand extends BaseCommand {
 
     /**
      * Change the message style setting
-     * 
+     *
      * Displays a quick pick menu with available message styles and updates
      * the configuration when the user makes a selection.
-     * 
+     *
      * @returns A promise that resolves when the message style is changed or the user cancels
-     * 
+     *
      * @example
      * ```typescript
      * const configCommand = new ConfigCommand(context);
@@ -117,25 +121,25 @@ export class ConfigCommand extends BaseCommand {
                 {
                     label: t('messageStyles.simple'),
                     description: MessageStyle.Simple,
-                    detail: t('messageStyles.simpleDetail')
+                    detail: t('messageStyles.simpleDetail'),
                 },
                 {
                     label: t('messageStyles.normal'),
                     description: MessageStyle.Normal,
-                    detail: t('messageStyles.normalDetail')
+                    detail: t('messageStyles.normalDetail'),
                 },
                 {
                     label: t('messageStyles.detailed'),
                     description: MessageStyle.Detailed,
-                    detail: t('messageStyles.detailedDetail')
-                }
+                    detail: t('messageStyles.detailedDetail'),
+                },
             ];
 
             // Show quick pick menu
             const selected = await vscode.window.showQuickPick(styles, {
                 placeHolder: t('quickPick.selectMessageStyle'),
                 matchOnDescription: true,
-                matchOnDetail: true
+                matchOnDetail: true,
             });
 
             if (selected) {
@@ -143,11 +147,13 @@ export class ConfigCommand extends BaseCommand {
                 await this.config.set(
                     'messageStyle',
                     selected.description as MessageStyle,
-                    vscode.ConfigurationTarget.Global
+                    vscode.ConfigurationTarget.Global,
                 );
 
                 this.logger.info(`Message style changed to: ${selected.description}`);
-                vscode.window.showInformationMessage(t('messages.messageStyleChanged', { style: selected.label }));
+                vscode.window.showInformationMessage(
+                    t('messages.messageStyleChanged', { style: selected.label }),
+                );
             } else {
                 this.logger.debug('Message style change cancelled by user');
             }

@@ -7,11 +7,11 @@ import { t } from '../i18n/index.js';
 
 /**
  * Manages the status bar item for language and configuration display
- * 
+ *
  * Provides a visual indicator in the VS Code status bar showing the current
  * language and message style configuration. The status bar item is interactive
  * and allows users to change settings through command links.
- * 
+ *
  * @example
  * ```typescript
  * const statusBar = new StatusBarManager(context, config);
@@ -25,25 +25,25 @@ export class StatusBarManager {
 
     /**
      * Creates a new StatusBarManager instance
-     * 
+     *
      * @param context - The VS Code extension context
      * @param config - The configuration manager
      */
     constructor(
         private context: vscode.ExtensionContext,
-        private config: ConfigManager
+        private config: ConfigManager,
     ) {
         this.logger = Logger.getInstance();
         this.statusBarItem = vscode.window.createStatusBarItem(
             vscode.StatusBarAlignment.Right,
-            100
+            100,
         );
         this.context.subscriptions.push(this.statusBarItem);
     }
 
     /**
      * Initialize the status bar item
-     * 
+     *
      * Sets up the initial display and shows the status bar item.
      */
     initialize(): void {
@@ -55,7 +55,7 @@ export class StatusBarManager {
 
     /**
      * Update the status bar display
-     * 
+     *
      * Refreshes the status bar text and tooltip based on current configuration.
      * This should be called whenever the configuration changes.
      */
@@ -80,7 +80,7 @@ export class StatusBarManager {
         // Set command
         this.statusBarItem.command = {
             title: t('commands.changeLanguage'),
-            command: 'otak-committer.changeLanguage'
+            command: 'otak-committer.changeLanguage',
         };
 
         this.logger.debug('Status bar updated successfully');
@@ -88,7 +88,7 @@ export class StatusBarManager {
 
     /**
      * Build the tooltip markdown for the status bar
-     * 
+     *
      * @returns A markdown string with configuration information and command links
      */
     private buildTooltip(): vscode.MarkdownString {
@@ -103,7 +103,7 @@ export class StatusBarManager {
         tooltip.appendMarkdown(`---\n\n`);
         tooltip.appendMarkdown(
             `$(key) [${t('statusBar.setApiKey')}](command:otak-committer.setApiKey) &nbsp;&nbsp; ` +
-            `$(gear) [${t('statusBar.openSettings')}](command:otak-committer.openSettings)`
+                `$(gear) [${t('statusBar.openSettings')}](command:otak-committer.openSettings)`,
         );
 
         return tooltip;
@@ -111,7 +111,7 @@ export class StatusBarManager {
 
     /**
      * Dispose of the status bar item
-     * 
+     *
      * Cleans up resources when the status bar is no longer needed.
      */
     dispose(): void {

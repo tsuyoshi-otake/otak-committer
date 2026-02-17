@@ -5,7 +5,7 @@ export enum ErrorSeverity {
     Info = 'info',
     Warning = 'warning',
     Error = 'error',
-    Critical = 'critical'
+    Critical = 'critical',
 }
 
 /**
@@ -25,7 +25,7 @@ export abstract class BaseError extends Error {
     constructor(
         message: string,
         public readonly code: string,
-        public readonly context?: Record<string, any>
+        public readonly context?: Record<string, unknown>,
     ) {
         super(message);
         this.name = this.constructor.name;
@@ -37,8 +37,15 @@ export abstract class BaseError extends Error {
     }
 
     private static readonly SENSITIVE_KEYS = new Set([
-        'apikey', 'api_key', 'token', 'secret', 'password',
-        'authorization', 'credential', 'openaiApiKey', 'githubToken'
+        'apikey',
+        'api_key',
+        'token',
+        'secret',
+        'password',
+        'authorization',
+        'credential',
+        'openaiApiKey',
+        'githubToken',
     ]);
 
     /**
@@ -47,11 +54,11 @@ export abstract class BaseError extends Error {
     public toString(): string {
         const contextStr = this.context
             ? ` | Context: ${JSON.stringify(this.context, (key, value) => {
-                if (typeof key === 'string' && BaseError.SENSITIVE_KEYS.has(key.toLowerCase())) {
-                    return typeof value === 'string' ? '[REDACTED]' : value;
-                }
-                return value;
-            })}`
+                  if (typeof key === 'string' && BaseError.SENSITIVE_KEYS.has(key.toLowerCase())) {
+                      return typeof value === 'string' ? '[REDACTED]' : value;
+                  }
+                  return value;
+              })}`
             : '';
         return `${this.name} [${this.code}]: ${this.message}${contextStr}`;
     }

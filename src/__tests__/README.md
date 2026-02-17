@@ -24,16 +24,19 @@ src/
 This project uses a **dual testing approach**:
 
 ### 1. Unit Tests
+
 - Located in `__tests__` directories next to source files
 - Test specific examples, edge cases, and error conditions
 - Use Mocha test framework
 - Focus on concrete behavior verification
 
 **Example locations:**
+
 - `src/commands/__tests__/CommitCommand.test.ts`
 - `src/services/__tests__/GitService.test.ts`
 
 ### 2. Property-Based Tests (PBT)
+
 - Located in `src/__tests__/properties/`
 - Test universal properties that should hold across all inputs
 - Use fast-check library
@@ -41,14 +44,16 @@ This project uses a **dual testing approach**:
 - Tagged with property references from design document
 
 **Example:**
+
 ```typescript
 // **Feature: extension-architecture-refactoring, Property 1: No Circular Dependencies**
 test('module dependency graph should be acyclic', () => {
-    // test implementation
+  // test implementation
 });
 ```
 
 ### 3. Integration Tests
+
 - Located in `src/__tests__/integration/`
 - Test component interactions and end-to-end flows
 - Verify that components work together correctly
@@ -82,10 +87,10 @@ Test configuration is centralized in `src/test/test.config.ts`:
 import * as assert from 'assert';
 
 suite('MyComponent', () => {
-    test('should do something', () => {
-        const result = myFunction('input');
-        assert.strictEqual(result, 'expected');
-    });
+  test('should do something', () => {
+    const result = myFunction('input');
+    assert.strictEqual(result, 'expected');
+  });
 });
 ```
 
@@ -96,15 +101,15 @@ import * as fc from 'fast-check';
 import { runPropertyTest } from '../../test/helpers/property-test.helper';
 
 suite('MyComponent Properties', () => {
-    // **Feature: my-feature, Property 1: Some Property**
-    test('should maintain invariant', () => {
-        runPropertyTest(
-            fc.property(fc.string(), (input) => {
-                const result = myFunction(input);
-                return result.length >= 0; // invariant
-            })
-        );
-    });
+  // **Feature: my-feature, Property 1: Some Property**
+  test('should maintain invariant', () => {
+    runPropertyTest(
+      fc.property(fc.string(), (input) => {
+        const result = myFunction(input);
+        return result.length >= 0; // invariant
+      }),
+    );
+  });
 });
 ```
 

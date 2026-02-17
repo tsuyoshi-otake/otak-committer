@@ -4,48 +4,65 @@ import { CommandRegistry } from './commands/CommandRegistry.js';
 import { registerAllCommands } from './commands/commandRegistration.js';
 import { StatusBarManager } from './ui/StatusBarManager.js';
 
-let logger: Logger;
-let statusBarManager: StatusBarManager;
+class ExtensionApp {
+    private readonly logger: Logger;
+    private readonly config: ConfigManager;
+    private readonly storage: StorageManager;
+    private readonly statusBarManager: StatusBarManager;
+
+    constructor(private readonly context: vscode.ExtensionContext) {
+        this.logger = Logger.getInstance();
+        this.config = new ConfigManager();
+        this.storage = new StorageManager(context);
+        this.statusBarManager = new StatusBarManager(context, this.config);
+    }
+
+    async activate(): Promise<void> {
+        this.logger.info('Activating otak-committer extension');
+
+        await this.config.setDefaults();
+        await this.storage.migrateFromLegacy();
+
+        // Register commands before initializing status bar.
+        // (status bar tooltip contains command links that must exist)
+        const registry = new CommandRegistry();
+        registerAllCommands(registry, this.context, this.statusBarManager);
+        registry.registerAll(this.context);
+
+        // Now initialize status bar (commands are available for tooltip links)
+        this.statusBarManager.initialize();
+
+        this.context.subscriptions.push(
+            vscode.workspace.onDidChangeConfiguration((e) => {
+                if (e.affectsConfiguration('otakCommitter')) {
+                    this.statusBarManager.update();
+                }
+            }),
+        );
+
+        this.logger.info('Extension activated successfully');
+    }
+
+    deactivate(): void {
+        this.statusBarManager.dispose();
+        this.logger.info('Extension deactivated');
+        this.logger.dispose();
+    }
+}
+
+let app: ExtensionApp | undefined;
 
 /**
  * Activate the extension
  */
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
     try {
-        logger = Logger.getInstance();
-        logger.info('Activating otak-committer extension');
-
-        const config = new ConfigManager();
-        const storage = new StorageManager(context);
-
-        await config.setDefaults();
-        await storage.migrateFromLegacy();
-
-        // Create status bar manager first (but don't initialize yet)
-        statusBarManager = new StatusBarManager(context, config);
-
-        // Register commands before initializing status bar
-        // (status bar tooltip contains command links that must exist)
-        const registry = new CommandRegistry();
-        registerAllCommands(registry, context, statusBarManager);
-        registry.registerAll(context);
-
-        // Now initialize status bar (commands are available for tooltip links)
-        statusBarManager.initialize();
-
-        context.subscriptions.push(
-            vscode.workspace.onDidChangeConfiguration(e => {
-                if (e.affectsConfiguration('otakCommitter')) {
-                    statusBarManager.update();
-                }
-            })
-        );
-
-        logger.info('Extension activated successfully');
+        app = new ExtensionApp(context);
+        await app.activate();
     } catch (error) {
         ErrorHandler.handle(error, {
             operation: 'activating extension',
-            component: 'extension'
+            component: 'extension',
         });
     }
 }
@@ -54,11 +71,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
  * Deactivate the extension
  */
 export function deactivate(): void {
-    if (statusBarManager) {
-        statusBarManager.dispose();
-    }
-    if (logger) {
-        logger.info('Extension deactivated');
-        logger.dispose();
-    }
+    app?.deactivate();
+    app = undefined;
 }

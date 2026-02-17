@@ -29,4 +29,3 @@
   "config.useConventionalCommits": "スコープ付きの Conventional Commits 形式を使用（<type>(<scope>): <subject>）",
   "config.appendCommitTrailer": "生成されたコミットメッセージに 'Commit-Message-By: otak-committer' トレーラーを追加"
 }
-

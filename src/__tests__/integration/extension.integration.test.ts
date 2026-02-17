@@ -13,14 +13,18 @@ import * as vscode from 'vscode';
 suite('Extension Integration Tests', () => {
     suite('Extension Activation', () => {
         test('extension should be present', () => {
-            const extension = vscode.extensions.getExtension('tsuyoshi-otake-system-exe-jp.otak-committer');
+            const extension = vscode.extensions.getExtension(
+                'tsuyoshi-otake-system-exe-jp.otak-committer',
+            );
             // Extension may or may not be present in test environment
             // This is an informational test
             console.log(`Extension found: ${!!extension}`);
         });
 
         test('extension should activate without errors', async () => {
-            const extension = vscode.extensions.getExtension('tsuyoshi-otake-system-exe-jp.otak-committer');
+            const extension = vscode.extensions.getExtension(
+                'tsuyoshi-otake-system-exe-jp.otak-committer',
+            );
 
             if (!extension) {
                 console.log('Extension not found, skipping activation test');
@@ -85,15 +89,27 @@ suite('Extension Integration Tests', () => {
             const config = new ConfigManager();
 
             assert.ok(config, 'ConfigManager should be instantiable');
-            assert.strictEqual(typeof config.get, 'function', 'ConfigManager should have get method');
-            assert.strictEqual(typeof config.set, 'function', 'ConfigManager should have set method');
+            assert.strictEqual(
+                typeof config.get,
+                'function',
+                'ConfigManager should have get method',
+            );
+            assert.strictEqual(
+                typeof config.set,
+                'function',
+                'ConfigManager should have set method',
+            );
         });
 
         test('ErrorHandler should be available', () => {
             const { ErrorHandler } = require('../../infrastructure/error/ErrorHandler');
 
             assert.ok(ErrorHandler, 'ErrorHandler should be available');
-            assert.strictEqual(typeof ErrorHandler.handle, 'function', 'ErrorHandler should have handle method');
+            assert.strictEqual(
+                typeof ErrorHandler.handle,
+                'function',
+                'ErrorHandler should have handle method',
+            );
         });
 
         test('StorageManager should be instantiable with mock context', () => {
@@ -102,16 +118,16 @@ suite('Extension Integration Tests', () => {
             const mockContext = {
                 secrets: {
                     get: async () => undefined,
-                    store: async () => { },
-                    delete: async () => { },
-                    onDidChange: new vscode.EventEmitter().event
+                    store: async () => {},
+                    delete: async () => {},
+                    onDidChange: new vscode.EventEmitter().event,
                 },
                 globalState: {
                     get: () => undefined,
-                    update: async () => { },
+                    update: async () => {},
                     keys: () => [],
-                    setKeysForSync: () => { }
-                }
+                    setKeysForSync: () => {},
+                },
             };
 
             const storage = new StorageManager(mockContext as any);
@@ -129,20 +145,20 @@ suite('Extension Integration Tests', () => {
                 extensionUri: vscode.Uri.file('/test/path'),
                 globalState: {
                     get: () => undefined,
-                    update: async () => { },
+                    update: async () => {},
                     keys: () => [],
-                    setKeysForSync: () => { }
+                    setKeysForSync: () => {},
                 } as any,
                 workspaceState: {
                     get: () => undefined,
-                    update: async () => { },
-                    keys: () => []
+                    update: async () => {},
+                    keys: () => [],
                 } as any,
                 secrets: {
                     get: async () => undefined,
-                    store: async () => { },
-                    delete: async () => { },
-                    onDidChange: new vscode.EventEmitter().event
+                    store: async () => {},
+                    delete: async () => {},
+                    onDidChange: new vscode.EventEmitter().event,
                 } as any,
                 extensionMode: vscode.ExtensionMode.Test,
                 storageUri: vscode.Uri.file('/test/storage'),
@@ -151,7 +167,7 @@ suite('Extension Integration Tests', () => {
                 asAbsolutePath: (relativePath: string) => `/test/path/${relativePath}`,
                 storagePath: '/test/storage',
                 globalStoragePath: '/test/global-storage',
-                logPath: '/test/log'
+                logPath: '/test/log',
             } as any;
         });
 

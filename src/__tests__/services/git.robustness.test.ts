@@ -12,7 +12,7 @@ import {
     categorizeFiles,
     isWindowsReservedName,
     generateFileSummary,
-    estimateTokenCount
+    estimateTokenCount,
 } from '../../utils/diffUtils';
 
 suite('GitService Robustness Tests', () => {
@@ -59,7 +59,7 @@ suite('GitService Robustness Tests', () => {
                 'diff --git a/file1.ts b/file1.ts',
                 '--- a/file1.ts',
                 '+++ b/file1.ts',
-                '@@ -1,100 +1,100 @@'
+                '@@ -1,100 +1,100 @@',
             ].join('\n');
 
             const largeContent = 'a'.repeat(900000); // More than 200K tokens
@@ -137,9 +137,7 @@ suite('GitService Robustness Tests', () => {
          * Validates: Requirement 1.2, Property 2
          */
         test('should categorize added files correctly', () => {
-            const files = [
-                { path: 'new-file.ts', index: 'A', working_dir: ' ' }
-            ];
+            const files = [{ path: 'new-file.ts', index: 'A', working_dir: ' ' }];
 
             const categories = categorizeFiles(files);
 
@@ -149,9 +147,7 @@ suite('GitService Robustness Tests', () => {
         });
 
         test('should categorize modified files correctly', () => {
-            const files = [
-                { path: 'existing-file.ts', index: 'M', working_dir: ' ' }
-            ];
+            const files = [{ path: 'existing-file.ts', index: 'M', working_dir: ' ' }];
 
             const categories = categorizeFiles(files);
 
@@ -161,9 +157,7 @@ suite('GitService Robustness Tests', () => {
         });
 
         test('should categorize deleted files correctly', () => {
-            const files = [
-                { path: 'old-file.ts', index: 'D', working_dir: ' ' }
-            ];
+            const files = [{ path: 'old-file.ts', index: 'D', working_dir: ' ' }];
 
             const categories = categorizeFiles(files);
 
@@ -173,9 +167,7 @@ suite('GitService Robustness Tests', () => {
         });
 
         test('should categorize renamed files correctly', () => {
-            const files = [
-                { path: 'old-name.ts -> new-name.ts', index: 'R', working_dir: ' ' }
-            ];
+            const files = [{ path: 'old-name.ts -> new-name.ts', index: 'R', working_dir: ' ' }];
 
             const categories = categorizeFiles(files);
 
@@ -189,7 +181,7 @@ suite('GitService Robustness Tests', () => {
                 { path: 'added.ts', index: 'A', working_dir: ' ' },
                 { path: 'modified.ts', index: 'M', working_dir: ' ' },
                 { path: 'deleted.ts', index: 'D', working_dir: ' ' },
-                { path: 'old.ts -> new.ts', index: 'R', working_dir: ' ' }
+                { path: 'old.ts -> new.ts', index: 'R', working_dir: ' ' },
             ];
 
             const categories = categorizeFiles(files);
@@ -204,7 +196,7 @@ suite('GitService Robustness Tests', () => {
             const files = [
                 { path: 'file1.ts', index: 'A', working_dir: ' ' },
                 { path: 'file2.ts', index: 'M', working_dir: ' ' },
-                { path: 'file3.ts', index: 'D', working_dir: ' ' }
+                { path: 'file3.ts', index: 'D', working_dir: ' ' },
             ];
 
             const categories = categorizeFiles(files);
@@ -230,7 +222,7 @@ suite('GitService Robustness Tests', () => {
                 modified: ['mod1.ts'],
                 deleted: ['del1.ts'],
                 renamed: [{ from: 'old.ts', to: 'new.ts' }],
-                binary: ['image.png']
+                binary: ['image.png'],
             };
 
             const summary = generateFileSummary(categories);
@@ -248,7 +240,7 @@ suite('GitService Robustness Tests', () => {
                 modified: [],
                 deleted: [],
                 renamed: [],
-                binary: []
+                binary: [],
             };
 
             const summary = generateFileSummary(categories);

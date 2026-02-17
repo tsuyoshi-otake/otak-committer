@@ -12,21 +12,21 @@ export async function selectFiles(files: string[]): Promise<string[] | undefined
         throw new Error('No workspace folder found');
     }
 
-    const items: FileQuickPickItem[] = files.map(fullPath => ({
+    const items: FileQuickPickItem[] = files.map((fullPath) => ({
         label: path.relative(workspaceRoot, fullPath).replace(/\\/g, '/'),
-        fullPath
+        fullPath,
     }));
 
     const selected = await vscode.window.showQuickPick(items, {
         canPickMany: true,
         ignoreFocusOut: true,
         title: 'Select files to include in analysis',
-        placeHolder: 'Type to search files'
+        placeHolder: 'Type to search files',
     });
 
     if (!selected) {
         return undefined;
     }
 
-    return selected.map(item => item.fullPath);
+    return selected.map((item) => item.fullPath);
 }

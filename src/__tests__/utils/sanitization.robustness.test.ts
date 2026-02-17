@@ -10,7 +10,7 @@ import {
     sanitizeCommitMessage,
     escapeShellMetacharacters,
     normalizeTypography,
-    removeControlCharacters
+    removeControlCharacters,
 } from '../../utils/sanitization';
 
 suite('Sanitization Robustness Tests', () => {
@@ -132,14 +132,14 @@ suite('Sanitization Robustness Tests', () => {
         });
 
         test('should normalize left single quote', () => {
-            const message = "fix: update \u2018quoted\u2019 text";
+            const message = 'fix: update \u2018quoted\u2019 text';
             const sanitized = sanitizeCommitMessage(message);
             assert.strictEqual(sanitized.includes("'"), true);
             assert.strictEqual(sanitized.includes('\u2018'), false);
         });
 
         test('should normalize right single quote', () => {
-            const message = "fix: update \u2018quoted\u2019 text";
+            const message = 'fix: update \u2018quoted\u2019 text';
             const sanitized = sanitizeCommitMessage(message);
             assert.strictEqual(sanitized.includes('\u2019'), false);
         });

@@ -36,20 +36,20 @@ import * as vscode from 'vscode';
 import { Logger, LogLevel } from './infrastructure/logging';
 
 export async function activate(context: vscode.ExtensionContext) {
-    const logger = Logger.getInstance();
-    
-    // Set log level based on configuration or environment
-    const isDevelopment = process.env.NODE_ENV === 'development';
-    logger.setLogLevel(isDevelopment ? LogLevel.Debug : LogLevel.Info);
-    
-    logger.info('Extension activating...');
-    
-    // Register dispose
-    context.subscriptions.push({
-        dispose: () => logger.dispose()
-    });
-    
-    logger.info('Extension activated successfully');
+  const logger = Logger.getInstance();
+
+  // Set log level based on configuration or environment
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  logger.setLogLevel(isDevelopment ? LogLevel.Debug : LogLevel.Info);
+
+  logger.info('Extension activating...');
+
+  // Register dispose
+  context.subscriptions.push({
+    dispose: () => logger.dispose(),
+  });
+
+  logger.info('Extension activated successfully');
 }
 ```
 
@@ -59,20 +59,20 @@ export async function activate(context: vscode.ExtensionContext) {
 import { Logger } from '../infrastructure/logging';
 
 export async function generateCommit() {
-    const logger = Logger.getInstance();
-    
-    logger.info('Starting commit generation');
-    
-    try {
-        // Command logic here
-        logger.debug('Processing git diff...');
-        
-        // More logic
-        logger.info('Commit message generated successfully');
-    } catch (error) {
-        logger.error('Failed to generate commit message', error);
-        throw error;
-    }
+  const logger = Logger.getInstance();
+
+  logger.info('Starting commit generation');
+
+  try {
+    // Command logic here
+    logger.debug('Processing git diff...');
+
+    // More logic
+    logger.info('Commit message generated successfully');
+  } catch (error) {
+    logger.error('Failed to generate commit message', error);
+    throw error;
+  }
 }
 ```
 
@@ -82,30 +82,32 @@ export async function generateCommit() {
 import { Logger } from '../infrastructure/logging';
 
 export class OpenAIService {
-    private logger = Logger.getInstance();
-    
-    async generateMessage(prompt: string): Promise<string> {
-        this.logger.debug('Calling OpenAI API', { promptLength: prompt.length });
-        
-        try {
-            const response = await this.callAPI(prompt);
-            this.logger.info('OpenAI API call successful');
-            return response;
-        } catch (error) {
-            this.logger.error('OpenAI API call failed', error);
-            throw error;
-        }
+  private logger = Logger.getInstance();
+
+  async generateMessage(prompt: string): Promise<string> {
+    this.logger.debug('Calling OpenAI API', { promptLength: prompt.length });
+
+    try {
+      const response = await this.callAPI(prompt);
+      this.logger.info('OpenAI API call successful');
+      return response;
+    } catch (error) {
+      this.logger.error('OpenAI API call failed', error);
+      throw error;
     }
+  }
 }
 ```
 
 ## Viewing Logs
 
 Users can view logs in VS Code by:
+
 1. Opening the Output panel (View > Output)
 2. Selecting "otak-committer" from the dropdown
 
 Or programmatically:
+
 ```typescript
 logger.show(); // Opens the output channel
 ```

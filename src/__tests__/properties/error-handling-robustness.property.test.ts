@@ -12,7 +12,7 @@ import {
     createCommitErrorContext,
     formatErrorMessage,
     handleCommitError,
-    CommitErrorContext
+    CommitErrorContext,
 } from '../../utils/errorHandling';
 import { runPropertyTest } from '../../test/helpers/property-test.helper';
 
@@ -30,7 +30,7 @@ suite('Error Handling Robustness Property Tests', () => {
             'sanitizeMessage',
             'validateApiKey',
             'truncateDiff',
-            'categorizeFiles'
+            'categorizeFiles',
         );
 
         const errorCodeArbitrary = fc.constantFrom(
@@ -41,26 +41,22 @@ suite('Error Handling Robustness Property Tests', () => {
             'NETWORK_ERROR',
             'RATE_LIMIT',
             'EMPTY_DIFF',
-            'UNKNOWN_ERROR'
+            'UNKNOWN_ERROR',
         );
 
         test('error messages should always include operation name', () => {
             runPropertyTest(
                 fc.property(
-                    fc.tuple(
-                        operationArbitrary,
-                        fc.string({ minLength: 1, maxLength: 100 })
-                    ),
+                    fc.tuple(operationArbitrary, fc.string({ minLength: 1, maxLength: 100 })),
                     ([operation, errorMsg]) => {
                         const context = createCommitErrorContext(operation);
                         const error = new Error(errorMsg);
                         const formatted = formatErrorMessage(error, context);
 
                         // Formatted message should reference the operation
-                        return formatted.includes(operation) ||
-                               formatted.includes(errorMsg);
-                    }
-                )
+                        return formatted.includes(operation) || formatted.includes(errorMsg);
+                    },
+                ),
             );
         });
 
@@ -70,7 +66,7 @@ suite('Error Handling Robustness Property Tests', () => {
                     fc.tuple(
                         operationArbitrary,
                         fc.integer({ min: 1, max: 1000 }),
-                        fc.string({ minLength: 1, maxLength: 50 })
+                        fc.string({ minLength: 1, maxLength: 50 }),
                     ),
                     ([operation, fileCount, errorMsg]) => {
                         const context = createCommitErrorContext(operation, { fileCount });
@@ -78,11 +74,13 @@ suite('Error Handling Robustness Property Tests', () => {
                         const formatted = formatErrorMessage(error, context);
 
                         // Should mention file count in some form
-                        return formatted.includes(String(fileCount)) ||
-                               formatted.includes('file') ||
-                               formatted.length > 0;
-                    }
-                )
+                        return (
+                            formatted.includes(String(fileCount)) ||
+                            formatted.includes('file') ||
+                            formatted.length > 0
+                        );
+                    },
+                ),
             );
         });
 
@@ -92,7 +90,7 @@ suite('Error Handling Robustness Property Tests', () => {
                     fc.tuple(
                         operationArbitrary,
                         fc.integer({ min: 1000, max: 1000000 }),
-                        fc.string({ minLength: 1, maxLength: 50 })
+                        fc.string({ minLength: 1, maxLength: 50 }),
                     ),
                     ([operation, tokenCount, errorMsg]) => {
                         const context = createCommitErrorContext(operation, { tokenCount });
@@ -100,8 +98,8 @@ suite('Error Handling Robustness Property Tests', () => {
                         const formatted = formatErrorMessage(error, context);
 
                         return formatted.length > 0;
-                    }
-                )
+                    },
+                ),
             );
         });
 
@@ -111,7 +109,7 @@ suite('Error Handling Robustness Property Tests', () => {
                     fc.tuple(
                         fc.string({ minLength: 1, maxLength: 100 }),
                         errorCodeArbitrary,
-                        operationArbitrary
+                        operationArbitrary,
                     ),
                     ([message, code, operation]) => {
                         const error = new CommitError(message, code);
@@ -123,8 +121,8 @@ suite('Error Handling Robustness Property Tests', () => {
                             result.message.length > 0 &&
                             typeof result.isRecoverable === 'boolean'
                         );
-                    }
-                )
+                    },
+                ),
             );
         });
 
@@ -133,7 +131,7 @@ suite('Error Handling Robustness Property Tests', () => {
                 fc.property(
                     fc.tuple(
                         fc.string({ minLength: 1, maxLength: 100 }),
-                        fc.constantFrom('INVALID_API_KEY', 'MISSING_API_KEY')
+                        fc.constantFrom('INVALID_API_KEY', 'MISSING_API_KEY'),
                     ),
                     ([message, code]) => {
                         const error = new CommitError(message, code);
@@ -141,8 +139,8 @@ suite('Error Handling Robustness Property Tests', () => {
                         const result = handleCommitError(error, context);
 
                         return result.isRecoverable === true;
-                    }
-                )
+                    },
+                ),
             );
         });
 
@@ -153,27 +151,50 @@ suite('Error Handling Robustness Property Tests', () => {
                         operation: operationArbitrary,
                         fileCount: fc.option(fc.integer({ min: 0, max: 1000 })),
                         tokenCount: fc.option(fc.integer({ min: 0, max: 1000000 })),
-                        errorType: fc.option(errorCodeArbitrary)
+                        errorType: fc.option(errorCodeArbitrary),
                     }),
                     (input) => {
                         const details: any = {};
-                        if (input.fileCount !== null) { details.fileCount = input.fileCount; }
-                        if (input.tokenCount !== null) { details.tokenCount = input.tokenCount; }
-                        if (input.errorType !== null) { details.errorType = input.errorType; }
+                        if (input.fileCount !== null) {
+                            details.fileCount = input.fileCount;
+                        }
+                        if (input.tokenCount !== null) {
+                            details.tokenCount = input.tokenCount;
+                        }
+                        if (input.errorType !== null) {
+                            details.errorType = input.errorType;
+                        }
 
                         const context = createCommitErrorContext(input.operation, details);
 
                         // Verify context preserves operation
-                        if (context.operation !== input.operation) { return false; }
+                        if (context.operation !== input.operation) {
+                            return false;
+                        }
 
                         // Verify details are preserved
-                        if (input.fileCount !== null && context.details?.fileCount !== input.fileCount) { return false; }
-                        if (input.tokenCount !== null && context.details?.tokenCount !== input.tokenCount) { return false; }
-                        if (input.errorType !== null && context.details?.errorType !== input.errorType) { return false; }
+                        if (
+                            input.fileCount !== null &&
+                            context.details?.fileCount !== input.fileCount
+                        ) {
+                            return false;
+                        }
+                        if (
+                            input.tokenCount !== null &&
+                            context.details?.tokenCount !== input.tokenCount
+                        ) {
+                            return false;
+                        }
+                        if (
+                            input.errorType !== null &&
+                            context.details?.errorType !== input.errorType
+                        ) {
+                            return false;
+                        }
 
                         return true;
-                    }
-                )
+                    },
+                ),
             );
         });
     });

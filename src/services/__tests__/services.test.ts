@@ -18,7 +18,7 @@ suite('Services Unit Tests', () => {
             assert.strictEqual(
                 typeof GitServiceFactory.initialize,
                 'function',
-                'GitServiceFactory should have initialize method'
+                'GitServiceFactory should have initialize method',
             );
         });
 
@@ -46,20 +46,20 @@ suite('Services Unit Tests', () => {
                 extensionUri: vscode.Uri.file('/test/path'),
                 globalState: {
                     get: () => undefined,
-                    update: async () => { },
+                    update: async () => {},
                     keys: () => [],
-                    setKeysForSync: () => { }
+                    setKeysForSync: () => {},
                 } as any,
                 workspaceState: {
                     get: () => undefined,
-                    update: async () => { },
-                    keys: () => []
+                    update: async () => {},
+                    keys: () => [],
                 } as any,
                 secrets: {
                     get: async () => undefined,
-                    store: async () => { },
-                    delete: async () => { },
-                    onDidChange: new vscode.EventEmitter().event
+                    store: async () => {},
+                    delete: async () => {},
+                    onDidChange: new vscode.EventEmitter().event,
                 } as any,
                 extensionMode: vscode.ExtensionMode.Test,
                 storageUri: vscode.Uri.file('/test/storage'),
@@ -68,7 +68,7 @@ suite('Services Unit Tests', () => {
                 asAbsolutePath: (relativePath: string) => `/test/path/${relativePath}`,
                 storagePath: '/test/storage',
                 globalStoragePath: '/test/global-storage',
-                logPath: '/test/log'
+                logPath: '/test/log',
             } as any;
         });
 
@@ -78,19 +78,22 @@ suite('Services Unit Tests', () => {
             assert.strictEqual(
                 typeof OpenAIService.initialize,
                 'function',
-                'OpenAIService should have initialize method'
+                'OpenAIService should have initialize method',
             );
         });
 
         test('OpenAIService should return undefined without API key', async () => {
             const { OpenAIService } = require('../openai');
 
-            const service = await OpenAIService.initialize({
-                openaiApiKey: '',
-                language: 'english',
-                messageStyle: 'normal',
-                useEmoji: false
-            }, mockContext);
+            const service = await OpenAIService.initialize(
+                {
+                    openaiApiKey: '',
+                    language: 'english',
+                    messageStyle: 'normal',
+                    useEmoji: false,
+                },
+                mockContext,
+            );
 
             assert.strictEqual(service, undefined, 'Should return undefined without API key');
         });
@@ -108,7 +111,7 @@ suite('Services Unit Tests', () => {
             assert.strictEqual(
                 typeof GitHubService.selectBranches,
                 'function',
-                'GitHubService should have selectBranches method'
+                'GitHubService should have selectBranches method',
             );
         });
     });
@@ -123,11 +126,14 @@ suite('Services Unit Tests', () => {
     suite('IssueGeneratorService', () => {
         test('IssueGeneratorServiceFactory should be importable', () => {
             const { IssueGeneratorServiceFactory } = require('../issueGenerator');
-            assert.ok(IssueGeneratorServiceFactory, 'IssueGeneratorServiceFactory should be exported');
+            assert.ok(
+                IssueGeneratorServiceFactory,
+                'IssueGeneratorServiceFactory should be exported',
+            );
             assert.strictEqual(
                 typeof IssueGeneratorServiceFactory.initialize,
                 'function',
-                'IssueGeneratorServiceFactory should have initialize method'
+                'IssueGeneratorServiceFactory should have initialize method',
             );
         });
     });
@@ -187,7 +193,7 @@ suite('Services Unit Tests', () => {
             assert.strictEqual(
                 importErrors.length,
                 0,
-                `Service imports failed: ${importErrors.join(', ')}`
+                `Service imports failed: ${importErrors.join(', ')}`,
             );
         });
 
@@ -207,7 +213,7 @@ suite('Services Unit Tests', () => {
             assert.strictEqual(
                 typeof ErrorHandler.handle,
                 'function',
-                'ErrorHandler.handle should be available'
+                'ErrorHandler.handle should be available',
             );
         });
     });

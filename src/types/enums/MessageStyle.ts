@@ -4,7 +4,7 @@
 export enum MessageStyle {
     Simple = 'simple',
     Normal = 'normal',
-    Detailed = 'detailed'
+    Detailed = 'detailed',
 }
 
 /**
@@ -12,7 +12,7 @@ export enum MessageStyle {
  */
 export enum EmojiStyle {
     GitHub = 'github',
-    Unicode = 'unicode'
+    Unicode = 'unicode',
 }
 
 /**
@@ -20,5 +20,5 @@ export enum EmojiStyle {
  */
 export enum MessageType {
     Commit = 'commit',
-    PR = 'pr'
+    PR = 'pr',
 }

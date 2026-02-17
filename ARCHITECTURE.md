@@ -30,7 +30,7 @@ otak-committer is a VS Code extension that uses AI to generate commit messages, 
 - **Language**: TypeScript
 - **Runtime**: VS Code Extension Host
 - **APIs**: VS Code Extension API, OpenAI API, GitHub API
-- **Testing**: Jest, fast-check (property-based testing)
+- **Testing**: Mocha, fast-check (property-based testing)
 - **Build**: TypeScript Compiler, esbuild
 
 ## Architecture Principles
@@ -38,27 +38,36 @@ otak-committer is a VS Code extension that uses AI to generate commit messages, 
 The architecture follows these core principles:
 
 ### 1. Single Responsibility Principle (SRP)
+
 Each module has one clear responsibility. For example:
+
 - `StorageManager` handles all persistence operations
 - `ConfigManager` handles all configuration operations
 - `ErrorHandler` handles all error processing
 
 ### 2. Dependency Inversion Principle (DIP)
+
 High-level modules don't depend on low-level modules. Both depend on abstractions:
+
 - Commands depend on `StorageProvider` interface, not concrete implementations
 - Services depend on `Logger` interface, not specific logging implementations
 
 ### 3. Interface Segregation Principle (ISP)
+
 Clients don't depend on interfaces they don't use:
+
 - `StorageProvider` interface is minimal with only essential methods
 - Commands only receive the context they need
 
 ### 4. Open/Closed Principle (OCP)
+
 The system is open for extension but closed for modification:
+
 - New commands can be added by extending `BaseCommand`
 - New storage providers can be added by implementing `StorageProvider`
 
 ### 5. No Circular Dependencies
+
 The dependency graph is acyclic, ensuring clean module boundaries and testability.
 
 ## Layer Architecture
@@ -125,9 +134,11 @@ The extension follows a layered architecture with clear boundaries:
 ### Entry Point Layer
 
 #### extension.ts
+
 **Responsibility**: Extension lifecycle management
 
 **Key Functions**:
+
 - Initialize infrastructure components (Logger, ErrorHandler, StorageManager, ConfigManager)
 - Register commands with VS Code
 - Set up StatusBar
@@ -136,28 +147,31 @@ The extension follows a layered architecture with clear boundaries:
 **Size Constraint**: ≤ 50 lines (excluding imports and comments)
 
 **Example**:
+
 ```typescript
 export async function activate(context: vscode.ExtensionContext) {
-    const logger = Logger.getInstance();
-    const storage = new StorageManager(context);
-    const config = new ConfigManager();
-    
-    // Register commands
-    const registry = new CommandRegistry();
-    registry.register(new CommitCommand(context));
-    registry.register(new PRCommand(context));
-    registry.registerAll(context);
-    
-    logger.info('Extension activated');
+  const logger = Logger.getInstance();
+  const storage = new StorageManager(context);
+  const config = new ConfigManager();
+
+  // Register commands
+  const registry = new CommandRegistry();
+  registry.register(new CommitCommand(context));
+  registry.register(new PRCommand(context));
+  registry.registerAll(context);
+
+  logger.info('Extension activated');
 }
 ```
 
 ### Command Layer
 
 #### BaseCommand (Abstract Class)
+
 **Responsibility**: Provide common infrastructure to all commands
 
 **Key Features**:
+
 - Access to Logger, ConfigManager, StorageManager
 - `withProgress()` helper for progress notifications
 - `handleErrorSilently()` helper for consistent error handling (swallows errors)
@@ -165,26 +179,29 @@ export async function activate(context: vscode.ExtensionContext) {
 - `openExternalUrl()` helper for opening URLs in browser
 
 **Usage**:
+
 ```typescript
 export class CommitCommand extends BaseCommand {
-    async execute() {
-        try {
-            await this.withProgress('Generating commit...', async () => {
-                // Command logic
-            });
-        } catch (error) {
-            this.handleErrorSilently(error, 'generate commit message');
-        }
+  async execute() {
+    try {
+      await this.withProgress('Generating commit...', async () => {
+        // Command logic
+      });
+    } catch (error) {
+      this.handleErrorSilently(error, 'generate commit message');
     }
+  }
 }
 ```
 
 #### CommitCommand
+
 **Responsibility**: Generate AI-powered commit messages
 
 **Dependencies**: GitService, OpenAIService, PromptService
 
 **Flow**:
+
 1. Get staged changes from GitService
 2. Generate prompt from PromptService
 3. Call OpenAI API via OpenAIService
@@ -192,33 +209,39 @@ export class CommitCommand extends BaseCommand {
 5. Commit if approved
 
 #### PRCommand
+
 **Responsibility**: Generate pull request descriptions
 
 **Dependencies**: GitService, GitHubService, OpenAIService
 
 **Flow**:
+
 1. Get branch diff from GitService
 2. Generate PR description via OpenAI
 3. Create PR via GitHubService
 4. Show success notification
 
 #### IssueCommand
+
 **Responsibility**: Generate GitHub issues
 
 **Dependencies**: GitHubService, OpenAIService
 
 **Flow**:
+
 1. Get user input for issue context
 2. Generate issue content via OpenAI
 3. Create issue via GitHubService
 4. Open issue in browser
 
 #### ConfigCommand
+
 **Responsibility**: Handle configuration changes
 
 **Dependencies**: ConfigManager
 
 **Operations**:
+
 - Change language preference
 - Change message style
 - Update emoji settings
@@ -226,9 +249,11 @@ export class CommitCommand extends BaseCommand {
 ### Service Layer
 
 #### GitService
+
 **Responsibility**: Git repository operations
 
 **Key Methods**:
+
 - `getStagedChanges()`: Get diff of staged files
 - `getBranchDiff()`: Get diff between branches
 - `commit()`: Create a commit
@@ -237,9 +262,11 @@ export class CommitCommand extends BaseCommand {
 **Dependencies**: simple-git library, Logger
 
 #### OpenAIService
+
 **Responsibility**: OpenAI API integration
 
 **Key Methods**:
+
 - `generateCompletion()`: Generate text completion
 - `generateCommitMessage()`: Specialized commit message generation
 - `generatePRDescription()`: Specialized PR description generation
@@ -249,9 +276,11 @@ export class CommitCommand extends BaseCommand {
 **Error Handling**: Retries with exponential backoff, fallback to simpler models
 
 #### GitHubService
+
 **Responsibility**: GitHub API integration
 
 **Key Methods**:
+
 - `createPullRequest()`: Create a new PR
 - `createIssue()`: Create a new issue
 - `getRepository()`: Get repository information
@@ -259,9 +288,11 @@ export class CommitCommand extends BaseCommand {
 **Dependencies**: Octokit, StorageManager (for token), Logger
 
 #### PromptService
+
 **Responsibility**: Generate prompts for AI models
 
 **Key Methods**:
+
 - `buildCommitPrompt()`: Build commit message prompt
 - `buildPRPrompt()`: Build PR description prompt
 - `buildIssuePrompt()`: Build issue prompt
@@ -271,81 +302,99 @@ export class CommitCommand extends BaseCommand {
 ### Infrastructure Layer
 
 #### StorageManager
+
 **Responsibility**: Unified storage abstraction
 
 **Key Features**:
+
 - Secure API key storage in SecretStorage
 - Encrypted backup in GlobalState
 - Fallback mechanisms for storage failures
 
 **Key Methods**:
+
 - `getApiKey(service)`: Retrieve API key with fallback
 - `setApiKey(service, value)`: Store API key securely
 
 #### StorageMigrationService
+
 **Responsibility**: Legacy data migration
 
 **Key Methods**:
+
 - `migrateFromLegacy()`: Migrate old data formats
 - `migrateLegacyKey()`: Migrate a single legacy key
 
 #### StorageDiagnostics
+
 **Responsibility**: Storage health checks and diagnostics
 
 **Key Methods**:
+
 - `checkStorageHealth()`: Verify storage subsystems
 - `getStorageDiagnostics()`: Get detailed diagnostic info
 
 **Storage Hierarchy**:
+
 1. Primary: VS Code SecretStorage (encrypted)
 2. Backup: GlobalState with encryption
 3. Legacy: Configuration (migrated away from)
 
 #### ConfigManager
+
 **Responsibility**: Configuration management
 
 **Key Features**:
+
 - Type-safe configuration access
 - Default value handling
 - Configuration target management (Global/Workspace)
 
 **Key Methods**:
+
 - `get<K>(key)`: Get configuration value
 - `set<K>(key, value, target)`: Set configuration value
 - `getAll()`: Get all configuration as object
 - `setDefaults()`: Initialize default values
 
 #### ErrorHandler
+
 **Responsibility**: Centralized error handling
 
 **Key Features**:
+
 - Error severity determination
 - User notifications based on severity
 - Error logging integration
 - Sensitive field redaction in log output
 
 **Error Severities**:
+
 - **Info**: Informational messages
 - **Warning**: Non-critical issues
 - **Error**: Operation failures
 - **Critical**: System-level failures
 
 **Key Methods**:
+
 - `handle(error, context)`: Process and handle error
 - `showUserNotification(severity, message)`: Notify user
 
 **Note**: Error severity is determined polymorphically via `BaseError.severity` property, not a standalone method.
 
 #### Logger
+
 **Responsibility**: Unified logging interface
 
 **Key Features**:
+
 - Multiple log levels (Debug, Info, Warning, Error)
 - Output channel integration
 - Console logging for development
 - Timestamp and level formatting
 
 **Key Methods**:
+
 - `debug(message, ...args)`: Debug-level logging
 - `info(message, ...args)`: Info-level logging
 - `warning(message, ...args)`: Warning-level logging
@@ -356,9 +405,11 @@ export class CommitCommand extends BaseCommand {
 ### UI Layer
 
 #### StatusBarManager
+
 **Responsibility**: Manage status bar UI
 
 **Key Features**:
+
 - Display current language and message style
 - Quick access to configuration commands
 - Visual feedback for extension state
@@ -541,6 +592,7 @@ src/types/
 ### Type Import Strategy
 
 Always import from the central export:
+
 ```typescript
 // ✅ Good
 import { MessageStyle, SupportedLanguage } from '../types';
@@ -578,26 +630,27 @@ BaseError (abstract)
 ### Error Context
 
 Every error should include context:
+
 ```typescript
 try {
-    await operation();
+  await operation();
 } catch (error) {
-    ErrorHandler.handle(error, {
-        operation: 'generate commit message',
-        component: 'CommitCommand',
-        metadata: { repo: repoPath }
-    });
+  ErrorHandler.handle(error, {
+    operation: 'generate commit message',
+    component: 'CommitCommand',
+    metadata: { repo: repoPath },
+  });
 }
 ```
 
 ### Fallback Mechanisms
 
-| Operation | Primary | Fallback 1 | Fallback 2 |
-|-----------|---------|------------|------------|
-| API Key Retrieval | SecretStorage | Encrypted GlobalState | Prompt User |
-| Configuration | Workspace Config | Global Config | Default Values |
-| Git Operations | simple-git | VS Code Git API | Manual Input |
-| OpenAI API | gpt-5.2 | Error message | Cached Response |
+| Operation         | Primary          | Fallback 1            | Fallback 2      |
+| ----------------- | ---------------- | --------------------- | --------------- |
+| API Key Retrieval | SecretStorage    | Encrypted GlobalState | Prompt User     |
+| Configuration     | Workspace Config | Global Config         | Default Values  |
+| Git Operations    | simple-git       | VS Code Git API       | Manual Input    |
+| OpenAI API        | gpt-5.2          | Error message         | Cached Response |
 
 ## Storage Architecture
 
@@ -628,10 +681,10 @@ try {
 
 ```typescript
 export interface StorageProvider {
-    get(key: string): Promise<string | undefined>;
-    set(key: string, value: string): Promise<void>;
-    delete(key: string): Promise<void>;
-    has(key: string): Promise<boolean>;
+  get(key: string): Promise<string | undefined>;
+  set(key: string, value: string): Promise<void>;
+  delete(key: string): Promise<void>;
+  has(key: string): Promise<boolean>;
 }
 ```
 
@@ -659,12 +712,14 @@ The extension automatically migrates from legacy storage:
 The extension uses both unit tests and property-based tests:
 
 #### Unit Tests
+
 - Test specific examples and edge cases
 - Test integration points between components
 - Test error handling scenarios
 - Located in `__tests__` folders next to source files
 
 #### Property-Based Tests
+
 - Test universal properties across all inputs
 - Use `fast-check` library
 - Run 100+ iterations per property
@@ -703,9 +758,9 @@ Each property test validates a correctness property from the design document:
 ```typescript
 // **Feature: extension-architecture-refactoring, Property 1: No Circular Dependencies**
 test('module dependency graph should be acyclic', () => {
-    const modules = analyzeModuleDependencies('./src');
-    const cycles = findCycles(modules);
-    expect(cycles).toHaveLength(0);
+  const modules = analyzeModuleDependencies('./src');
+  const cycles = findCycles(modules);
+  expect(cycles).toHaveLength(0);
 });
 ```
 
@@ -733,31 +788,33 @@ npm test -- --testPathPattern="properties"
 ### Adding a New Command
 
 1. **Create Command Class**:
+
 ```typescript
 // src/commands/MyCommand.ts
 import { BaseCommand } from './BaseCommand';
 
 export class MyCommand extends BaseCommand {
-    async execute(...args: unknown[]): Promise<void> {
-        try {
-            await this.withProgress('Doing something...', async () => {
-                // Your logic here
-                const config = this.config.get('someKey');
-                const apiKey = await this.storage.getApiKey('openai');
+  async execute(...args: unknown[]): Promise<void> {
+    try {
+      await this.withProgress('Doing something...', async () => {
+        // Your logic here
+        const config = this.config.get('someKey');
+        const apiKey = await this.storage.getApiKey('openai');
 
-                // Use services
-                const result = await someService.doSomething();
+        // Use services
+        const result = await someService.doSomething();
 
-                this.logger.info('Command completed');
-            });
-        } catch (error) {
-            this.handleErrorSilently(error, 'my operation');
-        }
+        this.logger.info('Command completed');
+      });
+    } catch (error) {
+      this.handleErrorSilently(error, 'my operation');
     }
+  }
 }
 ```
 
 2. **Register Command**:
+
 ```typescript
 // src/commands/index.ts
 export { MyCommand } from './MyCommand';
@@ -770,63 +827,68 @@ registry.register(new MyCommand(context));
 ```
 
 3. **Add to package.json**:
+
 ```json
 {
-    "contributes": {
-        "commands": [
-            {
-                "command": "otak-committer.myCommand",
-                "title": "My Command",
-                "category": "Otak Committer"
-            }
-        ]
-    }
+  "contributes": {
+    "commands": [
+      {
+        "command": "otak-committer.myCommand",
+        "title": "My Command",
+        "category": "Otak Committer"
+      }
+    ]
+  }
 }
 ```
 
 4. **Write Tests**:
+
 ```typescript
 // src/commands/__tests__/MyCommand.test.ts
 describe('MyCommand', () => {
-    it('should execute successfully', async () => {
-        const command = new MyCommand(mockContext);
-        await command.execute();
-        // Assertions
-    });
+  it('should execute successfully', async () => {
+    const command = new MyCommand(mockContext);
+    await command.execute();
+    // Assertions
+  });
 });
 ```
 
 ### Adding a New Service
 
 1. **Create Service Class**:
+
 ```typescript
 // src/services/myService.ts
 import { Logger } from '../infrastructure/logging';
 
 export class MyService {
-    private logger = Logger.getInstance();
-    
-    async doSomething(): Promise<Result> {
-        this.logger.info('Starting operation');
-        
-        try {
-            // Service logic
-            return result;
-        } catch (error) {
-            this.logger.error('Operation failed', error);
-            throw new ServiceError('Operation failed', 'MyService');
-        }
+  private logger = Logger.getInstance();
+
+  async doSomething(): Promise<Result> {
+    this.logger.info('Starting operation');
+
+    try {
+      // Service logic
+      return result;
+    } catch (error) {
+      this.logger.error('Operation failed', error);
+      throw new ServiceError('Operation failed', 'MyService');
     }
+  }
 }
 ```
 
 2. **Export from index**:
+
 ```typescript
 // src/services/index.ts
 export { MyService } from './myService';
 ```
 
 3. **Use in Commands**:
+
 ```typescript
 import { MyService } from '../services';
 
@@ -837,30 +899,33 @@ const result = await service.doSomething();
 ### Adding a New Configuration Option
 
 1. **Update Type Definition**:
+
 ```typescript
 // src/types/interfaces/Config.ts
 export interface ExtensionConfig {
-    // ... existing options
-    myNewOption: string;
+  // ... existing options
+  myNewOption: string;
 }
 ```
 
 2. **Add to package.json**:
+
 ```json
 {
-    "configuration": {
-        "properties": {
-            "otakCommitter.myNewOption": {
-                "type": "string",
-                "default": "defaultValue",
-                "description": "Description of my option"
-            }
-        }
+  "configuration": {
+    "properties": {
+      "otakCommitter.myNewOption": {
+        "type": "string",
+        "default": "defaultValue",
+        "description": "Description of my option"
+      }
     }
+  }
 }
 ```
 
 3. **Use in Code**:
+
 ```typescript
 const value = this.config.get('myNewOption');
 await this.config.set('myNewOption', 'newValue');
@@ -869,6 +934,7 @@ await this.config.set('myNewOption', 'newValue');
 ### Adding a New Storage Key
 
 1. **Use StorageManager**:
+
 ```typescript
 // For sensitive data (API keys, tokens)
 await this.storage.setApiKey('myService', apiKey);
@@ -879,11 +945,12 @@ await this.config.set('myData', value);
 ```
 
 2. **Add Migration if Needed**:
+
 ```typescript
 // src/infrastructure/storage/StorageManager.ts
 async migrateFromLegacy(): Promise<void> {
     // ... existing migrations
-    
+
     const legacyValue = this.configStorage.get('oldKey');
     if (legacyValue) {
         await this.setApiKey('myService', legacyValue);
@@ -895,26 +962,29 @@ async migrateFromLegacy(): Promise<void> {
 ### Adding a New Error Type
 
 1. **Create Error Class**:
+
 ```typescript
 // src/types/errors/MyError.ts
 import { BaseError } from './BaseError';
 
 export class MyError extends BaseError {
-    readonly severity = ErrorSeverity.Error;
+  readonly severity = ErrorSeverity.Error;
 
-    constructor(message: string, context?: Record<string, unknown>) {
-        super(message, 'MY_ERROR', context);
-    }
+  constructor(message: string, context?: Record<string, unknown>) {
+    super(message, 'MY_ERROR', context);
+  }
 }
 ```
 
 2. **Export from index**:
+
 ```typescript
 // src/types/errors/index.ts
 export { MyError } from './MyError';
 ```
 
 3. **Use in Code**:
+
 ```typescript
 throw new MyError('Something went wrong', { detail: 'info' });
 ```
@@ -922,30 +992,28 @@ throw new MyError('Something went wrong', { detail: 'info' });
 ### Adding Property-Based Tests
 
 1. **Create Test File**:
+
 ```typescript
 // src/__tests__/properties/myFeature.property.test.ts
 import fc from 'fast-check';
 
 // **Feature: my-feature, Property 1: My Property Description**
 describe('My Feature Properties', () => {
-    test('should maintain invariant X', () => {
-        fc.assert(
-            fc.property(
-                fc.string(),
-                fc.integer(),
-                (str, num) => {
-                    // Test logic
-                    const result = myFunction(str, num);
-                    return result.satisfiesInvariant();
-                }
-            ),
-            { numRuns: 100 }
-        );
-    });
+  test('should maintain invariant X', () => {
+    fc.assert(
+      fc.property(fc.string(), fc.integer(), (str, num) => {
+        // Test logic
+        const result = myFunction(str, num);
+        return result.satisfiesInvariant();
+      }),
+      { numRuns: 100 },
+    );
+  });
 });
 ```
 
 2. **Reference Design Document**:
+
 - Each property test must reference a property from design.md
 - Use the exact format: `**Feature: feature-name, Property N: Description**`
 
@@ -963,22 +1031,26 @@ describe('My Feature Properties', () => {
 ### Debugging Tips
 
 1. **Enable Debug Logging**:
+
 ```typescript
 const logger = Logger.getInstance();
 logger.setLogLevel(LogLevel.Debug);
 ```
 
 2. **View Output Channel**:
+
 - Open Command Palette (Ctrl+Shift+P)
 - Run "Output: Show Output Channels"
 - Select "otak-committer"
 
 3. **Debug Extension**:
+
 - Press F5 in VS Code to launch Extension Development Host
 - Set breakpoints in TypeScript files
 - Use Debug Console for evaluation
 
 4. **Test Specific Component**:
+
 ```bash
 npm test -- --testNamePattern="MyCommand"
 ```

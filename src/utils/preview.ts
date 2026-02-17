@@ -20,17 +20,21 @@ function generateRandomFileName(prefix: string): string {
 }
 
 export async function closePreviewTabs() {
-    const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs);
+    const tabs = vscode.window.tabGroups.all.flatMap((group) => group.tabs);
     const closeTasks = tabs
-        .filter(tab => 
-            (tab.label.includes('Preview') || tab.label.includes('プレビュー')) &&
-            tab.input instanceof vscode.TabInputWebview
+        .filter(
+            (tab) =>
+                (tab.label.includes('Preview') || tab.label.includes('プレビュー')) &&
+                tab.input instanceof vscode.TabInputWebview,
         )
-        .map(tab => vscode.window.tabGroups.close(tab));
+        .map((tab) => vscode.window.tabGroups.close(tab));
     await Promise.all(closeTasks);
 }
 
-export async function showMarkdownPreview(content: string, prefix: string = 'temp'): Promise<{ uri: vscode.Uri, document: vscode.TextDocument } | undefined> {
+export async function showMarkdownPreview(
+    content: string,
+    prefix: string = 'temp',
+): Promise<{ uri: vscode.Uri; document: vscode.TextDocument } | undefined> {
     try {
         await cleanupPreviewFiles();
         await vscode.workspace.fs.createDirectory(vscode.Uri.file(PREVIEW_DIR));
@@ -45,8 +49,7 @@ export async function showMarkdownPreview(content: string, prefix: string = 'tem
         await vscode.commands.executeCommand('markdown.showPreview', tempUri);
 
         return { uri: tempUri, document };
-    } catch (error) {
-        console.error('Error showing markdown preview', error);
+    } catch {
         return undefined;
     }
 }

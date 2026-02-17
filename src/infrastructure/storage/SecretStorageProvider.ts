@@ -6,10 +6,10 @@ import { Logger } from '../logging/Logger';
 
 /**
  * Storage provider implementation using VS Code's SecretStorage API
- * 
+ *
  * Provides secure storage for sensitive data like API keys with
  * encrypted fallback to GlobalState for reliability.
- * 
+ *
  * @example
  * ```typescript
  * const provider = new SecretStorageProvider(context);
@@ -27,7 +27,7 @@ export class SecretStorageProvider implements StorageProvider {
 
     /**
      * Retrieves a value from SecretStorage with encrypted fallback
-     * 
+     *
      * @param key - The storage key
      * @returns The stored value or undefined if not found
      * @throws {SecretStorageError} If retrieval fails critically
@@ -49,17 +49,17 @@ export class SecretStorageProvider implements StorageProvider {
             try {
                 return await this.getFromBackup(key);
             } catch (backupError) {
-                throw new SecretStorageError(
-                    `Failed to retrieve value for key: ${key}`,
-                    { key, originalError: error }
-                );
+                throw new SecretStorageError(`Failed to retrieve value for key: ${key}`, {
+                    key,
+                    originalError: error,
+                });
             }
         }
     }
 
     /**
      * Stores a value in SecretStorage with encrypted backup
-     * 
+     *
      * @param key - The storage key
      * @param value - The value to store
      * @throws {SecretStorageError} If storage fails
@@ -80,19 +80,22 @@ export class SecretStorageProvider implements StorageProvider {
             try {
                 const encryptedValue = EncryptionUtil.encrypt(value);
                 await this.setBackup(key, encryptedValue);
-                this.logger.debug(`[SecretStorageProvider] Stored value in backup only for key: ${key}`);
-            } catch (backupError) {
-                throw new SecretStorageError(
-                    `Failed to store value for key: ${key}`,
-                    { key, originalError: error, backupError }
+                this.logger.debug(
+                    `[SecretStorageProvider] Stored value in backup only for key: ${key}`,
                 );
+            } catch (backupError) {
+                throw new SecretStorageError(`Failed to store value for key: ${key}`, {
+                    key,
+                    originalError: error,
+                    backupError,
+                });
             }
         }
     }
 
     /**
      * Deletes a value from SecretStorage and backup
-     * 
+     *
      * @param key - The storage key
      * @throws {SecretStorageError} If deletion fails
      */
@@ -108,17 +111,17 @@ export class SecretStorageProvider implements StorageProvider {
             try {
                 await this.deleteBackup(key);
             } catch (backupError) {
-                throw new SecretStorageError(
-                    `Failed to delete value for key: ${key}`,
-                    { key, originalError: error }
-                );
+                throw new SecretStorageError(`Failed to delete value for key: ${key}`, {
+                    key,
+                    originalError: error,
+                });
             }
         }
     }
 
     /**
      * Checks if a key exists in SecretStorage or backup
-     * 
+     *
      * @param key - The storage key
      * @returns True if the key exists, false otherwise
      */
@@ -134,7 +137,7 @@ export class SecretStorageProvider implements StorageProvider {
 
     /**
      * Retrieves a value from encrypted backup in GlobalState
-     * 
+     *
      * @param key - The storage key
      * @returns The decrypted value or undefined if not found
      */
@@ -148,19 +151,29 @@ export class SecretStorageProvider implements StorageProvider {
 
         try {
             const decryptedValue = EncryptionUtil.decrypt(encryptedValue);
-            this.logger.debug(`[SecretStorageProvider] Retrieved value from backup for key: ${key}`);
+            this.logger.debug(
+                `[SecretStorageProvider] Retrieved value from backup for key: ${key}`,
+            );
 
             // Try to restore to SecretStorage
             try {
                 await this.context.secrets.store(key, decryptedValue);
-                this.logger.debug(`[SecretStorageProvider] Restored value to SecretStorage for key: ${key}`);
+                this.logger.debug(
+                    `[SecretStorageProvider] Restored value to SecretStorage for key: ${key}`,
+                );
             } catch (restoreError) {
-                this.logger.error(`[SecretStorageProvider] Failed to restore to SecretStorage:`, restoreError);
+                this.logger.error(
+                    `[SecretStorageProvider] Failed to restore to SecretStorage:`,
+                    restoreError,
+                );
             }
 
             return decryptedValue;
         } catch (decryptError) {
-            this.logger.error(`[SecretStorageProvider] Failed to decrypt backup for key ${key}:`, decryptError);
+            this.logger.error(
+                `[SecretStorageProvider] Failed to decrypt backup for key ${key}:`,
+                decryptError,
+            );
             // Clear corrupted backup
             await this.deleteBackup(key);
             return undefined;
@@ -169,7 +182,7 @@ export class SecretStorageProvider implements StorageProvider {
 
     /**
      * Stores an encrypted value in GlobalState backup
-     * 
+     *
      * @param key - The storage key
      * @param encryptedValue - The encrypted value to store
      */
@@ -180,7 +193,7 @@ export class SecretStorageProvider implements StorageProvider {
 
     /**
      * Deletes a value from GlobalState backup
-     * 
+     *
      * @param key - The storage key
      */
     private async deleteBackup(key: string): Promise<void> {
@@ -190,7 +203,7 @@ export class SecretStorageProvider implements StorageProvider {
 
     /**
      * Generates a backup key for GlobalState storage
-     * 
+     *
      * @param key - The original storage key
      * @returns The backup key
      */

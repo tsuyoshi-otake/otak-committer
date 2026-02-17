@@ -29,4 +29,3 @@
   "config.useConventionalCommits": "使用带 scope 的 Conventional Commits 格式（<type>(<scope>): <subject>）",
   "config.appendCommitTrailer": "在生成的提交消息末尾追加 'Commit-Message-By: otak-committer' 标记"
 }
-

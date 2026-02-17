@@ -39,7 +39,12 @@ export class OpenAIService extends BaseService {
     }
 
     private isAuthenticationError(error: unknown): boolean {
-        if (typeof error === 'object' && error !== null && 'status' in error && error.status === 401) {
+        if (
+            typeof error === 'object' &&
+            error !== null &&
+            'status' in error &&
+            error.status === 401
+        ) {
             return true;
         }
 
@@ -102,7 +107,7 @@ export class OpenAIService extends BaseService {
         diff: string,
         language: string,
         messageStyle: MessageStyle | string,
-        template?: TemplateInfo
+        template?: TemplateInfo,
     ): Promise<string | undefined> {
         try {
             this.logger.info('Generating commit message', { language, messageStyle });
@@ -111,7 +116,7 @@ export class OpenAIService extends BaseService {
                 diff,
                 language,
                 messageStyle,
-                template
+                template,
             );
 
             const systemPrompt = getPrompt(language as SupportedLanguage, PromptType.System);
@@ -121,13 +126,13 @@ export class OpenAIService extends BaseService {
                 model: OpenAIService.MODEL,
                 messages: [
                     { role: 'developer', content: systemPrompt },
-                    { role: 'user', content: userPrompt }
+                    { role: 'user', content: userPrompt },
                 ],
                 ...(temperature !== undefined ? { temperature } : {}),
                 reasoning_effort: this.getReasoningEffort(),
                 max_completion_tokens: 5000,
                 response_format: { type: 'text' },
-                store: false
+                store: false,
             });
 
             if (!response.choices || response.choices.length === 0) {
@@ -174,7 +179,7 @@ export class OpenAIService extends BaseService {
     async generatePRContent(
         diff: PullRequestDiff,
         language: string,
-        template?: TemplateInfo
+        template?: TemplateInfo,
     ): Promise<{ title: string; body: string } | undefined> {
         try {
             this.logger.info('Generating PR content', { language });
@@ -188,26 +193,26 @@ export class OpenAIService extends BaseService {
                     model: OpenAIService.MODEL,
                     messages: [
                         { role: 'developer', content: systemPrompt },
-                        { role: 'user', content: prompts.title }
+                        { role: 'user', content: prompts.title },
                     ],
                     ...(temperature !== undefined ? { temperature } : {}),
                     reasoning_effort: this.getReasoningEffort(),
                     max_completion_tokens: 100,
                     response_format: { type: 'text' },
-                    store: false
+                    store: false,
                 }),
                 this.openai.chat.completions.create({
                     model: OpenAIService.MODEL,
                     messages: [
                         { role: 'developer', content: systemPrompt },
-                        { role: 'user', content: prompts.body }
+                        { role: 'user', content: prompts.body },
                     ],
                     ...(temperature !== undefined ? { temperature } : {}),
                     reasoning_effort: this.getReasoningEffort(),
                     max_completion_tokens: 2000,
                     response_format: { type: 'text' },
-                    store: false
-                })
+                    store: false,
+                }),
             ]);
 
             const title = titleResponse.choices?.[0]?.message?.content?.trim();
@@ -220,7 +225,7 @@ export class OpenAIService extends BaseService {
             this.logger.info('PR content generated successfully');
             return {
                 title: cleanMarkdown(title),
-                body: formatMarkdown(body)
+                body: formatMarkdown(body),
             };
         } catch (error) {
             this.logger.error('Failed to generate PR content', error);
@@ -272,13 +277,13 @@ export class OpenAIService extends BaseService {
                 model: OpenAIService.MODEL,
                 messages: [
                     { role: 'developer', content: systemPrompt },
-                    { role: 'user', content: params.prompt }
+                    { role: 'user', content: params.prompt },
                 ],
                 ...(temperature !== undefined ? { temperature } : {}),
                 reasoning_effort: this.getReasoningEffort(),
                 max_completion_tokens: params.maxTokens ?? 1000,
                 response_format: { type: 'text' },
-                store: false
+                store: false,
             });
 
             this.logger.info('Chat completion created successfully');
@@ -341,9 +346,8 @@ export class OpenAIService extends BaseService {
      */
     static async initialize(
         config?: Partial<ServiceConfig>,
-        context?: vscode.ExtensionContext
+        context?: vscode.ExtensionContext,
     ): Promise<OpenAIService | undefined> {
         return initializeOpenAIService(config, context, async (cfg) => new OpenAIService(cfg));
     }
 }
-

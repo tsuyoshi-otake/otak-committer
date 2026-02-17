@@ -1,11 +1,11 @@
 /**
  * Property-based tests for unified storage abstraction
- * 
+ *
  * **Feature: extension-architecture-refactoring, Property 3: Unified Storage Abstraction**
  * **Validates: Requirements 3.1**
- * 
- * Property: For any storage operation (get, set, delete, has), the operation should go 
- * through the StorageManager interface rather than directly accessing VS Code's 
+ *
+ * Property: For any storage operation (get, set, delete, has), the operation should go
+ * through the StorageManager interface rather than directly accessing VS Code's
  * SecretStorage or Configuration APIs.
  */
 
@@ -19,7 +19,7 @@ import { StorageManager } from '../../infrastructure/storage/StorageManager';
 function createMockContext(): vscode.ExtensionContext {
     const secretStore = new Map<string, string>();
     const globalStateStore = new Map<string, any>();
-    
+
     return {
         secrets: {
             get: async (key: string) => secretStore.get(key),
@@ -29,7 +29,7 @@ function createMockContext(): vscode.ExtensionContext {
             delete: async (key: string) => {
                 secretStore.delete(key);
             },
-            onDidChange: undefined as any
+            onDidChange: undefined as any,
         },
         globalState: {
             get: <T>(key: string) => globalStateStore.get(key) as T,
@@ -41,7 +41,7 @@ function createMockContext(): vscode.ExtensionContext {
                 }
             },
             keys: () => Array.from(globalStateStore.keys()),
-            setKeysForSync: () => {}
+            setKeysForSync: () => {},
         },
         subscriptions: [],
         workspaceState: undefined as any,
@@ -57,14 +57,14 @@ function createMockContext(): vscode.ExtensionContext {
         logPath: '',
         asAbsolutePath: (relativePath: string) => relativePath,
         extension: undefined as any,
-        languageModelAccessInformation: undefined as any
+        languageModelAccessInformation: undefined as any,
     };
 }
 
 suite('Storage Property Tests', () => {
     /**
      * **Feature: extension-architecture-refactoring, Property 3: Unified Storage Abstraction**
-     * 
+     *
      * This test verifies that all storage operations maintain consistency through
      * the StorageManager interface. For any key-value pair, storing and retrieving
      * through StorageManager should preserve the value.
@@ -74,7 +74,7 @@ suite('Storage Property Tests', () => {
             fc.asyncProperty(
                 fc.record({
                     service: fc.constantFrom('openai' as const, 'github' as const),
-                    apiKey: fc.string({ minLength: 10, maxLength: 100 })
+                    apiKey: fc.string({ minLength: 10, maxLength: 100 }),
                 }),
                 async ({ service, apiKey }) => {
                     const mockContext = createMockContext();
@@ -85,15 +85,15 @@ suite('Storage Property Tests', () => {
                     const retrieved = await storage.getApiKey(service);
 
                     return retrieved === apiKey;
-                }
+                },
             ),
-            { numRuns: 100 }
+            { numRuns: 100 },
         );
     });
 
     /**
      * **Feature: extension-architecture-refactoring, Property 3: Unified Storage Abstraction**
-     * 
+     *
      * This test verifies that the has() operation correctly reflects the presence
      * of stored values through the unified interface.
      */
@@ -102,7 +102,7 @@ suite('Storage Property Tests', () => {
             fc.asyncProperty(
                 fc.record({
                     service: fc.constantFrom('openai' as const, 'github' as const),
-                    apiKey: fc.string({ minLength: 10, maxLength: 100 })
+                    apiKey: fc.string({ minLength: 10, maxLength: 100 }),
                 }),
                 async ({ service, apiKey }) => {
                     const mockContext = createMockContext();
@@ -114,15 +114,15 @@ suite('Storage Property Tests', () => {
                     const afterSet = await storage.hasApiKey(service);
 
                     return !beforeSet && afterSet;
-                }
+                },
             ),
-            { numRuns: 100 }
+            { numRuns: 100 },
         );
     });
 
     /**
      * **Feature: extension-architecture-refactoring, Property 3: Unified Storage Abstraction**
-     * 
+     *
      * This test verifies that delete operations work correctly through the
      * unified interface, removing values from all storage locations.
      */
@@ -131,7 +131,7 @@ suite('Storage Property Tests', () => {
             fc.asyncProperty(
                 fc.record({
                     service: fc.constantFrom('openai' as const, 'github' as const),
-                    apiKey: fc.string({ minLength: 10, maxLength: 100 })
+                    apiKey: fc.string({ minLength: 10, maxLength: 100 }),
                 }),
                 async ({ service, apiKey }) => {
                     const mockContext = createMockContext();
@@ -144,15 +144,15 @@ suite('Storage Property Tests', () => {
                     const exists = await storage.hasApiKey(service);
 
                     return retrieved === undefined && !exists;
-                }
+                },
             ),
-            { numRuns: 100 }
+            { numRuns: 100 },
         );
     });
 
     /**
      * **Feature: extension-architecture-refactoring, Property 3: Unified Storage Abstraction**
-     * 
+     *
      * This test verifies that generic secret operations (getSecret/setSecret) also
      * maintain consistency through the unified interface.
      */
@@ -161,7 +161,7 @@ suite('Storage Property Tests', () => {
             fc.asyncProperty(
                 fc.record({
                     key: fc.string({ minLength: 5, maxLength: 50 }),
-                    value: fc.string({ minLength: 1, maxLength: 100 })
+                    value: fc.string({ minLength: 1, maxLength: 100 }),
                 }),
                 async ({ key, value }) => {
                     const mockContext = createMockContext();
@@ -172,16 +172,16 @@ suite('Storage Property Tests', () => {
                     const retrieved = await storage.getSecret(key);
 
                     return retrieved === value;
-                }
+                },
             ),
-            { numRuns: 100 }
+            { numRuns: 100 },
         );
     });
 
     /**
      * **Feature: extension-architecture-refactoring, Property 6: Storage Consistency**
      * **Validates: Requirements 3.4**
-     * 
+     *
      * This test verifies that sensitive data stored in SecretStorage does not exist
      * in plain-text Configuration storage. For any configuration key K, if a value V
      * is stored in SecretStorage, then reading K should return V, and the value should
@@ -192,7 +192,7 @@ suite('Storage Property Tests', () => {
             fc.asyncProperty(
                 fc.record({
                     service: fc.constantFrom('openai' as const, 'github' as const),
-                    apiKey: fc.string({ minLength: 20, maxLength: 100 })
+                    apiKey: fc.string({ minLength: 20, maxLength: 100 }),
                 }),
                 async ({ service, apiKey }) => {
                     const mockContext = createMockContext();
@@ -211,18 +211,19 @@ suite('Storage Property Tests', () => {
                     const existsInSecret = inSecretStorage === apiKey;
 
                     // Property 3: Value should NOT be in plain-text Configuration
-                    const legacyKey = service === 'openai' 
-                        ? 'otakCommitter.openaiApiKey' 
-                        : 'otakCommitter.githubToken';
+                    const legacyKey =
+                        service === 'openai'
+                            ? 'otakCommitter.openaiApiKey'
+                            : 'otakCommitter.githubToken';
                     const config = vscode.workspace.getConfiguration();
                     const inConfig = config.get<string>(legacyKey);
                     const notInPlainConfig = inConfig === undefined;
 
                     // All three properties must hold
                     return valueMatches && existsInSecret && notInPlainConfig;
-                }
+                },
             ),
-            { numRuns: 100 }
+            { numRuns: 100 },
         );
     });
 });

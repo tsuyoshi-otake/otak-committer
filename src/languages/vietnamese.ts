@@ -1,4 +1,4 @@
-import { PromptType } from '../types/language';
+import { PromptType } from '../types/enums/PromptType';
 
 export const getVietnamesePrompt = (type: PromptType): string => {
     const prompts: Record<PromptType, string> = {
@@ -112,7 +112,7 @@ Xem xét:
 - Cần tài liệu gì?
 - Cần kiểm tra những gì?
 - Có thay đổi quan trọng nào không?
-`
+`,
     };
 
     return prompts[type] || '';

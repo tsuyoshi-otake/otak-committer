@@ -15,7 +15,7 @@ import {
     isApiKeyError,
     isNetworkError,
     isDiffError,
-    isEmptyDiffError
+    isEmptyDiffError,
 } from '../../utils/errorHandling';
 
 suite('Commit Error Handling Tests', () => {
@@ -66,7 +66,7 @@ suite('Commit Error Handling Tests', () => {
         test('should format message with file count when available', () => {
             const context: CommitErrorContext = {
                 operation: 'getDiff',
-                details: { fileCount: 50 }
+                details: { fileCount: 50 },
             };
             const error = new Error('Too many files');
             const formatted = formatErrorMessage(error, context);
@@ -76,7 +76,7 @@ suite('Commit Error Handling Tests', () => {
         test('should format message with token count when available', () => {
             const context: CommitErrorContext = {
                 operation: 'truncateDiff',
-                details: { tokenCount: 300000 }
+                details: { tokenCount: 300000 },
             };
             const error = new Error('Diff too large');
             const formatted = formatErrorMessage(error, context);
@@ -100,7 +100,7 @@ suite('Commit Error Handling Tests', () => {
         test('should format diff error with reason', () => {
             const context: CommitErrorContext = {
                 operation: 'getDiff',
-                details: { errorType: 'NO_REPO' }
+                details: { errorType: 'NO_REPO' },
             };
             const error = new Error('No git repository found');
             const formatted = formatErrorMessage(error, context);
@@ -118,8 +118,8 @@ suite('Commit Error Handling Tests', () => {
             const context: CommitErrorContext = {
                 operation: 'generateMessage',
                 details: {
-                    apiError: { status: 500, message: 'Internal Server Error' }
-                }
+                    apiError: { status: 500, message: 'Internal Server Error' },
+                },
             };
             const error = new Error('API call failed');
             const formatted = formatErrorMessage(error, context);
@@ -135,7 +135,7 @@ suite('Commit Error Handling Tests', () => {
             const error = new CommitError('Rate limited', 'RATE_LIMIT');
             const context: CommitErrorContext = {
                 operation: 'generateMessage',
-                details: { errorType: 'RATE_LIMIT' }
+                details: { errorType: 'RATE_LIMIT' },
             };
             const formatted = formatErrorMessage(error, context);
             assert.ok(formatted.includes('Rate') || formatted.includes('rate'));
@@ -159,8 +159,8 @@ suite('Commit Error Handling Tests', () => {
             const formatted = formatErrorMessage(error, context);
             assert.ok(
                 formatted.includes('API key') ||
-                formatted.includes('configure') ||
-                formatted.includes('Invalid')
+                    formatted.includes('configure') ||
+                    formatted.includes('Invalid'),
             );
         });
     });
@@ -177,8 +177,8 @@ suite('Commit Error Handling Tests', () => {
             const formatted = formatErrorMessage(error, context);
             assert.ok(
                 formatted.includes('changes') ||
-                formatted.includes('empty') ||
-                formatted.includes('No')
+                    formatted.includes('empty') ||
+                    formatted.includes('No'),
             );
         });
     });
@@ -192,8 +192,8 @@ suite('Commit Error Handling Tests', () => {
                 details: {
                     fileCount: 5,
                     tokenCount: 1000,
-                    errorType: 'UNKNOWN'
-                }
+                    errorType: 'UNKNOWN',
+                },
             };
             const formatted = formatErrorMessage(error, context);
             // Should include context for debugging
@@ -226,7 +226,7 @@ suite('Commit Error Handling Tests', () => {
         test('should create error with context', () => {
             const context: CommitErrorContext = {
                 operation: 'test',
-                details: { fileCount: 10 }
+                details: { fileCount: 10 },
             };
             const error = new CommitError('Test message', 'UNKNOWN_ERROR', context);
             assert.deepStrictEqual(error.context, context);

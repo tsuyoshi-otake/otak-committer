@@ -7,7 +7,7 @@ import {
     extractFilePathsFromDiff,
     generateScopeHint,
     getConventionalCommitsFormat,
-    getTraditionalFormat
+    getTraditionalFormat,
 } from '../utils/conventionalCommits';
 
 /**
@@ -37,10 +37,10 @@ export function getMessageLengthLimit(style: MessageStyle | string): number {
 
 /**
  * Service for creating prompts for AI models
- * 
+ *
  * Generates structured prompts for commit messages, pull requests,
  * and other AI-powered content generation.
- * 
+ *
  * @example
  * ```typescript
  * const promptService = new PromptService();
@@ -58,7 +58,9 @@ export class PromptService {
      * Sanitize user-provided configuration input to limit prompt injection risk
      */
     static sanitizeConfigInput(input: string): string {
-        if (!input) { return ''; }
+        if (!input) {
+            return '';
+        }
         return input.slice(0, PromptService.MAX_CUSTOM_MESSAGE_LENGTH).trim();
     }
 
@@ -66,22 +68,24 @@ export class PromptService {
      * Sanitize template content before including in prompts
      */
     static sanitizeTemplateContent(content: string): string {
-        if (!content) { return ''; }
+        if (!content) {
+            return '';
+        }
         return content.slice(0, PromptService.MAX_TEMPLATE_CONTENT_LENGTH).trim();
     }
 
     /**
      * Create a prompt for generating commit messages
-     * 
+     *
      * Generates a structured prompt that includes the diff, language preferences,
      * message style, and optional template.
-     * 
+     *
      * @param diff - The Git diff to analyze
      * @param language - The target language for the commit message
      * @param messageStyle - The style of the message (simple, normal, detailed)
      * @param template - Optional commit message template
      * @returns The generated prompt string
-     * 
+     *
      * @example
      * ```typescript
      * const prompt = await promptService.createCommitPrompt(
@@ -95,16 +99,20 @@ export class PromptService {
         diff: string,
         language: string,
         messageStyle: MessageStyle | string,
-        template?: TemplateInfo
+        template?: TemplateInfo,
     ): Promise<string> {
         const config = vscode.workspace.getConfiguration('otakCommitter');
         const useEmoji = config.get<boolean>('useEmoji') || false;
         const rawCustomMessage = config.get<string>('customMessage') || '';
         const useConventionalCommits = config.get<boolean>('useConventionalCommits') ?? false;
 
-        const emojiInstruction = useEmoji ? 'Feel free to use emojis for emphasis and key points.' : 'DO NOT use any emojis in the content.';
+        const emojiInstruction = useEmoji
+            ? 'Feel free to use emojis for emphasis and key points.'
+            : 'DO NOT use any emojis in the content.';
         const customMessage = PromptService.sanitizeConfigInput(rawCustomMessage);
-        const customInstruction = customMessage ? `\nAdditional requirements: ${customMessage}` : '';
+        const customInstruction = customMessage
+            ? `\nAdditional requirements: ${customMessage}`
+            : '';
 
         // テンプレートがある場合はそれを基に生成 (Templates override Conventional Commits format)
         if (template) {
@@ -121,8 +129,10 @@ Please follow the template format strictly without any leading newlines.`;
         }
 
         // テンプレートがない場合はPrefixを使用
-        const prefixDescriptions = COMMIT_PREFIXES.map(prefix => {
-            const desc = prefix.description[language as keyof CommitPrefix['description']] || prefix.description.english;
+        const prefixDescriptions = COMMIT_PREFIXES.map((prefix) => {
+            const desc =
+                prefix.description[language as keyof CommitPrefix['description']] ||
+                prefix.description.english;
             return `${prefix.prefix}: ${desc}`;
         }).join('\n');
 
@@ -160,12 +170,12 @@ ${emojiInstruction}${customInstruction}`;
 
     /**
      * Generate a summary of a pull request diff
-     * 
+     *
      * Creates a formatted summary of changed files and their modifications.
-     * 
+     *
      * @param diff - The pull request diff information
      * @returns Formatted diff summary string
-     * 
+     *
      * @example
      * ```typescript
      * const summary = await promptService.generateDiffSummary(diff);
@@ -174,25 +184,29 @@ ${emojiInstruction}${customInstruction}`;
      */
     async generateDiffSummary(diff: PullRequestDiff): Promise<string> {
         return `Changed files:
-${diff.files.map(file => `- ${file.filename} (additions: ${file.additions}, deletions: ${file.deletions})`).join('\n')}
+${diff.files.map((file) => `- ${file.filename} (additions: ${file.additions}, deletions: ${file.deletions})`).join('\n')}
 
 Detailed changes:
-${diff.files.map(file => `
+${diff.files
+    .map(
+        (file) => `
 [${file.filename}]
-${file.patch}`).join('\n')}`;
+${file.patch}`,
+    )
+    .join('\n')}`;
     }
 
     /**
      * Create prompts for generating pull request content
-     * 
+     *
      * Generates separate prompts for PR title and body based on the diff
      * and optional template.
-     * 
+     *
      * @param diff - The pull request diff information
      * @param language - The target language for the PR content
      * @param template - Optional PR template
      * @returns Object containing title and body prompts
-     * 
+     *
      * @example
      * ```typescript
      * const prompts = await promptService.createPRPrompt(diff, 'english');
@@ -203,14 +217,18 @@ ${file.patch}`).join('\n')}`;
     async createPRPrompt(
         diff: PullRequestDiff,
         language: string,
-        template?: TemplateInfo
+        template?: TemplateInfo,
     ): Promise<{ title: string; body: string }> {
         const diffSummary = await this.generateDiffSummary(diff);
-        const useEmoji = vscode.workspace.getConfiguration('otakCommitter').get<boolean>('useEmoji') || false;
-        const rawCustomMessage = vscode.workspace.getConfiguration('otakCommitter').get<string>('customMessage') || '';
+        const useEmoji =
+            vscode.workspace.getConfiguration('otakCommitter').get<boolean>('useEmoji') || false;
+        const rawCustomMessage =
+            vscode.workspace.getConfiguration('otakCommitter').get<string>('customMessage') || '';
         const emojiInstruction = useEmoji ? '' : 'DO NOT use any emojis in the content. ';
         const customMessage = PromptService.sanitizeConfigInput(rawCustomMessage);
-        const customInstruction = customMessage ? `Additional requirements: ${customMessage}\n\n` : '';
+        const customInstruction = customMessage
+            ? `Additional requirements: ${customMessage}\n\n`
+            : '';
 
         const titlePrompt = `Generate a Pull Request title in ${language}.
 
@@ -261,7 +279,7 @@ Note: Please ensure all content is written in ${language}. ${emojiInstruction}${
 
         return {
             title: titlePrompt,
-            body: bodyPrompt
+            body: bodyPrompt,
         };
     }
 }

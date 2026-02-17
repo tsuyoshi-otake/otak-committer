@@ -28,10 +28,10 @@ interface StatusResult {
 
 /**
  * Service for Git repository operations
- * 
+ *
  * Provides methods for interacting with Git repositories including
  * getting diffs, tracking files, finding templates, and checking repository status.
- * 
+ *
  * @example
  * ```typescript
  * const git = await GitService.initialize();
@@ -47,17 +47,16 @@ export class GitService extends BaseService {
         super(config);
         this.workspaceRoot = workspaceRoot;
         this.git = simpleGit(workspaceRoot);
-
     }
 
     /**
      * Get the Git diff for staged changes
-     * 
+     *
      * Automatically stages modified files and retrieves the diff.
      * Handles Windows reserved filenames and truncates large diffs.
-     * 
+     *
      * @returns The Git diff string or undefined if no changes
-     * 
+     *
      * @example
      * ```typescript
      * const diff = await git.getDiff();
@@ -72,14 +71,14 @@ export class GitService extends BaseService {
             const status = await this.git.status();
 
             const modifiedFiles = status.files
-                .filter(file => file.working_dir !== ' ' || file.index !== ' ')
-                .map(file => file.path);
+                .filter((file) => file.working_dir !== ' ' || file.index !== ' ')
+                .map((file) => file.path);
 
             this.logger.debug(`Found ${modifiedFiles.length} modified files`);
 
-            const reservedNameFiles = modifiedFiles.filter(file => isWindowsReservedName(file));
+            const reservedNameFiles = modifiedFiles.filter((file) => isWindowsReservedName(file));
             const hasStagedChanges = status.files.some(
-                file => file.index !== ' ' && file.index !== '?' && file.index !== '!'
+                (file) => file.index !== ' ' && file.index !== '?' && file.index !== '!',
             );
 
             let diff = hasStagedChanges ? await this.git.diff(['--cached']) : '';
@@ -126,7 +125,7 @@ export class GitService extends BaseService {
             t('git.stageAllPrompt'),
             stageAllLabel,
             alwaysStageLabel,
-            t('apiKey.cancel')
+            t('apiKey.cancel'),
         );
 
         if (action === alwaysStageLabel) {
@@ -155,7 +154,9 @@ export class GitService extends BaseService {
         } catch (error) {
             if (error instanceof Error && error.message.includes('index.lock')) {
                 this.logger.warning('Git index.lock detected, retrying after delay...');
-                await new Promise(resolve => setTimeout(resolve, GitService.INDEX_LOCK_RETRY_DELAY_MS));
+                await new Promise((resolve) =>
+                    setTimeout(resolve, GitService.INDEX_LOCK_RETRY_DELAY_MS),
+                );
                 try {
                     await this.git.add(['-A']);
                     return;
@@ -166,9 +167,11 @@ export class GitService extends BaseService {
                 }
             }
 
-            const addableFiles = modifiedFiles.filter(file => !isWindowsReservedName(file));
+            const addableFiles = modifiedFiles.filter((file) => !isWindowsReservedName(file));
             if (reservedNameFiles.length > 0) {
-                this.logger.warning(`Skipping Windows reserved name files during staging: ${reservedNameFiles.join(', ')}`);
+                this.logger.warning(
+                    `Skipping Windows reserved name files during staging: ${reservedNameFiles.join(', ')}`,
+                );
             }
 
             for (const file of addableFiles) {
@@ -193,7 +196,11 @@ export class GitService extends BaseService {
                 throw error;
             }
             if (error.message.includes('did not match any files')) {
-                try { await this.git.rm(file); } catch { /* Ignore if already deleted */ }
+                try {
+                    await this.git.rm(file);
+                } catch {
+                    /* Ignore if already deleted */
+                }
                 return;
             }
             throw error;
@@ -211,7 +218,7 @@ export class GitService extends BaseService {
         const reservedFilesList = reservedNameFiles.join(', ');
         this.logger.warning(`Files with reserved names found: ${reservedFilesList}`);
         vscode.window.showInformationMessage(
-            t('git.reservedNamesInfo', { files: reservedFilesList })
+            t('git.reservedNamesInfo', { files: reservedFilesList }),
         );
 
         let result = diff;
@@ -219,7 +226,7 @@ export class GitService extends BaseService {
             result += '\n\n';
         }
         result += `# Files with reserved names (content not available):\n`;
-        reservedNameFiles.forEach(file => {
+        reservedNameFiles.forEach((file) => {
             result += `# - ${file}\n`;
         });
         return result;
@@ -240,21 +247,23 @@ export class GitService extends BaseService {
         const thresholdKTokens = Math.floor(truncateThresholdTokens / 1000);
         const truncatedLength = truncateThresholdTokens * TokenManager.CHARS_PER_TOKEN;
 
-        this.logger.warning(`Diff size (${estimatedKTokens}K tokens) exceeds ${thresholdKTokens}K limit, truncating`);
+        this.logger.warning(
+            `Diff size (${estimatedKTokens}K tokens) exceeds ${thresholdKTokens}K limit, truncating`,
+        );
         vscode.window.showWarningMessage(
-            t('git.diffTruncatedWarning', { estimatedKTokens, thresholdKTokens })
+            t('git.diffTruncatedWarning', { estimatedKTokens, thresholdKTokens }),
         );
         return diff.substring(0, truncatedLength);
     }
 
     /**
      * Get all tracked source files in the repository
-     * 
+     *
      * Uses `git ls-files` to retrieve tracked files and filters
      * to include only source code files.
-     * 
+     *
      * @returns Array of tracked source file paths
-     * 
+     *
      * @example
      * ```typescript
      * const files = await git.getTrackedFiles();
@@ -268,8 +277,8 @@ export class GitService extends BaseService {
             const result = await this.git.raw(['ls-files']);
             const files = result
                 .split('\n')
-                .filter(file => file.trim() !== '')
-                .map(file => cleanPath(path.join(this.workspaceRoot, file.trim())))
+                .filter((file) => file.trim() !== '')
+                .map((file) => cleanPath(path.join(this.workspaceRoot, file.trim())))
                 .filter(isSourceFile);
             this.logger.info(`Found ${files.length} tracked source files`);
             return files;
@@ -281,9 +290,9 @@ export class GitService extends BaseService {
 
     /**
      * Get the current Git repository status
-     * 
+     *
      * @returns Status information including current branch and changed files
-     * 
+     *
      * @example
      * ```typescript
      * const status = await git.getStatus();
@@ -299,11 +308,11 @@ export class GitService extends BaseService {
             return {
                 current: status.current || '',
                 tracking: status.tracking,
-                files: status.files.map(file => ({
+                files: status.files.map((file) => ({
                     path: file.path,
                     index: file.index,
-                    working_dir: file.working_dir
-                }))
+                    working_dir: file.working_dir,
+                })),
             };
         } catch (error) {
             this.logger.error('Failed to get git status', error);
@@ -313,11 +322,11 @@ export class GitService extends BaseService {
 
     /**
      * Find commit and PR templates in the repository
-     * 
+     *
      * Searches common locations for commit message and pull request templates.
-     * 
+     *
      * @returns Object containing found templates (commit and/or pr)
-     * 
+     *
      * @example
      * ```typescript
      * const templates = await git.findTemplates();
@@ -328,8 +337,23 @@ export class GitService extends BaseService {
      */
     async findTemplates(): Promise<{ commit?: TemplateInfo; pr?: TemplateInfo }> {
         const templateDefs = [
-            { type: 'commit' as const, paths: ['.gitmessage', '.github/commit_template', '.github/templates/commit_template.md', 'docs/templates/commit_template.md'] },
-            { type: 'pr' as const, paths: ['.github/pull_request_template.md', '.github/templates/pull_request_template.md', 'docs/templates/pull_request_template.md'] }
+            {
+                type: 'commit' as const,
+                paths: [
+                    '.gitmessage',
+                    '.github/commit_template',
+                    '.github/templates/commit_template.md',
+                    'docs/templates/commit_template.md',
+                ],
+            },
+            {
+                type: 'pr' as const,
+                paths: [
+                    '.github/pull_request_template.md',
+                    '.github/templates/pull_request_template.md',
+                    'docs/templates/pull_request_template.md',
+                ],
+            },
         ];
 
         const templates: { commit?: TemplateInfo; pr?: TemplateInfo } = {};
@@ -351,14 +375,19 @@ export class GitService extends BaseService {
     /** Maximum template file size (100 KB) to prevent resource exhaustion */
     private static readonly MAX_TEMPLATE_BYTES = 100 * 1024;
 
-    private async tryReadFirstTemplate(type: 'commit' | 'pr', paths: string[]): Promise<TemplateInfo | undefined> {
+    private async tryReadFirstTemplate(
+        type: 'commit' | 'pr',
+        paths: string[],
+    ): Promise<TemplateInfo | undefined> {
         for (const templatePath of paths) {
             const fullPath = path.join(this.workspaceRoot, templatePath);
             try {
                 const content = await readFile(fullPath, 'utf-8');
                 if (content) {
                     if (Buffer.byteLength(content, 'utf-8') > GitService.MAX_TEMPLATE_BYTES) {
-                        this.logger.warning(`Template at ${templatePath} exceeds size limit, skipping`);
+                        this.logger.warning(
+                            `Template at ${templatePath} exceeds size limit, skipping`,
+                        );
                         continue;
                     }
                     this.logger.info(`Found ${type} template at ${templatePath}`);
@@ -373,9 +402,9 @@ export class GitService extends BaseService {
 
     /**
      * Check if the current directory is a Git repository
-     * 
+     *
      * @returns True if the directory is a Git repository, false otherwise
-     * 
+     *
      * @example
      * ```typescript
      * if (await git.checkIsRepo()) {
@@ -394,12 +423,11 @@ export class GitService extends BaseService {
             return false;
         }
     }
-
 }
 
 /**
  * Factory for creating Git service instances
- * 
+ *
  * Handles service initialization and workspace validation.
  */
 export class GitServiceFactory extends BaseServiceFactory<GitService> {
@@ -412,7 +440,7 @@ export class GitServiceFactory extends BaseServiceFactory<GitService> {
         const workspaceRoot = workspaceFolders[0].uri.fsPath;
         const service = new GitService(workspaceRoot, config);
 
-        if (!await service.checkIsRepo()) {
+        if (!(await service.checkIsRepo())) {
             throw new Error('No Git repository found in the current workspace');
         }
 
@@ -426,7 +454,7 @@ export class GitServiceFactory extends BaseServiceFactory<GitService> {
         } catch (error) {
             ErrorHandler.handle(error, {
                 operation: 'Initialize Git service',
-                component: 'GitServiceFactory'
+                component: 'GitServiceFactory',
             });
             return undefined;
         }

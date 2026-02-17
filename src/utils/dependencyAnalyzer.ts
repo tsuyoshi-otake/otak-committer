@@ -1,9 +1,9 @@
 /**
  * Dependency Analyzer Utility
- * 
+ *
  * Analyzes module dependencies in the TypeScript codebase to detect
  * circular dependencies and validate architectural constraints.
- * 
+ *
  * This utility is used by property-based tests to ensure the codebase
  * maintains a clean, acyclic dependency graph.
  */
@@ -49,11 +49,11 @@ export interface DependencyAnalysisResult {
 
 /**
  * Analyzes module dependencies in a directory
- * 
+ *
  * @param sourceDir - The source directory to analyze (e.g., './src')
  * @param options - Analysis options
  * @returns Analysis result with modules and detected cycles
- * 
+ *
  * @example
  * ```typescript
  * const result = analyzeModuleDependencies('./src');
@@ -67,11 +67,11 @@ export function analyzeModuleDependencies(
         extensions?: string[];
         /** Directories to exclude */
         excludeDirs?: string[];
-    } = {}
+    } = {},
 ): DependencyAnalysisResult {
     const {
         extensions = ['.ts', '.tsx'],
-        excludeDirs = ['node_modules', 'out', 'dist', '__tests__', '.vscode-test']
+        excludeDirs = ['node_modules', 'out', 'dist', '__tests__', '.vscode-test'],
     } = options;
 
     const modules = new Map<string, Module>();
@@ -84,14 +84,16 @@ export function analyzeModuleDependencies(
     const cycles = detectCycles(modules);
 
     // Step 3: Calculate statistics
-    const dependencyCount = Array.from(modules.values())
-        .reduce((sum, mod) => sum + mod.dependencies.length, 0);
+    const dependencyCount = Array.from(modules.values()).reduce(
+        (sum, mod) => sum + mod.dependencies.length,
+        0,
+    );
 
     return {
         modules,
         cycles,
         moduleCount: modules.size,
-        dependencyCount
+        dependencyCount,
     };
 }
 
@@ -103,7 +105,7 @@ function collectModules(
     sourceRoot: string,
     modules: Map<string, Module>,
     extensions: string[],
-    excludeDirs: string[]
+    excludeDirs: string[],
 ): void {
     if (!fs.existsSync(currentDir)) {
         return;
@@ -127,11 +129,11 @@ function collectModules(
             if (extensions.includes(ext)) {
                 const relativePath = path.relative(sourceRoot, fullPath);
                 const dependencies = extractImports(fullPath, sourceRoot);
-                
+
                 modules.set(relativePath, {
                     filePath: fullPath,
                     relativePath,
-                    dependencies
+                    dependencies,
                 });
             }
         }
@@ -140,7 +142,7 @@ function collectModules(
 
 /**
  * Extracts import statements from a TypeScript file
- * 
+ *
  * @param filePath - Absolute path to the file
  * @param sourceRoot - Source root directory
  * @returns Array of relative paths to imported modules
@@ -156,14 +158,14 @@ function extractImports(filePath: string, sourceRoot: string): string[] {
         // require('...')
         /require\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
         // import('...')
-        /import\s*\(\s*['"]([^'"]+)['"]\s*\)/g
+        /import\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
     ];
 
     for (const pattern of importPatterns) {
         let match;
         while ((match = pattern.exec(content)) !== null) {
             const importPath = match[1];
-            
+
             // Only process relative imports (internal modules)
             if (importPath.startsWith('.')) {
                 const resolvedPath = resolveImportPath(filePath, importPath, sourceRoot);
@@ -179,7 +181,7 @@ function extractImports(filePath: string, sourceRoot: string): string[] {
 
 /**
  * Resolves a relative import path to an absolute module path
- * 
+ *
  * @param fromFile - The file containing the import
  * @param importPath - The relative import path
  * @param sourceRoot - Source root directory
@@ -188,14 +190,14 @@ function extractImports(filePath: string, sourceRoot: string): string[] {
 function resolveImportPath(
     fromFile: string,
     importPath: string,
-    sourceRoot: string
+    sourceRoot: string,
 ): string | null {
     const fromDir = path.dirname(fromFile);
     const absoluteImport = path.resolve(fromDir, importPath);
 
     // Try different extensions
     const extensions = ['.ts', '.tsx', '.js', '.jsx'];
-    
+
     // Try as file
     for (const ext of extensions) {
         const withExt = absoluteImport + ext;
@@ -218,7 +220,7 @@ function resolveImportPath(
 
 /**
  * Detects circular dependencies using depth-first search
- * 
+ *
  * @param modules - Map of all modules
  * @returns Array of detected cycles
  */
@@ -230,14 +232,7 @@ function detectCycles(modules: Map<string, Module>): DependencyCycle[] {
 
     for (const modulePath of modules.keys()) {
         if (!visited.has(modulePath)) {
-            detectCyclesHelper(
-                modulePath,
-                modules,
-                visited,
-                recursionStack,
-                pathStack,
-                cycles
-            );
+            detectCyclesHelper(modulePath, modules, visited, recursionStack, pathStack, cycles);
         }
     }
 
@@ -253,7 +248,7 @@ function detectCyclesHelper(
     visited: Set<string>,
     recursionStack: Set<string>,
     pathStack: string[],
-    cycles: DependencyCycle[]
+    cycles: DependencyCycle[],
 ): void {
     visited.add(currentModule);
     recursionStack.add(currentModule);
@@ -274,14 +269,7 @@ function detectCyclesHelper(
 
         if (!visited.has(dependency)) {
             // Visit unvisited dependency
-            detectCyclesHelper(
-                dependency,
-                modules,
-                visited,
-                recursionStack,
-                pathStack,
-                cycles
-            );
+            detectCyclesHelper(dependency, modules, visited, recursionStack, pathStack, cycles);
         } else if (recursionStack.has(dependency)) {
             // Found a cycle!
             const cycleStartIndex = pathStack.indexOf(dependency);
@@ -292,9 +280,11 @@ function detectCyclesHelper(
             const description = cycle.join(' -> ');
 
             // Check if we've already found this cycle (or its reverse)
-            const isDuplicate = cycles.some(existingCycle => {
-                return arraysEqual(existingCycle.cycle, cycle) ||
-                       arraysEqual(existingCycle.cycle, cycle.slice().reverse());
+            const isDuplicate = cycles.some((existingCycle) => {
+                return (
+                    arraysEqual(existingCycle.cycle, cycle) ||
+                    arraysEqual(existingCycle.cycle, cycle.slice().reverse())
+                );
             });
 
             if (!isDuplicate) {
@@ -324,7 +314,7 @@ function arraysEqual(a: string[], b: string[]): boolean {
 
 /**
  * Gets the layer of a module based on its path
- * 
+ *
  * Layers (from low to high):
  * - types: Type definitions
  * - infrastructure: Cross-cutting concerns
@@ -332,44 +322,62 @@ function arraysEqual(a: string[], b: string[]): boolean {
  * - commands: Command implementations
  * - ui: UI components
  * - extension: Entry point
- * 
+ *
  * @param modulePath - Relative module path
  * @returns The layer name
  */
 export function getModuleLayer(modulePath: string): string {
     const normalized = modulePath.replace(/\\/g, '/');
-    
+
     // Check for specific patterns (order matters - more specific first)
-    if (normalized.includes('types/') || normalized.startsWith('types\\')) return 'types';
-    if (normalized.includes('infrastructure/') || normalized.startsWith('infrastructure\\')) return 'infrastructure';
-    if (normalized.includes('services/') || normalized.startsWith('services\\')) return 'services';
-    if (normalized.includes('commands/') || normalized.startsWith('commands\\')) return 'commands';
-    if (normalized.includes('ui/') || normalized.startsWith('ui\\')) return 'ui';
-    if (normalized.includes('utils/') || normalized.startsWith('utils\\')) return 'utils';
-    if (normalized.includes('languages/') || normalized.startsWith('languages\\')) return 'languages';
-    if (normalized.includes('constants/') || normalized.startsWith('constants\\')) return 'constants';
-    if (normalized.includes('extension.ts') || normalized === 'extension.ts') return 'extension';
-    
+    if (normalized.includes('types/') || normalized.startsWith('types\\')) {
+        return 'types';
+    }
+    if (normalized.includes('infrastructure/') || normalized.startsWith('infrastructure\\')) {
+        return 'infrastructure';
+    }
+    if (normalized.includes('services/') || normalized.startsWith('services\\')) {
+        return 'services';
+    }
+    if (normalized.includes('commands/') || normalized.startsWith('commands\\')) {
+        return 'commands';
+    }
+    if (normalized.includes('ui/') || normalized.startsWith('ui\\')) {
+        return 'ui';
+    }
+    if (normalized.includes('utils/') || normalized.startsWith('utils\\')) {
+        return 'utils';
+    }
+    if (normalized.includes('languages/') || normalized.startsWith('languages\\')) {
+        return 'languages';
+    }
+    if (normalized.includes('constants/') || normalized.startsWith('constants\\')) {
+        return 'constants';
+    }
+    if (normalized.includes('extension.ts') || normalized === 'extension.ts') {
+        return 'extension';
+    }
+
     return 'other';
 }
 
 /**
  * Validates that module dependencies respect layer boundaries
- * 
+ *
  * Higher layers can depend on lower layers, but not vice versa.
  * Layer hierarchy (low to high):
  * types < constants < languages < utils < infrastructure < services < commands < ui < extension
- * 
+ *
  * Note: utils is a shared utility layer that can be used by infrastructure and above
- * 
+ *
  * @param modules - Map of all modules
  * @returns Array of layer boundary violations
  */
 export function validateLayerBoundaries(
-    modules: Map<string, Module>
+    modules: Map<string, Module>,
 ): Array<{ from: string; to: string; violation: string }> {
     const violations: Array<{ from: string; to: string; violation: string }> = [];
-    
+
     const layerOrder = [
         'types',
         'constants',
@@ -379,7 +387,7 @@ export function validateLayerBoundaries(
         'services',
         'commands',
         'ui',
-        'extension'
+        'extension',
     ];
 
     for (const [modulePath, module] of modules) {
@@ -395,7 +403,7 @@ export function validateLayerBoundaries(
                 violations.push({
                     from: modulePath,
                     to: dependency,
-                    violation: `Layer '${fromLayer}' should not depend on higher layer '${toLayer}'`
+                    violation: `Layer '${fromLayer}' should not depend on higher layer '${toLayer}'`,
                 });
             }
         }
@@ -406,7 +414,7 @@ export function validateLayerBoundaries(
 
 /**
  * Gets statistics about the dependency graph
- * 
+ *
  * @param modules - Map of all modules
  * @returns Statistics object
  */
@@ -442,6 +450,6 @@ export function getDependencyStatistics(modules: Map<string, Module>): {
         averageDependencies: modules.size > 0 ? totalDependencies / modules.size : 0,
         maxDependencies,
         moduleWithMostDependencies,
-        modulesByLayer
+        modulesByLayer,
     };
 }

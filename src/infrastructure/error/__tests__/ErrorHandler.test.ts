@@ -14,7 +14,7 @@ import {
     ServiceError,
     StorageError,
     CommandError,
-    CriticalError
+    CriticalError,
 } from '../../../types/errors/index.js';
 
 suite('ErrorHandler Unit Tests', () => {
@@ -32,7 +32,7 @@ suite('ErrorHandler Unit Tests', () => {
         originalLoggerMethods = {
             error: logger.error.bind(logger),
             warning: logger.warning.bind(logger),
-            info: logger.info.bind(logger)
+            info: logger.info.bind(logger),
         };
 
         logger.error = (message: string, error?: unknown) => {
@@ -49,7 +49,7 @@ suite('ErrorHandler Unit Tests', () => {
         originalVSCodeMethods = {
             showErrorMessage: vscode.window.showErrorMessage,
             showWarningMessage: vscode.window.showWarningMessage,
-            showInformationMessage: vscode.window.showInformationMessage
+            showInformationMessage: vscode.window.showInformationMessage,
         };
 
         vscode.window.showErrorMessage = (message: string) => {
@@ -222,7 +222,7 @@ suite('ErrorHandler Unit Tests', () => {
             const error = new Error('Test error');
             ErrorHandler.handle(error, {
                 operation: 'testOperation',
-                component: 'TestComponent'
+                component: 'TestComponent',
             });
 
             assert.strictEqual(loggedMessages.length, 1);
@@ -236,7 +236,7 @@ suite('ErrorHandler Unit Tests', () => {
             const error = new ValidationError('Invalid value', { field: 'email' });
             ErrorHandler.handle(error, {
                 operation: 'validate',
-                component: 'Validator'
+                component: 'Validator',
             });
 
             assert.strictEqual(loggedMessages.length, 1);
@@ -250,7 +250,7 @@ suite('ErrorHandler Unit Tests', () => {
             const error = new Error('Standard error message');
             ErrorHandler.handle(error, {
                 operation: 'process',
-                component: 'Processor'
+                component: 'Processor',
             });
 
             assert.strictEqual(loggedMessages.length, 1);
@@ -264,7 +264,7 @@ suite('ErrorHandler Unit Tests', () => {
             const error = { custom: 'error object' };
             ErrorHandler.handle(error, {
                 operation: 'handle',
-                component: 'Handler'
+                component: 'Handler',
             });
 
             assert.strictEqual(loggedMessages.length, 1);
@@ -290,7 +290,7 @@ suite('ErrorHandler Unit Tests', () => {
             ErrorHandler.handle(error, {
                 operation: 'test',
                 component: 'TestComponent',
-                metadata: { userId: '123', action: 'save' }
+                metadata: { userId: '123', action: 'save' },
             });
 
             assert.strictEqual(loggedMessages.length, 1);
@@ -306,18 +306,18 @@ suite('ErrorHandler Unit Tests', () => {
                 new ServiceError('Service', 'Test'),
                 new StorageError('Storage'),
                 new CommandError('Command', 'test.cmd'),
-                new Error('Standard')
+                new Error('Standard'),
             ];
 
             errors.forEach((error, index) => {
                 ErrorHandler.handle(error, {
                     operation: `op${index}`,
-                    component: `Component${index}`
+                    component: `Component${index}`,
                 });
             });
 
             assert.strictEqual(loggedMessages.length, errors.length);
-            
+
             // All messages should follow the same format: [Component] operation: message
             loggedMessages.forEach((log, index) => {
                 assert.ok(log.message.includes(`[Component${index}]`));

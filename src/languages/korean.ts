@@ -1,4 +1,4 @@
-import { PromptType } from '../types/language';
+import { PromptType } from '../types/enums/PromptType';
 
 export const getKoreanPrompt = (type: PromptType): string => {
     const prompts: Record<PromptType, string> = {
@@ -112,7 +112,7 @@ export const getKoreanPrompt = (type: PromptType): string => {
 - 필요한 문서는 무엇인가요?
 - 테스트해야 할 항목은 무엇인가요?
 - 호환성을 깨는 변경이 있나요?
-`
+`,
     };
 
     return prompts[type] || '';

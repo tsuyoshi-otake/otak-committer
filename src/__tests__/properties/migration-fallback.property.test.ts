@@ -1,10 +1,10 @@
 /**
  * Property-based tests for migration fallback resilience
- * 
+ *
  * **Feature: extension-architecture-refactoring, Property 5: Migration Fallback Resilience**
  * **Validates: Requirements 3.3**
- * 
- * Property: For any migration operation that fails, the system should fall back to using 
+ *
+ * Property: For any migration operation that fails, the system should fall back to using
  * the legacy data format and continue functioning without crashing.
  */
 
@@ -21,7 +21,7 @@ function createMockContext(options?: {
 }): vscode.ExtensionContext {
     const secretStore = new Map<string, string>();
     const globalStateStore = new Map<string, any>();
-    
+
     return {
         secrets: {
             get: async (key: string) => {
@@ -42,7 +42,7 @@ function createMockContext(options?: {
                 }
                 secretStore.delete(key);
             },
-            onDidChange: undefined as any
+            onDidChange: undefined as any,
         },
         globalState: {
             get: <T>(key: string) => {
@@ -67,7 +67,7 @@ function createMockContext(options?: {
                 }
                 return Array.from(globalStateStore.keys());
             },
-            setKeysForSync: () => {}
+            setKeysForSync: () => {},
         },
         subscriptions: [],
         workspaceState: undefined as any,
@@ -83,7 +83,7 @@ function createMockContext(options?: {
         logPath: '',
         asAbsolutePath: (relativePath: string) => relativePath,
         extension: undefined as any,
-        languageModelAccessInformation: undefined as any
+        languageModelAccessInformation: undefined as any,
     };
 }
 
@@ -100,7 +100,7 @@ function createMockWorkspaceConfig(): Map<string, any> {
 function mockGetConfiguration(configStore: Map<string, any>) {
     return (section?: string) => {
         const prefix = section ? `${section}.` : '';
-        
+
         return {
             get: <T>(key: string): T | undefined => {
                 const fullKey = prefix + key;
@@ -118,7 +118,7 @@ function mockGetConfiguration(configStore: Map<string, any>) {
                 const fullKey = prefix + key;
                 return configStore.has(fullKey);
             },
-            inspect: undefined as any
+            inspect: undefined as any,
         };
     };
 }
@@ -135,17 +135,17 @@ suite('Migration Fallback Resilience Property Tests', () => {
         originalGetConfiguration = vscode.workspace.getConfiguration;
         originalShowWarningMessage = vscode.window.showWarningMessage;
         originalShowInformationMessage = vscode.window.showInformationMessage;
-        
+
         // Track messages
         warningMessages = [];
         infoMessages = [];
-        
+
         // Mock message functions
         (vscode.window as any).showWarningMessage = (message: string) => {
             warningMessages.push(message);
             return Promise.resolve(undefined);
         };
-        
+
         (vscode.window as any).showInformationMessage = (message: string) => {
             infoMessages.push(message);
             return Promise.resolve(undefined);
@@ -174,22 +174,29 @@ suite('Migration Fallback Resilience Property Tests', () => {
                 fc.record({
                     service: fc.constantFrom('openai' as const, 'github' as const),
                     // Use alphanumeric characters to avoid whitespace-only strings
-                    apiKey: fc.string({ minLength: 20, maxLength: 50 }).map(s => 'key' + s.replace(/\s/g, 'x'))
+                    apiKey: fc
+                        .string({ minLength: 20, maxLength: 50 })
+                        .map((s) => 'key' + s.replace(/\s/g, 'x')),
                 }),
                 async ({ service, apiKey }) => {
                     // Setup: Create context where SecretStorage fails but GlobalState works
                     // This tests the backup fallback mechanism in SecretStorageProvider
-                    const mockContext = createMockContext({ secretStorageFails: true, globalStateFails: false });
+                    const mockContext = createMockContext({
+                        secretStorageFails: true,
+                        globalStateFails: false,
+                    });
                     const testConfigStore = createMockWorkspaceConfig();
 
                     const originalConfig = vscode.workspace.getConfiguration;
-                    (vscode.workspace as any).getConfiguration = mockGetConfiguration(testConfigStore);
+                    (vscode.workspace as any).getConfiguration =
+                        mockGetConfiguration(testConfigStore);
 
                     try {
                         // Pre-condition: Place legacy data in Configuration storage
-                        const legacyKey = service === 'openai'
-                            ? 'otakCommitter.openaiApiKey'
-                            : 'otakCommitter.githubToken';
+                        const legacyKey =
+                            service === 'openai'
+                                ? 'otakCommitter.openaiApiKey'
+                                : 'otakCommitter.githubToken';
                         testConfigStore.set(legacyKey, apiKey);
 
                         const storage = new StorageManager(mockContext);
@@ -211,7 +218,9 @@ suite('Migration Fallback Resilience Property Tests', () => {
                         // Verification 2: Data should be retrievable (from backup or any fallback)
                         const retrievedKey = await storage.getApiKey(service);
                         if (retrievedKey !== apiKey) {
-                            console.error(`Failed to retrieve key: expected ${apiKey}, got ${retrievedKey}`);
+                            console.error(
+                                `Failed to retrieve key: expected ${apiKey}, got ${retrievedKey}`,
+                            );
                             return false;
                         }
 
@@ -219,9 +228,9 @@ suite('Migration Fallback Resilience Property Tests', () => {
                     } finally {
                         (vscode.workspace as any).getConfiguration = originalConfig;
                     }
-                }
+                },
             ),
-            { numRuns: 20, timeout: 30000 }
+            { numRuns: 20, timeout: 30000 },
         );
     });
 
@@ -235,19 +244,24 @@ suite('Migration Fallback Resilience Property Tests', () => {
         await fc.assert(
             fc.asyncProperty(
                 fc.record({
-                    openaiKey: fc.string({ minLength: 20, maxLength: 50 }).map(s => 'key' + s.replace(/\s/g, 'x')),
-                    githubToken: fc.string({ minLength: 20, maxLength: 50 }).map(s => 'key' + s.replace(/\s/g, 'x'))
+                    openaiKey: fc
+                        .string({ minLength: 20, maxLength: 50 })
+                        .map((s) => 'key' + s.replace(/\s/g, 'x')),
+                    githubToken: fc
+                        .string({ minLength: 20, maxLength: 50 })
+                        .map((s) => 'key' + s.replace(/\s/g, 'x')),
                 }),
                 async ({ openaiKey, githubToken }) => {
                     // Setup: Create context where both SecretStorage and GlobalState fail
                     const mockContext = createMockContext({
                         secretStorageFails: true,
-                        globalStateFails: true
+                        globalStateFails: true,
                     });
                     const testConfigStore = createMockWorkspaceConfig();
 
                     const originalConfig = vscode.workspace.getConfiguration;
-                    (vscode.workspace as any).getConfiguration = mockGetConfiguration(testConfigStore);
+                    (vscode.workspace as any).getConfiguration =
+                        mockGetConfiguration(testConfigStore);
 
                     try {
                         // Pre-condition: Place legacy data
@@ -275,12 +289,16 @@ suite('Migration Fallback Resilience Property Tests', () => {
                         const retrievedGitHub = await storage.getApiKey('github');
 
                         if (retrievedOpenAI !== openaiKey) {
-                            console.error(`Failed to retrieve OpenAI key: expected ${openaiKey}, got ${retrievedOpenAI}`);
+                            console.error(
+                                `Failed to retrieve OpenAI key: expected ${openaiKey}, got ${retrievedOpenAI}`,
+                            );
                             return false;
                         }
 
                         if (retrievedGitHub !== githubToken) {
-                            console.error(`Failed to retrieve GitHub token: expected ${githubToken}, got ${retrievedGitHub}`);
+                            console.error(
+                                `Failed to retrieve GitHub token: expected ${githubToken}, got ${retrievedGitHub}`,
+                            );
                             return false;
                         }
 
@@ -288,9 +306,9 @@ suite('Migration Fallback Resilience Property Tests', () => {
                     } finally {
                         (vscode.workspace as any).getConfiguration = originalConfig;
                     }
-                }
+                },
             ),
-            { numRuns: 20, timeout: 30000 }
+            { numRuns: 20, timeout: 30000 },
         );
     });
 
@@ -304,8 +322,12 @@ suite('Migration Fallback Resilience Property Tests', () => {
         await fc.assert(
             fc.asyncProperty(
                 fc.record({
-                    openaiKey: fc.string({ minLength: 20, maxLength: 50 }).map(s => 'key' + s.replace(/\s/g, 'x')),
-                    githubToken: fc.string({ minLength: 20, maxLength: 50 }).map(s => 'key' + s.replace(/\s/g, 'x'))
+                    openaiKey: fc
+                        .string({ minLength: 20, maxLength: 50 })
+                        .map((s) => 'key' + s.replace(/\s/g, 'x')),
+                    githubToken: fc
+                        .string({ minLength: 20, maxLength: 50 })
+                        .map((s) => 'key' + s.replace(/\s/g, 'x')),
                 }),
                 async ({ openaiKey, githubToken }) => {
                     // Setup: Use standard mock with working storage
@@ -313,7 +335,8 @@ suite('Migration Fallback Resilience Property Tests', () => {
                     const testConfigStore = createMockWorkspaceConfig();
 
                     const originalConfig = vscode.workspace.getConfiguration;
-                    (vscode.workspace as any).getConfiguration = mockGetConfiguration(testConfigStore);
+                    (vscode.workspace as any).getConfiguration =
+                        mockGetConfiguration(testConfigStore);
 
                     try {
                         // Pre-condition: Place both legacy keys
@@ -341,12 +364,16 @@ suite('Migration Fallback Resilience Property Tests', () => {
                         const retrievedGitHub = await storage.getApiKey('github');
 
                         if (retrievedOpenAI !== openaiKey) {
-                            console.error(`OpenAI key not accessible: expected ${openaiKey}, got ${retrievedOpenAI}`);
+                            console.error(
+                                `OpenAI key not accessible: expected ${openaiKey}, got ${retrievedOpenAI}`,
+                            );
                             return false;
                         }
 
                         if (retrievedGitHub !== githubToken) {
-                            console.error(`GitHub token not accessible: expected ${githubToken}, got ${retrievedGitHub}`);
+                            console.error(
+                                `GitHub token not accessible: expected ${githubToken}, got ${retrievedGitHub}`,
+                            );
                             return false;
                         }
 
@@ -354,9 +381,9 @@ suite('Migration Fallback Resilience Property Tests', () => {
                     } finally {
                         (vscode.workspace as any).getConfiguration = originalConfig;
                     }
-                }
+                },
             ),
-            { numRuns: 20, timeout: 30000 }
+            { numRuns: 20, timeout: 30000 },
         );
     });
 
@@ -371,7 +398,9 @@ suite('Migration Fallback Resilience Property Tests', () => {
             fc.asyncProperty(
                 fc.record({
                     service: fc.constantFrom('openai' as const, 'github' as const),
-                    apiKey: fc.string({ minLength: 20, maxLength: 50 }).map(s => 'key' + s.replace(/\s/g, 'x'))
+                    apiKey: fc
+                        .string({ minLength: 20, maxLength: 50 })
+                        .map((s) => 'key' + s.replace(/\s/g, 'x')),
                 }),
                 async ({ service, apiKey }) => {
                     // Setup: Create working mock context
@@ -379,13 +408,15 @@ suite('Migration Fallback Resilience Property Tests', () => {
                     const testConfigStore = createMockWorkspaceConfig();
 
                     const originalConfig = vscode.workspace.getConfiguration;
-                    (vscode.workspace as any).getConfiguration = mockGetConfiguration(testConfigStore);
+                    (vscode.workspace as any).getConfiguration =
+                        mockGetConfiguration(testConfigStore);
 
                     try {
                         // Pre-condition: Place legacy data
-                        const legacyKey = service === 'openai'
-                            ? 'otakCommitter.openaiApiKey'
-                            : 'otakCommitter.githubToken';
+                        const legacyKey =
+                            service === 'openai'
+                                ? 'otakCommitter.openaiApiKey'
+                                : 'otakCommitter.githubToken';
                         testConfigStore.set(legacyKey, apiKey);
 
                         const storage = new StorageManager(mockContext);
@@ -396,7 +427,9 @@ suite('Migration Fallback Resilience Property Tests', () => {
                         // Verification 1: Data should be accessible
                         const afterFirst = await storage.getApiKey(service);
                         if (afterFirst !== apiKey) {
-                            console.error(`Data not accessible after first migration: expected ${apiKey}, got ${afterFirst}`);
+                            console.error(
+                                `Data not accessible after first migration: expected ${apiKey}, got ${afterFirst}`,
+                            );
                             return false;
                         }
 
@@ -406,7 +439,9 @@ suite('Migration Fallback Resilience Property Tests', () => {
                         // Verification 2: Data should still be accessible
                         const afterSecond = await storage.getApiKey(service);
                         if (afterSecond !== apiKey) {
-                            console.error(`Data not accessible after second migration: expected ${apiKey}, got ${afterSecond}`);
+                            console.error(
+                                `Data not accessible after second migration: expected ${apiKey}, got ${afterSecond}`,
+                            );
                             return false;
                         }
 
@@ -414,9 +449,9 @@ suite('Migration Fallback Resilience Property Tests', () => {
                     } finally {
                         (vscode.workspace as any).getConfiguration = originalConfig;
                     }
-                }
+                },
             ),
-            { numRuns: 20, timeout: 30000 }
+            { numRuns: 20, timeout: 30000 },
         );
     });
 });

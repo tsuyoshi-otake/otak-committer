@@ -64,7 +64,7 @@ export class TranslationManager {
             vi: vi as TranslationDictionary,
             ko: ko as TranslationDictionary,
             'zh-cn': zhCN as TranslationDictionary,
-            'zh-tw': zhTW as TranslationDictionary
+            'zh-tw': zhTW as TranslationDictionary,
         };
         this.locale = LocaleDetector.getLocale();
     }

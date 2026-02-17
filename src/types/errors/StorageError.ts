@@ -7,7 +7,7 @@ import { BaseError, ErrorSeverity } from './BaseError';
 export class StorageError extends BaseError {
     readonly severity = ErrorSeverity.Error;
 
-    constructor(message: string, context?: Record<string, any>) {
+    constructor(message: string, context?: Record<string, unknown>) {
         super(message, 'STORAGE_ERROR', context);
     }
 }
@@ -16,7 +16,7 @@ export class StorageError extends BaseError {
  * Error thrown when SecretStorage operations fail
  */
 export class SecretStorageError extends StorageError {
-    constructor(message: string, context?: Record<string, any>) {
+    constructor(message: string, context?: Record<string, unknown>) {
         super(message, { ...context, storageType: 'SecretStorage' });
     }
 }
@@ -25,7 +25,7 @@ export class SecretStorageError extends StorageError {
  * Error thrown when Configuration operations fail
  */
 export class ConfigurationError extends StorageError {
-    constructor(message: string, context?: Record<string, any>) {
+    constructor(message: string, context?: Record<string, unknown>) {
         super(message, { ...context, storageType: 'Configuration' });
     }
 }

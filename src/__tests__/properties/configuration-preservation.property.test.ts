@@ -19,65 +19,48 @@ suite('Configuration Preservation Property Tests', () => {
 
     test('Property 8: Language configuration should be preserved', () => {
         runPropertyTest(
-            fc.property(
-                arbitraries.language(),
-                (language) => {
-                    // Simulate configuration preservation
-                    const config = { language };
-                    // The language should be preserved as-is
-                    return config.language === language;
-                }
-            )
+            fc.property(arbitraries.language(), (language) => {
+                // Simulate configuration preservation
+                const config = { language };
+                // The language should be preserved as-is
+                return config.language === language;
+            }),
         );
     });
 
     test('Property 8: Message style configuration should be preserved', () => {
         runPropertyTest(
-            fc.property(
-                arbitraries.messageStyle(),
-                (messageStyle) => {
-                    const config = { messageStyle };
-                    return config.messageStyle === messageStyle;
-                }
-            )
+            fc.property(arbitraries.messageStyle(), (messageStyle) => {
+                const config = { messageStyle };
+                return config.messageStyle === messageStyle;
+            }),
         );
     });
 
     test('Property 8: Emoji configuration should be preserved', () => {
         runPropertyTest(
-            fc.property(
-                fc.boolean(),
-                arbitraries.emojiStyle(),
-                (useEmoji, emojiStyle) => {
-                    const config = { useEmoji, emojiStyle };
-                    return config.useEmoji === useEmoji &&
-                           config.emojiStyle === emojiStyle;
-                }
-            )
+            fc.property(fc.boolean(), arbitraries.emojiStyle(), (useEmoji, emojiStyle) => {
+                const config = { useEmoji, emojiStyle };
+                return config.useEmoji === useEmoji && config.emojiStyle === emojiStyle;
+            }),
         );
     });
 
     test('Property 8: Custom message configuration should be preserved', () => {
         runPropertyTest(
-            fc.property(
-                fc.string({ minLength: 0, maxLength: 500 }),
-                (customMessage) => {
-                    const config = { customMessage };
-                    return config.customMessage === customMessage;
-                }
-            )
+            fc.property(fc.string({ minLength: 0, maxLength: 500 }), (customMessage) => {
+                const config = { customMessage };
+                return config.customMessage === customMessage;
+            }),
         );
     });
 
     test('Property 8: Temperature configuration should be preserved', () => {
         runPropertyTest(
-            fc.property(
-                fc.float({ min: 0, max: 2, noNaN: true }),
-                (temperature) => {
-                    const config = { temperature };
-                    return Math.abs(config.temperature - temperature) < 0.001;
-                }
-            )
+            fc.property(fc.float({ min: 0, max: 2, noNaN: true }), (temperature) => {
+                const config = { temperature };
+                return Math.abs(config.temperature - temperature) < 0.001;
+            }),
         );
     });
 
@@ -105,7 +88,7 @@ suite('Configuration Preservation Property Tests', () => {
                         messageStyle,
                         useEmoji,
                         customMessage,
-                        temperature
+                        temperature,
                     };
 
                     // Simulate migration
@@ -113,17 +96,19 @@ suite('Configuration Preservation Property Tests', () => {
                         ...originalConfig,
                         // New GPT-5.2 specific fields
                         reasoningEffort: 'low',
-                        maxInputTokens: 200000
+                        maxInputTokens: 200000,
                     };
 
                     // Verify all original settings are preserved
-                    return migratedConfig.language === language &&
-                           migratedConfig.messageStyle === messageStyle &&
-                           migratedConfig.useEmoji === useEmoji &&
-                           migratedConfig.customMessage === customMessage &&
-                           Math.abs(migratedConfig.temperature - temperature) < 0.001;
-                }
-            )
+                    return (
+                        migratedConfig.language === language &&
+                        migratedConfig.messageStyle === messageStyle &&
+                        migratedConfig.useEmoji === useEmoji &&
+                        migratedConfig.customMessage === customMessage &&
+                        Math.abs(migratedConfig.temperature - temperature) < 0.001
+                    );
+                },
+            ),
         );
     });
 });

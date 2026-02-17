@@ -29,4 +29,3 @@
   "config.useConventionalCommits": "스코프가 있는 Conventional Commits 형식 사용 (<type>(<scope>): <subject>)",
   "config.appendCommitTrailer": "생성된 커밋 메시지에 'Commit-Message-By: otak-committer' 트레일러 추가"
 }
-

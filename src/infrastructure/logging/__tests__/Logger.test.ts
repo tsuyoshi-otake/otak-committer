@@ -25,16 +25,16 @@ suite('Logger Unit Tests', () => {
 
         test('Log levels can be compared for filtering', () => {
             const currentLevel = LogLevel.Info;
-            
+
             // Debug should be filtered (0 < 1)
             assert.strictEqual(LogLevel.Debug < currentLevel, true);
-            
+
             // Info should pass (1 >= 1)
             assert.strictEqual(LogLevel.Info >= currentLevel, true);
-            
+
             // Warning should pass (2 >= 1)
             assert.strictEqual(LogLevel.Warning >= currentLevel, true);
-            
+
             // Error should pass (3 >= 1)
             assert.strictEqual(LogLevel.Error >= currentLevel, true);
         });
@@ -48,7 +48,7 @@ suite('Logger Unit Tests', () => {
         setup(() => {
             logger = Logger.getInstance();
             loggedMessages = [];
-            
+
             // Mock the output channel's appendLine method
             const outputChannel = (logger as any).outputChannel;
             originalAppendLine = outputChannel.appendLine;
@@ -66,18 +66,18 @@ suite('Logger Unit Tests', () => {
 
         test('should filter messages below current log level', () => {
             logger.setLogLevel(LogLevel.Warning);
-            
+
             logger.debug('Debug message');
             logger.info('Info message');
             logger.warning('Warning message');
             logger.error('Error message');
-            
+
             // Only Warning and Error should be logged
-            const warningMessages = loggedMessages.filter(msg => msg.includes('[WARNING]'));
-            const errorMessages = loggedMessages.filter(msg => msg.includes('[ERROR]'));
-            const debugMessages = loggedMessages.filter(msg => msg.includes('[DEBUG]'));
-            const infoMessages = loggedMessages.filter(msg => msg.includes('[INFO]'));
-            
+            const warningMessages = loggedMessages.filter((msg) => msg.includes('[WARNING]'));
+            const errorMessages = loggedMessages.filter((msg) => msg.includes('[ERROR]'));
+            const debugMessages = loggedMessages.filter((msg) => msg.includes('[DEBUG]'));
+            const infoMessages = loggedMessages.filter((msg) => msg.includes('[INFO]'));
+
             assert.strictEqual(warningMessages.length, 1);
             assert.strictEqual(errorMessages.length, 1);
             assert.strictEqual(debugMessages.length, 0);
@@ -86,17 +86,17 @@ suite('Logger Unit Tests', () => {
 
         test('should log all messages when level is Debug', () => {
             logger.setLogLevel(LogLevel.Debug);
-            
+
             logger.debug('Debug message');
             logger.info('Info message');
             logger.warning('Warning message');
             logger.error('Error message');
-            
-            const debugMessages = loggedMessages.filter(msg => msg.includes('[DEBUG]'));
-            const infoMessages = loggedMessages.filter(msg => msg.includes('[INFO]'));
-            const warningMessages = loggedMessages.filter(msg => msg.includes('[WARNING]'));
-            const errorMessages = loggedMessages.filter(msg => msg.includes('[ERROR]'));
-            
+
+            const debugMessages = loggedMessages.filter((msg) => msg.includes('[DEBUG]'));
+            const infoMessages = loggedMessages.filter((msg) => msg.includes('[INFO]'));
+            const warningMessages = loggedMessages.filter((msg) => msg.includes('[WARNING]'));
+            const errorMessages = loggedMessages.filter((msg) => msg.includes('[ERROR]'));
+
             assert.strictEqual(debugMessages.length, 1);
             assert.strictEqual(infoMessages.length, 1);
             assert.strictEqual(warningMessages.length, 1);
@@ -105,17 +105,18 @@ suite('Logger Unit Tests', () => {
 
         test('should only log Error messages when level is Error', () => {
             logger.setLogLevel(LogLevel.Error);
-            
+
             logger.debug('Debug message');
             logger.info('Info message');
             logger.warning('Warning message');
             logger.error('Error message');
-            
-            const errorMessages = loggedMessages.filter(msg => msg.includes('[ERROR]'));
-            const otherMessages = loggedMessages.filter(msg => 
-                msg.includes('[DEBUG]') || msg.includes('[INFO]') || msg.includes('[WARNING]')
+
+            const errorMessages = loggedMessages.filter((msg) => msg.includes('[ERROR]'));
+            const otherMessages = loggedMessages.filter(
+                (msg) =>
+                    msg.includes('[DEBUG]') || msg.includes('[INFO]') || msg.includes('[WARNING]'),
             );
-            
+
             assert.strictEqual(errorMessages.length, 1);
             assert.strictEqual(otherMessages.length, 0);
         });
@@ -123,14 +124,14 @@ suite('Logger Unit Tests', () => {
         test('should respect log level changes dynamically', () => {
             logger.setLogLevel(LogLevel.Info);
             logger.debug('Should not appear');
-            
+
             const beforeChange = loggedMessages.length;
-            
+
             logger.setLogLevel(LogLevel.Debug);
             logger.debug('Should appear');
-            
+
             const afterChange = loggedMessages.length;
-            
+
             assert.strictEqual(beforeChange, 0);
             assert.strictEqual(afterChange, 1);
         });
@@ -145,7 +146,7 @@ suite('Logger Unit Tests', () => {
             logger = Logger.getInstance();
             logger.setLogLevel(LogLevel.Debug);
             loggedMessages = [];
-            
+
             const outputChannel = (logger as any).outputChannel;
             originalAppendLine = outputChannel.appendLine;
             outputChannel.appendLine = (message: string) => {
@@ -161,9 +162,9 @@ suite('Logger Unit Tests', () => {
 
         test('should format message with timestamp and log level', () => {
             logger.info('Test message');
-            
+
             const message = loggedMessages[0];
-            
+
             // Check format: [timestamp] [LEVEL] message
             assert.ok(message.includes('[INFO]'));
             assert.ok(message.includes('Test message'));
@@ -172,7 +173,7 @@ suite('Logger Unit Tests', () => {
 
         test('should format debug messages correctly', () => {
             logger.debug('Debug test');
-            
+
             const message = loggedMessages[0];
             assert.ok(message.includes('[DEBUG]'));
             assert.ok(message.includes('Debug test'));
@@ -180,7 +181,7 @@ suite('Logger Unit Tests', () => {
 
         test('should format warning messages correctly', () => {
             logger.warning('Warning test');
-            
+
             const message = loggedMessages[0];
             assert.ok(message.includes('[WARNING]'));
             assert.ok(message.includes('Warning test'));
@@ -188,7 +189,7 @@ suite('Logger Unit Tests', () => {
 
         test('should format error messages correctly', () => {
             logger.error('Error test');
-            
+
             const message = loggedMessages[0];
             assert.ok(message.includes('[ERROR]'));
             assert.ok(message.includes('Error test'));
@@ -196,11 +197,11 @@ suite('Logger Unit Tests', () => {
 
         test('should include additional arguments as JSON', () => {
             logger.info('Test with args', { key: 'value' }, [1, 2, 3]);
-            
+
             // First message is the formatted log line
             // Second message should be the JSON stringified args
             assert.ok(loggedMessages.length >= 2);
-            
+
             const argsMessage = loggedMessages[1];
             assert.ok(argsMessage.includes('"key"'));
             assert.ok(argsMessage.includes('"value"'));
@@ -208,11 +209,11 @@ suite('Logger Unit Tests', () => {
 
         test('should handle empty additional arguments', () => {
             logger.info('Test without args');
-            
+
             // Should only have one message (the formatted log line)
             // No additional JSON output for empty args
-            const relevantMessages = loggedMessages.filter(msg => 
-                msg.includes('Test without args') || msg.includes('[')
+            const relevantMessages = loggedMessages.filter(
+                (msg) => msg.includes('Test without args') || msg.includes('['),
             );
             assert.strictEqual(relevantMessages.length, 1);
         });
@@ -220,7 +221,7 @@ suite('Logger Unit Tests', () => {
         test('should handle error objects in error method', () => {
             const testError = new Error('Test error');
             logger.error('Error occurred', testError);
-            
+
             assert.ok(loggedMessages.length >= 1);
             assert.ok(loggedMessages[0].includes('[ERROR]'));
             assert.ok(loggedMessages[0].includes('Error occurred'));
@@ -228,12 +229,14 @@ suite('Logger Unit Tests', () => {
 
         test('should use ISO timestamp format', () => {
             logger.info('Timestamp test');
-            
+
             const message = loggedMessages[0];
-            const timestampMatch = message.match(/\[(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)\]/);
-            
+            const timestampMatch = message.match(
+                /\[(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)\]/,
+            );
+
             assert.ok(timestampMatch);
-            
+
             // Verify it's a valid ISO string
             const timestamp = timestampMatch![1];
             const date = new Date(timestamp);
@@ -245,11 +248,11 @@ suite('Logger Unit Tests', () => {
             logger.info('test');
             logger.warning('test');
             logger.error('test');
-            
-            assert.ok(loggedMessages.some(msg => msg.includes('[DEBUG]')));
-            assert.ok(loggedMessages.some(msg => msg.includes('[INFO]')));
-            assert.ok(loggedMessages.some(msg => msg.includes('[WARNING]')));
-            assert.ok(loggedMessages.some(msg => msg.includes('[ERROR]')));
+
+            assert.ok(loggedMessages.some((msg) => msg.includes('[DEBUG]')));
+            assert.ok(loggedMessages.some((msg) => msg.includes('[INFO]')));
+            assert.ok(loggedMessages.some((msg) => msg.includes('[WARNING]')));
+            assert.ok(loggedMessages.some((msg) => msg.includes('[ERROR]')));
         });
     });
 
@@ -280,15 +283,15 @@ suite('Logger Unit Tests', () => {
             let appendLineCalled = false;
             const outputChannel = (logger as any).outputChannel;
             const originalAppendLine = outputChannel.appendLine;
-            
+
             outputChannel.appendLine = () => {
                 appendLineCalled = true;
             };
-            
+
             logger.info('Test');
-            
+
             assert.strictEqual(appendLineCalled, true);
-            
+
             // Restore
             outputChannel.appendLine = originalAppendLine;
         });
@@ -298,17 +301,17 @@ suite('Logger Unit Tests', () => {
         test('should return same instance on multiple getInstance calls', () => {
             const instance1 = Logger.getInstance();
             const instance2 = Logger.getInstance();
-            
+
             assert.strictEqual(instance1, instance2);
         });
 
         test('should maintain log level across getInstance calls', () => {
             const instance1 = Logger.getInstance();
             instance1.setLogLevel(LogLevel.Error);
-            
+
             const instance2 = Logger.getInstance();
             const logLevel = (instance2 as any).logLevel;
-            
+
             assert.strictEqual(logLevel, LogLevel.Error);
         });
     });

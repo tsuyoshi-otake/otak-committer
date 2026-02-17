@@ -1,4 +1,4 @@
-import { PromptType } from '../types/language';
+import { PromptType } from '../types/enums/PromptType';
 
 export const getHebrewPrompt = (type: PromptType): string => {
     const prompts: Record<PromptType, string> = {
@@ -112,7 +112,7 @@ export const getHebrewPrompt = (type: PromptType): string => {
 - איזה תיעוד נדרש?
 - מה צריך לבדוק?
 - האם יש שינויים שוברי תאימות?
-`
+`,
     };
 
     return prompts[type] || '';

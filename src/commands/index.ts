@@ -1,6 +1,6 @@
 /**
  * Commands module exports
- * 
+ *
  * This module provides the base command infrastructure and all command implementations.
  */
 

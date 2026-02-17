@@ -13,7 +13,7 @@ export class StorageMigrationService {
     constructor(
         private readonly context: vscode.ExtensionContext,
         private readonly configStorage: ConfigStorageProvider,
-        private readonly setApiKey: (service: ServiceProvider, value: string) => Promise<void>
+        private readonly setApiKey: (service: ServiceProvider, value: string) => Promise<void>,
     ) {
         this.logger = Logger.getInstance();
     }
@@ -28,7 +28,7 @@ export class StorageMigrationService {
     async migrateFromLegacy(): Promise<void> {
         try {
             const migrationCompleted = this.context.globalState.get<boolean>(
-                StorageMigrationService.MIGRATION_FLAG_KEY
+                StorageMigrationService.MIGRATION_FLAG_KEY,
             );
 
             if (migrationCompleted) {
@@ -46,7 +46,7 @@ export class StorageMigrationService {
             this.logger.info('[StorageManager] Legacy data migration completed');
 
             vscode.window.showInformationMessage(
-                'otak-committer: API keys have been migrated to secure storage.'
+                'otak-committer: API keys have been migrated to secure storage.',
             );
         } catch (error) {
             this.logger.error('[StorageManager] Migration failed', error);
@@ -56,10 +56,7 @@ export class StorageMigrationService {
     /**
      * Migrates a single legacy key from Configuration to SecretStorage with fallback
      */
-    async migrateLegacyKey(
-        service: ServiceProvider,
-        legacyConfigKey: string
-    ): Promise<void> {
+    async migrateLegacyKey(service: ServiceProvider, legacyConfigKey: string): Promise<void> {
         try {
             const legacyValue = await this.configStorage.get(legacyConfigKey);
 
@@ -74,10 +71,15 @@ export class StorageMigrationService {
                 await this.configStorage.delete(legacyConfigKey);
                 this.logger.info(`[StorageManager] Successfully migrated ${service} API key`);
             } catch (migrationError) {
-                this.logger.error(`[StorageManager] Failed to migrate ${service} key`, migrationError);
-                this.logger.info(`[StorageManager] Keeping ${service} API key in legacy storage as fallback`);
+                this.logger.error(
+                    `[StorageManager] Failed to migrate ${service} key`,
+                    migrationError,
+                );
+                this.logger.info(
+                    `[StorageManager] Keeping ${service} API key in legacy storage as fallback`,
+                );
                 vscode.window.showWarningMessage(
-                    `otak-committer: Failed to migrate ${service} API key to secure storage. Using fallback storage.`
+                    `otak-committer: Failed to migrate ${service} API key to secure storage. Using fallback storage.`,
                 );
             }
         } catch (error) {
@@ -103,8 +105,9 @@ export class StorageMigrationService {
      * Check if migration has been completed
      */
     get migrationCompleted(): boolean {
-        return this.context.globalState.get<boolean>(
-            StorageMigrationService.MIGRATION_FLAG_KEY
-        ) ?? false;
+        return (
+            this.context.globalState.get<boolean>(StorageMigrationService.MIGRATION_FLAG_KEY) ??
+            false
+        );
     }
 }

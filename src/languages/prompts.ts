@@ -1,12 +1,15 @@
 import { PromptType } from '../types/enums/PromptType';
 import type { SupportedLanguage } from './index';
+import type { AsianLanguageCode } from './asian';
+import type { EuropeanLanguageCode } from './european';
+import type { MiddleEasternLanguageCode } from './middleEastern';
 import { getEuropeanPrompt } from './european';
 import { getAsianPrompt } from './asian';
 import { getMiddleEasternPrompt } from './middleEastern';
 import { getEnglishPrompt } from './english';
 import { getJapanesePrompt } from './japanese';
 
-const EUROPEAN_LANG_TO_CODE: Record<string, string> = {
+const EUROPEAN_LANG_TO_CODE: Partial<Record<SupportedLanguage, EuropeanLanguageCode>> = {
     french: 'fr',
     german: 'de',
     italian: 'it',
@@ -16,10 +19,10 @@ const EUROPEAN_LANG_TO_CODE: Record<string, string> = {
     hungarian: 'hu',
     bulgarian: 'bg',
     polish: 'pl',
-    russian: 'ru'
+    russian: 'ru',
 };
 
-const ASIAN_LANG_TO_CODE: Record<string, string> = {
+const ASIAN_LANG_TO_CODE: Partial<Record<SupportedLanguage, AsianLanguageCode>> = {
     chinese: 'zh',
     traditionalChinese: 'zh-tw',
     korean: 'ko',
@@ -29,13 +32,13 @@ const ASIAN_LANG_TO_CODE: Record<string, string> = {
     bengali: 'bn',
     javanese: 'jv',
     tamil: 'ta',
-    burmese: 'my'
+    burmese: 'my',
 };
 
-const MIDDLE_EASTERN_LANG_TO_CODE: Record<string, string> = {
+const MIDDLE_EASTERN_LANG_TO_CODE: Partial<Record<SupportedLanguage, MiddleEasternLanguageCode>> = {
     arabic: 'ar',
     hebrew: 'he',
-    turkish: 'tr'
+    turkish: 'tr',
 };
 
 /**
@@ -56,20 +59,19 @@ export const getPrompt = (language: SupportedLanguage, type: PromptType): string
 
     const europeanCode = EUROPEAN_LANG_TO_CODE[language];
     if (europeanCode) {
-        return getEuropeanPrompt(europeanCode as any, type);
+        return getEuropeanPrompt(europeanCode, type);
     }
 
     const asianCode = ASIAN_LANG_TO_CODE[language];
     if (asianCode) {
-        return getAsianPrompt(asianCode as any, type);
+        return getAsianPrompt(asianCode, type);
     }
 
     const middleEasternCode = MIDDLE_EASTERN_LANG_TO_CODE[language];
     if (middleEasternCode) {
-        return getMiddleEasternPrompt(middleEasternCode as any, type);
+        return getMiddleEasternPrompt(middleEasternCode, type);
     }
 
     // デフォルトは英語を返す
     return getEnglishPrompt(type);
 };
-

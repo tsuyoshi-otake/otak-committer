@@ -27,78 +27,85 @@ suite('Command Independence Properties', () => {
      * 2. Commands can be instantiated independently
      * 3. Commands do not share mutable state
      */
-    test('Property 2: Command Independence', createTaggedPropertyTest(
-        'extension-architecture-refactoring',
-        2,
-        'Command Independence',
-        () => {
-            const srcPath = path.resolve(__dirname, '../../../src');
-            const result = analyzeModuleDependencies(srcPath);
+    test(
+        'Property 2: Command Independence',
+        createTaggedPropertyTest(
+            'extension-architecture-refactoring',
+            2,
+            'Command Independence',
+            () => {
+                const srcPath = path.resolve(__dirname, '../../../src');
+                const result = analyzeModuleDependencies(srcPath);
 
-            // Get all command modules
-            const commandModules = Array.from(result.modules.entries())
-                .filter(([modulePath]) => {
-                    const normalized = modulePath.replace(/\\/g, '/');
-                    return normalized.includes('commands/') &&
-                           !normalized.includes('__tests__') &&
-                           !normalized.includes('index.ts');
-                });
-
-            console.log(`Analyzing ${commandModules.length} command modules`);
-
-            // For each command module, verify it doesn't import other commands
-            const violations: string[] = [];
-
-            for (const [modulePath, module] of commandModules) {
-                const commandName = path.basename(modulePath, '.ts');
-
-                // Skip CommandRegistry and BaseCommand (they are infrastructure)
-                if (commandName === 'CommandRegistry' || commandName === 'BaseCommand') {
-                    continue;
-                }
-
-                // Skip commandRegistration.ts (it's infrastructure)
-                if (modulePath.includes('commandRegistration')) {
-                    continue;
-                }
-
-                // Check dependencies
-                for (const dep of module.dependencies) {
-                    const normalizedDep = dep.replace(/\\/g, '/');
-                    const depName = path.basename(normalizedDep, '.ts');
-
-                    // Check if this dependency is another command
-                    if (normalizedDep.includes('commands/') &&
-                        depName !== 'BaseCommand' &&
-                        depName !== 'CommandRegistry' &&
-                        depName !== 'index' &&
-                        !normalizedDep.includes('__tests__')) {
-
-                        // Allow importing from the same file
-                        if (depName === commandName) {
-                            continue;
-                        }
-
-                        violations.push(
-                            `${commandName} imports ${depName} - commands should not depend on other commands`
+                // Get all command modules
+                const commandModules = Array.from(result.modules.entries()).filter(
+                    ([modulePath]) => {
+                        const normalized = modulePath.replace(/\\/g, '/');
+                        return (
+                            normalized.includes('commands/') &&
+                            !normalized.includes('__tests__') &&
+                            !normalized.includes('index.ts')
                         );
+                    },
+                );
+
+                console.log(`Analyzing ${commandModules.length} command modules`);
+
+                // For each command module, verify it doesn't import other commands
+                const violations: string[] = [];
+
+                for (const [modulePath, module] of commandModules) {
+                    const commandName = path.basename(modulePath, '.ts');
+
+                    // Skip CommandRegistry and BaseCommand (they are infrastructure)
+                    if (commandName === 'CommandRegistry' || commandName === 'BaseCommand') {
+                        continue;
+                    }
+
+                    // Skip commandRegistration.ts (it's infrastructure)
+                    if (modulePath.includes('commandRegistration')) {
+                        continue;
+                    }
+
+                    // Check dependencies
+                    for (const dep of module.dependencies) {
+                        const normalizedDep = dep.replace(/\\/g, '/');
+                        const depName = path.basename(normalizedDep, '.ts');
+
+                        // Check if this dependency is another command
+                        if (
+                            normalizedDep.includes('commands/') &&
+                            depName !== 'BaseCommand' &&
+                            depName !== 'CommandRegistry' &&
+                            depName !== 'index' &&
+                            !normalizedDep.includes('__tests__')
+                        ) {
+                            // Allow importing from the same file
+                            if (depName === commandName) {
+                                continue;
+                            }
+
+                            violations.push(
+                                `${commandName} imports ${depName} - commands should not depend on other commands`,
+                            );
+                        }
                     }
                 }
-            }
 
-            if (violations.length > 0) {
-                console.log('\nCommand independence violations:');
-                violations.forEach(v => console.log(`  - ${v}`));
-            }
+                if (violations.length > 0) {
+                    console.log('\nCommand independence violations:');
+                    violations.forEach((v) => console.log(`  - ${v}`));
+                }
 
-            assert.strictEqual(
-                violations.length,
-                0,
-                `Found ${violations.length} command independence violations. ` +
-                `Commands should not directly import or invoke other commands.`
-            );
-        }
-    ));
+                assert.strictEqual(
+                    violations.length,
+                    0,
+                    `Found ${violations.length} command independence violations. ` +
+                        `Commands should not directly import or invoke other commands.`,
+                );
+            },
+        ),
+    );
 
     /**
      * Additional test: Commands only depend on lower layers
@@ -114,16 +121,17 @@ suite('Command Independence Properties', () => {
         const result = analyzeModuleDependencies(srcPath);
 
         // Get all command modules (excluding test files and infrastructure)
-        const commandModules = Array.from(result.modules.entries())
-            .filter(([modulePath]) => {
-                const normalized = modulePath.replace(/\\/g, '/');
-                return normalized.includes('commands/') &&
-                       !normalized.includes('__tests__') &&
-                       !normalized.includes('index.ts') &&
-                       !normalized.includes('CommandRegistry') &&
-                       !normalized.includes('BaseCommand') &&
-                       !normalized.includes('commandRegistration');
-            });
+        const commandModules = Array.from(result.modules.entries()).filter(([modulePath]) => {
+            const normalized = modulePath.replace(/\\/g, '/');
+            return (
+                normalized.includes('commands/') &&
+                !normalized.includes('__tests__') &&
+                !normalized.includes('index.ts') &&
+                !normalized.includes('CommandRegistry') &&
+                !normalized.includes('BaseCommand') &&
+                !normalized.includes('commandRegistration')
+            );
+        });
 
         const violations: string[] = [];
 
@@ -134,7 +142,7 @@ suite('Command Independence Properties', () => {
                 // Commands should not depend on UI or extension layer
                 if (depLayer === 'extension') {
                     violations.push(
-                        `${path.basename(modulePath)} depends on extension layer (${dep})`
+                        `${path.basename(modulePath)} depends on extension layer (${dep})`,
                     );
                 }
             }
@@ -142,14 +150,14 @@ suite('Command Independence Properties', () => {
 
         if (violations.length > 0) {
             console.log('\nLayer dependency violations in commands:');
-            violations.forEach(v => console.log(`  - ${v}`));
+            violations.forEach((v) => console.log(`  - ${v}`));
         }
 
         assert.strictEqual(
             violations.length,
             0,
             `Found ${violations.length} layer dependency violations. ` +
-            `Commands should only depend on lower layers.`
+                `Commands should only depend on lower layers.`,
         );
     });
 
@@ -167,14 +175,18 @@ suite('Command Independence Properties', () => {
         }
 
         // List all command files
-        const commandFiles = fs.readdirSync(commandsDir)
-            .filter(f => f.endsWith('.ts') &&
-                        !f.includes('.test.') &&
-                        !f.includes('__tests__') &&
-                        f !== 'index.ts' &&
-                        f !== 'BaseCommand.ts' &&
-                        f !== 'CommandRegistry.ts' &&
-                        f !== 'commandRegistration.ts');
+        const commandFiles = fs
+            .readdirSync(commandsDir)
+            .filter(
+                (f) =>
+                    f.endsWith('.ts') &&
+                    !f.includes('.test.') &&
+                    !f.includes('__tests__') &&
+                    f !== 'index.ts' &&
+                    f !== 'BaseCommand.ts' &&
+                    f !== 'CommandRegistry.ts' &&
+                    f !== 'commandRegistration.ts',
+            );
 
         console.log(`Found ${commandFiles.length} command files`);
 
@@ -191,24 +203,26 @@ suite('Command Independence Properties', () => {
             while ((match = importPattern.exec(content)) !== null) {
                 const importedModule = match[1];
                 // Filter out allowed imports
-                if (importedModule !== 'BaseCommand' &&
+                if (
+                    importedModule !== 'BaseCommand' &&
                     importedModule !== 'CommandRegistry' &&
                     importedModule !== 'index' &&
-                    !importedModule.includes('__tests__')) {
+                    !importedModule.includes('__tests__')
+                ) {
                     localImports.push(importedModule);
                 }
             }
 
             // Commands should only import BaseCommand from the same directory
-            const problematicImports = localImports.filter(imp =>
-                imp.endsWith('Command') && imp !== 'BaseCommand'
+            const problematicImports = localImports.filter(
+                (imp) => imp.endsWith('Command') && imp !== 'BaseCommand',
             );
 
             assert.strictEqual(
                 problematicImports.length,
                 0,
                 `${file} imports other commands: ${problematicImports.join(', ')}. ` +
-                `Commands should be independently importable.`
+                    `Commands should be independently importable.`,
             );
         }
     });
@@ -228,14 +242,18 @@ suite('Command Independence Properties', () => {
         }
 
         // List all command files
-        const commandFiles = fs.readdirSync(commandsDir)
-            .filter(f => f.endsWith('.ts') &&
-                        !f.includes('.test.') &&
-                        !f.includes('__tests__') &&
-                        f !== 'index.ts' &&
-                        f !== 'BaseCommand.ts' &&
-                        f !== 'CommandRegistry.ts' &&
-                        f !== 'commandRegistration.ts');
+        const commandFiles = fs
+            .readdirSync(commandsDir)
+            .filter(
+                (f) =>
+                    f.endsWith('.ts') &&
+                    !f.includes('.test.') &&
+                    !f.includes('__tests__') &&
+                    f !== 'index.ts' &&
+                    f !== 'BaseCommand.ts' &&
+                    f !== 'CommandRegistry.ts' &&
+                    f !== 'commandRegistration.ts',
+            );
 
         const violations: string[] = [];
 
@@ -251,8 +269,10 @@ suite('Command Independence Properties', () => {
             while ((match = staticMutablePattern.exec(content)) !== null) {
                 const propertyName = match[1];
                 // Skip private readonly patterns that might be missed
-                if (!content.includes(`static readonly ${propertyName}`) &&
-                    !content.includes(`private static readonly ${propertyName}`)) {
+                if (
+                    !content.includes(`static readonly ${propertyName}`) &&
+                    !content.includes(`private static readonly ${propertyName}`)
+                ) {
                     violations.push(`${file} has static mutable property: ${propertyName}`);
                 }
             }
@@ -262,7 +282,7 @@ suite('Command Independence Properties', () => {
         // This test catches obvious mutable state issues
         if (violations.length > 0) {
             console.log('\nPotential shared mutable state:');
-            violations.forEach(v => console.log(`  - ${v}`));
+            violations.forEach((v) => console.log(`  - ${v}`));
         }
 
         // This is a warning, not a hard failure

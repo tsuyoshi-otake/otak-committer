@@ -1,4 +1,4 @@
-import { PromptType } from '../types/language';
+import { PromptType } from '../types/enums/PromptType';
 
 export const getHungarianPrompt = (type: PromptType): string => {
     const prompts: Record<PromptType, string> = {
@@ -112,7 +112,7 @@ Vegye figyelembe:
 - Milyen dokumentáció szükséges?
 - Mit kell tesztelni?
 - Vannak-e töréspontok?
-`
+`,
     };
 
     return prompts[type] || '';

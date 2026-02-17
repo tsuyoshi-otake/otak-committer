@@ -61,12 +61,12 @@ suite('CommitCommand Unit Tests', () => {
                     }
                 },
                 keys: () => Array.from(globalStore.keys()),
-                setKeysForSync: () => { }
+                setKeysForSync: () => {},
             } as any,
             workspaceState: {
                 get: () => undefined,
                 update: () => Promise.resolve(),
-                keys: () => []
+                keys: () => [],
             } as any,
             secrets: {
                 get: async (key: string) => secretStore.get(key),
@@ -76,7 +76,7 @@ suite('CommitCommand Unit Tests', () => {
                 delete: async (key: string) => {
                     secretStore.delete(key);
                 },
-                onDidChange: new vscode.EventEmitter<vscode.SecretStorageChangeEvent>().event
+                onDidChange: new vscode.EventEmitter<vscode.SecretStorageChangeEvent>().event,
             } as any,
             extensionMode: vscode.ExtensionMode.Test,
             storageUri: vscode.Uri.file('/test/storage'),
@@ -85,7 +85,7 @@ suite('CommitCommand Unit Tests', () => {
             asAbsolutePath: (relativePath: string) => `/test/path/${relativePath}`,
             storagePath: '/test/storage',
             globalStoragePath: '/test/global-storage',
-            logPath: '/test/log'
+            logPath: '/test/log',
         } as any;
     });
 
@@ -176,10 +176,7 @@ suite('CommitCommand Unit Tests', () => {
             command.testHandleError(testError, 'test operation');
 
             assert.strictEqual(handledErrors.length, 1);
-            assert.strictEqual(
-                handledErrors[0].context.component,
-                'TestableCommitCommand'
-            );
+            assert.strictEqual(handledErrors[0].context.component, 'TestableCommitCommand');
         });
 
         test('should include operation in error context', () => {
@@ -189,10 +186,7 @@ suite('CommitCommand Unit Tests', () => {
             command.testHandleError(testError, 'generating commit');
 
             assert.strictEqual(handledErrors.length, 1);
-            assert.strictEqual(
-                handledErrors[0].context.operation,
-                'generating commit'
-            );
+            assert.strictEqual(handledErrors[0].context.operation, 'generating commit');
         });
     });
 

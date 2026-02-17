@@ -16,7 +16,7 @@ export enum EdgeCaseType {
     BinaryFiles = 'binary-files',
     DeletionsOnly = 'deletions-only',
     RenamesOnly = 'renames-only',
-    MixedOperations = 'mixed-operations'
+    MixedOperations = 'mixed-operations',
 }
 
 /**
@@ -54,10 +54,7 @@ export interface ExtendedDiffMetadata extends Partial<DiffMetadata> {
  * @param metadata - Diff metadata including file categories
  * @returns EdgeCaseType or null if not an edge case
  */
-export function detectEdgeCase(
-    diff: string,
-    metadata: ExtendedDiffMetadata
-): EdgeCaseType | null {
+export function detectEdgeCase(diff: string, metadata: ExtendedDiffMetadata): EdgeCaseType | null {
     const categories = metadata.categories;
 
     // Check for binary files
@@ -78,8 +75,9 @@ export function detectEdgeCase(
         const hasRenamed = categories.renamed.length > 0;
         const hasBinary = categories.binary.length > 0;
 
-        const operationCount = [hasAdded, hasModified, hasDeleted, hasRenamed, hasBinary]
-            .filter(Boolean).length;
+        const operationCount = [hasAdded, hasModified, hasDeleted, hasRenamed, hasBinary].filter(
+            Boolean,
+        ).length;
 
         // Check for deletions-only
         if (hasDeleted && !hasAdded && !hasModified && !hasRenamed && !hasBinary) {
@@ -130,8 +128,8 @@ function isWhitespaceOnlyDiff(diff: string): boolean {
     }
 
     // Compare non-whitespace content
-    const addedContent = addedLines.map(l => l.replace(/\s/g, '')).join('');
-    const removedContent = removedLines.map(l => l.replace(/\s/g, '')).join('');
+    const addedContent = addedLines.map((l) => l.replace(/\s/g, '')).join('');
+    const removedContent = removedLines.map((l) => l.replace(/\s/g, '')).join('');
 
     // If non-whitespace content is the same, it's whitespace-only changes
     return addedContent === removedContent && addedContent.length > 0;
@@ -148,7 +146,7 @@ function isWhitespaceOnlyDiff(diff: string): boolean {
  */
 export function createEdgeCasePrompt(
     edgeCaseType: EdgeCaseType,
-    options: EdgeCasePromptOptions
+    options: EdgeCasePromptOptions,
 ): string {
     const { language, diff, binaryFiles, deletedFiles, renamedFiles, categories } = options;
 
@@ -197,9 +195,10 @@ Note: Generate a concise commit message that accurately describes the whitespace
  * Create prompt for binary file changes
  */
 function createBinaryFilesPrompt(binaryFiles: string[], language: string): string {
-    const fileList = binaryFiles.length > 0
-        ? `Binary files changed:\n${binaryFiles.map(f => `- ${f}`).join('\n')}`
-        : 'Binary files have been modified.';
+    const fileList =
+        binaryFiles.length > 0
+            ? `Binary files changed:\n${binaryFiles.map((f) => `- ${f}`).join('\n')}`
+            : 'Binary files have been modified.';
 
     return `Generate a commit message in ${language} for the following binary file changes.
 
@@ -214,9 +213,10 @@ Note: Since binary files cannot be diffed, focus on the file names and any patte
  * Create prompt for deletion-only changes
  */
 function createDeletionsOnlyPrompt(deletedFiles: string[], language: string): string {
-    const fileList = deletedFiles.length > 0
-        ? `Files deleted:\n${deletedFiles.map(f => `- ${f}`).join('\n')}`
-        : 'Files have been deleted.';
+    const fileList =
+        deletedFiles.length > 0
+            ? `Files deleted:\n${deletedFiles.map((f) => `- ${f}`).join('\n')}`
+            : 'Files have been deleted.';
 
     return `Generate a commit message in ${language} for the following file deletions.
 
@@ -235,11 +235,12 @@ Note: Focus on describing the removal of these files and their likely purpose.`;
  */
 function createRenamesOnlyPrompt(
     renamedFiles: Array<{ from: string; to: string }>,
-    language: string
+    language: string,
 ): string {
-    const fileList = renamedFiles.length > 0
-        ? `Files renamed:\n${renamedFiles.map(r => `- ${r.from} -> ${r.to}`).join('\n')}`
-        : 'Files have been renamed.';
+    const fileList =
+        renamedFiles.length > 0
+            ? `Files renamed:\n${renamedFiles.map((r) => `- ${r.from} -> ${r.to}`).join('\n')}`
+            : 'Files have been renamed.';
 
     return `Generate a commit message in ${language} for the following file renames.
 
@@ -258,7 +259,7 @@ Note: Focus on describing the renaming changes and any organizational improvemen
  */
 function createMixedOperationsPrompt(
     categories: FileCategories | undefined,
-    language: string
+    language: string,
 ): string {
     if (!categories) {
         return createDefaultPrompt('mixed changes', language);
@@ -267,15 +268,21 @@ function createMixedOperationsPrompt(
     const summary: string[] = [];
 
     if (categories.added.length > 0) {
-        summary.push(`Added ${categories.added.length} file(s): ${categories.added.slice(0, 3).join(', ')}${categories.added.length > 3 ? '...' : ''}`);
+        summary.push(
+            `Added ${categories.added.length} file(s): ${categories.added.slice(0, 3).join(', ')}${categories.added.length > 3 ? '...' : ''}`,
+        );
     }
 
     if (categories.modified.length > 0) {
-        summary.push(`Modified ${categories.modified.length} file(s): ${categories.modified.slice(0, 3).join(', ')}${categories.modified.length > 3 ? '...' : ''}`);
+        summary.push(
+            `Modified ${categories.modified.length} file(s): ${categories.modified.slice(0, 3).join(', ')}${categories.modified.length > 3 ? '...' : ''}`,
+        );
     }
 
     if (categories.deleted.length > 0) {
-        summary.push(`Deleted ${categories.deleted.length} file(s): ${categories.deleted.slice(0, 3).join(', ')}${categories.deleted.length > 3 ? '...' : ''}`);
+        summary.push(
+            `Deleted ${categories.deleted.length} file(s): ${categories.deleted.slice(0, 3).join(', ')}${categories.deleted.length > 3 ? '...' : ''}`,
+        );
     }
 
     if (categories.renamed.length > 0) {
@@ -289,7 +296,7 @@ function createMixedOperationsPrompt(
     return `Generate a commit message in ${language} for the following changes that include multiple types of operations.
 
 Change summary:
-${summary.map(s => `- ${s}`).join('\n')}
+${summary.map((s) => `- ${s}`).join('\n')}
 
 Please create a commit message that:
 1. Summarizes the overall purpose of the changes

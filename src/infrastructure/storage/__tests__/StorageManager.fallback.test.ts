@@ -4,7 +4,7 @@ import { StorageManager } from '../StorageManager';
 
 /**
  * Unit tests for StorageManager fallback mechanisms
- * 
+ *
  * Tests the fallback and graceful degradation features
  */
 suite('StorageManager Fallback Mechanisms', () => {
@@ -24,7 +24,7 @@ suite('StorageManager Fallback Mechanisms', () => {
                 },
                 delete: async (key: string) => {
                     storedSecrets.delete(key);
-                }
+                },
             },
             globalState: {
                 get: (key: string) => globalStateData.get(key),
@@ -36,8 +36,8 @@ suite('StorageManager Fallback Mechanisms', () => {
                     }
                 },
                 keys: () => Array.from(globalStateData.keys()),
-                setKeysForSync: (keys: readonly string[]) => {}
-            }
+                setKeysForSync: (keys: readonly string[]) => {},
+            },
         } as any;
     });
 
@@ -50,20 +50,30 @@ suite('StorageManager Fallback Mechanisms', () => {
     test('should not throw when storage operations fail', async () => {
         const failingContext = {
             secrets: {
-                get: async () => { throw new Error('Storage error'); },
-                store: async () => { throw new Error('Storage error'); },
-                delete: async () => { throw new Error('Storage error'); }
+                get: async () => {
+                    throw new Error('Storage error');
+                },
+                store: async () => {
+                    throw new Error('Storage error');
+                },
+                delete: async () => {
+                    throw new Error('Storage error');
+                },
             },
             globalState: {
-                get: () => { throw new Error('State error'); },
-                update: async () => { throw new Error('State error'); },
+                get: () => {
+                    throw new Error('State error');
+                },
+                update: async () => {
+                    throw new Error('State error');
+                },
                 keys: () => [],
-                setKeysForSync: () => {}
-            }
+                setKeysForSync: () => {},
+            },
         } as any;
 
         const manager = new StorageManager(failingContext);
-        
+
         // Should not throw - returns undefined instead
         const key = await manager.getApiKey('openai');
         assert.strictEqual(key, undefined);
@@ -72,20 +82,30 @@ suite('StorageManager Fallback Mechanisms', () => {
     test('should return false when hasApiKey fails', async () => {
         const failingContext = {
             secrets: {
-                get: async () => { throw new Error('Storage error'); },
-                store: async () => { throw new Error('Storage error'); },
-                delete: async () => { throw new Error('Storage error'); }
+                get: async () => {
+                    throw new Error('Storage error');
+                },
+                store: async () => {
+                    throw new Error('Storage error');
+                },
+                delete: async () => {
+                    throw new Error('Storage error');
+                },
             },
             globalState: {
-                get: () => { throw new Error('State error'); },
-                update: async () => { throw new Error('State error'); },
+                get: () => {
+                    throw new Error('State error');
+                },
+                update: async () => {
+                    throw new Error('State error');
+                },
                 keys: () => [],
-                setKeysForSync: () => {}
-            }
+                setKeysForSync: () => {},
+            },
         } as any;
 
         const manager = new StorageManager(failingContext);
-        
+
         // Should return false instead of throwing
         const hasKey = await manager.hasApiKey('openai');
         assert.strictEqual(hasKey, false);
@@ -93,10 +113,10 @@ suite('StorageManager Fallback Mechanisms', () => {
 
     test('should not throw when deleteApiKey fails partially', async () => {
         const manager = new StorageManager(mockContext);
-        
+
         // Store a key first
         await manager.setApiKey('openai', 'sk-test-key');
-        
+
         // Should not throw even if deletion has issues
         await assert.doesNotReject(async () => {
             await manager.deleteApiKey('openai');
@@ -106,7 +126,7 @@ suite('StorageManager Fallback Mechanisms', () => {
     test('should provide storage health diagnostics', async () => {
         const manager = new StorageManager(mockContext);
         const health = await manager.checkStorageHealth();
-        
+
         assert.ok(typeof health.secretStorage === 'boolean');
         assert.ok(typeof health.configStorage === 'boolean');
         assert.ok(typeof health.globalState === 'boolean');
@@ -116,7 +136,7 @@ suite('StorageManager Fallback Mechanisms', () => {
     test('should provide storage diagnostics', async () => {
         const manager = new StorageManager(mockContext);
         const diagnostics = await manager.getStorageDiagnostics();
-        
+
         assert.ok(typeof diagnostics.migrationCompleted === 'boolean');
         assert.ok(Array.isArray(diagnostics.openaiKeyLocations));
         assert.ok(Array.isArray(diagnostics.githubKeyLocations));
@@ -126,21 +146,27 @@ suite('StorageManager Fallback Mechanisms', () => {
     test('should handle getSecret gracefully on error', async () => {
         const failingContext = {
             secrets: {
-                get: async () => { throw new Error('Storage error'); },
-                store: async () => { throw new Error('Storage error'); },
-                delete: async () => { throw new Error('Storage error'); }
+                get: async () => {
+                    throw new Error('Storage error');
+                },
+                store: async () => {
+                    throw new Error('Storage error');
+                },
+                delete: async () => {
+                    throw new Error('Storage error');
+                },
             },
             globalState: {
                 get: () => undefined,
                 update: async () => {},
                 keys: () => [],
-                setKeysForSync: () => {}
-            }
+                setKeysForSync: () => {},
+            },
         } as any;
 
         const manager = new StorageManager(failingContext);
         const value = await manager.getSecret('test-key');
-        
+
         // Should return undefined instead of throwing
         assert.strictEqual(value, undefined);
     });
@@ -148,7 +174,7 @@ suite('StorageManager Fallback Mechanisms', () => {
     test('should handle getConfig gracefully on error', async () => {
         const manager = new StorageManager(mockContext);
         const value = await manager.getConfig('nonexistent.key');
-        
+
         // Should return undefined instead of throwing
         assert.strictEqual(value, undefined);
     });
@@ -158,18 +184,20 @@ suite('StorageManager Fallback Mechanisms', () => {
             secrets: {
                 get: async () => undefined,
                 store: async () => {},
-                delete: async () => { throw new Error('Delete error'); }
+                delete: async () => {
+                    throw new Error('Delete error');
+                },
             },
             globalState: {
                 get: () => undefined,
                 update: async () => {},
                 keys: () => [],
-                setKeysForSync: () => {}
-            }
+                setKeysForSync: () => {},
+            },
         } as any;
 
         const manager = new StorageManager(failingContext);
-        
+
         // Should not throw
         await assert.doesNotReject(async () => {
             await manager.deleteSecret('test-key');
@@ -178,7 +206,7 @@ suite('StorageManager Fallback Mechanisms', () => {
 
     test('should not throw when deleteConfig fails', async () => {
         const manager = new StorageManager(mockContext);
-        
+
         // Should not throw
         await assert.doesNotReject(async () => {
             await manager.deleteConfig('test.key');

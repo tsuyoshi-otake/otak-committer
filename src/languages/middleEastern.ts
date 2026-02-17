@@ -1,4 +1,4 @@
-import { PromptType } from '../types/language';
+import { PromptType } from '../types/enums/PromptType';
 import { getArabicPrompt } from './arabic';
 import { getHebrewPrompt } from './hebrew';
 import { getTurkishPrompt } from './turkish';
@@ -10,27 +10,27 @@ import { getTurkishPrompt } from './turkish';
  */
 
 export type MiddleEasternLanguageCode =
-    | 'ar'    // アラビア語
-    | 'he'    // ヘブライ語
-    | 'tr';   // トルコ語
+    | 'ar' // アラビア語
+    | 'he' // ヘブライ語
+    | 'tr'; // トルコ語
 
 export const getMiddleEasternPrompt = (
     language: MiddleEasternLanguageCode,
-    type: PromptType
+    type: PromptType,
 ): string => {
     const promptMap: Record<MiddleEasternLanguageCode, (type: PromptType) => string> = {
-        'ar': getArabicPrompt,
-        'he': getHebrewPrompt,
-        'tr': getTurkishPrompt
+        ar: getArabicPrompt,
+        he: getHebrewPrompt,
+        tr: getTurkishPrompt,
     };
 
     return promptMap[language]?.(type) || '';
 };
 
 export const middleEasternLanguages: Record<MiddleEasternLanguageCode, string> = {
-    'ar': 'العربية',
-    'he': 'עברית',
-    'tr': 'Türkçe'
+    ar: 'العربية',
+    he: 'עברית',
+    tr: 'Türkçe',
 };
 
 // RTL言語のリスト

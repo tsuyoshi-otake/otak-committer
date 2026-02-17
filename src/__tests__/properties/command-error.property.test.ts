@@ -19,7 +19,7 @@ import {
     ServiceError,
     StorageError,
     CommandError,
-    CriticalError
+    CriticalError,
 } from '../../types/errors';
 
 /**
@@ -59,18 +59,18 @@ suite('Command Error Handling Properties', () => {
                 get: () => undefined,
                 update: () => Promise.resolve(),
                 keys: () => [],
-                setKeysForSync: () => { }
+                setKeysForSync: () => {},
             } as any,
             workspaceState: {
                 get: () => undefined,
                 update: () => Promise.resolve(),
-                keys: () => []
+                keys: () => [],
             } as any,
             secrets: {
                 get: () => Promise.resolve(undefined),
                 store: () => Promise.resolve(),
                 delete: () => Promise.resolve(),
-                onDidChange: new vscode.EventEmitter<vscode.SecretStorageChangeEvent>().event
+                onDidChange: new vscode.EventEmitter<vscode.SecretStorageChangeEvent>().event,
             } as any,
             extensionMode: vscode.ExtensionMode.Test,
             storageUri: vscode.Uri.file('/test/storage'),
@@ -79,7 +79,7 @@ suite('Command Error Handling Properties', () => {
             asAbsolutePath: (relativePath: string) => `/test/path/${relativePath}`,
             storagePath: '/test/storage',
             globalStoragePath: '/test/global-storage',
-            logPath: '/test/log'
+            logPath: '/test/log',
         } as any;
 
         capturedErrors = [];
@@ -108,124 +108,127 @@ suite('Command Error Handling Properties', () => {
      * 2. Error context includes operation and component information
      * 3. Different error types are all handled consistently
      */
-    test('Property 9: Consistent Command Error Handling', createTaggedPropertyTest(
-        'extension-architecture-refactoring',
-        9,
-        'Consistent Command Error Handling',
-        () => {
-            runPropertyTest(
-                fc.asyncProperty(
-                    fc.oneof(
-                        fc.record({
-                            type: fc.constant('ValidationError'),
-                            message: fc.string({ minLength: 1, maxLength: 100 })
-                        }),
-                        fc.record({
-                            type: fc.constant('ServiceError'),
-                            message: fc.string({ minLength: 1, maxLength: 100 }),
-                            service: fc.constantFrom('OpenAI', 'GitHub', 'Git')
-                        }),
-                        fc.record({
-                            type: fc.constant('StorageError'),
-                            message: fc.string({ minLength: 1, maxLength: 100 })
-                        }),
-                        fc.record({
-                            type: fc.constant('CommandError'),
-                            message: fc.string({ minLength: 1, maxLength: 100 }),
-                            commandId: fc.string({ minLength: 1, maxLength: 50 })
-                        }),
-                        fc.record({
-                            type: fc.constant('CriticalError'),
-                            message: fc.string({ minLength: 1, maxLength: 100 })
-                        }),
-                        fc.record({
-                            type: fc.constant('Error'),
-                            message: fc.string({ minLength: 1, maxLength: 100 })
-                        }),
-                        fc.record({
-                            type: fc.constant('string'),
-                            message: fc.string({ minLength: 1, maxLength: 100 })
-                        })
+    test(
+        'Property 9: Consistent Command Error Handling',
+        createTaggedPropertyTest(
+            'extension-architecture-refactoring',
+            9,
+            'Consistent Command Error Handling',
+            () => {
+                runPropertyTest(
+                    fc.asyncProperty(
+                        fc.oneof(
+                            fc.record({
+                                type: fc.constant('ValidationError'),
+                                message: fc.string({ minLength: 1, maxLength: 100 }),
+                            }),
+                            fc.record({
+                                type: fc.constant('ServiceError'),
+                                message: fc.string({ minLength: 1, maxLength: 100 }),
+                                service: fc.constantFrom('OpenAI', 'GitHub', 'Git'),
+                            }),
+                            fc.record({
+                                type: fc.constant('StorageError'),
+                                message: fc.string({ minLength: 1, maxLength: 100 }),
+                            }),
+                            fc.record({
+                                type: fc.constant('CommandError'),
+                                message: fc.string({ minLength: 1, maxLength: 100 }),
+                                commandId: fc.string({ minLength: 1, maxLength: 50 }),
+                            }),
+                            fc.record({
+                                type: fc.constant('CriticalError'),
+                                message: fc.string({ minLength: 1, maxLength: 100 }),
+                            }),
+                            fc.record({
+                                type: fc.constant('Error'),
+                                message: fc.string({ minLength: 1, maxLength: 100 }),
+                            }),
+                            fc.record({
+                                type: fc.constant('string'),
+                                message: fc.string({ minLength: 1, maxLength: 100 }),
+                            }),
+                        ),
+                        async (errorSpec) => {
+                            // Clear captured errors
+                            capturedErrors = [];
+
+                            // Create error based on spec
+                            let error: unknown;
+                            switch (errorSpec.type) {
+                                case 'ValidationError':
+                                    error = new ValidationError(errorSpec.message);
+                                    break;
+                                case 'ServiceError':
+                                    error = new ServiceError(
+                                        errorSpec.message,
+                                        (errorSpec as any).service,
+                                    );
+                                    break;
+                                case 'StorageError':
+                                    error = new StorageError(errorSpec.message);
+                                    break;
+                                case 'CommandError':
+                                    error = new CommandError(
+                                        errorSpec.message,
+                                        (errorSpec as any).commandId,
+                                    );
+                                    break;
+                                case 'CriticalError':
+                                    error = new CriticalError(errorSpec.message);
+                                    break;
+                                case 'Error':
+                                    error = new Error(errorSpec.message);
+                                    break;
+                                case 'string':
+                                    error = errorSpec.message;
+                                    break;
+                                default:
+                                    error = new Error('Unknown error');
+                            }
+
+                            // Create and execute command that throws this error
+                            const command = new ErrorThrowingCommand(mockContext, error);
+                            await command.execute();
+
+                            // Verify that error was handled through ErrorHandler
+                            assert.strictEqual(
+                                capturedErrors.length,
+                                1,
+                                'Error should be routed through ErrorHandler.handle',
+                            );
+
+                            // Verify that context includes operation
+                            assert.ok(
+                                capturedErrors[0].context.operation,
+                                'Error context should include operation',
+                            );
+
+                            // Verify that context includes component (command class name)
+                            assert.ok(
+                                capturedErrors[0].context.component,
+                                'Error context should include component',
+                            );
+                            assert.strictEqual(
+                                capturedErrors[0].context.component,
+                                'ErrorThrowingCommand',
+                                'Component should be the command class name',
+                            );
+
+                            // Verify the original error is passed
+                            assert.strictEqual(
+                                capturedErrors[0].error,
+                                error,
+                                'Original error should be passed to ErrorHandler',
+                            );
+
+                            return true;
+                        },
                     ),
-                    async (errorSpec) => {
-                        // Clear captured errors
-                        capturedErrors = [];
-
-                        // Create error based on spec
-                        let error: unknown;
-                        switch (errorSpec.type) {
-                            case 'ValidationError':
-                                error = new ValidationError(errorSpec.message);
-                                break;
-                            case 'ServiceError':
-                                error = new ServiceError(
-                                    errorSpec.message,
-                                    (errorSpec as any).service
-                                );
-                                break;
-                            case 'StorageError':
-                                error = new StorageError(errorSpec.message);
-                                break;
-                            case 'CommandError':
-                                error = new CommandError(
-                                    errorSpec.message,
-                                    (errorSpec as any).commandId
-                                );
-                                break;
-                            case 'CriticalError':
-                                error = new CriticalError(errorSpec.message);
-                                break;
-                            case 'Error':
-                                error = new Error(errorSpec.message);
-                                break;
-                            case 'string':
-                                error = errorSpec.message;
-                                break;
-                            default:
-                                error = new Error('Unknown error');
-                        }
-
-                        // Create and execute command that throws this error
-                        const command = new ErrorThrowingCommand(mockContext, error);
-                        await command.execute();
-
-                        // Verify that error was handled through ErrorHandler
-                        assert.strictEqual(
-                            capturedErrors.length,
-                            1,
-                            'Error should be routed through ErrorHandler.handle'
-                        );
-
-                        // Verify that context includes operation
-                        assert.ok(
-                            capturedErrors[0].context.operation,
-                            'Error context should include operation'
-                        );
-
-                        // Verify that context includes component (command class name)
-                        assert.ok(
-                            capturedErrors[0].context.component,
-                            'Error context should include component'
-                        );
-                        assert.strictEqual(
-                            capturedErrors[0].context.component,
-                            'ErrorThrowingCommand',
-                            'Component should be the command class name'
-                        );
-
-                        // Verify the original error is passed
-                        assert.strictEqual(
-                            capturedErrors[0].error,
-                            error,
-                            'Original error should be passed to ErrorHandler'
-                        );
-
-                        return true;
-                    }
-                )
-            );
-        }
-    ));
+                );
+            },
+        ),
+    );
 
     /**
      * Additional test: Commands do not throw unhandled exceptions
@@ -235,37 +238,34 @@ suite('Command Error Handling Properties', () => {
      */
     test('Commands should not throw unhandled exceptions', () => {
         runPropertyTest(
-            fc.asyncProperty(
-                fc.string({ minLength: 1, maxLength: 100 }),
-                async (message) => {
-                    capturedErrors = [];
+            fc.asyncProperty(fc.string({ minLength: 1, maxLength: 100 }), async (message) => {
+                capturedErrors = [];
 
-                    const error = new Error(message);
-                    const command = new ErrorThrowingCommand(mockContext, error);
+                const error = new Error(message);
+                const command = new ErrorThrowingCommand(mockContext, error);
 
-                    // Execute should not throw - error should be handled internally
-                    let didThrow = false;
-                    try {
-                        await command.execute();
-                    } catch (e) {
-                        didThrow = true;
-                    }
-
-                    assert.strictEqual(
-                        didThrow,
-                        false,
-                        'Command should not throw unhandled exceptions'
-                    );
-
-                    assert.strictEqual(
-                        capturedErrors.length,
-                        1,
-                        'Error should be handled through ErrorHandler'
-                    );
-
-                    return true;
+                // Execute should not throw - error should be handled internally
+                let didThrow = false;
+                try {
+                    await command.execute();
+                } catch (e) {
+                    didThrow = true;
                 }
-            )
+
+                assert.strictEqual(
+                    didThrow,
+                    false,
+                    'Command should not throw unhandled exceptions',
+                );
+
+                assert.strictEqual(
+                    capturedErrors.length,
+                    1,
+                    'Error should be handled through ErrorHandler',
+                );
+
+                return true;
+            }),
         );
     });
 
@@ -278,10 +278,10 @@ suite('Command Error Handling Properties', () => {
     test('Different commands use the same error handling pattern', () => {
         runPropertyTest(
             fc.asyncProperty(
-                fc.array(
-                    fc.string({ minLength: 1, maxLength: 50 }),
-                    { minLength: 1, maxLength: 5 }
-                ),
+                fc.array(fc.string({ minLength: 1, maxLength: 50 }), {
+                    minLength: 1,
+                    maxLength: 5,
+                }),
                 async (errorMessages) => {
                     capturedErrors = [];
 
@@ -296,7 +296,7 @@ suite('Command Error Handling Properties', () => {
                     assert.strictEqual(
                         capturedErrors.length,
                         errorMessages.length,
-                        'All errors should be routed through ErrorHandler'
+                        'All errors should be routed through ErrorHandler',
                     );
 
                     // All contexts should follow the same structure
@@ -304,13 +304,13 @@ suite('Command Error Handling Properties', () => {
                         const ctx = capturedErrors[i].context;
                         assert.ok(
                             ctx.operation && ctx.component,
-                            `Error ${i} context should include operation and component`
+                            `Error ${i} context should include operation and component`,
                         );
                     }
 
                     return true;
-                }
-            )
+                },
+            ),
         );
     });
 
@@ -329,7 +329,7 @@ suite('Command Error Handling Properties', () => {
                     new StorageError('Storage failed'),
                     new CommandError('Command failed', 'test.command'),
                     new CriticalError('Critical failure'),
-                    new Error('Standard error')
+                    new Error('Standard error'),
                 ),
                 async (error) => {
                     capturedErrors = [];
@@ -344,16 +344,16 @@ suite('Command Error Handling Properties', () => {
                     // Verify context structure
                     assert.ok(
                         typeof ctx.operation === 'string',
-                        'Context should have string operation'
+                        'Context should have string operation',
                     );
                     assert.ok(
                         typeof ctx.component === 'string',
-                        'Context should have string component'
+                        'Context should have string component',
                     );
 
                     return true;
-                }
-            )
+                },
+            ),
         );
     });
 });

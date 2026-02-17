@@ -16,43 +16,63 @@ suite('LanguagePreferenceManager Property Tests', () => {
         LanguagePreferenceManager.resetForTesting();
     });
 
-    test('Property 8: Japanese locale maps to japanese language', createTaggedPropertyTest(
-        'ui-internationalization',
-        8,
-        'Japanese UI generates Japanese commit messages',
-        async () => {
-            await LanguagePreferenceManager.setPreferredLanguage('ja');
-            const languageName = LanguagePreferenceManager.getCommitLanguageName();
-            assert.strictEqual(languageName, 'japanese');
-        }
-    ));
+    test(
+        'Property 8: Japanese locale maps to japanese language',
+        createTaggedPropertyTest(
+            'ui-internationalization',
+            8,
+            'Japanese UI generates Japanese commit messages',
+            async () => {
+                await LanguagePreferenceManager.setPreferredLanguage('ja');
+                const languageName = LanguagePreferenceManager.getCommitLanguageName();
+                assert.strictEqual(languageName, 'japanese');
+            },
+        ),
+    );
 
-    test('Property 12: English locale maps to english language', createTaggedPropertyTest(
-        'ui-internationalization',
-        12,
-        'Unsupported UI language generates English commit messages',
-        async () => {
-            await LanguagePreferenceManager.setPreferredLanguage('en');
-            const languageName = LanguagePreferenceManager.getCommitLanguageName();
-            assert.strictEqual(languageName, 'english');
-        }
-    ));
+    test(
+        'Property 12: English locale maps to english language',
+        createTaggedPropertyTest(
+            'ui-internationalization',
+            12,
+            'Unsupported UI language generates English commit messages',
+            async () => {
+                await LanguagePreferenceManager.setPreferredLanguage('en');
+                const languageName = LanguagePreferenceManager.getCommitLanguageName();
+                assert.strictEqual(languageName, 'english');
+            },
+        ),
+    );
 
-    test('Property 13: Manual language preference overrides UI language', createTaggedPropertyTest(
-        'ui-internationalization',
-        13,
-        'Manual language preference overrides UI language',
-        async () => {
-            const supportedLocales: SupportedLocale[] = ['ja', 'vi', 'ko', 'zh-cn', 'zh-tw', 'en'];
+    test(
+        'Property 13: Manual language preference overrides UI language',
+        createTaggedPropertyTest(
+            'ui-internationalization',
+            13,
+            'Manual language preference overrides UI language',
+            async () => {
+                const supportedLocales: SupportedLocale[] = [
+                    'ja',
+                    'vi',
+                    'ko',
+                    'zh-cn',
+                    'zh-tw',
+                    'en',
+                ];
 
-            for (const preferredLocale of supportedLocales) {
-                LanguagePreferenceManager.resetForTesting();
-                await LanguagePreferenceManager.setPreferredLanguage(preferredLocale);
-                const result = LanguagePreferenceManager.getPreferredLanguage();
-                assert.strictEqual(result, preferredLocale, `Preference ${preferredLocale} should be returned`);
-            }
-        }
-    ));
+                for (const preferredLocale of supportedLocales) {
+                    LanguagePreferenceManager.resetForTesting();
+                    await LanguagePreferenceManager.setPreferredLanguage(preferredLocale);
+                    const result = LanguagePreferenceManager.getPreferredLanguage();
+                    assert.strictEqual(
+                        result,
+                        preferredLocale,
+                        `Preference ${preferredLocale} should be returned`,
+                    );
+                }
+            },
+        ),
+    );
 });
 
 suite('LanguagePreferenceManager Unit Tests', () => {
@@ -85,7 +105,10 @@ suite('LanguagePreferenceManager Unit Tests', () => {
     test('LOCALE_TO_LANGUAGE_MAP should have all supported locales', () => {
         const supportedLocales: SupportedLocale[] = ['ja', 'vi', 'ko', 'zh-cn', 'zh-tw', 'en'];
         for (const locale of supportedLocales) {
-            assert.ok(LOCALE_TO_LANGUAGE_MAP[locale], `LOCALE_TO_LANGUAGE_MAP should have entry for ${locale}`);
+            assert.ok(
+                LOCALE_TO_LANGUAGE_MAP[locale],
+                `LOCALE_TO_LANGUAGE_MAP should have entry for ${locale}`,
+            );
         }
     });
 
@@ -96,7 +119,7 @@ suite('LanguagePreferenceManager Unit Tests', () => {
             { locale: 'ko', expected: 'korean' },
             { locale: 'zh-cn', expected: 'chinese' },
             { locale: 'zh-tw', expected: 'traditionalChinese' },
-            { locale: 'en', expected: 'english' }
+            { locale: 'en', expected: 'english' },
         ];
 
         for (const { locale, expected } of testCases) {

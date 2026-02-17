@@ -27,8 +27,8 @@ When retrieving an API key, the system attempts the following in order:
 // Example usage
 const apiKey = await storage.getApiKey('openai');
 if (!apiKey) {
-    // Prompt user to configure API key
-    vscode.window.showWarningMessage('Please configure your OpenAI API key');
+  // Prompt user to configure API key
+  vscode.window.showWarningMessage('Please configure your OpenAI API key');
 }
 ```
 
@@ -45,10 +45,10 @@ When storing an API key, the system attempts:
 ```typescript
 // Example usage
 try {
-    await storage.setApiKey('openai', 'sk-...');
+  await storage.setApiKey('openai', 'sk-...');
 } catch (error) {
-    // All storage mechanisms failed
-    vscode.window.showErrorMessage('Failed to store API key');
+  // All storage mechanisms failed
+  vscode.window.showErrorMessage('Failed to store API key');
 }
 ```
 
@@ -85,6 +85,7 @@ console.log('Encryption:', health.encryption);
 ```
 
 Returns:
+
 - `secretStorage`: Can read/write to SecretStorage
 - `configStorage`: Can read/write to Configuration
 - `globalState`: Can read/write to GlobalState
@@ -144,32 +145,30 @@ The migration process includes fallback mechanisms:
 
 ```typescript
 async function getOpenAIKey(storage: StorageManager): Promise<string | undefined> {
-    try {
-        // Try to get the API key
-        let apiKey = await storage.getApiKey('openai');
-        
-        if (!apiKey) {
-            // Check storage health
-            const health = await storage.checkStorageHealth();
-            
-            if (!health.secretStorage) {
-                vscode.window.showWarningMessage(
-                    'Secure storage is unavailable. Please check your VS Code installation.'
-                );
-            } else {
-                // Storage is healthy but key is not configured
-                vscode.window.showInformationMessage(
-                    'Please configure your OpenAI API key.'
-                );
-            }
-        }
-        
-        return apiKey;
-    } catch (error) {
-        console.error('Failed to retrieve API key:', error);
-        vscode.window.showErrorMessage('Failed to access storage');
-        return undefined;
+  try {
+    // Try to get the API key
+    let apiKey = await storage.getApiKey('openai');
+
+    if (!apiKey) {
+      // Check storage health
+      const health = await storage.checkStorageHealth();
+
+      if (!health.secretStorage) {
+        vscode.window.showWarningMessage(
+          'Secure storage is unavailable. Please check your VS Code installation.',
+        );
+      } else {
+        // Storage is healthy but key is not configured
+        vscode.window.showInformationMessage('Please configure your OpenAI API key.');
+      }
     }
+
+    return apiKey;
+  } catch (error) {
+    console.error('Failed to retrieve API key:', error);
+    vscode.window.showErrorMessage('Failed to access storage');
+    return undefined;
+  }
 }
 ```
 

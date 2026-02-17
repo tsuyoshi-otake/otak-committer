@@ -263,7 +263,10 @@
     "compile:test": "tsc -p ./tsconfig.test.json",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile:test && npm run lint",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
     "lint": "eslint src",
+    "lint:ci": "eslint src --max-warnings=0",
     "test": "node ./out/test/runTest.js",
     "test:unit": "npm run compile:test && node ./out/test/run-unit-tests.js",
     "test:integration": "dotenvx run -- npm test",
@@ -283,9 +286,11 @@
     "@vscode/test-electron": "^2.4.1",
     "esbuild": "^0.25.10",
     "eslint": "^9.19.0",
+    "eslint-config-prettier": "^10.1.8",
     "fast-check": "^4.3.0",
     "glob": "^10.3.10",
     "mocha": "^10.3.0",
+    "prettier": "^3.8.1",
     "typescript": "^5.7.3"
   },
   "dependencies": {

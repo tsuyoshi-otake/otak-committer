@@ -29,4 +29,3 @@
   "config.useConventionalCommits": "Su dung dinh dang Conventional Commits voi scope (<type>(<scope>): <subject>)",
   "config.appendCommitTrailer": "Them dong 'Commit-Message-By: otak-committer' vao cuoi thong diep commit da tao"
 }
-

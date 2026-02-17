@@ -17,12 +17,12 @@ export class EncryptionUtil {
     private static generateMachineKey(): Buffer {
         // Combine multiple machine-specific factors
         const factors = [
-            os.hostname(),           // Machine name
-            os.platform(),           // OS platform
-            os.arch(),              // CPU architecture
-            os.homedir(),           // Home directory path
-            process.env.USER || process.env.USERNAME || 'default',  // Username
-            'otak-committer-v1.8.4' // Application-specific salt
+            os.hostname(), // Machine name
+            os.platform(), // OS platform
+            os.arch(), // CPU architecture
+            os.homedir(), // Home directory path
+            process.env.USER || process.env.USERNAME || 'default', // Username
+            'otak-committer-v1.8.4', // Application-specific salt
         ].join('|');
 
         // Create a deterministic key from machine factors
@@ -49,10 +49,7 @@ export class EncryptionUtil {
             const cipher = crypto.createCipheriv(this.ALGORITHM, derivedKey, iv);
 
             // Encrypt the plaintext
-            const encrypted = Buffer.concat([
-                cipher.update(plaintext, 'utf8'),
-                cipher.final()
-            ]);
+            const encrypted = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
 
             // Get the authentication tag
             const tag = cipher.getAuthTag();
@@ -63,8 +60,9 @@ export class EncryptionUtil {
             // Return as base64
             return combined.toString('base64');
         } catch (error) {
-            console.error('[Encryption] Encryption failed:', error);
-            throw new Error('Failed to encrypt data');
+            const wrapped = new Error('Failed to encrypt data') as Error & { cause?: unknown };
+            wrapped.cause = error;
+            throw wrapped;
         }
     }
 
@@ -85,7 +83,7 @@ export class EncryptionUtil {
             const iv = combined.slice(this.SALT_LENGTH, this.SALT_LENGTH + this.IV_LENGTH);
             const tag = combined.slice(
                 this.SALT_LENGTH + this.IV_LENGTH,
-                this.SALT_LENGTH + this.IV_LENGTH + this.TAG_LENGTH
+                this.SALT_LENGTH + this.IV_LENGTH + this.TAG_LENGTH,
             );
             const encrypted = combined.slice(this.SALT_LENGTH + this.IV_LENGTH + this.TAG_LENGTH);
 
@@ -97,15 +95,13 @@ export class EncryptionUtil {
             decipher.setAuthTag(tag);
 
             // Decrypt
-            const decrypted = Buffer.concat([
-                decipher.update(encrypted),
-                decipher.final()
-            ]);
+            const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
 
             return decrypted.toString('utf8');
         } catch (error) {
-            console.error('[Encryption] Decryption failed:', error);
-            throw new Error('Failed to decrypt data');
+            const wrapped = new Error('Failed to decrypt data') as Error & { cause?: unknown };
+            wrapped.cause = error;
+            throw wrapped;
         }
     }
 
@@ -113,14 +109,9 @@ export class EncryptionUtil {
      * Test if encryption/decryption is working
      */
     static async selfTest(): Promise<boolean> {
-        try {
-            const testData = 'test-api-key-sk-1234567890';
-            const encrypted = this.encrypt(testData);
-            const decrypted = this.decrypt(encrypted);
-            return testData === decrypted;
-        } catch (error) {
-            console.error('[Encryption] Self test failed:', error);
-            return false;
-        }
+        const testData = 'test-api-key-sk-1234567890';
+        const encrypted = this.encrypt(testData);
+        const decrypted = this.decrypt(encrypted);
+        return testData === decrypted;
     }
 }

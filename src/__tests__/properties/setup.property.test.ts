@@ -13,7 +13,7 @@ suite('Property-Based Testing Setup', () => {
         runPropertyTest(
             fc.property(fc.string(), (str) => {
                 return str.length >= 0;
-            })
+            }),
         );
     });
 
@@ -22,20 +22,20 @@ suite('Property-Based Testing Setup', () => {
         runPropertyTest(
             fc.property(arbitraries.messageStyle(), (style) => {
                 return ['simple', 'normal', 'detailed'].includes(style);
-            })
+            }),
         );
     });
 
     test('property tests should run 100 iterations by default', () => {
         let runCount = 0;
-        
+
         runPropertyTest(
             fc.property(fc.integer(), (_num) => {
                 runCount++;
                 return true;
-            })
+            }),
         );
-        
+
         // Verify that the test ran at least 100 times
         assert.ok(runCount >= 100, `Expected at least 100 runs, got ${runCount}`);
     });

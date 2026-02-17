@@ -9,11 +9,11 @@ import { t } from '../i18n/index.js';
 
 /**
  * Command for generating commit messages using AI
- * 
+ *
  * This command analyzes the current Git diff and generates an appropriate
  * commit message using OpenAI's API. It handles the entire workflow from
  * retrieving the diff to setting the message in the source control input box.
- * 
+ *
  * @example
  * ```typescript
  * const command = new CommitCommand(context);
@@ -23,14 +23,14 @@ import { t } from '../i18n/index.js';
 export class CommitCommand extends BaseCommand {
     /**
      * Execute the commit message generation command
-     * 
+     *
      * Workflow:
      * 1. Initialize Git service and retrieve diff
      * 2. Find commit message templates (if any)
      * 3. Initialize OpenAI service with API key from storage
      * 4. Generate commit message using AI
      * 5. Sanitize and set the message in source control input
-     * 
+     *
      * @returns A promise that resolves when the command completes
      */
     async execute(): Promise<void> {
@@ -73,7 +73,6 @@ export class CommitCommand extends BaseCommand {
 
             this.logger.info('Successfully generated and set commit message');
             await this.showSuccessNotification();
-
         } catch (error) {
             this.handleErrorSilently(error, 'generating commit message');
         }
@@ -81,13 +80,13 @@ export class CommitCommand extends BaseCommand {
 
     /**
      * Get the Git diff for staged changes
-     * 
+     *
      * @returns The diff string or undefined if no changes
      */
     private async getDiff(git: GitService): Promise<string | undefined> {
         this.logger.debug('Getting Git diff');
         const diff = await git.getDiff(this.context.globalState);
-        
+
         if (!diff) {
             this.logger.info('No changes to commit');
             await this.showNotification(t('messages.noChangesToCommit'), 3000);
@@ -102,7 +101,9 @@ export class CommitCommand extends BaseCommand {
      *
      * @returns Template information
      */
-    private async findTemplates(git: GitService): Promise<{ commit?: TemplateInfo; pr?: TemplateInfo }> {
+    private async findTemplates(
+        git: GitService,
+    ): Promise<{ commit?: TemplateInfo; pr?: TemplateInfo }> {
         this.logger.debug('Looking for commit message templates');
 
         return await git.findTemplates();
@@ -110,7 +111,7 @@ export class CommitCommand extends BaseCommand {
 
     /**
      * Generate commit message using OpenAI
-     * 
+     *
      * @param openai - OpenAI service instance
      * @param diff - Git diff string
      * @param template - Optional commit message template
@@ -119,7 +120,7 @@ export class CommitCommand extends BaseCommand {
     private async generateMessage(
         openai: OpenAIService,
         diff: string,
-        template?: TemplateInfo
+        template?: TemplateInfo,
     ): Promise<string | undefined> {
         this.logger.debug('Starting commit message generation');
 
@@ -137,7 +138,7 @@ export class CommitCommand extends BaseCommand {
                     diff,
                     language,
                     messageStyle,
-                    template
+                    template,
                 );
 
                 if (!generatedMessage) {
@@ -146,7 +147,7 @@ export class CommitCommand extends BaseCommand {
 
                 // Sanitize the message (escape dangerous characters, remove markdown blocks, etc.)
                 return sanitizeCommitMessage(generatedMessage) || '';
-            }
+            },
         );
 
         if (message === undefined) {
@@ -176,7 +177,7 @@ export class CommitCommand extends BaseCommand {
 
     /**
      * Set the generated commit message in the source control input box
-     * 
+     *
      * @param message - The commit message to set
      */
     private async setCommitMessage(message: string): Promise<void> {
@@ -192,7 +193,7 @@ export class CommitCommand extends BaseCommand {
         // Get Git API
         const gitApi = gitExtension.exports.getAPI(1);
         const repository = gitApi.repositories[0];
-        
+
         if (!repository) {
             this.logger.error('No Git repository found');
             throw new Error('No Git repository found');
@@ -212,7 +213,7 @@ export class CommitCommand extends BaseCommand {
 
     /**
      * Show a notification to the user for a specified duration
-     * 
+     *
      * @param title - The notification title
      * @param duration - Duration in milliseconds
      */
@@ -221,13 +222,13 @@ export class CommitCommand extends BaseCommand {
             {
                 location: vscode.ProgressLocation.Notification,
                 title,
-                cancellable: false
+                cancellable: false,
             },
             async () => {
-                return new Promise<void>(resolve => {
+                return new Promise<void>((resolve) => {
                     setTimeout(resolve, duration);
                 });
-            }
+            },
         );
     }
 }

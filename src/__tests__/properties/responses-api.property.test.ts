@@ -9,10 +9,7 @@
 import * as assert from 'assert';
 import * as fc from 'fast-check';
 import { runPropertyTest } from '../../test/helpers/property-test.helper';
-import {
-    ResponsesAPIMock,
-    ResponsesAPIRequest
-} from '../../test/mocks/responsesAPI.mock';
+import { ResponsesAPIMock, ResponsesAPIRequest } from '../../test/mocks/responsesAPI.mock';
 import { TokenManager } from '../../services/tokenManager';
 
 suite('Responses API Property Tests', () => {
@@ -35,7 +32,7 @@ suite('Responses API Property Tests', () => {
                 model: 'gpt-5.2',
                 input: `Generate ${requestType} content`,
                 max_output_tokens: 2000,
-                reasoning: { effort: 'low' }
+                reasoning: { effort: 'low' },
             };
 
             await ResponsesAPIMock.call(request);
@@ -57,13 +54,13 @@ suite('Responses API Property Tests', () => {
                         model: 'gpt-5.2',
                         input: `${requestType}: ${content}`,
                         max_output_tokens: 2000,
-                        reasoning: { effort: 'low' }
+                        reasoning: { effort: 'low' },
                     };
 
                     await ResponsesAPIMock.call(request);
                     return ResponsesAPIMock.verifyAllCallsUseModel('gpt-5.2');
-                }
-            )
+                },
+            ),
         );
     });
 
@@ -86,13 +83,13 @@ suite('Responses API Property Tests', () => {
                         model: 'gpt-5.2',
                         input: `${requestType}: ${content}`,
                         max_output_tokens: 2000,
-                        reasoning: { effort: 'low' }
+                        reasoning: { effort: 'low' },
                     };
 
                     await ResponsesAPIMock.call(request);
                     return ResponsesAPIMock.verifyAllCallsHaveReasoningEffort('low');
-                }
-            )
+                },
+            ),
         );
     });
 
@@ -106,7 +103,7 @@ suite('Responses API Property Tests', () => {
         assert.strictEqual(
             TokenManager.OUTPUT_TOKENS.COMMIT_MESSAGE,
             4000,
-            'Commit message output tokens should be 4000'
+            'Commit message output tokens should be 4000',
         );
     });
 
@@ -120,7 +117,7 @@ suite('Responses API Property Tests', () => {
         assert.strictEqual(
             TokenManager.OUTPUT_TOKENS.PR_TITLE,
             500,
-            'PR title output tokens should be 500'
+            'PR title output tokens should be 500',
         );
     });
 
@@ -134,7 +131,7 @@ suite('Responses API Property Tests', () => {
         assert.strictEqual(
             TokenManager.OUTPUT_TOKENS.PR_BODY,
             8000,
-            'PR body output tokens should be 8000'
+            'PR body output tokens should be 8000',
         );
     });
 
@@ -148,7 +145,7 @@ suite('Responses API Property Tests', () => {
         assert.strictEqual(
             TokenManager.OUTPUT_TOKENS.ISSUE,
             12000,
-            'Issue output tokens should be 12000'
+            'Issue output tokens should be 12000',
         );
     });
 
@@ -159,7 +156,7 @@ suite('Responses API Property Tests', () => {
                     TokenManager.OUTPUT_TOKENS.COMMIT_MESSAGE,
                     TokenManager.OUTPUT_TOKENS.PR_TITLE,
                     TokenManager.OUTPUT_TOKENS.PR_BODY,
-                    TokenManager.OUTPUT_TOKENS.ISSUE
+                    TokenManager.OUTPUT_TOKENS.ISSUE,
                 ),
                 fc.integer({ min: 0, max: TokenManager.MAX_INPUT_TOKENS }),
                 (outputTokens, inputTokens) => {
@@ -167,9 +164,9 @@ suite('Responses API Property Tests', () => {
                     const total = inputTokens + outputTokens + TokenManager.REASONING_BUFFER;
 
                     // Validation should correctly reflect whether we're within limits
-                    return isValid === (total <= TokenManager.CONTEXT_LIMIT);
-                }
-            )
+                    return isValid === total <= TokenManager.CONTEXT_LIMIT;
+                },
+            ),
         );
     });
 });

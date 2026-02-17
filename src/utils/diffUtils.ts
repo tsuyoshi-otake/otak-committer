@@ -67,9 +67,28 @@ const LINE_BOUNDARY_SEARCH_RANGE = 200;
  * Windows reserved device names
  */
 const RESERVED_NAMES = [
-    'CON', 'PRN', 'AUX', 'NUL',
-    'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
-    'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9'
+    'CON',
+    'PRN',
+    'AUX',
+    'NUL',
+    'COM1',
+    'COM2',
+    'COM3',
+    'COM4',
+    'COM5',
+    'COM6',
+    'COM7',
+    'COM8',
+    'COM9',
+    'LPT1',
+    'LPT2',
+    'LPT3',
+    'LPT4',
+    'LPT5',
+    'LPT6',
+    'LPT7',
+    'LPT8',
+    'LPT9',
 ];
 
 /**
@@ -98,7 +117,7 @@ export function truncateDiff(diff: string): TruncationResult {
     if (originalTokens <= TRUNCATE_THRESHOLD_TOKENS) {
         return {
             content: diff,
-            isTruncated: false
+            isTruncated: false,
         };
     }
 
@@ -139,7 +158,7 @@ export function truncateDiff(diff: string): TruncationResult {
         content: truncatedContent,
         isTruncated: true,
         originalTokens,
-        truncatedTokens
+        truncatedTokens,
     };
 }
 
@@ -159,9 +178,7 @@ export function isWindowsReservedName(filePath: string): boolean {
     const nameWithoutExt = fileName.split('.')[0];
 
     // Check if it matches any reserved name (case-insensitive)
-    return RESERVED_NAMES.some(reserved =>
-        nameWithoutExt.toUpperCase() === reserved
-    );
+    return RESERVED_NAMES.some((reserved) => nameWithoutExt.toUpperCase() === reserved);
 }
 
 /**
@@ -178,7 +195,7 @@ export function categorizeFiles(files: StatusFile[]): FileCategories {
         modified: [],
         deleted: [],
         renamed: [],
-        binary: []
+        binary: [],
     };
 
     for (const file of files) {
@@ -191,7 +208,7 @@ export function categorizeFiles(files: StatusFile[]): FileCategories {
             if (parts.length === 2) {
                 categories.renamed.push({
                     from: parts[0].trim(),
-                    to: parts[1].trim()
+                    to: parts[1].trim(),
                 });
             }
             continue;
@@ -238,23 +255,33 @@ export function generateFileSummary(categories: FileCategories): string {
     const sections: string[] = [];
 
     if (categories.added.length > 0) {
-        sections.push(`Added (${categories.added.length} files):\n${categories.added.map(f => `  - ${f}`).join('\n')}`);
+        sections.push(
+            `Added (${categories.added.length} files):\n${categories.added.map((f) => `  - ${f}`).join('\n')}`,
+        );
     }
 
     if (categories.modified.length > 0) {
-        sections.push(`Modified (${categories.modified.length} files):\n${categories.modified.map(f => `  - ${f}`).join('\n')}`);
+        sections.push(
+            `Modified (${categories.modified.length} files):\n${categories.modified.map((f) => `  - ${f}`).join('\n')}`,
+        );
     }
 
     if (categories.deleted.length > 0) {
-        sections.push(`Deleted (${categories.deleted.length} files):\n${categories.deleted.map(f => `  - ${f}`).join('\n')}`);
+        sections.push(
+            `Deleted (${categories.deleted.length} files):\n${categories.deleted.map((f) => `  - ${f}`).join('\n')}`,
+        );
     }
 
     if (categories.renamed.length > 0) {
-        sections.push(`Renamed (${categories.renamed.length} files):\n${categories.renamed.map(r => `  - ${r.from} -> ${r.to}`).join('\n')}`);
+        sections.push(
+            `Renamed (${categories.renamed.length} files):\n${categories.renamed.map((r) => `  - ${r.from} -> ${r.to}`).join('\n')}`,
+        );
     }
 
     if (categories.binary.length > 0) {
-        sections.push(`Binary (${categories.binary.length} files):\n${categories.binary.map(f => `  - ${f}`).join('\n')}`);
+        sections.push(
+            `Binary (${categories.binary.length} files):\n${categories.binary.map((f) => `  - ${f}`).join('\n')}`,
+        );
     }
 
     return sections.join('\n\n');
@@ -283,8 +310,8 @@ export function createDiffResult(content: string, files: StatusFile[]): DiffResu
         ...categories.added,
         ...categories.modified,
         ...categories.deleted,
-        ...categories.renamed.map(r => r.from),
-        ...categories.binary
+        ...categories.renamed.map((r) => r.from),
+        ...categories.binary,
     ];
     const reservedFiles = detectReservedFiles(allFiles);
 
@@ -299,7 +326,7 @@ export function createDiffResult(content: string, files: StatusFile[]): DiffResu
             truncatedTokens: truncationResult.truncatedTokens,
             hasReservedNames: reservedFiles.length > 0,
             reservedFiles: reservedFiles.length > 0 ? reservedFiles : undefined,
-            categories
-        }
+            categories,
+        },
     };
 }

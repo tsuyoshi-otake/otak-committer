@@ -11,7 +11,7 @@ import { runPropertyTest } from '../../test/helpers/property-test.helper';
 import {
     ResponsesAPIErrorType,
     classifyError,
-    getUserFriendlyMessage
+    getUserFriendlyMessage,
 } from '../../test/mocks/responsesAPI.mock';
 
 suite('GPT-5.2 Error Handling Property Tests', () => {
@@ -30,8 +30,8 @@ suite('GPT-5.2 Error Handling Property Tests', () => {
                     const result1 = classifyError(statusCode, message);
                     const result2 = classifyError(statusCode, message);
                     return result1 === result2;
-                }
-            )
+                },
+            ),
         );
     });
 
@@ -80,17 +80,19 @@ suite('GPT-5.2 Error Handling Property Tests', () => {
                     ResponsesAPIErrorType.CONTEXT_LENGTH_EXCEEDED,
                     ResponsesAPIErrorType.NETWORK,
                     ResponsesAPIErrorType.AUTHENTICATION,
-                    ResponsesAPIErrorType.UNKNOWN
+                    ResponsesAPIErrorType.UNKNOWN,
                 ),
                 (errorType) => {
                     const message = getUserFriendlyMessage(errorType);
                     // Should not contain technical details
-                    return !message.includes('stack') &&
-                           !message.includes('Error:') &&
-                           !message.includes('at ') &&
-                           message.length > 0;
-                }
-            )
+                    return (
+                        !message.includes('stack') &&
+                        !message.includes('Error:') &&
+                        !message.includes('at ') &&
+                        message.length > 0
+                    );
+                },
+            ),
         );
     });
 
@@ -103,18 +105,20 @@ suite('GPT-5.2 Error Handling Property Tests', () => {
                     ResponsesAPIErrorType.CONTEXT_LENGTH_EXCEEDED,
                     ResponsesAPIErrorType.NETWORK,
                     ResponsesAPIErrorType.AUTHENTICATION,
-                    ResponsesAPIErrorType.UNKNOWN
+                    ResponsesAPIErrorType.UNKNOWN,
                 ),
                 (errorType) => {
                     const message = getUserFriendlyMessage(errorType);
                     // Messages should contain actionable guidance
-                    return message.includes('Please') ||
-                           message.includes('try again') ||
-                           message.includes('check') ||
-                           message.includes('update') ||
-                           message.includes('truncated');
-                }
-            )
+                    return (
+                        message.includes('Please') ||
+                        message.includes('try again') ||
+                        message.includes('check') ||
+                        message.includes('update') ||
+                        message.includes('truncated')
+                    );
+                },
+            ),
         );
     });
 

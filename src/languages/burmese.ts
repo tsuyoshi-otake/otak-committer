@@ -1,4 +1,4 @@
-import { PromptType } from '../types/language';
+import { PromptType } from '../types/enums/PromptType';
 
 export const getBurmesePrompt = (type: PromptType): string => {
     const prompts: Record<PromptType, string> = {
@@ -112,7 +112,7 @@ export const getBurmesePrompt = (type: PromptType): string => {
 - မည်သည့်စာရွက်စာတမ်း လိုအပ်သနည်း?
 - ဘာတွေကို စမ်းသပ်သင့်သနည်း?
 - breaking changes တွေရှိသလား?
-`
+`,
     };
 
     return prompts[type] || '';

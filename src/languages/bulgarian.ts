@@ -1,4 +1,4 @@
-import { PromptType } from '../types/language';
+import { PromptType } from '../types/enums/PromptType';
 
 export const getBulgarianPrompt = (type: PromptType): string => {
     const prompts: Record<PromptType, string> = {
@@ -112,7 +112,7 @@ export const getBulgarianPrompt = (type: PromptType): string => {
 - Каква документация е необходима?
 - Какво трябва да се тества?
 - Има ли критични промени?
-`
+`,
     };
 
     return prompts[type] || '';

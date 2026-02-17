@@ -50,4 +50,3 @@ export function invalidateValidatedApiKey(apiKey: string): void {
     }
     validatedKeyHashes.delete(hashKey(trimmed));
 }
-

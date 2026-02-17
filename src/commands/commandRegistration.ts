@@ -4,10 +4,10 @@ import type { StatusBarManager } from '../ui/StatusBarManager.js';
 
 /**
  * Register all extension commands with the command registry
- * 
+ *
  * This function centralizes all command registration logic, keeping the
  * extension.ts entry point clean and focused on initialization.
- * 
+ *
  * @param registry - The command registry
  * @param context - The VS Code extension context
  * @param statusBar - The status bar manager
@@ -15,7 +15,7 @@ import type { StatusBarManager } from '../ui/StatusBarManager.js';
 export function registerAllCommands(
     registry: CommandRegistry,
     context: vscode.ExtensionContext,
-    statusBar: StatusBarManager
+    statusBar: StatusBarManager,
 ): void {
     // Commit message generation
     registry.register({
@@ -26,7 +26,7 @@ export function registerAllCommands(
             const { CommitCommand } = await import('./CommitCommand.js');
             const command = new CommitCommand(context);
             await command.execute();
-        }
+        },
     });
 
     // PR generation
@@ -38,7 +38,7 @@ export function registerAllCommands(
             const { PRCommand } = await import('./PRCommand.js');
             const command = new PRCommand(context);
             await command.execute();
-        }
+        },
     });
 
     // Issue generation
@@ -50,7 +50,7 @@ export function registerAllCommands(
             const { IssueCommand } = await import('./IssueCommand.js');
             const command = new IssueCommand(context);
             await command.execute();
-        }
+        },
     });
 
     registry.register({
@@ -62,7 +62,7 @@ export function registerAllCommands(
             const configCommand = new ConfigCommand(context);
             await configCommand.changeLanguage();
             statusBar.update();
-        }
+        },
     });
 
     registry.register({
@@ -74,7 +74,7 @@ export function registerAllCommands(
             const configCommand = new ConfigCommand(context);
             await configCommand.changeMessageStyle();
             statusBar.update();
-        }
+        },
     });
 
     // Utility commands
@@ -84,7 +84,7 @@ export function registerAllCommands(
         category: 'otak-committer',
         handler: () => {
             vscode.commands.executeCommand('workbench.action.openSettings', 'otakCommitter');
-        }
+        },
     });
 
     registry.register({
@@ -97,7 +97,7 @@ export function registerAllCommands(
             const storage = new StorageManager(context);
             const apiKeyManager = new ApiKeyManager(context, storage);
             await apiKeyManager.configureApiKey();
-        }
+        },
     });
 
     registry.register({
@@ -113,15 +113,21 @@ export function registerAllCommands(
             const diagnostics = await storage.getStorageDiagnostics();
 
             logger.info('Storage diagnosis started');
-            logger.info(`OpenAI key locations: ${diagnostics.openaiKeyLocations.join(', ') || 'none'}`);
-            logger.info(`GitHub key locations: ${diagnostics.githubKeyLocations.join(', ') || 'none'}`);
+            logger.info(
+                `OpenAI key locations: ${diagnostics.openaiKeyLocations.join(', ') || 'none'}`,
+            );
+            logger.info(
+                `GitHub key locations: ${diagnostics.githubKeyLocations.join(', ') || 'none'}`,
+            );
             logger.info(`Migration completed: ${diagnostics.migrationCompleted}`);
-            logger.info(`Storage health - SecretStorage: ${diagnostics.storageHealth.secretStorage}, Config: ${diagnostics.storageHealth.configStorage}, GlobalState: ${diagnostics.storageHealth.globalState}, Encryption: ${diagnostics.storageHealth.encryption}`);
+            logger.info(
+                `Storage health - SecretStorage: ${diagnostics.storageHealth.secretStorage}, Config: ${diagnostics.storageHealth.configStorage}, GlobalState: ${diagnostics.storageHealth.globalState}, Encryption: ${diagnostics.storageHealth.encryption}`,
+            );
             logger.info('Storage diagnosis completed');
             logger.show();
 
             const { t } = await import('../i18n/index.js');
             vscode.window.showInformationMessage(t('messages.storageDiagnosisWritten'));
-        }
+        },
     });
 }

@@ -7,7 +7,7 @@
 
 import {
     MAX_INPUT_TOKENS as _MAX_INPUT_TOKENS,
-    CHARS_PER_TOKEN as _CHARS_PER_TOKEN
+    CHARS_PER_TOKEN as _CHARS_PER_TOKEN,
 } from '../constants/tokenLimits';
 
 /**
@@ -44,9 +44,9 @@ export class TokenManager {
     /** Output token allocations by content type */
     public static readonly OUTPUT_TOKENS: OutputTokenAllocations = {
         COMMIT_MESSAGE: 4000, // Increased for Japanese/CJK languages
-        PR_TITLE: 500,        // Increased for Japanese/CJK titles
-        PR_BODY: 8000,        // Increased for detailed PR bodies
-        ISSUE: 12000,         // Increased for comprehensive issues
+        PR_TITLE: 500, // Increased for Japanese/CJK titles
+        PR_BODY: 8000, // Increased for detailed PR bodies
+        ISSUE: 12000, // Increased for comprehensive issues
     };
 
     /**
@@ -120,7 +120,7 @@ export class TokenManager {
     public static getMaxInputTokens(outputTokens: number): number {
         return Math.min(
             this.MAX_INPUT_TOKENS,
-            this.CONTEXT_LIMIT - outputTokens - this.REASONING_BUFFER
+            this.CONTEXT_LIMIT - outputTokens - this.REASONING_BUFFER,
         );
     }
 
@@ -131,8 +131,10 @@ export class TokenManager {
      */
     public static getConfiguredMaxTokens(): number {
         try {
-            const vscode = require('vscode'); // eslint-disable-line @typescript-eslint/no-require-imports
-            const configuredMaxTokens: unknown = vscode.workspace.getConfiguration('otakCommitter').get('maxInputTokens');
+            const vscode = require('vscode');
+            const configuredMaxTokens: unknown = vscode.workspace
+                .getConfiguration('otakCommitter')
+                .get('maxInputTokens');
             if (typeof configuredMaxTokens === 'number' && configuredMaxTokens >= 1000) {
                 return configuredMaxTokens;
             }

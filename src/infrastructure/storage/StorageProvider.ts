@@ -1,6 +1,6 @@
 /**
  * Storage provider interface for unified storage abstraction
- * 
+ *
  * Provides a common interface for different storage backends
  * (SecretStorage, Configuration, GlobalState, etc.)
  */

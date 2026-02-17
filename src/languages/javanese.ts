@@ -1,4 +1,4 @@
-import { PromptType } from '../types/language';
+import { PromptType } from '../types/enums/PromptType';
 
 export const getJavanesePrompt = (type: PromptType): string => {
     const prompts: Record<PromptType, string> = {
@@ -112,7 +112,7 @@ Nimbang:
 - Dokumentasi apa sing dibutuhake?
 - Apa sing kudu diuji?
 - Apa ana owahan radikal?
-`
+`,
     };
 
     return prompts[type] || '';

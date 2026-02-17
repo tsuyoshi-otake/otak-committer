@@ -11,7 +11,7 @@ import {
     truncateDiff,
     categorizeFiles,
     isWindowsReservedName,
-    StatusFile
+    StatusFile,
 } from '../../utils/diffUtils';
 import { runPropertyTest } from '../../test/helpers/property-test.helper';
 
@@ -26,25 +26,29 @@ suite('GitService Robustness Property Tests', () => {
         test('truncated diff should not cut in middle of file header', () => {
             runPropertyTest(
                 fc.property(
-                    fc.nat({ max: 100 }).chain(numFiles =>
+                    fc.nat({ max: 100 }).chain((numFiles) =>
                         fc.array(
                             fc.record({
-                                path: fc.string({ minLength: 1, maxLength: 50 })
-                                    .filter(s => !s.includes('\n')),
-                                content: fc.string({ minLength: 100, maxLength: 50000 })
+                                path: fc
+                                    .string({ minLength: 1, maxLength: 50 })
+                                    .filter((s) => !s.includes('\n')),
+                                content: fc.string({ minLength: 100, maxLength: 50000 }),
                             }),
-                            { minLength: 1, maxLength: Math.max(1, numFiles) }
-                        )
+                            { minLength: 1, maxLength: Math.max(1, numFiles) },
+                        ),
                     ),
                     (files) => {
                         // Create a simulated diff with file headers
-                        const diff = files.map(f =>
-                            `diff --git a/${f.path} b/${f.path}\n` +
-                            `--- a/${f.path}\n` +
-                            `+++ b/${f.path}\n` +
-                            `@@ -1,10 +1,10 @@\n` +
-                            f.content
-                        ).join('\n');
+                        const diff = files
+                            .map(
+                                (f) =>
+                                    `diff --git a/${f.path} b/${f.path}\n` +
+                                    `--- a/${f.path}\n` +
+                                    `+++ b/${f.path}\n` +
+                                    `@@ -1,10 +1,10 @@\n` +
+                                    f.content,
+                            )
+                            .join('\n');
 
                         const result = truncateDiff(diff);
 
@@ -55,34 +59,32 @@ suite('GitService Robustness Property Tests', () => {
                             const lastLine = lines[lines.length - 1];
                             // Last line should be complete (not a partial header)
                             const partialHeaders = ['diff --git', '---', '+++', '@@'];
-                            const isPartialHeader = partialHeaders.some(h =>
-                                lastLine.startsWith(h.slice(0, -1)) && !lastLine.includes(' ')
+                            const isPartialHeader = partialHeaders.some(
+                                (h) =>
+                                    lastLine.startsWith(h.slice(0, -1)) && !lastLine.includes(' '),
                             );
                             return !isPartialHeader || lastLine.length > 3;
                         }
                         return true;
-                    }
-                )
+                    },
+                ),
             );
         });
 
         test('truncation metadata should be accurate', () => {
             runPropertyTest(
-                fc.property(
-                    fc.string({ minLength: 1, maxLength: 2000000 }),
-                    (content) => {
-                        const result = truncateDiff(content);
+                fc.property(fc.string({ minLength: 1, maxLength: 2000000 }), (content) => {
+                    const result = truncateDiff(content);
 
-                        if (result.isTruncated) {
-                            // Original tokens should be greater than truncated tokens
-                            return (result.originalTokens ?? 0) > (result.truncatedTokens ?? 0);
-                        } else {
-                            // If not truncated, tokens should be within limit
-                            const tokenCount = Math.ceil(content.length / 4);
-                            return tokenCount <= 200 * 1000;
-                        }
+                    if (result.isTruncated) {
+                        // Original tokens should be greater than truncated tokens
+                        return (result.originalTokens ?? 0) > (result.truncatedTokens ?? 0);
+                    } else {
+                        // If not truncated, tokens should be within limit
+                        const tokenCount = Math.ceil(content.length / 4);
+                        return tokenCount <= 200 * 1000;
                     }
-                )
+                }),
             );
         });
     });
@@ -98,13 +100,14 @@ suite('GitService Robustness Property Tests', () => {
         const workingDirArbitrary = fc.constantFrom(' ', 'M', 'D', '?');
 
         const statusFileArbitrary: fc.Arbitrary<StatusFile> = fc.record({
-            path: fc.string({ minLength: 1, maxLength: 100 })
-                .filter(s => !s.includes('\n'))
-                .chain(p => fc.boolean().map(isRename =>
-                    isRename ? `${p} -> ${p}_renamed` : p
-                )),
+            path: fc
+                .string({ minLength: 1, maxLength: 100 })
+                .filter((s) => !s.includes('\n'))
+                .chain((p) =>
+                    fc.boolean().map((isRename) => (isRename ? `${p} -> ${p}_renamed` : p)),
+                ),
             index: fileIndexArbitrary,
-            working_dir: workingDirArbitrary
+            working_dir: workingDirArbitrary,
         });
 
         test('all files should be categorized exactly once', () => {
@@ -124,8 +127,8 @@ suite('GitService Robustness Property Tests', () => {
 
                         // At minimum, categorized files shouldn't exceed input files
                         return categorizedCount <= files.length;
-                    }
-                )
+                    },
+                ),
             );
         });
 
@@ -136,7 +139,7 @@ suite('GitService Robustness Property Tests', () => {
                     (files) => {
                         // Filter to unique paths first (simulating real git behavior where paths are unique)
                         const seenPaths = new Set<string>();
-                        const uniqueFiles = files.filter(f => {
+                        const uniqueFiles = files.filter((f) => {
                             if (seenPaths.has(f.path)) {
                                 return false;
                             }
@@ -147,15 +150,27 @@ suite('GitService Robustness Property Tests', () => {
                         const categories = categorizeFiles(uniqueFiles);
 
                         // Check no duplicates within each category
-                        const addedUnique = new Set(categories.added).size === categories.added.length;
-                        const modifiedUnique = new Set(categories.modified).size === categories.modified.length;
-                        const deletedUnique = new Set(categories.deleted).size === categories.deleted.length;
-                        const renamedUnique = new Set(categories.renamed.map(r => r.from + r.to)).size === categories.renamed.length;
-                        const binaryUnique = new Set(categories.binary).size === categories.binary.length;
+                        const addedUnique =
+                            new Set(categories.added).size === categories.added.length;
+                        const modifiedUnique =
+                            new Set(categories.modified).size === categories.modified.length;
+                        const deletedUnique =
+                            new Set(categories.deleted).size === categories.deleted.length;
+                        const renamedUnique =
+                            new Set(categories.renamed.map((r) => r.from + r.to)).size ===
+                            categories.renamed.length;
+                        const binaryUnique =
+                            new Set(categories.binary).size === categories.binary.length;
 
-                        return addedUnique && modifiedUnique && deletedUnique && renamedUnique && binaryUnique;
-                    }
-                )
+                        return (
+                            addedUnique &&
+                            modifiedUnique &&
+                            deletedUnique &&
+                            renamedUnique &&
+                            binaryUnique
+                        );
+                    },
+                ),
             );
         });
 
@@ -174,8 +189,8 @@ suite('GitService Robustness Property Tests', () => {
                             Array.isArray(categories.renamed) &&
                             Array.isArray(categories.binary)
                         );
-                    }
-                )
+                    },
+                ),
             );
         });
     });
@@ -188,45 +203,66 @@ suite('GitService Robustness Property Tests', () => {
      */
     suite('Property 3: Reserved Name Detection Accuracy', () => {
         const reservedNames = [
-            'CON', 'PRN', 'AUX', 'NUL',
-            'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
-            'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9'
+            'CON',
+            'PRN',
+            'AUX',
+            'NUL',
+            'COM1',
+            'COM2',
+            'COM3',
+            'COM4',
+            'COM5',
+            'COM6',
+            'COM7',
+            'COM8',
+            'COM9',
+            'LPT1',
+            'LPT2',
+            'LPT3',
+            'LPT4',
+            'LPT5',
+            'LPT6',
+            'LPT7',
+            'LPT8',
+            'LPT9',
         ];
 
         const reservedNameArbitrary = fc.constantFrom(...reservedNames);
-        const extensionArbitrary = fc.string({ minLength: 1, maxLength: 5 })
-            .filter(s => /^[a-zA-Z0-9]+$/.test(s));
-        const pathPrefixArbitrary = fc.array(
-            fc.string({ minLength: 1, maxLength: 20 }).filter(s => !s.includes('/') && !s.includes('\\')),
-            { minLength: 0, maxLength: 5 }
-        ).map(parts => parts.length > 0 ? parts.join('/') + '/' : '');
+        const extensionArbitrary = fc
+            .string({ minLength: 1, maxLength: 5 })
+            .filter((s) => /^[a-zA-Z0-9]+$/.test(s));
+        const pathPrefixArbitrary = fc
+            .array(
+                fc
+                    .string({ minLength: 1, maxLength: 20 })
+                    .filter((s) => !s.includes('/') && !s.includes('\\')),
+                { minLength: 0, maxLength: 5 },
+            )
+            .map((parts) => (parts.length > 0 ? parts.join('/') + '/' : ''));
 
         test('should detect reserved names regardless of case', () => {
             runPropertyTest(
                 fc.property(
-                    reservedNameArbitrary.chain(name =>
+                    reservedNameArbitrary.chain((name) =>
                         fc.constantFrom(
                             name.toLowerCase(),
                             name.toUpperCase(),
-                            name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()
-                        )
+                            name.charAt(0).toUpperCase() + name.slice(1).toLowerCase(),
+                        ),
                     ),
                     (name) => {
                         return isWindowsReservedName(name) === true;
-                    }
-                )
+                    },
+                ),
             );
         });
 
         test('should detect reserved names with any extension', () => {
             runPropertyTest(
-                fc.property(
-                    fc.tuple(reservedNameArbitrary, extensionArbitrary),
-                    ([name, ext]) => {
-                        const fileNameWithExt = `${name}.${ext}`;
-                        return isWindowsReservedName(fileNameWithExt) === true;
-                    }
-                )
+                fc.property(fc.tuple(reservedNameArbitrary, extensionArbitrary), ([name, ext]) => {
+                    const fileNameWithExt = `${name}.${ext}`;
+                    return isWindowsReservedName(fileNameWithExt) === true;
+                }),
             );
         });
 
@@ -237,42 +273,43 @@ suite('GitService Robustness Property Tests', () => {
                     ([prefix, name]) => {
                         const fullPath = prefix + name;
                         return isWindowsReservedName(fullPath) === true;
-                    }
-                )
+                    },
+                ),
             );
         });
 
         test('should not flag names that contain but are not reserved names', () => {
             runPropertyTest(
                 fc.property(
-                    reservedNameArbitrary.chain(name =>
-                        fc.string({ minLength: 1, maxLength: 10 })
-                            .filter(s => /^[a-zA-Z]+$/.test(s))
-                            .map(suffix => name + suffix)
+                    reservedNameArbitrary.chain((name) =>
+                        fc
+                            .string({ minLength: 1, maxLength: 10 })
+                            .filter((s) => /^[a-zA-Z]+$/.test(s))
+                            .map((suffix) => name + suffix),
                     ),
                     (extendedName) => {
                         // Extended names like "CONSOLE" (CON + SOLE) should not be reserved
                         return isWindowsReservedName(extendedName) === false;
-                    }
-                )
+                    },
+                ),
             );
         });
 
         test('regular file names should not be detected as reserved', () => {
             runPropertyTest(
                 fc.property(
-                    fc.string({ minLength: 1, maxLength: 50 })
-                        .filter(s => {
-                            // Filter out actual reserved names
-                            return !reservedNames.some(r => {
-                                const baseName = s.split('.')[0].split('/').pop()?.split('\\').pop() ?? '';
-                                return baseName.toUpperCase() === r;
-                            });
-                        }),
+                    fc.string({ minLength: 1, maxLength: 50 }).filter((s) => {
+                        // Filter out actual reserved names
+                        return !reservedNames.some((r) => {
+                            const baseName =
+                                s.split('.')[0].split('/').pop()?.split('\\').pop() ?? '';
+                            return baseName.toUpperCase() === r;
+                        });
+                    }),
                     (fileName) => {
                         return isWindowsReservedName(fileName) === false;
-                    }
-                )
+                    },
+                ),
             );
         });
     });

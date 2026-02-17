@@ -7,7 +7,7 @@ import { BaseError, ErrorSeverity } from './BaseError';
 export class CriticalError extends BaseError {
     readonly severity = ErrorSeverity.Critical;
 
-    constructor(message: string, context?: Record<string, any>) {
+    constructor(message: string, context?: Record<string, unknown>) {
         super(message, 'CRITICAL_ERROR', context);
     }
 }

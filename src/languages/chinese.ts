@@ -1,4 +1,4 @@
-import { PromptType } from '../types/language';
+import { PromptType } from '../types/enums/PromptType';
 
 export const getChinesePrompt = (type: PromptType): string => {
     const prompts: Record<PromptType, string> = {
@@ -112,7 +112,7 @@ export const getChinesePrompt = (type: PromptType): string => {
 - 需要什么文档？
 - 需要测试什么？
 - 有突破性变化吗？
-`
+`,
     };
 
     return prompts[type] || '';

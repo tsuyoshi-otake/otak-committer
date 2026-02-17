@@ -31,8 +31,8 @@ suite('Token Limit Property Tests', () => {
                     // Truncate should not modify input within limit
                     const result = TokenManager.truncateInput(input, TokenManager.MAX_INPUT_TOKENS);
                     return result.length === input.length;
-                }
-            )
+                },
+            ),
         );
     });
 
@@ -66,25 +66,22 @@ suite('Token Limit Property Tests', () => {
 
                     // Result should be exactly at the limit
                     return resultTokens <= TokenManager.MAX_INPUT_TOKENS;
-                }
-            )
+                },
+            ),
         );
     });
 
     test('Property 3: Truncated output should be exactly at limit', () => {
         runPropertyTest(
-            fc.property(
-                fc.integer({ min: 200001, max: 300000 }),
-                (tokenCount) => {
-                    const charCount = tokenCount * TokenManager.CHARS_PER_TOKEN;
-                    const input = 'a'.repeat(charCount);
+            fc.property(fc.integer({ min: 200001, max: 300000 }), (tokenCount) => {
+                const charCount = tokenCount * TokenManager.CHARS_PER_TOKEN;
+                const input = 'a'.repeat(charCount);
 
-                    const result = TokenManager.truncateInput(input, TokenManager.MAX_INPUT_TOKENS);
-                    const expectedLength = TokenManager.MAX_INPUT_TOKENS * TokenManager.CHARS_PER_TOKEN;
+                const result = TokenManager.truncateInput(input, TokenManager.MAX_INPUT_TOKENS);
+                const expectedLength = TokenManager.MAX_INPUT_TOKENS * TokenManager.CHARS_PER_TOKEN;
 
-                    return result.length === expectedLength;
-                }
-            )
+                return result.length === expectedLength;
+            }),
         );
     });
 
@@ -106,8 +103,8 @@ suite('Token Limit Property Tests', () => {
                     }
                     // If prefix is too long, result should be a prefix of prefix
                     return prefix.startsWith(result);
-                }
-            )
+                },
+            ),
         );
     });
 

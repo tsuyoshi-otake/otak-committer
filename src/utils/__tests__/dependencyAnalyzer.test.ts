@@ -8,7 +8,7 @@ import {
     analyzeModuleDependencies,
     getModuleLayer,
     validateLayerBoundaries,
-    getDependencyStatistics
+    getDependencyStatistics,
 } from '../dependencyAnalyzer';
 
 suite('Dependency Analyzer', () => {
@@ -19,8 +19,10 @@ suite('Dependency Analyzer', () => {
         // Should find modules
         assert.ok(result.moduleCount > 0, 'Should find at least one module');
         assert.ok(result.modules.size > 0, 'Modules map should not be empty');
-        
-        console.log(`Analyzed ${result.moduleCount} modules with ${result.dependencyCount} dependencies`);
+
+        console.log(
+            `Analyzed ${result.moduleCount} modules with ${result.dependencyCount} dependencies`,
+        );
     });
 
     test('should detect no circular dependencies in current codebase', () => {
@@ -43,7 +45,10 @@ suite('Dependency Analyzer', () => {
     test('should correctly identify module layers', () => {
         // Test with forward slashes (Unix-style)
         assert.strictEqual(getModuleLayer('types/index.ts'), 'types');
-        assert.strictEqual(getModuleLayer('infrastructure/storage/StorageManager.ts'), 'infrastructure');
+        assert.strictEqual(
+            getModuleLayer('infrastructure/storage/StorageManager.ts'),
+            'infrastructure',
+        );
         assert.strictEqual(getModuleLayer('services/git.ts'), 'services');
         assert.strictEqual(getModuleLayer('commands/CommitCommand.ts'), 'commands');
         assert.strictEqual(getModuleLayer('ui/StatusBarManager.ts'), 'ui');
@@ -51,10 +56,13 @@ suite('Dependency Analyzer', () => {
         assert.strictEqual(getModuleLayer('utils/encryption.ts'), 'utils');
         assert.strictEqual(getModuleLayer('languages/english.ts'), 'languages');
         assert.strictEqual(getModuleLayer('constants/commitGuide.ts'), 'constants');
-        
+
         // Test with backslashes (Windows-style)
         assert.strictEqual(getModuleLayer('types\\index.ts'), 'types');
-        assert.strictEqual(getModuleLayer('infrastructure\\storage\\StorageManager.ts'), 'infrastructure');
+        assert.strictEqual(
+            getModuleLayer('infrastructure\\storage\\StorageManager.ts'),
+            'infrastructure',
+        );
         assert.strictEqual(getModuleLayer('services\\git.ts'), 'services');
         assert.strictEqual(getModuleLayer('commands\\CommitCommand.ts'), 'commands');
     });
@@ -85,7 +93,7 @@ suite('Dependency Analyzer', () => {
         assert.ok(stats.totalModules > 0, 'Should have modules');
         assert.ok(stats.averageDependencies >= 0, 'Average dependencies should be non-negative');
         assert.ok(stats.maxDependencies >= 0, 'Max dependencies should be non-negative');
-        
+
         console.log('Dependency Statistics:');
         console.log(`  Total modules: ${stats.totalModules}`);
         console.log(`  Total dependencies: ${stats.totalDependencies}`);
@@ -102,7 +110,7 @@ suite('Dependency Analyzer', () => {
 
     test('should handle non-existent directory gracefully', () => {
         const result = analyzeModuleDependencies('./non-existent-directory');
-        
+
         assert.strictEqual(result.moduleCount, 0, 'Should find no modules');
         assert.strictEqual(result.cycles.length, 0, 'Should find no cycles');
     });
@@ -112,19 +120,22 @@ suite('Dependency Analyzer', () => {
         const result = analyzeModuleDependencies(srcPath);
 
         // Check that test files are excluded
-        const testFiles = Array.from(result.modules.keys()).filter(modulePath => 
-            modulePath.includes('__tests__') || modulePath.includes('.test.')
+        const testFiles = Array.from(result.modules.keys()).filter(
+            (modulePath) => modulePath.includes('__tests__') || modulePath.includes('.test.'),
         );
 
         // Log any test files found for debugging
         if (testFiles.length > 0) {
             console.log('Test files found in analysis:');
-            testFiles.forEach(file => console.log(`  - ${file}`));
+            testFiles.forEach((file) => console.log(`  - ${file}`));
         }
 
         // The analyzer should exclude __tests__ directories
         // Note: This test file itself might be included if run from compiled output
         // We verify that the exclusion logic is working by checking the count is minimal
-        assert.ok(testFiles.length <= 1, `Should exclude most test files, found ${testFiles.length}`);
+        assert.ok(
+            testFiles.length <= 1,
+            `Should exclude most test files, found ${testFiles.length}`,
+        );
     });
 });

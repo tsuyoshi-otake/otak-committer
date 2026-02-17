@@ -11,16 +11,16 @@ suite('OpenAI API Integration Tests', () => {
     const apiKey = process.env.OPENAI_API_KEY;
 
     // Check if API key is valid (not a placeholder or test key)
-    const isValidApiKey = apiKey &&
-        apiKey.startsWith('sk-') &&
-        apiKey.length > 20 &&
-        !apiKey.includes('*');
+    const isValidApiKey =
+        apiKey && apiKey.startsWith('sk-') && apiKey.length > 20 && !apiKey.includes('*');
 
-    test('GPT-5.2 Responses API should work with real API key', async function() {
+    test('GPT-5.2 Responses API should work with real API key', async function () {
         this.timeout(30000); // 30 seconds timeout
 
         if (!isValidApiKey) {
-            console.log('Skipping: Valid OPENAI_API_KEY not set. Run with: npx dotenvx run -f .env.local -- npm test');
+            console.log(
+                'Skipping: Valid OPENAI_API_KEY not set. Run with: npx dotenvx run -f .env.local -- npm test',
+            );
             this.skip();
             return;
         }
@@ -33,10 +33,10 @@ suite('OpenAI API Integration Tests', () => {
                 model: 'gpt-4o-mini',
                 messages: [
                     { role: 'system', content: 'You are a helpful assistant.' },
-                    { role: 'user', content: 'Say "API test successful" and nothing else.' }
+                    { role: 'user', content: 'Say "API test successful" and nothing else.' },
                 ],
                 max_tokens: 50,
-                temperature: 0
+                temperature: 0,
             });
 
             const content = response.choices[0]?.message?.content;
@@ -52,7 +52,9 @@ suite('OpenAI API Integration Tests', () => {
             if (error instanceof OpenAI.APIError) {
                 // Skip test if API key is invalid (401) - indicates key not properly configured via dotenvx
                 if (error.status === 401) {
-                    console.log('Skipping: Invalid API key. Configure with: npx dotenvx set OPENAI_API_KEY "sk-..." -f .env.local');
+                    console.log(
+                        'Skipping: Invalid API key. Configure with: npx dotenvx set OPENAI_API_KEY "sk-..." -f .env.local',
+                    );
                     this.skip();
                     return;
                 }
@@ -63,11 +65,13 @@ suite('OpenAI API Integration Tests', () => {
         }
     });
 
-    test('API key validation should work', async function() {
+    test('API key validation should work', async function () {
         this.timeout(10000);
 
         if (!isValidApiKey) {
-            console.log('Skipping: Valid OPENAI_API_KEY not set. Run with: npx dotenvx run -f .env.local -- npm test');
+            console.log(
+                'Skipping: Valid OPENAI_API_KEY not set. Run with: npx dotenvx run -f .env.local -- npm test',
+            );
             this.skip();
             return;
         }

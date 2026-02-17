@@ -6,5 +6,5 @@ export enum GitStatus {
     Modified = 'modified',
     Deleted = 'deleted',
     Renamed = 'renamed',
-    Copied = 'copied'
+    Copied = 'copied',
 }

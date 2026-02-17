@@ -12,7 +12,7 @@ export type {
     GitHubError,
     GitHubErrorResponse,
     GitHubLabel,
-    GitHubAPI
+    GitHubAPI,
 } from './interfaces/GitHub';
 
 /**

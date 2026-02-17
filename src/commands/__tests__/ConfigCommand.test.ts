@@ -60,12 +60,12 @@ suite('ConfigCommand Unit Tests', () => {
                     }
                 },
                 keys: () => Array.from(globalStore.keys()),
-                setKeysForSync: () => { }
+                setKeysForSync: () => {},
             } as any,
             workspaceState: {
                 get: () => undefined,
                 update: () => Promise.resolve(),
-                keys: () => []
+                keys: () => [],
             } as any,
             secrets: {
                 get: async (key: string) => secretStore.get(key),
@@ -75,7 +75,7 @@ suite('ConfigCommand Unit Tests', () => {
                 delete: async (key: string) => {
                     secretStore.delete(key);
                 },
-                onDidChange: new vscode.EventEmitter<vscode.SecretStorageChangeEvent>().event
+                onDidChange: new vscode.EventEmitter<vscode.SecretStorageChangeEvent>().event,
             } as any,
             extensionMode: vscode.ExtensionMode.Test,
             storageUri: vscode.Uri.file('/test/storage'),
@@ -84,7 +84,7 @@ suite('ConfigCommand Unit Tests', () => {
             asAbsolutePath: (relativePath: string) => `/test/path/${relativePath}`,
             storagePath: '/test/storage',
             globalStoragePath: '/test/global-storage',
-            logPath: '/test/log'
+            logPath: '/test/log',
         } as any;
     });
 
@@ -275,10 +275,7 @@ suite('ConfigCommand Unit Tests', () => {
             command.testHandleError(testError, 'test operation');
 
             assert.strictEqual(handledErrors.length, 1);
-            assert.strictEqual(
-                handledErrors[0].context.component,
-                'TestableConfigCommand'
-            );
+            assert.strictEqual(handledErrors[0].context.component, 'TestableConfigCommand');
         });
     });
 

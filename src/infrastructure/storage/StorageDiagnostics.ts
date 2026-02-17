@@ -4,6 +4,9 @@ import { ConfigStorageProvider } from './ConfigStorageProvider';
 import { StorageMigrationService } from './StorageMigrationService';
 import { Logger } from '../logging/Logger';
 
+/**
+ * Storage subsystem health status.
+ */
 export interface StorageHealthResult {
     secretStorage: boolean;
     configStorage: boolean;
@@ -11,6 +14,9 @@ export interface StorageHealthResult {
     encryption: boolean;
 }
 
+/**
+ * Aggregated diagnostics about storage state and key locations.
+ */
 export interface StorageDiagnosticsResult {
     migrationCompleted: boolean;
     openaiKeyLocations: string[];
@@ -28,7 +34,7 @@ export class StorageDiagnostics {
         private readonly context: vscode.ExtensionContext,
         private readonly secretStorage: SecretStorageProvider,
         private readonly configStorage: ConfigStorageProvider,
-        private readonly migrationService: StorageMigrationService
+        private readonly migrationService: StorageMigrationService,
     ) {
         this.logger = Logger.getInstance();
     }
@@ -41,7 +47,7 @@ export class StorageDiagnostics {
             secretStorage: false,
             configStorage: false,
             globalState: false,
-            encryption: false
+            encryption: false,
         };
 
         // Test SecretStorage
@@ -99,7 +105,7 @@ export class StorageDiagnostics {
             migrationCompleted: this.migrationService.migrationCompleted,
             openaiKeyLocations: [],
             githubKeyLocations: [],
-            storageHealth: await this.checkStorageHealth()
+            storageHealth: await this.checkStorageHealth(),
         };
 
         // Check OpenAI key locations

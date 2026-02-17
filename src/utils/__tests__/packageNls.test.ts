@@ -54,7 +54,7 @@ suite('Manifest Localization (package.nls) Tests', () => {
             'package.nls.vi.json',
             'package.nls.ko.json',
             'package.nls.zh-cn.json',
-            'package.nls.zh-tw.json'
+            'package.nls.zh-tw.json',
         ];
 
         for (const fileName of nlsFiles) {
@@ -62,7 +62,10 @@ suite('Manifest Localization (package.nls) Tests', () => {
             assert.ok(fs.existsSync(nlsPath), `Missing file: ${fileName}`);
 
             const nlsJson = readJsonFile(nlsPath);
-            assert.ok(nlsJson && typeof nlsJson === 'object' && !Array.isArray(nlsJson), `${fileName} must be an object`);
+            assert.ok(
+                nlsJson && typeof nlsJson === 'object' && !Array.isArray(nlsJson),
+                `${fileName} must be an object`,
+            );
 
             const dict = nlsJson as Record<string, unknown>;
             const missing: string[] = [];
@@ -76,7 +79,7 @@ suite('Manifest Localization (package.nls) Tests', () => {
             assert.strictEqual(
                 missing.length,
                 0,
-                `Missing ${missing.length} package.nls keys in ${fileName}:\n- ${missing.join('\n- ')}`
+                `Missing ${missing.length} package.nls keys in ${fileName}:\n- ${missing.join('\n- ')}`,
             );
         }
     });

@@ -11,28 +11,32 @@ export type { MessageStyleConfig, EmojiConfig } from './interfaces/Config';
 /**
  * Message style configurations with token limits
  */
-export const MESSAGE_STYLES: Record<import('./enums/MessageStyle').MessageStyle, import('./interfaces/Config').MessageStyleConfig> = {
+export const MESSAGE_STYLES: Record<
+    import('./enums/MessageStyle').MessageStyle,
+    import('./interfaces/Config').MessageStyleConfig
+> = {
     simple: {
         tokens: {
             commit: 100,
-            pr: 400
+            pr: 400,
         },
-        description: "Generate a very concise message focusing only on the core changes."
+        description: 'Generate a very concise message focusing only on the core changes.',
     },
     normal: {
         tokens: {
             commit: 200,
-            pr: 800
+            pr: 800,
         },
-        description: "Generate a message with a brief explanation of the changes."
+        description: 'Generate a message with a brief explanation of the changes.',
     },
     detailed: {
         tokens: {
             commit: 500,
-            pr: 2000
+            pr: 2000,
         },
-        description: "Generate a detailed message including context, reasoning, and impact of the changes."
-    }
+        description:
+            'Generate a detailed message including context, reasoning, and impact of the changes.',
+    },
 };
 
 /**
@@ -46,5 +50,5 @@ export const EMOJI_CATEGORIES = {
     refactor: ['♻️', ':recycle:'],
     performance: ['⚡', ':zap:'],
     test: ['🧪', ':test_tube:'],
-    chore: ['🔧', ':wrench:']
+    chore: ['🔧', ':wrench:'],
 } as const;

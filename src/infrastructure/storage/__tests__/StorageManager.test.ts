@@ -4,7 +4,7 @@ import { StorageManager } from '../StorageManager';
 
 /**
  * Unit tests for StorageManager
- * 
+ *
  * Tests the unified storage abstraction for API keys and configuration
  * _Requirements: 7.1_
  */
@@ -18,14 +18,14 @@ suite('StorageManager', () => {
             secrets: {
                 get: async (key: string) => undefined,
                 store: async (key: string, value: string) => {},
-                delete: async (key: string) => {}
+                delete: async (key: string) => {},
             },
             globalState: {
                 get: (key: string) => undefined,
                 update: async (key: string, value: any) => {},
                 keys: () => [],
-                setKeysForSync: (keys: readonly string[]) => {}
-            }
+                setKeysForSync: (keys: readonly string[]) => {},
+            },
         } as any;
 
         storageManager = new StorageManager(mockContext);
@@ -72,7 +72,7 @@ suite('StorageManager', () => {
                     },
                     delete: async (key: string) => {
                         storedSecrets.delete(key);
-                    }
+                    },
                 },
                 globalState: {
                     get: (key: string) => globalStateData.get(key),
@@ -84,8 +84,8 @@ suite('StorageManager', () => {
                         }
                     },
                     keys: () => Array.from(globalStateData.keys()),
-                    setKeysForSync: (keys: readonly string[]) => {}
-                }
+                    setKeysForSync: (keys: readonly string[]) => {},
+                },
             } as any;
         });
 
@@ -115,7 +115,11 @@ suite('StorageManager', () => {
             const manager = new StorageManager(testContext);
             const retrieved = await manager.getApiKey('openai');
 
-            assert.strictEqual(retrieved, undefined, 'Should return undefined for non-existent key');
+            assert.strictEqual(
+                retrieved,
+                undefined,
+                'Should return undefined for non-existent key',
+            );
         });
 
         test('should store encrypted backup in GlobalState', async () => {
@@ -141,9 +145,17 @@ suite('StorageManager', () => {
 
             await manager.deleteApiKey('openai');
 
-            assert.strictEqual(storedSecrets.has('openai.apiKey'), false, 'Key should be deleted from SecretStorage');
+            assert.strictEqual(
+                storedSecrets.has('openai.apiKey'),
+                false,
+                'Key should be deleted from SecretStorage',
+            );
             const retrieved = await manager.getApiKey('openai');
-            assert.strictEqual(retrieved, undefined, 'Key should not be retrievable after deletion');
+            assert.strictEqual(
+                retrieved,
+                undefined,
+                'Key should not be retrievable after deletion',
+            );
         });
 
         test('should correctly report if API key exists', async () => {
@@ -174,7 +186,11 @@ suite('StorageManager', () => {
             const retrieved = await manager.getApiKey('openai');
 
             // Whitespace-only strings should be treated as no key
-            assert.strictEqual(retrieved, undefined, 'Whitespace-only string should be treated as no key');
+            assert.strictEqual(
+                retrieved,
+                undefined,
+                'Whitespace-only string should be treated as no key',
+            );
         });
 
         test('should store multiple API keys independently', async () => {
@@ -224,7 +240,7 @@ suite('StorageManager', () => {
                     },
                     delete: async (key: string) => {
                         storedSecrets.delete(key);
-                    }
+                    },
                 },
                 globalState: {
                     get: (key: string) => globalStateData.get(key),
@@ -236,8 +252,8 @@ suite('StorageManager', () => {
                         }
                     },
                     keys: () => Array.from(globalStateData.keys()),
-                    setKeysForSync: (keys: readonly string[]) => {}
-                }
+                    setKeysForSync: (keys: readonly string[]) => {},
+                },
             } as any;
 
             // Mock workspace configuration
@@ -259,7 +275,7 @@ suite('StorageManager', () => {
                         const fullKey = section ? `${section}.${key}` : key;
                         return configData.has(fullKey);
                     },
-                    inspect: () => undefined
+                    inspect: () => undefined,
                 };
             };
         });
@@ -272,7 +288,11 @@ suite('StorageManager', () => {
             await manager.migrateFromLegacy();
 
             // Should not have migrated anything
-            assert.strictEqual(storedSecrets.size, 0, 'No secrets should be stored when migration already completed');
+            assert.strictEqual(
+                storedSecrets.size,
+                0,
+                'No secrets should be stored when migration already completed',
+            );
         });
 
         test('should set migration completion flag', async () => {
@@ -283,7 +303,7 @@ suite('StorageManager', () => {
             assert.strictEqual(
                 globalStateData.get('otak-committer.migrationCompleted'),
                 true,
-                'Migration completion flag should be set'
+                'Migration completion flag should be set',
             );
         });
 
@@ -291,20 +311,28 @@ suite('StorageManager', () => {
             // Create a context that will fail
             const failingContext = {
                 secrets: {
-                    get: async () => { throw new Error('Storage error'); },
-                    store: async () => { throw new Error('Storage error'); },
-                    delete: async () => { throw new Error('Storage error'); }
+                    get: async () => {
+                        throw new Error('Storage error');
+                    },
+                    store: async () => {
+                        throw new Error('Storage error');
+                    },
+                    delete: async () => {
+                        throw new Error('Storage error');
+                    },
                 },
                 globalState: {
                     get: () => undefined,
-                    update: async () => { throw new Error('State error'); },
+                    update: async () => {
+                        throw new Error('State error');
+                    },
                     keys: () => [],
-                    setKeysForSync: () => {}
-                }
+                    setKeysForSync: () => {},
+                },
             } as any;
 
             const manager = new StorageManager(failingContext);
-            
+
             // Should not throw - migration errors are caught
             await assert.doesNotReject(async () => {
                 await manager.migrateFromLegacy();
@@ -323,7 +351,10 @@ suite('StorageManager', () => {
 
             assert.strictEqual(retrieved, legacyKey, 'Should retrieve legacy key');
             // After migration, key should be in SecretStorage
-            assert.ok(storedSecrets.has('openai.apiKey'), 'Key should be migrated to SecretStorage');
+            assert.ok(
+                storedSecrets.has('openai.apiKey'),
+                'Key should be migrated to SecretStorage',
+            );
         });
 
         test('should clean up legacy storage after successful migration', async () => {
@@ -339,7 +370,7 @@ suite('StorageManager', () => {
             assert.strictEqual(
                 configData.has('otakCommitter.openaiApiKey'),
                 false,
-                'Legacy key should be removed after migration'
+                'Legacy key should be removed after migration',
             );
         });
 
@@ -347,15 +378,17 @@ suite('StorageManager', () => {
             const failingMigrationContext = {
                 secrets: {
                     get: async () => undefined,
-                    store: async () => { throw new Error('SecretStorage unavailable'); },
-                    delete: async () => {}
+                    store: async () => {
+                        throw new Error('SecretStorage unavailable');
+                    },
+                    delete: async () => {},
                 },
                 globalState: {
                     get: () => undefined,
                     update: async () => {},
                     keys: () => [],
-                    setKeysForSync: () => {}
-                }
+                    setKeysForSync: () => {},
+                },
             } as any;
 
             const manager = new StorageManager(failingMigrationContext);
@@ -363,7 +396,11 @@ suite('StorageManager', () => {
 
             // Should still return the legacy key even if migration fails
             const retrieved = await manager.getApiKey('openai');
-            assert.strictEqual(retrieved, 'sk-legacy-key', 'Should return legacy key when migration fails');
+            assert.strictEqual(
+                retrieved,
+                'sk-legacy-key',
+                'Should return legacy key when migration fails',
+            );
         });
 
         test('should migrate both OpenAI and GitHub keys', async () => {
@@ -404,7 +441,7 @@ suite('StorageManager', () => {
             assert.strictEqual(
                 globalStateData.get('otak-committer.migrationCompleted'),
                 true,
-                'Migration flag should be set after first run'
+                'Migration flag should be set after first run',
             );
 
             // Add a new legacy key
@@ -416,11 +453,19 @@ suite('StorageManager', () => {
             // New key should NOT be in SecretStorage (migration skipped)
             // But hasApiKey will still return true because it falls back to legacy storage
             const inSecretStorage = await migrationContext.secrets.get('github.apiKey');
-            assert.strictEqual(inSecretStorage, undefined, 'New legacy key should not be migrated to SecretStorage');
+            assert.strictEqual(
+                inSecretStorage,
+                undefined,
+                'New legacy key should not be migrated to SecretStorage',
+            );
 
             // Key should still be accessible from legacy storage via hasApiKey fallback
             const hasGithubKey = await manager.hasApiKey('github');
-            assert.strictEqual(hasGithubKey, true, 'Key should still be accessible from legacy storage');
+            assert.strictEqual(
+                hasGithubKey,
+                true,
+                'Key should still be accessible from legacy storage',
+            );
         });
     });
 
@@ -441,7 +486,7 @@ suite('StorageManager', () => {
                     },
                     delete: async (key: string) => {
                         storedSecrets.delete(key);
-                    }
+                    },
                 },
                 globalState: {
                     get: (key: string) => globalStateData.get(key),
@@ -453,8 +498,8 @@ suite('StorageManager', () => {
                         }
                     },
                     keys: () => Array.from(globalStateData.keys()),
-                    setKeysForSync: (keys: readonly string[]) => {}
-                }
+                    setKeysForSync: (keys: readonly string[]) => {},
+                },
             } as any;
         });
 
@@ -487,24 +532,34 @@ suite('StorageManager', () => {
             await manager.getApiKey('openai');
 
             // Verify it was restored
-            assert.ok(storedSecrets.has('openai.apiKey'), 'Key should be restored to SecretStorage');
+            assert.ok(
+                storedSecrets.has('openai.apiKey'),
+                'Key should be restored to SecretStorage',
+            );
         });
 
         test('should handle corrupted backup gracefully', async () => {
             const manager = new StorageManager(testContext);
 
             // Set a corrupted backup
-            globalStateData.set('otak-committer.backup.openai.apiKey', 'corrupted-data-not-encrypted');
+            globalStateData.set(
+                'otak-committer.backup.openai.apiKey',
+                'corrupted-data-not-encrypted',
+            );
 
             // Should return undefined for corrupted backup
             const retrieved = await manager.getApiKey('openai');
-            assert.strictEqual(retrieved, undefined, 'Should return undefined for corrupted backup');
+            assert.strictEqual(
+                retrieved,
+                undefined,
+                'Should return undefined for corrupted backup',
+            );
 
             // Corrupted backup should be cleaned up
             assert.strictEqual(
                 globalStateData.has('otak-committer.backup.openai.apiKey'),
                 false,
-                'Corrupted backup should be deleted'
+                'Corrupted backup should be deleted',
             );
         });
 
@@ -521,28 +576,36 @@ suite('StorageManager', () => {
                     },
                     update: async () => {},
                     has: () => false,
-                    inspect: () => undefined
+                    inspect: () => undefined,
                 };
             };
 
             const failingContext = {
                 secrets: {
-                    get: async () => { throw new Error('SecretStorage unavailable'); },
-                    store: async () => { throw new Error('SecretStorage unavailable'); },
-                    delete: async () => {}
+                    get: async () => {
+                        throw new Error('SecretStorage unavailable');
+                    },
+                    store: async () => {
+                        throw new Error('SecretStorage unavailable');
+                    },
+                    delete: async () => {},
                 },
                 globalState: {
                     get: () => undefined,
                     update: async () => {},
                     keys: () => [],
-                    setKeysForSync: () => {}
-                }
+                    setKeysForSync: () => {},
+                },
             } as any;
 
             const manager = new StorageManager(failingContext);
             const retrieved = await manager.getApiKey('openai');
 
-            assert.strictEqual(retrieved, 'sk-legacy-fallback-key', 'Should fall back to legacy storage');
+            assert.strictEqual(
+                retrieved,
+                'sk-legacy-fallback-key',
+                'Should fall back to legacy storage',
+            );
         });
 
         test('should attempt fallback storage when primary storage fails', async () => {
@@ -559,22 +622,26 @@ suite('StorageManager', () => {
                         configData.set(fullKey, value);
                     },
                     has: () => false,
-                    inspect: () => undefined
+                    inspect: () => undefined,
                 };
             };
 
             const failingContext = {
                 secrets: {
                     get: async () => undefined,
-                    store: async () => { throw new Error('SecretStorage unavailable'); },
-                    delete: async () => {}
+                    store: async () => {
+                        throw new Error('SecretStorage unavailable');
+                    },
+                    delete: async () => {},
                 },
                 globalState: {
                     get: () => undefined,
-                    update: async () => { throw new Error('GlobalState unavailable'); },
+                    update: async () => {
+                        throw new Error('GlobalState unavailable');
+                    },
                     keys: () => [],
-                    setKeysForSync: () => {}
-                }
+                    setKeysForSync: () => {},
+                },
             } as any;
 
             const manager = new StorageManager(failingContext);
@@ -588,7 +655,7 @@ suite('StorageManager', () => {
             assert.strictEqual(
                 configData.get('otakCommitter.openaiApiKey'),
                 'sk-fallback-key',
-                'Should store in fallback configuration'
+                'Should store in fallback configuration',
             );
         });
 
@@ -617,16 +684,20 @@ suite('StorageManager', () => {
         test('should return undefined when getApiKey encounters errors', async () => {
             const failingContext = {
                 secrets: {
-                    get: async () => { throw new Error('Storage error'); },
+                    get: async () => {
+                        throw new Error('Storage error');
+                    },
                     store: async () => {},
-                    delete: async () => {}
+                    delete: async () => {},
                 },
                 globalState: {
-                    get: () => { throw new Error('State error'); },
+                    get: () => {
+                        throw new Error('State error');
+                    },
                     update: async () => {},
                     keys: () => [],
-                    setKeysForSync: () => {}
-                }
+                    setKeysForSync: () => {},
+                },
             } as any;
 
             const manager = new StorageManager(failingContext);
@@ -639,24 +710,30 @@ suite('StorageManager', () => {
             const failingContext = {
                 secrets: {
                     get: async () => undefined,
-                    store: async () => { throw new Error('SecretStorage failed'); },
-                    delete: async () => {}
+                    store: async () => {
+                        throw new Error('SecretStorage failed');
+                    },
+                    delete: async () => {},
                 },
                 globalState: {
                     get: () => undefined,
-                    update: async () => { throw new Error('GlobalState failed'); },
+                    update: async () => {
+                        throw new Error('GlobalState failed');
+                    },
                     keys: () => [],
-                    setKeysForSync: () => {}
-                }
+                    setKeysForSync: () => {},
+                },
             } as any;
 
             // Mock configuration to also fail
             (vscode.workspace as any).getConfiguration = () => {
                 return {
                     get: () => undefined,
-                    update: async () => { throw new Error('Configuration failed'); },
+                    update: async () => {
+                        throw new Error('Configuration failed');
+                    },
                     has: () => false,
-                    inspect: () => undefined
+                    inspect: () => undefined,
                 };
             };
 
@@ -665,23 +742,25 @@ suite('StorageManager', () => {
             await assert.rejects(
                 async () => await manager.setApiKey('openai', 'sk-test-key'),
                 /Failed to store API key/,
-                'Should throw StorageError when all mechanisms fail'
+                'Should throw StorageError when all mechanisms fail',
             );
         });
 
         test('should return false from hasApiKey on error', async () => {
             const failingContext = {
                 secrets: {
-                    get: async () => { throw new Error('Storage error'); },
+                    get: async () => {
+                        throw new Error('Storage error');
+                    },
                     store: async () => {},
-                    delete: async () => {}
+                    delete: async () => {},
                 },
                 globalState: {
                     get: () => undefined,
                     update: async () => {},
                     keys: () => [],
-                    setKeysForSync: () => {}
-                }
+                    setKeysForSync: () => {},
+                },
             } as any;
 
             const manager = new StorageManager(failingContext);
@@ -695,24 +774,30 @@ suite('StorageManager', () => {
                 secrets: {
                     get: async () => undefined,
                     store: async () => {},
-                    delete: async () => { throw new Error('SecretStorage delete failed'); }
+                    delete: async () => {
+                        throw new Error('SecretStorage delete failed');
+                    },
                 },
                 globalState: {
                     get: () => undefined,
                     // GlobalState update must also fail to prevent backup fallback
-                    update: async () => { throw new Error('GlobalState update failed'); },
+                    update: async () => {
+                        throw new Error('GlobalState update failed');
+                    },
                     keys: () => [],
-                    setKeysForSync: () => {}
-                }
+                    setKeysForSync: () => {},
+                },
             } as any;
 
             // Mock configuration to also fail
             (vscode.workspace as any).getConfiguration = () => {
                 return {
                     get: () => undefined,
-                    update: async () => { throw new Error('Configuration delete failed'); },
+                    update: async () => {
+                        throw new Error('Configuration delete failed');
+                    },
                     has: () => false,
-                    inspect: () => undefined
+                    inspect: () => undefined,
                 };
             };
 
@@ -721,7 +806,7 @@ suite('StorageManager', () => {
             await assert.rejects(
                 async () => await manager.deleteApiKey('openai'),
                 /Failed to delete API key/,
-                'Should throw StorageError when all deletion attempts fail'
+                'Should throw StorageError when all deletion attempts fail',
             );
         });
 
@@ -729,15 +814,19 @@ suite('StorageManager', () => {
             const failingContext = {
                 secrets: {
                     get: async () => undefined,
-                    store: async () => { throw new Error('Storage failed'); },
-                    delete: async () => {}
+                    store: async () => {
+                        throw new Error('Storage failed');
+                    },
+                    delete: async () => {},
                 },
                 globalState: {
                     get: () => undefined,
-                    update: async () => { throw new Error('State failed'); },
+                    update: async () => {
+                        throw new Error('State failed');
+                    },
                     keys: () => [],
-                    setKeysForSync: () => {}
-                }
+                    setKeysForSync: () => {},
+                },
             } as any;
 
             const manager = new StorageManager(failingContext);
@@ -745,23 +834,25 @@ suite('StorageManager', () => {
             await assert.rejects(
                 async () => await manager.setSecret('test-key', 'test-value'),
                 /Failed to store secret/,
-                'Should throw StorageError for setSecret failure'
+                'Should throw StorageError for setSecret failure',
             );
         });
 
         test('should handle getSecret errors gracefully', async () => {
             const failingContext = {
                 secrets: {
-                    get: async () => { throw new Error('Storage failed'); },
+                    get: async () => {
+                        throw new Error('Storage failed');
+                    },
                     store: async () => {},
-                    delete: async () => {}
+                    delete: async () => {},
                 },
                 globalState: {
                     get: () => undefined,
                     update: async () => {},
                     keys: () => [],
-                    setKeysForSync: () => {}
-                }
+                    setKeysForSync: () => {},
+                },
             } as any;
 
             const manager = new StorageManager(failingContext);
@@ -775,21 +866,25 @@ suite('StorageManager', () => {
                 secrets: {
                     get: async () => undefined,
                     store: async () => {},
-                    delete: async () => { throw new Error('Delete failed'); }
+                    delete: async () => {
+                        throw new Error('Delete failed');
+                    },
                 },
                 globalState: {
                     get: () => undefined,
-                    update: async () => { throw new Error('State failed'); },
+                    update: async () => {
+                        throw new Error('State failed');
+                    },
                     keys: () => [],
-                    setKeysForSync: () => {}
-                }
+                    setKeysForSync: () => {},
+                },
             } as any;
 
             const manager = new StorageManager(failingContext);
 
             await assert.doesNotReject(
                 async () => await manager.deleteSecret('test-key'),
-                'Should not throw when deleteSecret fails'
+                'Should not throw when deleteSecret fails',
             );
         });
     });

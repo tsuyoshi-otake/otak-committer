@@ -13,7 +13,7 @@ export interface ErrorContext {
     /** The component where the error occurred */
     component: string;
     /** Additional metadata about the error */
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
 }
 
 /**
@@ -22,27 +22,26 @@ export interface ErrorContext {
  */
 export class ErrorHandler {
     private static logger = Logger.getInstance();
-    
+
     /**
      * Handle an error with centralized error management
      * @param error The error to handle
      * @param context Context information about where and why the error occurred
      */
     static handle(error: unknown, context: ErrorContext | string): void {
-        const ctx = typeof context === 'string' 
-            ? { operation: context, component: 'unknown' }
-            : context;
-        
+        const ctx =
+            typeof context === 'string' ? { operation: context, component: 'unknown' } : context;
+
         const severity = this.determineSeverity(error);
         const message = this.formatErrorMessage(error, ctx);
-        
+
         // Log the error
         this.logError(severity, message, error);
-        
+
         // Show user notification
         this.showUserNotification(severity, message);
     }
-    
+
     /**
      * Determine the severity of an error based on its type
      * @param error The error to analyze
@@ -54,7 +53,7 @@ export class ErrorHandler {
         }
         return ErrorSeverity.Error;
     }
-    
+
     /**
      * Format an error message with context information
      * @param error The error to format
@@ -63,7 +62,7 @@ export class ErrorHandler {
      */
     private static formatErrorMessage(error: unknown, ctx: ErrorContext): string {
         let errorMsg: string;
-        
+
         if (error instanceof BaseError) {
             errorMsg = error.toString();
         } else if (error instanceof Error) {
@@ -71,10 +70,10 @@ export class ErrorHandler {
         } else {
             errorMsg = String(error);
         }
-        
+
         return `[${ctx.component}] ${ctx.operation}: ${errorMsg}`;
     }
-    
+
     /**
      * Log an error with appropriate log level
      * @param severity The error severity
@@ -95,7 +94,7 @@ export class ErrorHandler {
                 break;
         }
     }
-    
+
     /**
      * Show a user notification based on error severity
      * @param severity The error severity
@@ -104,7 +103,7 @@ export class ErrorHandler {
     private static showUserNotification(severity: ErrorSeverity, message: string): void {
         // Clean up the message for user display (remove technical prefixes)
         const userMessage = this.cleanMessageForUser(message);
-        
+
         switch (severity) {
             case ErrorSeverity.Critical:
             case ErrorSeverity.Error:
@@ -118,7 +117,7 @@ export class ErrorHandler {
                 break;
         }
     }
-    
+
     /**
      * Clean up error message for user display
      * Removes technical prefixes and makes the message more user-friendly
@@ -128,11 +127,10 @@ export class ErrorHandler {
     private static cleanMessageForUser(message: string): string {
         // Remove component prefixes like [ComponentName]
         let cleaned = message.replace(/^\[.*?\]\s*/, '');
-        
+
         // Remove error codes like [ERROR_CODE]
         cleaned = cleaned.replace(/\[.*?_ERROR\]:\s*/, '');
-        
+
         return cleaned;
     }
-
 }

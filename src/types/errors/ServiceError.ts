@@ -10,7 +10,7 @@ export class ServiceError extends BaseError {
     constructor(
         message: string,
         public readonly service: string,
-        context?: Record<string, any>
+        context?: Record<string, unknown>,
     ) {
         super(message, 'SERVICE_ERROR', { ...context, service });
     }
@@ -20,7 +20,7 @@ export class ServiceError extends BaseError {
  * Error thrown when OpenAI API operations fail
  */
 export class OpenAIServiceError extends ServiceError {
-    constructor(message: string, context?: Record<string, any>) {
+    constructor(message: string, context?: Record<string, unknown>) {
         super(message, 'OpenAI', context);
     }
 }
@@ -32,7 +32,7 @@ export class GitHubServiceError extends ServiceError {
     constructor(
         message: string,
         public readonly status?: number,
-        context?: Record<string, any>
+        context?: Record<string, unknown>,
     ) {
         super(message, 'GitHub', { ...context, status });
     }
@@ -42,7 +42,7 @@ export class GitHubServiceError extends ServiceError {
  * Error thrown when Git operations fail
  */
 export class GitServiceError extends ServiceError {
-    constructor(message: string, context?: Record<string, any>) {
+    constructor(message: string, context?: Record<string, unknown>) {
         super(message, 'Git', context);
     }
 }

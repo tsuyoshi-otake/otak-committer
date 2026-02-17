@@ -1,4 +1,4 @@
-import { PromptType } from '../types/language';
+import { PromptType } from '../types/enums/PromptType';
 
 export const getBengaliPrompt = (type: PromptType): string => {
     const prompts: Record<PromptType, string> = {
@@ -112,7 +112,7 @@ export const getBengaliPrompt = (type: PromptType): string => {
 - কোন ডকুমেন্টেশন প্রয়োজন?
 - কী পরীক্ষা করতে হবে?
 - কোন ব্রেকিং চেঞ্জ আছে?
-`
+`,
     };
 
     return prompts[type] || '';

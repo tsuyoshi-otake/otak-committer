@@ -42,7 +42,7 @@ suite('ApiKeyManager i18n Property Tests', () => {
             'retryPrompt',
             'invalidKeyPrompt',
             'errorPrompt',
-            'setApiKey'
+            'setApiKey',
         ];
 
         const locales = [
@@ -51,16 +51,16 @@ suite('ApiKeyManager i18n Property Tests', () => {
             { name: 'Vietnamese', data: vi },
             { name: 'Korean', data: ko },
             { name: 'Chinese (Simplified)', data: zhCN },
-            { name: 'Chinese (Traditional)', data: zhTW }
+            { name: 'Chinese (Traditional)', data: zhTW },
         ];
 
         test('all API key translation keys should exist in all locales', () => {
-            const localeNamesArbitrary = fc.constantFrom(...locales.map(l => l.name));
+            const localeNamesArbitrary = fc.constantFrom(...locales.map((l) => l.name));
             const keyArbitrary = fc.constantFrom(...requiredApiKeyTranslationKeys);
 
             runPropertyTest(
                 fc.property(localeNamesArbitrary, keyArbitrary, (localeName, key) => {
-                    const locale = locales.find(l => l.name === localeName);
+                    const locale = locales.find((l) => l.name === localeName);
                     if (!locale) {
                         return false;
                     }
@@ -72,7 +72,7 @@ suite('ApiKeyManager i18n Property Tests', () => {
 
                     const value = apiKeySection[key];
                     return typeof value === 'string' && value.trim().length > 0;
-                })
+                }),
             );
         });
 
@@ -85,7 +85,7 @@ suite('ApiKeyManager i18n Property Tests', () => {
                     const value = apiKeySection[key];
                     assert.ok(
                         typeof value === 'string' && value.trim().length > 0,
-                        `${locale.name} should have non-empty apiKey.${key}`
+                        `${locale.name} should have non-empty apiKey.${key}`,
                     );
                 }
             }
@@ -102,7 +102,7 @@ suite('ApiKeyManager i18n Property Tests', () => {
                         return false;
                     }
                     return apiKeySection[key] !== key;
-                })
+                }),
             );
         });
 
@@ -117,8 +117,11 @@ suite('ApiKeyManager i18n Property Tests', () => {
                     }
 
                     const validationFailed = apiKeySection.validationFailed;
-                    return typeof validationFailed === 'string' && validationFailed.includes('{reason}');
-                })
+                    return (
+                        typeof validationFailed === 'string' &&
+                        validationFailed.includes('{reason}')
+                    );
+                }),
             );
         });
 
@@ -128,12 +131,12 @@ suite('ApiKeyManager i18n Property Tests', () => {
 
             assert.ok(
                 japaneseCharRegex.test(jaApiKey.enterKey),
-                'Japanese enterKey should contain Japanese characters'
+                'Japanese enterKey should contain Japanese characters',
             );
 
             assert.ok(
                 japaneseCharRegex.test(jaApiKey.invalidFormat),
-                'Japanese invalidFormat should contain Japanese characters'
+                'Japanese invalidFormat should contain Japanese characters',
             );
         });
     });

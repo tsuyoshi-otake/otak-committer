@@ -1,4 +1,4 @@
-import { PromptType } from '../types/language';
+import { PromptType } from '../types/enums/PromptType';
 
 export const getCzechPrompt = (type: PromptType): string => {
     const prompts: Record<PromptType, string> = {
@@ -112,7 +112,7 @@ Zvažte:
 - Jaká dokumentace je potřeba?
 - Co je třeba otestovat?
 - Jsou zde nějaké breaking changes?
-`
+`,
     };
 
     return prompts[type] || '';

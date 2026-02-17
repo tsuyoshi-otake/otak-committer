@@ -23,15 +23,17 @@ export async function run(): Promise<void> {
         // - Infrastructure tests in infrastructure/**/__tests__
         // - Legacy tests in test/suite
         const testFiles = await glob('**/**.test.js', { cwd: testsRoot });
-        const infrastructureFiles = await glob('infrastructure/**/__tests__/**/*.test.js', { cwd: projectRoot });
+        const infrastructureFiles = await glob('infrastructure/**/__tests__/**/*.test.js', {
+            cwd: projectRoot,
+        });
         const propertyTestFiles = await glob('__tests__/**/*.test.js', { cwd: projectRoot });
-        
+
         const files = [
-            ...testFiles.map(f => path.resolve(testsRoot, f)),
-            ...infrastructureFiles.map(f => path.resolve(projectRoot, f)),
-            ...propertyTestFiles.map(f => path.resolve(projectRoot, f))
+            ...testFiles.map((f) => path.resolve(testsRoot, f)),
+            ...infrastructureFiles.map((f) => path.resolve(projectRoot, f)),
+            ...propertyTestFiles.map((f) => path.resolve(projectRoot, f)),
         ];
-        
+
         // Add files to the test suite
         files.forEach((f: string) => mocha.addFile(f));
 

@@ -57,7 +57,7 @@ export class ApiKeyManager {
      */
     constructor(
         _context: vscode.ExtensionContext,
-        private readonly storage: StorageManager
+        private readonly storage: StorageManager,
     ) {
         this.logger = Logger.getInstance();
     }
@@ -122,7 +122,7 @@ export class ApiKeyManager {
                     return t('apiKey.invalidFormat');
                 }
                 return null;
-            }
+            },
         });
 
         return apiKey;
@@ -155,12 +155,12 @@ export class ApiKeyManager {
             { label: t('apiKey.updateKey'), description: '', action: 'update' },
             { label: t('apiKey.validateKey'), description: '', action: 'validate' },
             { label: t('apiKey.removeKey'), description: '', action: 'remove' },
-            { label: t('apiKey.cancel'), description: '', action: 'cancel' }
+            { label: t('apiKey.cancel'), description: '', action: 'cancel' },
         ];
 
         const selected = await vscode.window.showQuickPick(items, {
             placeHolder: t('apiKey.keyExists'),
-            title: t('apiKey.chooseAction')
+            title: t('apiKey.chooseAction'),
         });
 
         return selected?.action ?? 'cancel';
@@ -214,9 +214,9 @@ export class ApiKeyManager {
             {
                 location: vscode.ProgressLocation.Notification,
                 title: t('apiKey.validating'),
-                cancellable: false
+                cancellable: false,
             },
-            async () => this.validateWithOpenAI(apiKey)
+            async () => this.validateWithOpenAI(apiKey),
         );
     }
 
@@ -237,7 +237,7 @@ export class ApiKeyManager {
             const validateChoice = await vscode.window.showInformationMessage(
                 t('apiKey.validatePrompt'),
                 t('buttons.yes'),
-                t('buttons.no')
+                t('buttons.no'),
             );
 
             if (validateChoice === t('buttons.yes')) {
@@ -256,18 +256,19 @@ export class ApiKeyManager {
                 const continueLabel = t('apiKey.continueWithoutValidation');
                 const cancelLabel = t('apiKey.cancel');
 
-                const action = result.status === 401
-                    ? await vscode.window.showWarningMessage(
-                        t('apiKey.validationFailed', { reason }),
-                        retryLabel,
-                        cancelLabel
-                    )
-                    : await vscode.window.showWarningMessage(
-                        t('apiKey.validationFailed', { reason }),
-                        retryLabel,
-                        continueLabel,
-                        cancelLabel
-                    );
+                const action =
+                    result.status === 401
+                        ? await vscode.window.showWarningMessage(
+                              t('apiKey.validationFailed', { reason }),
+                              retryLabel,
+                              cancelLabel,
+                          )
+                        : await vscode.window.showWarningMessage(
+                              t('apiKey.validationFailed', { reason }),
+                              retryLabel,
+                              continueLabel,
+                              cancelLabel,
+                          );
 
                 if (action === retryLabel) {
                     continue;
@@ -297,7 +298,7 @@ export class ApiKeyManager {
             const action = await vscode.window.showWarningMessage(
                 t('messages.apiKeyNotConfigured'),
                 setApiKeyLabel,
-                t('apiKey.cancel')
+                t('apiKey.cancel'),
             );
 
             if (action === setApiKeyLabel) {
@@ -325,7 +326,7 @@ export class ApiKeyManager {
                 t('apiKey.validationFailed', { reason }),
                 retryLabel,
                 updateLabel,
-                cancelLabel
+                cancelLabel,
             );
 
             if (action === retryLabel) {

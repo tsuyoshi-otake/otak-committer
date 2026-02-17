@@ -17,7 +17,7 @@ export interface CommitErrorContext {
         fileCount?: number;
         tokenCount?: number;
         errorType?: string;
-        apiError?: any;
+        apiError?: unknown;
     };
 }
 
@@ -71,11 +71,11 @@ export class CommitError extends Error {
  */
 export function createCommitErrorContext(
     operation: string,
-    details?: CommitErrorContext['details']
+    details?: CommitErrorContext['details'],
 ): CommitErrorContext {
     return {
         operation,
-        details: details ? { ...details } : undefined
+        details: details ? { ...details } : undefined,
     };
 }
 
@@ -90,7 +90,7 @@ export function createCommitErrorContext(
  */
 export function formatErrorMessage(
     error: Error | CommitError | unknown,
-    context: CommitErrorContext
+    context: CommitErrorContext,
 ): string {
     const parts: string[] = [];
 
@@ -121,8 +121,9 @@ export function formatErrorMessage(
             detailParts.push(`type: ${context.details.errorType}`);
         }
 
-        if (context.details.apiError?.status) {
-            detailParts.push(`status: ${context.details.apiError.status}`);
+        const apiStatus = getApiErrorStatus(context.details.apiError);
+        if (apiStatus !== undefined) {
+            detailParts.push(`status: ${apiStatus}`);
         }
 
         if (detailParts.length > 0) {
@@ -131,6 +132,21 @@ export function formatErrorMessage(
     }
 
     return parts.join('');
+}
+
+function getApiErrorStatus(apiError: unknown): number | undefined {
+    if (typeof apiError !== 'object' || apiError === null) {
+        return undefined;
+    }
+
+    if ('status' in apiError) {
+        const status = (apiError as { status?: unknown }).status;
+        if (typeof status === 'number') {
+            return status;
+        }
+    }
+
+    return undefined;
 }
 
 /**
@@ -220,7 +236,7 @@ export function isEmptyDiffError(error: Error | CommitError): boolean {
  */
 export function handleCommitError(
     error: Error | CommitError,
-    context: CommitErrorContext
+    context: CommitErrorContext,
 ): ErrorHandlerResult {
     const message = formatErrorMessage(error, context);
 
@@ -245,7 +261,7 @@ export function handleCommitError(
     return {
         message,
         isRecoverable,
-        suggestedAction
+        suggestedAction,
     };
 }
 
@@ -255,15 +271,12 @@ export function handleCommitError(
  * @param error - The error to log
  * @param context - Error context
  */
-export function logErrorDetails(
-    error: Error | CommitError,
-    context: CommitErrorContext
-): void {
+export function logErrorDetails(error: Error | CommitError, context: CommitErrorContext): void {
     console.error('Commit Error Details:', {
         operation: context.operation,
         message: error.message,
         code: error instanceof CommitError ? error.code : 'UNKNOWN',
         stack: error.stack,
-        details: context.details
+        details: context.details,
     });
 }

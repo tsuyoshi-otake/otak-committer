@@ -1,9 +1,9 @@
 /**
  * Property-based tests for operation fallback behavior
- * 
+ *
  * **Feature: extension-architecture-refactoring, Property 8: Operation Fallback Behavior**
  * **Validates: Requirements 4.2**
- * 
+ *
  * Property: For any operation O that can fail, if O fails, the system should provide
  * a fallback behavior (default value, cached value, or graceful degradation) rather
  * than crashing or leaving the system in an inconsistent state.
@@ -33,7 +33,7 @@ function createFailingMockContext(): vscode.ExtensionContext {
             delete: async (key: string) => {
                 throw new Error('SecretStorage unavailable');
             },
-            onDidChange: undefined as any
+            onDidChange: undefined as any,
         },
         globalState: {
             get: <T>(key: string) => {
@@ -45,7 +45,7 @@ function createFailingMockContext(): vscode.ExtensionContext {
             keys: () => {
                 throw new Error('GlobalState unavailable');
             },
-            setKeysForSync: () => {}
+            setKeysForSync: () => {},
         },
         subscriptions: [],
         workspaceState: undefined as any,
@@ -61,156 +61,153 @@ function createFailingMockContext(): vscode.ExtensionContext {
         logPath: '',
         asAbsolutePath: (relativePath: string) => relativePath,
         extension: undefined as any,
-        languageModelAccessInformation: undefined as any
+        languageModelAccessInformation: undefined as any,
     };
 }
 
 suite('Operation Fallback Behavior Properties', () => {
     /**
      * Property 8: Operation Fallback Behavior - Storage Operations
-     * 
+     *
      * For any storage operation that fails, the system should return undefined
      * or a default value rather than throwing an exception that crashes the extension.
-     * 
+     *
      * This test verifies that:
      * 1. Failed getApiKey operations return undefined instead of throwing
      * 2. Failed getSecret operations return undefined instead of throwing
      * 3. Failed getConfig operations return undefined instead of throwing
      * 4. The system remains in a consistent state after failures
      */
-    test('Property 8: Storage operations provide fallback on failure', createTaggedPropertyTest(
-        'extension-architecture-refactoring',
-        8,
-        'Operation Fallback Behavior',
-        () => {
-            runPropertyTest(
-                fc.asyncProperty(
-                    fc.constantFrom('openai' as const, 'github' as const),
-                    async (service) => {
-                        // Create a context where storage operations fail
-                        const failingContext = createFailingMockContext();
-                        const storage = new StorageManager(failingContext);
+    test(
+        'Property 8: Storage operations provide fallback on failure',
+        createTaggedPropertyTest(
+            'extension-architecture-refactoring',
+            8,
+            'Operation Fallback Behavior',
+            () => {
+                runPropertyTest(
+                    fc.asyncProperty(
+                        fc.constantFrom('openai' as const, 'github' as const),
+                        async (service) => {
+                            // Create a context where storage operations fail
+                            const failingContext = createFailingMockContext();
+                            const storage = new StorageManager(failingContext);
 
-                        // Property: getApiKey should not throw, should return undefined
-                        let didThrow = false;
-                        let result: string | undefined;
-                        
-                        try {
-                            result = await storage.getApiKey(service);
-                        } catch (error) {
-                            didThrow = true;
-                        }
+                            // Property: getApiKey should not throw, should return undefined
+                            let didThrow = false;
+                            let result: string | undefined;
 
-                        // Verify graceful degradation: no exception thrown
-                        assert.strictEqual(
-                            didThrow,
-                            false,
-                            'getApiKey should not throw when storage fails'
-                        );
+                            try {
+                                result = await storage.getApiKey(service);
+                            } catch (error) {
+                                didThrow = true;
+                            }
 
-                        // Verify fallback behavior: returns undefined
-                        assert.strictEqual(
-                            result,
-                            undefined,
-                            'getApiKey should return undefined when storage fails'
-                        );
+                            // Verify graceful degradation: no exception thrown
+                            assert.strictEqual(
+                                didThrow,
+                                false,
+                                'getApiKey should not throw when storage fails',
+                            );
 
-                        return true;
-                    }
-                )
-            );
-        }
-    ));
+                            // Verify fallback behavior: returns undefined
+                            assert.strictEqual(
+                                result,
+                                undefined,
+                                'getApiKey should return undefined when storage fails',
+                            );
+
+                            return true;
+                        },
+                    ),
+                );
+            },
+        ),
+    );
 
     /**
      * Property 8: Generic secret operations provide fallback on failure
-     * 
+     *
      * Tests that generic secret operations (getSecret) also provide graceful
      * degradation when storage fails.
      */
     test('Property 8: Generic secret operations provide fallback on failure', () => {
         runPropertyTest(
-            fc.asyncProperty(
-                fc.string({ minLength: 5, maxLength: 50 }),
-                async (key) => {
-                    const failingContext = createFailingMockContext();
-                    const storage = new StorageManager(failingContext);
+            fc.asyncProperty(fc.string({ minLength: 5, maxLength: 50 }), async (key) => {
+                const failingContext = createFailingMockContext();
+                const storage = new StorageManager(failingContext);
 
-                    // Property: getSecret should not throw, should return undefined
-                    let didThrow = false;
-                    let result: string | undefined;
-                    
-                    try {
-                        result = await storage.getSecret(key);
-                    } catch (error) {
-                        didThrow = true;
-                    }
+                // Property: getSecret should not throw, should return undefined
+                let didThrow = false;
+                let result: string | undefined;
 
-                    // Verify graceful degradation
-                    assert.strictEqual(
-                        didThrow,
-                        false,
-                        'getSecret should not throw when storage fails'
-                    );
-
-                    assert.strictEqual(
-                        result,
-                        undefined,
-                        'getSecret should return undefined when storage fails'
-                    );
-
-                    return true;
+                try {
+                    result = await storage.getSecret(key);
+                } catch (error) {
+                    didThrow = true;
                 }
-            )
+
+                // Verify graceful degradation
+                assert.strictEqual(
+                    didThrow,
+                    false,
+                    'getSecret should not throw when storage fails',
+                );
+
+                assert.strictEqual(
+                    result,
+                    undefined,
+                    'getSecret should return undefined when storage fails',
+                );
+
+                return true;
+            }),
         );
     });
 
     /**
      * Property 8: Configuration operations provide fallback on failure
-     * 
+     *
      * Tests that configuration operations provide graceful degradation
      * when configuration access fails.
      */
     test('Property 8: Configuration operations provide fallback on failure', () => {
         runPropertyTest(
-            fc.asyncProperty(
-                fc.string({ minLength: 5, maxLength: 50 }),
-                async (key) => {
-                    const failingContext = createFailingMockContext();
-                    const storage = new StorageManager(failingContext);
+            fc.asyncProperty(fc.string({ minLength: 5, maxLength: 50 }), async (key) => {
+                const failingContext = createFailingMockContext();
+                const storage = new StorageManager(failingContext);
 
-                    // Property: getConfig should not throw, should return undefined
-                    let didThrow = false;
-                    let result: string | undefined;
-                    
-                    try {
-                        result = await storage.getConfig(key);
-                    } catch (error) {
-                        didThrow = true;
-                    }
+                // Property: getConfig should not throw, should return undefined
+                let didThrow = false;
+                let result: string | undefined;
 
-                    // Verify graceful degradation
-                    assert.strictEqual(
-                        didThrow,
-                        false,
-                        'getConfig should not throw when storage fails'
-                    );
-
-                    assert.strictEqual(
-                        result,
-                        undefined,
-                        'getConfig should return undefined when storage fails'
-                    );
-
-                    return true;
+                try {
+                    result = await storage.getConfig(key);
+                } catch (error) {
+                    didThrow = true;
                 }
-            )
+
+                // Verify graceful degradation
+                assert.strictEqual(
+                    didThrow,
+                    false,
+                    'getConfig should not throw when storage fails',
+                );
+
+                assert.strictEqual(
+                    result,
+                    undefined,
+                    'getConfig should return undefined when storage fails',
+                );
+
+                return true;
+            }),
         );
     });
 
     /**
      * Property 8: hasApiKey provides fallback on failure
-     * 
+     *
      * Tests that hasApiKey returns false (safe default) when storage fails
      * rather than throwing an exception.
      */
@@ -225,7 +222,7 @@ suite('Operation Fallback Behavior Properties', () => {
                     // Property: hasApiKey should not throw, should return false
                     let didThrow = false;
                     let result: boolean;
-                    
+
                     try {
                         result = await storage.hasApiKey(service);
                     } catch (error) {
@@ -237,25 +234,25 @@ suite('Operation Fallback Behavior Properties', () => {
                     assert.strictEqual(
                         didThrow,
                         false,
-                        'hasApiKey should not throw when storage fails'
+                        'hasApiKey should not throw when storage fails',
                     );
 
                     // Verify safe default: returns false
                     assert.strictEqual(
                         result,
                         false,
-                        'hasApiKey should return false (safe default) when storage fails'
+                        'hasApiKey should return false (safe default) when storage fails',
                     );
 
                     return true;
-                }
-            )
+                },
+            ),
         );
     });
 
     /**
      * Property 8: Delete operations provide fallback on failure
-     * 
+     *
      * Tests that delete operations don't throw exceptions when storage fails.
      * Deletion failures are non-critical and should be handled gracefully.
      */
@@ -269,7 +266,7 @@ suite('Operation Fallback Behavior Properties', () => {
 
                     // Property: deleteApiKey should not throw
                     let didThrow = false;
-                    
+
                     try {
                         await storage.deleteApiKey(service);
                     } catch (error) {
@@ -280,18 +277,18 @@ suite('Operation Fallback Behavior Properties', () => {
                     assert.strictEqual(
                         didThrow,
                         false,
-                        'deleteApiKey should not throw when storage fails'
+                        'deleteApiKey should not throw when storage fails',
                     );
 
                     return true;
-                }
-            )
+                },
+            ),
         );
     });
 
     /**
      * Property 8: Partial storage failure provides fallback
-     * 
+     *
      * Tests that when some storage mechanisms fail but others succeed,
      * the system uses the working storage as a fallback.
      */
@@ -300,7 +297,7 @@ suite('Operation Fallback Behavior Properties', () => {
             fc.asyncProperty(
                 fc.record({
                     service: fc.constantFrom('openai' as const, 'github' as const),
-                    apiKey: fc.string({ minLength: 10, maxLength: 100 })
+                    apiKey: fc.string({ minLength: 10, maxLength: 100 }),
                 }),
                 async ({ service, apiKey }) => {
                     // Create a context where SecretStorage fails but Configuration works
@@ -316,7 +313,7 @@ suite('Operation Fallback Behavior Properties', () => {
                             delete: async (key: string) => {
                                 throw new Error('SecretStorage unavailable');
                             },
-                            onDidChange: undefined as any
+                            onDidChange: undefined as any,
                         },
                         globalState: {
                             get: <T>(key: string) => configStore.get(key) as T,
@@ -328,7 +325,7 @@ suite('Operation Fallback Behavior Properties', () => {
                                 }
                             },
                             keys: () => Array.from(configStore.keys()),
-                            setKeysForSync: () => {}
+                            setKeysForSync: () => {},
                         },
                         subscriptions: [],
                         workspaceState: undefined as any,
@@ -344,7 +341,7 @@ suite('Operation Fallback Behavior Properties', () => {
                         logPath: '',
                         asAbsolutePath: (relativePath: string) => relativePath,
                         extension: undefined as any,
-                        languageModelAccessInformation: undefined as any
+                        languageModelAccessInformation: undefined as any,
                     };
 
                     // Simulate legacy data in workspace configuration
@@ -371,7 +368,7 @@ suite('Operation Fallback Behavior Properties', () => {
                                     return false;
                                 },
                                 update: async () => {},
-                                inspect: () => undefined
+                                inspect: () => undefined,
                             };
                         }
                         return originalGet(section);
@@ -382,7 +379,7 @@ suite('Operation Fallback Behavior Properties', () => {
                     // Property: Should fall back to legacy storage when primary fails
                     let didThrow = false;
                     let result: string | undefined;
-                    
+
                     try {
                         result = await storage.getApiKey(service);
                     } catch (error) {
@@ -396,24 +393,24 @@ suite('Operation Fallback Behavior Properties', () => {
                     assert.strictEqual(
                         didThrow,
                         false,
-                        'getApiKey should not throw when primary storage fails but fallback exists'
+                        'getApiKey should not throw when primary storage fails but fallback exists',
                     );
 
                     // Verify fallback behavior: returns value from legacy storage
                     assert.strictEqual(
                         result,
                         apiKey,
-                        'getApiKey should return value from fallback storage'
+                        'getApiKey should return value from fallback storage',
                     );
 
                     return true;
-                }
-            )
+                },
+            ),
         );
     });
     /**
      * Property 8: Migration failures don't prevent extension from loading
-     * 
+     *
      * Tests that when migration fails, the extension continues to function
      * using legacy storage as a fallback.
      */
@@ -422,12 +419,12 @@ suite('Operation Fallback Behavior Properties', () => {
             fc.asyncProperty(
                 fc.record({
                     service: fc.constantFrom('openai' as const, 'github' as const),
-                    apiKey: fc.string({ minLength: 10, maxLength: 100 })
+                    apiKey: fc.string({ minLength: 10, maxLength: 100 }),
                 }),
                 async ({ service, apiKey }) => {
                     // Create a context where migration will fail
                     const failingContext = createFailingMockContext();
-                    
+
                     // Set up legacy storage with data
                     const originalGet = vscode.workspace.getConfiguration;
                     (vscode.workspace as any).getConfiguration = (section?: string) => {
@@ -454,7 +451,7 @@ suite('Operation Fallback Behavior Properties', () => {
                                 update: async () => {
                                     throw new Error('Configuration update failed');
                                 },
-                                inspect: () => undefined
+                                inspect: () => undefined,
                             };
                         }
                         return originalGet(section);
@@ -464,7 +461,7 @@ suite('Operation Fallback Behavior Properties', () => {
 
                     // Property: migrateFromLegacy should not throw
                     let didThrow = false;
-                    
+
                     try {
                         await storage.migrateFromLegacy();
                     } catch (error) {
@@ -475,7 +472,7 @@ suite('Operation Fallback Behavior Properties', () => {
                     assert.strictEqual(
                         didThrow,
                         false,
-                        'migrateFromLegacy should not throw when migration fails'
+                        'migrateFromLegacy should not throw when migration fails',
                     );
 
                     // Property: After failed migration, data should still be accessible
@@ -493,12 +490,12 @@ suite('Operation Fallback Behavior Properties', () => {
                     assert.strictEqual(
                         result,
                         apiKey,
-                        'After failed migration, data should still be accessible from legacy storage'
+                        'After failed migration, data should still be accessible from legacy storage',
                     );
 
                     return true;
-                }
-            )
+                },
+            ),
         );
     });
 });

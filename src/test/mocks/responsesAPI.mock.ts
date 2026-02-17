@@ -55,7 +55,7 @@ export enum ResponsesAPIErrorType {
     CONTEXT_LENGTH_EXCEEDED = 'context_length_exceeded',
     NETWORK = 'network',
     AUTHENTICATION = 'authentication',
-    UNKNOWN = 'unknown'
+    UNKNOWN = 'unknown',
 }
 
 /**
@@ -96,7 +96,7 @@ export class ResponsesAPIMock {
             input_tokens: number;
             output_tokens: number;
             reasoning_tokens?: number;
-        }
+        },
     ): void {
         this.errorConfig = null;
         this.mockResponse = {
@@ -109,10 +109,11 @@ export class ResponsesAPIMock {
                 input_tokens: usage?.input_tokens ?? 100,
                 output_tokens: usage?.output_tokens ?? 50,
                 reasoning_tokens: usage?.reasoning_tokens,
-                total_tokens: (usage?.input_tokens ?? 100) +
+                total_tokens:
+                    (usage?.input_tokens ?? 100) +
                     (usage?.output_tokens ?? 50) +
-                    (usage?.reasoning_tokens ?? 0)
-            }
+                    (usage?.reasoning_tokens ?? 0),
+            },
         };
     }
 
@@ -139,11 +140,11 @@ export class ResponsesAPIMock {
         this.capturedCalls.push({
             endpoint: '/v1/responses',
             request,
-            timestamp: Date.now()
+            timestamp: Date.now(),
         });
 
         // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise((resolve) => setTimeout(resolve, 10));
 
         // Return error if mocked
         if (this.errorConfig) {
@@ -168,8 +169,8 @@ export class ResponsesAPIMock {
             usage: {
                 input_tokens: 100,
                 output_tokens: 20,
-                total_tokens: 120
-            }
+                total_tokens: 120,
+            },
         };
     }
 
@@ -194,21 +195,29 @@ export class ResponsesAPIMock {
      * @returns True if a matching call was found
      */
     public static verifyCall(expectedParams: Partial<ResponsesAPIRequest>): boolean {
-        return this.capturedCalls.some(call => {
+        return this.capturedCalls.some((call) => {
             const request = call.request;
 
             if (expectedParams.model !== undefined && request.model !== expectedParams.model) {
                 return false;
             }
-            if (expectedParams.input !== undefined && !request.input.includes(expectedParams.input)) {
+            if (
+                expectedParams.input !== undefined &&
+                !request.input.includes(expectedParams.input)
+            ) {
                 return false;
             }
-            if (expectedParams.max_output_tokens !== undefined &&
-                request.max_output_tokens !== expectedParams.max_output_tokens) {
+            if (
+                expectedParams.max_output_tokens !== undefined &&
+                request.max_output_tokens !== expectedParams.max_output_tokens
+            ) {
                 return false;
             }
             if (expectedParams.reasoning !== undefined) {
-                if (!request.reasoning || request.reasoning.effort !== expectedParams.reasoning.effort) {
+                if (
+                    !request.reasoning ||
+                    request.reasoning.effort !== expectedParams.reasoning.effort
+                ) {
                     return false;
                 }
             }
@@ -221,23 +230,21 @@ export class ResponsesAPIMock {
      * Verify all calls used the correct model
      */
     public static verifyAllCallsUseModel(model: string): boolean {
-        return this.capturedCalls.every(call => call.request.model === model);
+        return this.capturedCalls.every((call) => call.request.model === model);
     }
 
     /**
      * Verify all calls used the correct endpoint
      */
     public static verifyAllCallsUseEndpoint(endpoint: string): boolean {
-        return this.capturedCalls.every(call => call.endpoint === endpoint);
+        return this.capturedCalls.every((call) => call.endpoint === endpoint);
     }
 
     /**
      * Verify all calls include reasoning effort
      */
     public static verifyAllCallsHaveReasoningEffort(effort: string): boolean {
-        return this.capturedCalls.every(
-            call => call.request.reasoning?.effort === effort
-        );
+        return this.capturedCalls.every((call) => call.request.reasoning?.effort === effort);
     }
 
     /**
@@ -263,14 +270,18 @@ export function classifyError(statusCode: number, errorMessage: string): Respons
             }
             return ResponsesAPIErrorType.UNKNOWN;
         case 400:
-            if (errorMessage.toLowerCase().includes('context') ||
-                errorMessage.toLowerCase().includes('token')) {
+            if (
+                errorMessage.toLowerCase().includes('context') ||
+                errorMessage.toLowerCase().includes('token')
+            ) {
                 return ResponsesAPIErrorType.CONTEXT_LENGTH_EXCEEDED;
             }
             return ResponsesAPIErrorType.UNKNOWN;
         default:
-            if (errorMessage.toLowerCase().includes('network') ||
-                errorMessage.toLowerCase().includes('connection')) {
+            if (
+                errorMessage.toLowerCase().includes('network') ||
+                errorMessage.toLowerCase().includes('connection')
+            ) {
                 return ResponsesAPIErrorType.NETWORK;
             }
             return ResponsesAPIErrorType.UNKNOWN;
@@ -280,7 +291,10 @@ export function classifyError(statusCode: number, errorMessage: string): Respons
 /**
  * Generate user-friendly error message from API error
  */
-export function getUserFriendlyMessage(errorType: ResponsesAPIErrorType, retryAfter?: number): string {
+export function getUserFriendlyMessage(
+    errorType: ResponsesAPIErrorType,
+    retryAfter?: number,
+): string {
     switch (errorType) {
         case ResponsesAPIErrorType.RATE_LIMIT:
             return retryAfter

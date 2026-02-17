@@ -10,5 +10,5 @@ export type {
     IssueType,
     IssueGenerationParams,
     GeneratedIssueContent,
-    IssueGeneratorDependencies
+    IssueGeneratorDependencies,
 } from './interfaces/Issue';

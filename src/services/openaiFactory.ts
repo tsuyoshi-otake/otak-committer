@@ -21,9 +21,8 @@ export class OpenAIServiceFactory extends BaseServiceFactory<OpenAIService> {
 
     static async initialize(
         config?: Partial<ServiceConfig>,
-        context?: vscode.ExtensionContext
+        context?: vscode.ExtensionContext,
     ): Promise<OpenAIService | undefined> {
         return initializeOpenAIService(config, context, async (cfg) => new OpenAIService(cfg));
     }
 }
-

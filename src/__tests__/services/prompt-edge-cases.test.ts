@@ -6,11 +6,7 @@
  */
 
 import * as assert from 'assert';
-import {
-    createEdgeCasePrompt,
-    detectEdgeCase,
-    EdgeCaseType
-} from '../../utils/edgeCaseHandling';
+import { createEdgeCasePrompt, detectEdgeCase, EdgeCaseType } from '../../utils/edgeCaseHandling';
 import { FileCategories } from '../../utils/diffUtils';
 
 suite('Edge Case Prompt Generation Tests', () => {
@@ -32,7 +28,7 @@ suite('Edge Case Prompt Generation Tests', () => {
             const edgeCase = detectEdgeCase(diff, {
                 fileCount: 1,
                 isTruncated: false,
-                hasReservedNames: false
+                hasReservedNames: false,
             });
 
             assert.strictEqual(edgeCase, EdgeCaseType.WhitespaceOnly);
@@ -49,7 +45,7 @@ Binary files a/image.png and b/image.png differ`;
             const edgeCase = detectEdgeCase(diff, {
                 fileCount: 1,
                 isTruncated: false,
-                hasReservedNames: false
+                hasReservedNames: false,
             });
 
             assert.strictEqual(edgeCase, EdgeCaseType.BinaryFiles);
@@ -65,14 +61,14 @@ Binary files a/image.png and b/image.png differ`;
                 modified: [],
                 deleted: ['file1.ts', 'file2.ts'],
                 renamed: [],
-                binary: []
+                binary: [],
             };
 
             const edgeCase = detectEdgeCase('deleted content', {
                 fileCount: 2,
                 isTruncated: false,
                 hasReservedNames: false,
-                categories
+                categories,
             });
 
             assert.strictEqual(edgeCase, EdgeCaseType.DeletionsOnly);
@@ -88,14 +84,14 @@ Binary files a/image.png and b/image.png differ`;
                 modified: [],
                 deleted: [],
                 renamed: [{ from: 'old.ts', to: 'new.ts' }],
-                binary: []
+                binary: [],
             };
 
             const edgeCase = detectEdgeCase('rename content', {
                 fileCount: 1,
                 isTruncated: false,
                 hasReservedNames: false,
-                categories
+                categories,
             });
 
             assert.strictEqual(edgeCase, EdgeCaseType.RenamesOnly);
@@ -111,14 +107,14 @@ Binary files a/image.png and b/image.png differ`;
                 modified: ['existing.ts'],
                 deleted: ['old.ts'],
                 renamed: [],
-                binary: []
+                binary: [],
             };
 
             const edgeCase = detectEdgeCase('mixed content', {
                 fileCount: 3,
                 isTruncated: false,
                 hasReservedNames: false,
-                categories
+                categories,
             });
 
             assert.strictEqual(edgeCase, EdgeCaseType.MixedOperations);
@@ -130,14 +126,14 @@ Binary files a/image.png and b/image.png differ`;
                 modified: ['file.ts'],
                 deleted: [],
                 renamed: [],
-                binary: []
+                binary: [],
             };
 
             const edgeCase = detectEdgeCase('+const x = 1;\n-const y = 2;', {
                 fileCount: 1,
                 isTruncated: false,
                 hasReservedNames: false,
-                categories
+                categories,
             });
 
             assert.strictEqual(edgeCase, null);
@@ -148,7 +144,7 @@ Binary files a/image.png and b/image.png differ`;
         test('should generate prompt for whitespace changes', () => {
             const prompt = createEdgeCasePrompt(EdgeCaseType.WhitespaceOnly, {
                 diff: 'whitespace diff',
-                language: 'english'
+                language: 'english',
             });
 
             assert.ok(prompt.includes('whitespace') || prompt.includes('formatting'));
@@ -157,13 +153,13 @@ Binary files a/image.png and b/image.png differ`;
         test('should mention formatting in the prompt', () => {
             const prompt = createEdgeCasePrompt(EdgeCaseType.WhitespaceOnly, {
                 diff: 'diff content',
-                language: 'english'
+                language: 'english',
             });
 
             assert.ok(
                 prompt.toLowerCase().includes('format') ||
-                prompt.toLowerCase().includes('whitespace') ||
-                prompt.toLowerCase().includes('style')
+                    prompt.toLowerCase().includes('whitespace') ||
+                    prompt.toLowerCase().includes('style'),
             );
         });
     });
@@ -173,7 +169,7 @@ Binary files a/image.png and b/image.png differ`;
             const prompt = createEdgeCasePrompt(EdgeCaseType.BinaryFiles, {
                 diff: 'Binary files differ',
                 language: 'english',
-                binaryFiles: ['image.png', 'data.bin']
+                binaryFiles: ['image.png', 'data.bin'],
             });
 
             assert.ok(prompt.includes('binary') || prompt.includes('Binary'));
@@ -183,7 +179,7 @@ Binary files a/image.png and b/image.png differ`;
             const prompt = createEdgeCasePrompt(EdgeCaseType.BinaryFiles, {
                 diff: 'Binary diff',
                 language: 'english',
-                binaryFiles: ['icon.png']
+                binaryFiles: ['icon.png'],
             });
 
             assert.ok(prompt.includes('icon.png') || prompt.includes('binary'));
@@ -195,12 +191,11 @@ Binary files a/image.png and b/image.png differ`;
             const prompt = createEdgeCasePrompt(EdgeCaseType.DeletionsOnly, {
                 diff: 'deleted content',
                 language: 'english',
-                deletedFiles: ['old-file.ts']
+                deletedFiles: ['old-file.ts'],
             });
 
             assert.ok(
-                prompt.toLowerCase().includes('delet') ||
-                prompt.toLowerCase().includes('remov')
+                prompt.toLowerCase().includes('delet') || prompt.toLowerCase().includes('remov'),
             );
         });
 
@@ -208,13 +203,13 @@ Binary files a/image.png and b/image.png differ`;
             const prompt = createEdgeCasePrompt(EdgeCaseType.DeletionsOnly, {
                 diff: 'deleted content',
                 language: 'english',
-                deletedFiles: ['deprecated.ts', 'unused.ts']
+                deletedFiles: ['deprecated.ts', 'unused.ts'],
             });
 
             assert.ok(
                 prompt.includes('deprecated.ts') ||
-                prompt.includes('deleted') ||
-                prompt.includes('files')
+                    prompt.includes('deleted') ||
+                    prompt.includes('files'),
             );
         });
     });
@@ -224,12 +219,11 @@ Binary files a/image.png and b/image.png differ`;
             const prompt = createEdgeCasePrompt(EdgeCaseType.RenamesOnly, {
                 diff: 'rename content',
                 language: 'english',
-                renamedFiles: [{ from: 'old.ts', to: 'new.ts' }]
+                renamedFiles: [{ from: 'old.ts', to: 'new.ts' }],
             });
 
             assert.ok(
-                prompt.toLowerCase().includes('rename') ||
-                prompt.toLowerCase().includes('move')
+                prompt.toLowerCase().includes('rename') || prompt.toLowerCase().includes('move'),
             );
         });
 
@@ -237,13 +231,13 @@ Binary files a/image.png and b/image.png differ`;
             const prompt = createEdgeCasePrompt(EdgeCaseType.RenamesOnly, {
                 diff: 'rename content',
                 language: 'english',
-                renamedFiles: [{ from: 'utils.ts', to: 'helpers.ts' }]
+                renamedFiles: [{ from: 'utils.ts', to: 'helpers.ts' }],
             });
 
             assert.ok(
                 prompt.includes('utils.ts') ||
-                prompt.includes('helpers.ts') ||
-                prompt.includes('rename')
+                    prompt.includes('helpers.ts') ||
+                    prompt.includes('rename'),
             );
         });
     });
@@ -258,8 +252,8 @@ Binary files a/image.png and b/image.png differ`;
                     modified: ['existing.ts'],
                     deleted: ['old.ts'],
                     renamed: [],
-                    binary: []
-                }
+                    binary: [],
+                },
             });
 
             assert.ok(prompt.length > 0);
@@ -274,8 +268,8 @@ Binary files a/image.png and b/image.png differ`;
                     modified: ['b.ts'],
                     deleted: ['c.ts'],
                     renamed: [{ from: 'd.ts', to: 'e.ts' }],
-                    binary: ['f.png']
-                }
+                    binary: ['f.png'],
+                },
             });
 
             // Should reference multiple types of changes
@@ -285,7 +279,7 @@ Binary files a/image.png and b/image.png differ`;
                 lowerPrompt.includes('modif'),
                 lowerPrompt.includes('delet'),
                 lowerPrompt.includes('rename'),
-                lowerPrompt.includes('binary')
+                lowerPrompt.includes('binary'),
             ].filter(Boolean).length;
 
             // Should mention at least some operations
@@ -297,14 +291,12 @@ Binary files a/image.png and b/image.png differ`;
         test('should respect language setting for prompts', () => {
             const prompt = createEdgeCasePrompt(EdgeCaseType.WhitespaceOnly, {
                 diff: 'diff',
-                language: 'japanese'
+                language: 'japanese',
             });
 
             // Prompt should include language instruction
             assert.ok(
-                prompt.includes('japanese') ||
-                prompt.includes('Japanese') ||
-                prompt.length > 0
+                prompt.includes('japanese') || prompt.includes('Japanese') || prompt.length > 0,
             );
         });
 
@@ -314,7 +306,7 @@ Binary files a/image.png and b/image.png differ`;
             for (const lang of languages) {
                 const prompt = createEdgeCasePrompt(EdgeCaseType.BinaryFiles, {
                     diff: 'diff',
-                    language: lang
+                    language: lang,
                 });
                 assert.ok(prompt.length > 0, `Prompt should be generated for ${lang}`);
             }
@@ -326,7 +318,7 @@ Binary files a/image.png and b/image.png differ`;
             const edgeCase = detectEdgeCase('', {
                 fileCount: 0,
                 isTruncated: false,
-                hasReservedNames: false
+                hasReservedNames: false,
             });
 
             // Empty diff might be detected as a special case or null
@@ -341,7 +333,7 @@ Binary files a/image.png and b/image.png differ`;
             const edgeCase = detectEdgeCase(diff, {
                 fileCount: 1,
                 isTruncated: false,
-                hasReservedNames: false
+                hasReservedNames: false,
             });
 
             // Should handle gracefully
@@ -356,7 +348,7 @@ Binary files a/data.bin and b/data.bin differ`;
             const edgeCase = detectEdgeCase(diff, {
                 fileCount: 3,
                 isTruncated: false,
-                hasReservedNames: false
+                hasReservedNames: false,
             });
 
             assert.strictEqual(edgeCase, EdgeCaseType.BinaryFiles);

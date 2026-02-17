@@ -9,7 +9,7 @@ suite('Extension Test Suite', () => {
         const config = vscode.workspace.getConfiguration('otakCommitter');
         const settings: LanguageSettings = {
             language: config.get<string>('language') || 'english',
-            messageStyle: config.get<string>('messageStyle') || 'normal'
+            messageStyle: config.get<string>('messageStyle') || 'normal',
         };
 
         // 言語設定が存在することを確認
@@ -29,7 +29,7 @@ suite('Extension Test Suite', () => {
     test('RTL languages are properly marked', () => {
         // RTL言語の確認
         const rtlLanguages = ['arabic', 'hebrew'];
-        rtlLanguages.forEach(lang => {
+        rtlLanguages.forEach((lang) => {
             const config = LANGUAGE_CONFIGS[lang as SupportedLanguage];
             assert.strictEqual(config.isRTL, true, `${lang} should be marked as RTL`);
         });

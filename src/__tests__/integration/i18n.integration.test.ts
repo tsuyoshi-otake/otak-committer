@@ -30,7 +30,7 @@ suite('i18n Integration Tests', () => {
             // Should be one of supported locales
             assert.ok(
                 ['ja', 'vi', 'ko', 'zh-cn', 'zh-tw', 'en'].includes(locale),
-                `Expected locale to be a supported locale, got '${locale}'`
+                `Expected locale to be a supported locale, got '${locale}'`,
             );
         });
 
@@ -129,7 +129,10 @@ suite('i18n Integration Tests', () => {
             const manager = TranslationManager.getInstance();
             manager.setLocale('en');
 
-            const message = manager.t('messages.prCreatedSuccess', { prType: 'Draft PR', number: 42 });
+            const message = manager.t('messages.prCreatedSuccess', {
+                prType: 'Draft PR',
+                number: 42,
+            });
             assert.strictEqual(message, 'Draft PR #42 created successfully!');
         });
     });
@@ -280,7 +283,7 @@ suite('i18n Integration Tests', () => {
                 'commands.changeLanguage',
                 'commands.changeMessageStyle',
                 'commands.setApiKey',
-                'commands.openSettings'
+                'commands.openSettings',
             ];
 
             // Test all supported locales
@@ -288,7 +291,11 @@ suite('i18n Integration Tests', () => {
                 manager.setLocale(locale);
                 for (const key of commandKeys) {
                     const translation = manager.t(key);
-                    assert.notStrictEqual(translation, key, `Missing ${locale} translation for ${key}`);
+                    assert.notStrictEqual(
+                        translation,
+                        key,
+                        `Missing ${locale} translation for ${key}`,
+                    );
                 }
             }
         });
@@ -301,7 +308,7 @@ suite('i18n Integration Tests', () => {
                 'messages.apiKeySaved',
                 'messages.authRequired',
                 'messages.noChangesToCommit',
-                'messages.commitMessageGenerated'
+                'messages.commitMessageGenerated',
             ];
 
             // Test all supported locales
@@ -309,7 +316,11 @@ suite('i18n Integration Tests', () => {
                 manager.setLocale(locale);
                 for (const key of messageKeys) {
                     const translation = manager.t(key);
-                    assert.notStrictEqual(translation, key, `Missing ${locale} translation for ${key}`);
+                    assert.notStrictEqual(
+                        translation,
+                        key,
+                        `Missing ${locale} translation for ${key}`,
+                    );
                 }
             }
         });
@@ -321,7 +332,7 @@ suite('i18n Integration Tests', () => {
                 'statusBar.configuration',
                 'statusBar.currentStyle',
                 'statusBar.setApiKey',
-                'statusBar.openSettings'
+                'statusBar.openSettings',
             ];
 
             // Test all supported locales
@@ -329,7 +340,11 @@ suite('i18n Integration Tests', () => {
                 manager.setLocale(locale);
                 for (const key of statusBarKeys) {
                     const translation = manager.t(key);
-                    assert.notStrictEqual(translation, key, `Missing ${locale} translation for ${key}`);
+                    assert.notStrictEqual(
+                        translation,
+                        key,
+                        `Missing ${locale} translation for ${key}`,
+                    );
                 }
             }
         });

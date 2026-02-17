@@ -9,10 +9,10 @@ import { t } from '../i18n/index.js';
 
 /**
  * Command for generating GitHub issues using AI
- * 
+ *
  * This command analyzes repository files and generates appropriate GitHub issues
  * using OpenAI's API. It handles the entire workflow from file selection to issue creation.
- * 
+ *
  * @example
  * ```typescript
  * const command = new IssueCommand(context);
@@ -20,17 +20,16 @@ import { t } from '../i18n/index.js';
  * ```
  */
 export class IssueCommand extends BaseCommand {
-
     /**
      * Execute the issue generation command
-     * 
+     *
      * Workflow:
      * 1. Authenticate with GitHub
      * 2. Initialize issue generator service
      * 3. Select issue type and files for analysis
      * 4. Generate preview and allow modifications
      * 5. Create issue on GitHub
-     * 
+     *
      * @returns A promise that resolves when the command completes
      */
     async execute(): Promise<void> {
@@ -71,7 +70,6 @@ export class IssueCommand extends BaseCommand {
             await this.generateAndCreateIssue(service, issueType, description, selectedFiles);
 
             this.logger.info('Successfully completed issue generation');
-
         } catch (error) {
             this.handleErrorSilently(error, 'generating issue');
         } finally {
@@ -81,18 +79,16 @@ export class IssueCommand extends BaseCommand {
 
     /**
      * Authenticate with GitHub
-     * 
+     *
      * @returns True if authentication successful, false otherwise
      */
     private async authenticateGitHub(): Promise<boolean> {
         this.logger.debug('Checking GitHub authentication');
 
         try {
-            const session = await vscode.authentication.getSession(
-                'github',
-                ['repo'],
-                { createIfNone: true }
-            );
+            const session = await vscode.authentication.getSession('github', ['repo'], {
+                createIfNone: true,
+            });
 
             if (!session) {
                 this.logger.warning('GitHub authentication failed');
@@ -102,20 +98,17 @@ export class IssueCommand extends BaseCommand {
 
             this.logger.debug('GitHub authentication successful');
             return true;
-
         } catch (error) {
             this.logger.error('Error during GitHub authentication', error);
-            throw new ServiceError(
-                'Failed to authenticate with GitHub',
-                'github',
-                { originalError: error }
-            );
+            throw new ServiceError('Failed to authenticate with GitHub', 'github', {
+                originalError: error,
+            });
         }
     }
 
     /**
      * Initialize the issue generator service
-     * 
+     *
      * @returns Issue generator service instance or undefined if initialization fails
      */
     private async initializeService(): Promise<IssueGeneratorService | undefined> {
@@ -123,27 +116,26 @@ export class IssueCommand extends BaseCommand {
 
         try {
             const service = await IssueGeneratorServiceFactory.initialize(undefined, this.context);
-            
+
             if (!service) {
                 this.logger.error('Failed to initialize IssueGeneratorService');
                 return undefined;
             }
 
             return service;
-
         } catch (error) {
             this.logger.error('Error initializing issue generator service', error);
             throw new ServiceError(
                 'Failed to initialize issue generator service',
                 'issue-generator',
-                { originalError: error }
+                { originalError: error },
             );
         }
     }
 
     /**
      * Select issue type from available options
-     * 
+     *
      * @param service - Issue generator service instance
      * @returns Selected issue type or undefined if cancelled
      */
@@ -151,12 +143,9 @@ export class IssueCommand extends BaseCommand {
         this.logger.debug('Prompting user to select issue type');
 
         const issueTypes: IssueType[] = service.getAvailableTypes();
-        const issueType = await vscode.window.showQuickPick<IssueType>(
-            issueTypes,
-            {
-                placeHolder: t('quickPick.selectIssueType')
-            }
-        );
+        const issueType = await vscode.window.showQuickPick<IssueType>(issueTypes, {
+            placeHolder: t('quickPick.selectIssueType'),
+        });
 
         if (!issueType) {
             this.logger.info('Issue type selection cancelled');
@@ -169,11 +158,13 @@ export class IssueCommand extends BaseCommand {
 
     /**
      * Select files for analysis
-     * 
+     *
      * @param service - Issue generator service instance
      * @returns Array of selected file paths or undefined if cancelled
      */
-    private async selectFilesForAnalysis(service: IssueGeneratorService): Promise<string[] | undefined> {
+    private async selectFilesForAnalysis(
+        service: IssueGeneratorService,
+    ): Promise<string[] | undefined> {
         this.logger.debug('Getting tracked files');
 
         try {
@@ -191,7 +182,7 @@ export class IssueCommand extends BaseCommand {
                 const confirm = await vscode.window.showInformationMessage(
                     t('messages.noFilesSelectedConfirm'),
                     t('buttons.yes'),
-                    t('buttons.no')
+                    t('buttons.no'),
                 );
 
                 if (confirm !== t('buttons.yes')) {
@@ -202,7 +193,6 @@ export class IssueCommand extends BaseCommand {
 
             this.logger.debug(`Selected ${selectedFiles.length} files for analysis`);
             return selectedFiles;
-
         } catch (error) {
             this.logger.error('Error selecting files', error);
             throw error;
@@ -211,7 +201,7 @@ export class IssueCommand extends BaseCommand {
 
     /**
      * Get issue description from user
-     * 
+     *
      * @returns Issue description or undefined if cancelled
      */
     private async getIssueDescription(): Promise<string | undefined> {
@@ -219,7 +209,7 @@ export class IssueCommand extends BaseCommand {
 
         const description = await vscode.window.showInputBox({
             placeHolder: t('quickPick.enterIssueDescription'),
-            prompt: t('quickPick.describeIssue')
+            prompt: t('quickPick.describeIssue'),
         });
 
         if (!description) {
@@ -233,7 +223,7 @@ export class IssueCommand extends BaseCommand {
 
     /**
      * Generate preview and create issue with user feedback loop
-     * 
+     *
      * @param service - Issue generator service instance
      * @param issueType - Selected issue type
      * @param description - Issue description
@@ -243,17 +233,21 @@ export class IssueCommand extends BaseCommand {
         service: IssueGeneratorService,
         issueType: IssueType,
         description: string,
-        selectedFiles: string[]
+        selectedFiles: string[],
     ): Promise<void> {
         await vscode.window.withProgress(
             {
                 location: vscode.ProgressLocation.Notification,
                 title: t('messages.generatingIssue'),
-                cancellable: false
+                cancellable: false,
             },
             async (progress) => {
                 const preview = await this.runIssueGenerationLoop(
-                    service, issueType, description, selectedFiles, progress
+                    service,
+                    issueType,
+                    description,
+                    selectedFiles,
+                    progress,
                 );
                 if (!preview) {
                     return;
@@ -265,7 +259,7 @@ export class IssueCommand extends BaseCommand {
                 if (issueUrl) {
                     await this.handleSuccessfulCreation(issueUrl);
                 }
-            }
+            },
         );
     }
 
@@ -278,14 +272,14 @@ export class IssueCommand extends BaseCommand {
         issueType: IssueType,
         description: string,
         selectedFiles: string[],
-        progress: vscode.Progress<{ message?: string }>
+        progress: vscode.Progress<{ message?: string }>,
     ): Promise<GeneratedIssueContent | undefined> {
         progress.report({ message: t('messages.analyzingRepository') });
 
         let preview = await service.generatePreview({
             type: issueType,
             description,
-            files: selectedFiles
+            files: selectedFiles,
         });
 
         while (true) {
@@ -314,14 +308,14 @@ export class IssueCommand extends BaseCommand {
             preview = await service.generatePreview({
                 type: issueType,
                 description: `${description}\n\nModification instructions: ${modifications}`,
-                files: selectedFiles
+                files: selectedFiles,
             });
         }
     }
 
     /**
      * Show markdown preview of the issue
-     * 
+     *
      * @param issueType - Issue type
      * @param preview - Generated issue content
      */
@@ -335,7 +329,6 @@ export class IssueCommand extends BaseCommand {
             if (!this.previewFile) {
                 throw new Error('Failed to show preview');
             }
-
         } catch (error) {
             this.logger.error('Error showing preview', error);
             throw error;
@@ -344,49 +337,54 @@ export class IssueCommand extends BaseCommand {
 
     /**
      * Get user action for the preview
-     * 
+     *
      * @returns User action: 'modify', 'create', or 'cancel'
      */
     private async getUserAction(): Promise<string | undefined> {
         this.logger.debug('Prompting user for action');
 
-        const action = await vscode.window.showQuickPick([
+        const action = await vscode.window.showQuickPick(
+            [
+                {
+                    label: `$(edit) ${t('issueActions.modify')}`,
+                    description: t('issueActions.modifyDescription'),
+                    action: 'modify',
+                },
+                {
+                    label: `$(check) ${t('issueActions.create')}`,
+                    description: t('issueActions.createDescription'),
+                    action: 'create',
+                },
+                {
+                    label: `$(close) ${t('issueActions.cancel')}`,
+                    description: t('issueActions.cancelDescription'),
+                    action: 'cancel',
+                },
+            ],
             {
-                label: `$(edit) ${t('issueActions.modify')}`,
-                description: t('issueActions.modifyDescription'),
-                action: 'modify'
+                placeHolder: t('quickPick.chooseAction'),
+                matchOnDescription: true,
+                ignoreFocusOut: true,
             },
-            {
-                label: `$(check) ${t('issueActions.create')}`,
-                description: t('issueActions.createDescription'),
-                action: 'create'
-            },
-            {
-                label: `$(close) ${t('issueActions.cancel')}`,
-                description: t('issueActions.cancelDescription'),
-                action: 'cancel'
-            }
-        ], {
-            placeHolder: t('quickPick.chooseAction'),
-            matchOnDescription: true,
-            ignoreFocusOut: true
-        });
+        );
 
         return action?.action;
     }
 
     /**
      * Get modification instructions from user
-     * 
+     *
      * @param progress - Progress reporter
      * @returns Modification instructions or undefined if cancelled
      */
-    private async getModificationInstructions(progress: vscode.Progress<{ message?: string }>): Promise<string | undefined> {
+    private async getModificationInstructions(
+        progress: vscode.Progress<{ message?: string }>,
+    ): Promise<string | undefined> {
         progress.report({ message: t('messages.waitingForModificationInput') });
 
         const modifications = await vscode.window.showInputBox({
             placeHolder: t('quickPick.enterModificationInstructions'),
-            prompt: t('quickPick.describeModification')
+            prompt: t('quickPick.describeModification'),
         });
 
         return modifications;
@@ -394,7 +392,7 @@ export class IssueCommand extends BaseCommand {
 
     /**
      * Handle successful issue creation
-     * 
+     *
      * @param issueUrl - URL of the created issue
      */
     private async handleSuccessfulCreation(issueUrl: string): Promise<void> {
@@ -406,12 +404,11 @@ export class IssueCommand extends BaseCommand {
         // Show success message
         const response = await vscode.window.showInformationMessage(
             t('messages.issueCreatedSuccess'),
-            t('buttons.openIssue')
+            t('buttons.openIssue'),
         );
 
         if (response === t('buttons.openIssue')) {
             await this.openExternalUrl(issueUrl);
         }
     }
-
 }

@@ -2,7 +2,11 @@ import * as vscode from 'vscode';
 import { SecretStorageProvider } from './SecretStorageProvider';
 import { ConfigStorageProvider } from './ConfigStorageProvider';
 import { StorageMigrationService } from './StorageMigrationService';
-import { StorageDiagnostics, StorageHealthResult, StorageDiagnosticsResult } from './StorageDiagnostics';
+import {
+    StorageDiagnostics,
+    StorageHealthResult,
+    StorageDiagnosticsResult,
+} from './StorageDiagnostics';
 import { StorageError } from '../../types/errors';
 import { ServiceProvider } from '../../types/enums/ServiceProvider';
 import { Logger } from '../logging/Logger';
@@ -36,13 +40,13 @@ export class StorageManager {
         this.migrationService = new StorageMigrationService(
             context,
             this.configStorage,
-            (service, value) => this.setApiKey(service, value)
+            (service, value) => this.setApiKey(service, value),
         );
         this.diagnosticsService = new StorageDiagnostics(
             context,
             this.secretStorage,
             this.configStorage,
-            this.migrationService
+            this.migrationService,
         );
     }
 
@@ -128,7 +132,7 @@ export class StorageManager {
                 this.logger.error(`Fallback storage also failed`, fallbackError);
                 throw new StorageError(
                     `Failed to store API key for service: ${service}. All storage mechanisms failed.`,
-                    { service, originalError: error, fallbackError }
+                    { service, originalError: error, fallbackError },
                 );
             }
         }
@@ -159,7 +163,10 @@ export class StorageManager {
         if (errors.length === 2) {
             throw new StorageError(
                 `Failed to delete API key for service: ${service} from all storage locations`,
-                { service, errors: errors.map(e => e instanceof Error ? e.message : String(e)) }
+                {
+                    service,
+                    errors: errors.map((e) => (e instanceof Error ? e.message : String(e))),
+                },
             );
         }
 
@@ -215,10 +222,10 @@ export class StorageManager {
             await this.secretStorage.set(key, value);
         } catch (error) {
             this.logger.error(`Error storing secret for key ${key}`, error);
-            throw new StorageError(
-                `Failed to store secret for key: ${key}`,
-                { key, originalError: error }
-            );
+            throw new StorageError(`Failed to store secret for key: ${key}`, {
+                key,
+                originalError: error,
+            });
         }
     }
 
@@ -251,16 +258,16 @@ export class StorageManager {
     async setConfig(
         key: string,
         value: string,
-        target: vscode.ConfigurationTarget = vscode.ConfigurationTarget.Global
+        target: vscode.ConfigurationTarget = vscode.ConfigurationTarget.Global,
     ): Promise<void> {
         try {
             await this.configStorage.set(key, value, target);
         } catch (error) {
             this.logger.error(`Error storing config for key ${key}`, error);
-            throw new StorageError(
-                `Failed to store configuration for key: ${key}`,
-                { key, originalError: error }
-            );
+            throw new StorageError(`Failed to store configuration for key: ${key}`, {
+                key,
+                originalError: error,
+            });
         }
     }
 

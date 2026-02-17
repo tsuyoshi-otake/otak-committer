@@ -40,12 +40,12 @@ const CONFIG_SECTION = 'otakCommitter';
  * Used to integrate with the existing language system in src/languages/
  */
 export const LOCALE_TO_LANGUAGE_MAP: Record<SupportedLocale, string> = {
-    'ja': 'japanese',
-    'vi': 'vietnamese',
-    'ko': 'korean',
+    ja: 'japanese',
+    vi: 'vietnamese',
+    ko: 'korean',
     'zh-cn': 'chinese',
     'zh-tw': 'traditionalChinese',
-    'en': 'english'
+    en: 'english',
 };
 
 /**

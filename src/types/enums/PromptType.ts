@@ -7,5 +7,5 @@ export enum PromptType {
     PRTitle = 'prTitle',
     PRBody = 'prBody',
     IssueTask = 'issue.task',
-    IssueStandard = 'issue.standard'
+    IssueStandard = 'issue.standard',
 }

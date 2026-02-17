@@ -23,7 +23,7 @@ const DEFAULT_OPTIONS: Required<SanitizationOptions> = {
     preserveUnicode: true,
     escapeShellMetachars: true,
     removeControlChars: true,
-    normalizeTypography: true
+    normalizeTypography: true,
 };
 
 /**
@@ -35,15 +35,17 @@ const DEFAULT_OPTIONS: Required<SanitizationOptions> = {
  * **Property 5: Shell metacharacter safety**
  */
 export function escapeShellMetacharacters(text: string): string {
-    return text
-        // Neutralize command substitution $(...) by replacing $ with safe character
-        .replace(/\$\(/g, '(dollar)(')
-        // Neutralize variable expansion ${...}
-        .replace(/\$\{/g, '(dollar){')
-        // Convert backticks to single quotes for code references (including empty backticks)
-        .replace(/`([^`]*)`/g, "'$1'")
-        // Remove any remaining lone backticks
-        .replace(/`/g, "'");
+    return (
+        text
+            // Neutralize command substitution $(...) by replacing $ with safe character
+            .replace(/\$\(/g, '(dollar)(')
+            // Neutralize variable expansion ${...}
+            .replace(/\$\{/g, '(dollar){')
+            // Convert backticks to single quotes for code references (including empty backticks)
+            .replace(/`([^`]*)`/g, "'$1'")
+            // Remove any remaining lone backticks
+            .replace(/`/g, "'")
+    );
 }
 
 /**
@@ -55,17 +57,19 @@ export function escapeShellMetacharacters(text: string): string {
  * **Property 7: Typography normalization**
  */
 export function normalizeTypography(text: string): string {
-    return text
-        // Normalize smart double quotes (U+201C, U+201D)
-        .replace(/[\u201C\u201D]/g, '"')
-        // Normalize smart single quotes (U+2018, U+2019)
-        .replace(/[\u2018\u2019]/g, "'")
-        // Normalize em dash to hyphen (U+2014)
-        .replace(/\u2014/g, '-')
-        // Normalize en dash to hyphen (U+2013)
-        .replace(/\u2013/g, '-')
-        // Normalize ellipsis (U+2026)
-        .replace(/\u2026/g, '...');
+    return (
+        text
+            // Normalize smart double quotes (U+201C, U+201D)
+            .replace(/[\u201C\u201D]/g, '"')
+            // Normalize smart single quotes (U+2018, U+2019)
+            .replace(/[\u2018\u2019]/g, "'")
+            // Normalize em dash to hyphen (U+2014)
+            .replace(/\u2014/g, '-')
+            // Normalize en dash to hyphen (U+2013)
+            .replace(/\u2013/g, '-')
+            // Normalize ellipsis (U+2026)
+            .replace(/\u2026/g, '...')
+    );
 }
 
 /**
@@ -113,10 +117,7 @@ export function removeMarkdownCodeBlocks(text: string): string {
  *
  * **Properties 4-8: Unicode, Shell safety, Markdown, Typography, Control chars**
  */
-export function sanitizeCommitMessage(
-    message: string,
-    options?: SanitizationOptions
-): string {
+export function sanitizeCommitMessage(message: string, options?: SanitizationOptions): string {
     const opts = { ...DEFAULT_OPTIONS, ...options };
     let result = message;
 

@@ -23,5 +23,5 @@ export interface TemplateInfo {
 export interface IServiceError extends Error {
     code: string;
     status?: number;
-    data?: any;
+    data?: unknown;
 }

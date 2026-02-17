@@ -1,36 +1,36 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "type": "npm",
-            "script": "esbuild-watch",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "problemMatcher": {
-                "owner": "esbuild",
-                "fileLocation": ["relative", "${workspaceFolder}"],
-                "pattern": {
-                    "regexp": "^(.+):(\\d+):(\\d+): (error|warning): (.+)$",
-                    "file": 1,
-                    "line": 2,
-                    "column": 3,
-                    "severity": 4,
-                    "message": 5
-                },
-                "background": {
-                    "activeOnStart": true,
-                    "beginsPattern": "^\\[watch\\]",
-                    "endsPattern": "build finished"
-                }
-            },
-            "isBackground": true,
-            "presentation": {
-                "reveal": "silent",
-                "panel": "dedicated"
-            },
-            "label": "npm: esbuild-watch"
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "esbuild-watch",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": {
+        "owner": "esbuild",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": {
+          "regexp": "^(.+):(\\d+):(\\d+): (error|warning): (.+)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^\\[watch\\]",
+          "endsPattern": "build finished"
         }
-    ]
+      },
+      "isBackground": true,
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated"
+      },
+      "label": "npm: esbuild-watch"
+    }
+  ]
 }

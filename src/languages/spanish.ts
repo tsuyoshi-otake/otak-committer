@@ -1,4 +1,4 @@
-import { PromptType } from '../types/language';
+import { PromptType } from '../types/enums/PromptType';
 
 export const getSpanishPrompt = (type: PromptType): string => {
     const prompts: Record<PromptType, string> = {
@@ -112,7 +112,7 @@ Considere:
 - ¿Qué documentación se necesita?
 - ¿Qué debe probarse?
 - ¿Hay cambios disruptivos?
-`
+`,
     };
 
     return prompts[type] || '';

@@ -6,5 +6,5 @@ export enum IssueTypeEnum {
     Bug = 'bug',
     Feature = 'feature',
     Docs = 'docs',
-    Refactor = 'refactor'
+    Refactor = 'refactor',
 }

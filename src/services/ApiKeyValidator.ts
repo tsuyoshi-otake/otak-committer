@@ -42,21 +42,26 @@ export class ApiKeyValidator {
      * @param apiKey - The API key to validate
      * @returns Validation result
      */
-    static async validateWithOpenAI(apiKey: string): Promise<{ isValid: boolean; status?: number; isNetworkError?: boolean; error?: string }> {
+    static async validateWithOpenAI(
+        apiKey: string,
+    ): Promise<{ isValid: boolean; status?: number; isNetworkError?: boolean; error?: string }> {
         const logger = Logger.getInstance();
         logger.info('Validating API key with OpenAI');
 
         try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), ApiKeyValidator.VALIDATION_TIMEOUT_MS);
+            const timeoutId = setTimeout(
+                () => controller.abort(),
+                ApiKeyValidator.VALIDATION_TIMEOUT_MS,
+            );
 
             const response = await fetch('https://api.openai.com/v1/models', {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${apiKey}`,
-                    'Content-Type': 'application/json'
+                    Authorization: `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json',
                 },
-                signal: controller.signal
+                signal: controller.signal,
             }).finally(() => clearTimeout(timeoutId));
 
             if (response.ok) {
@@ -65,7 +70,8 @@ export class ApiKeyValidator {
             }
 
             const errorData = await response.json().catch(() => ({}));
-            const errorMessage = (errorData as { error?: { message?: string } }).error?.message || 'Unknown error';
+            const errorMessage =
+                (errorData as { error?: { message?: string } }).error?.message || 'Unknown error';
             logger.warning(`API key validation failed: ${response.status}`);
             const sanitizedMessage = ApiKeyValidator.sanitizeErrorMessage(errorMessage, apiKey);
             return { isValid: false, status: response.status, error: sanitizedMessage };

@@ -23,7 +23,7 @@ suite('Token Management Property Tests', () => {
                 const expected = Math.ceil(text.length / 4);
                 const actual = TokenManager.estimateTokens(text);
                 return actual === expected;
-            })
+            }),
         );
     });
 
@@ -31,7 +31,7 @@ suite('Token Management Property Tests', () => {
         runPropertyTest(
             fc.property(fc.string(), (text) => {
                 return TokenManager.estimateTokens(text) >= 0;
-            })
+            }),
         );
     });
 
@@ -60,8 +60,8 @@ suite('Token Management Property Tests', () => {
                     }
                     // If validation fails, total should exceed limit
                     return total > TokenManager.CONTEXT_LIMIT;
-                }
-            )
+                },
+            ),
         );
     });
 
@@ -75,8 +75,8 @@ suite('Token Management Property Tests', () => {
                     const result1 = TokenManager.validateAllocation(inputTokens, outputTokens);
                     const result2 = TokenManager.validateAllocation(inputTokens, outputTokens);
                     return result1 === result2;
-                }
-            )
+                },
+            ),
         );
     });
 
@@ -89,22 +89,19 @@ suite('Token Management Property Tests', () => {
                     const truncated = TokenManager.truncateInput(input, maxTokens);
                     const truncatedTokens = TokenManager.estimateTokens(truncated);
                     return truncatedTokens <= maxTokens;
-                }
-            )
+                },
+            ),
         );
     });
 
     test('Truncation should preserve input when within limit', () => {
         runPropertyTest(
-            fc.property(
-                fc.string({ minLength: 0, maxLength: 100 }),
-                (input) => {
-                    // Use a large enough token limit
-                    const maxTokens = 1000;
-                    const truncated = TokenManager.truncateInput(input, maxTokens);
-                    return truncated === input;
-                }
-            )
+            fc.property(fc.string({ minLength: 0, maxLength: 100 }), (input) => {
+                // Use a large enough token limit
+                const maxTokens = 1000;
+                const truncated = TokenManager.truncateInput(input, maxTokens);
+                return truncated === input;
+            }),
         );
     });
 });

@@ -10,7 +10,7 @@ export class CommandError extends BaseError {
     constructor(
         message: string,
         public readonly commandId: string,
-        context?: Record<string, any>
+        context?: Record<string, unknown>,
     ) {
         super(message, 'COMMAND_ERROR', { ...context, commandId });
     }

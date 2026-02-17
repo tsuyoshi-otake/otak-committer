@@ -6,11 +6,7 @@ import { GitHubService, GitHubServiceFactory } from './github';
 import { BaseService, BaseServiceFactory } from './base';
 import { ServiceConfig } from '../types';
 import { t } from '../i18n';
-import {
-    IssueType,
-    IssueGenerationParams,
-    GeneratedIssueContent
-} from '../types/issue';
+import { IssueType, IssueGenerationParams, GeneratedIssueContent } from '../types/issue';
 import { ErrorHandler } from '../infrastructure/error';
 import { TokenManager } from './tokenManager';
 
@@ -23,10 +19,10 @@ interface FileAnalysis {
 
 /**
  * Service for generating GitHub issues using AI
- * 
+ *
  * Analyzes repository files and generates appropriate GitHub issues
  * with AI-powered content generation.
- * 
+ *
  * @example
  * ```typescript
  * const service = await IssueGeneratorService.initialize();
@@ -43,23 +39,37 @@ export class IssueGeneratorService extends BaseService {
     private static readonly MAX_FILE_PREVIEW_CHARS = 1000;
 
     private static readonly FILE_TYPE_MAP: Record<string, string> = {
-        ts: 'TypeScript', js: 'JavaScript', jsx: 'React JavaScript', tsx: 'React TypeScript',
-        css: 'CSS', scss: 'SCSS', html: 'HTML', json: 'JSON', md: 'Markdown',
-        py: 'Python', java: 'Java', cpp: 'C++', c: 'C', go: 'Go', rs: 'Rust', php: 'PHP', rb: 'Ruby'
+        ts: 'TypeScript',
+        js: 'JavaScript',
+        jsx: 'React JavaScript',
+        tsx: 'React TypeScript',
+        css: 'CSS',
+        scss: 'SCSS',
+        html: 'HTML',
+        json: 'JSON',
+        md: 'Markdown',
+        py: 'Python',
+        java: 'Java',
+        cpp: 'C++',
+        c: 'C',
+        go: 'Go',
+        rs: 'Rust',
+        php: 'PHP',
+        rb: 'Ruby',
     };
 
     constructor(
         private readonly openai: OpenAIService,
         private readonly github: GitHubService,
         private readonly git: GitService,
-        config?: Partial<ServiceConfig>
+        config?: Partial<ServiceConfig>,
     ) {
         super(config);
     }
 
     /**
      * Get all tracked files in the repository
-     * 
+     *
      * @returns Array of tracked file paths
      */
     async getTrackedFiles(): Promise<string[]> {
@@ -68,11 +78,11 @@ export class IssueGeneratorService extends BaseService {
 
     /**
      * Get available issue types
-     * 
+     *
      * Returns a list of issue types that can be generated (task, bug, feature, etc.)
-     * 
+     *
      * @returns Array of issue type configurations
-     * 
+     *
      * @example
      * ```typescript
      * const types = service.getAvailableTypes();
@@ -86,39 +96,39 @@ export class IssueGeneratorService extends BaseService {
             {
                 label: useEmoji ? '📋 Task' : 'Task',
                 description: 'General task or improvement',
-                type: 'task'
+                type: 'task',
             },
             {
                 label: useEmoji ? '🐛 Bug Report' : 'Bug Report',
                 description: 'Report a bug',
-                type: 'bug'
+                type: 'bug',
             },
             {
                 label: useEmoji ? '✨ Feature Request' : 'Feature Request',
                 description: 'Request a new feature',
-                type: 'feature'
+                type: 'feature',
             },
             {
                 label: useEmoji ? '📝 Documentation' : 'Documentation',
                 description: 'Documentation improvement',
-                type: 'docs'
+                type: 'docs',
             },
             {
                 label: useEmoji ? '🔧 Refactoring' : 'Refactoring',
                 description: 'Code improvement',
-                type: 'refactor'
-            }
+                type: 'refactor',
+            },
         ];
     }
 
     private async generateTitle(type: string, description: string): Promise<string> {
         try {
             this.logger.debug(`Generating title for ${type}`);
-            
+
             const title = await this.openai.createChatCompletion({
                 prompt: `Create a concise title (maximum ${IssueGeneratorService.MAX_TITLE_TOKENS} characters) in ${this.config.language || 'english'} for this ${type} based on the following description:\n\n${description}\n\nRequirements:\n- Must be in ${this.config.language || 'english'}\n- Maximum ${IssueGeneratorService.MAX_TITLE_TOKENS} characters\n- Clear and descriptive\n- No technical jargon unless necessary`,
                 temperature: 0.1,
-                maxTokens: IssueGeneratorService.MAX_TITLE_TOKENS
+                maxTokens: IssueGeneratorService.MAX_TITLE_TOKENS,
             });
 
             this.logger.info('Title generated successfully');
@@ -144,33 +154,54 @@ export class IssueGeneratorService extends BaseService {
         for (const file of files) {
             const extension = file.split('.').pop()?.toLowerCase();
             const type = this.getFileType(extension);
-            const displayPath = workspaceRoot ? path.relative(workspaceRoot, file).replace(/\\/g, '/') : file;
+            const displayPath = workspaceRoot
+                ? path.relative(workspaceRoot, file).replace(/\\/g, '/')
+                : file;
 
             if (totalTokens >= maxTokensLimit) {
-                analyses.push({ path: displayPath, content: '... (content omitted due to token limit)', type });
+                analyses.push({
+                    path: displayPath,
+                    content: '... (content omitted due to token limit)',
+                    type,
+                });
                 continue;
             }
 
-            const result = await this.analyzeOneFile(file, displayPath, type, totalTokens, maxTokensLimit);
+            const result = await this.analyzeOneFile(
+                file,
+                displayPath,
+                type,
+                totalTokens,
+                maxTokensLimit,
+            );
             totalTokens = result.totalTokens;
             analyses.push(result.analysis);
         }
 
-        this.logger.info(`File analysis complete: ${analyses.length} files analyzed, ${totalTokens} tokens`);
+        this.logger.info(
+            `File analysis complete: ${analyses.length} files analyzed, ${totalTokens} tokens`,
+        );
         return analyses;
     }
 
     private async analyzeOneFile(
-        file: string, displayPath: string, type: string,
-        totalTokens: number, maxTokensLimit: number
+        file: string,
+        displayPath: string,
+        type: string,
+        totalTokens: number,
+        maxTokensLimit: number,
     ): Promise<{ analysis: FileAnalysis; totalTokens: number }> {
         try {
             const fileUri = vscode.Uri.file(file);
 
             if (await this.isFileOversized(fileUri)) {
                 return {
-                    analysis: { path: displayPath, content: `... (content omitted: file larger than ${Math.floor(IssueGeneratorService.MAX_FILE_BYTES / 1024)}KB)`, type },
-                    totalTokens
+                    analysis: {
+                        path: displayPath,
+                        content: `... (content omitted: file larger than ${Math.floor(IssueGeneratorService.MAX_FILE_BYTES / 1024)}KB)`,
+                        type,
+                    },
+                    totalTokens,
                 };
             }
 
@@ -178,7 +209,9 @@ export class IssueGeneratorService extends BaseService {
             let content = new TextDecoder().decode(fileContent);
 
             if (content.length > IssueGeneratorService.MAX_FILE_PREVIEW_CHARS) {
-                content = content.substring(0, IssueGeneratorService.MAX_FILE_PREVIEW_CHARS) + '\n... (content truncated)';
+                content =
+                    content.substring(0, IssueGeneratorService.MAX_FILE_PREVIEW_CHARS) +
+                    '\n... (content truncated)';
             }
 
             const estimatedTokens = TokenManager.estimateTokens(content);
@@ -193,8 +226,12 @@ export class IssueGeneratorService extends BaseService {
         } catch (error) {
             this.logger.warning(`Failed to analyze file ${displayPath}`, error);
             return {
-                analysis: { path: displayPath, type, error: error instanceof Error ? error.message : 'Unknown error' },
-                totalTokens
+                analysis: {
+                    path: displayPath,
+                    type,
+                    error: error instanceof Error ? error.message : 'Unknown error',
+                },
+                totalTokens,
             };
         }
     }
@@ -202,28 +239,33 @@ export class IssueGeneratorService extends BaseService {
     private async isFileOversized(fileUri: vscode.Uri): Promise<boolean> {
         try {
             const stat = await vscode.workspace.fs.stat(fileUri);
-            return typeof stat.size === 'number' && stat.size > IssueGeneratorService.MAX_FILE_BYTES;
+            return (
+                typeof stat.size === 'number' && stat.size > IssueGeneratorService.MAX_FILE_BYTES
+            );
         } catch {
             return false;
         }
     }
 
     private getFileType(extension: string | undefined): string {
-        return extension ? (IssueGeneratorService.FILE_TYPE_MAP[extension] || 'Unknown') : 'Unknown';
+        return extension ? IssueGeneratorService.FILE_TYPE_MAP[extension] || 'Unknown' : 'Unknown';
     }
 
     private formatAnalysisResult(analyses: FileAnalysis[]): string {
         const parts: string[] = ['# Repository Analysis', ''];
 
         // ファイルタイプごとにグループ化
-        const groupedByType = analyses.reduce((groups: { [key: string]: FileAnalysis[] }, analysis) => {
-            const type = analysis.type || 'Unknown';
-            if (!groups[type]) {
-                groups[type] = [];
-            }
-            groups[type].push(analysis);
-            return groups;
-        }, {});
+        const groupedByType = analyses.reduce(
+            (groups: { [key: string]: FileAnalysis[] }, analysis) => {
+                const type = analysis.type || 'Unknown';
+                if (!groups[type]) {
+                    groups[type] = [];
+                }
+                groups[type].push(analysis);
+                return groups;
+            },
+            {},
+        );
 
         // 各タイプのファイルをまとめて表示
         for (const [type, files] of Object.entries(groupedByType)) {
@@ -233,7 +275,9 @@ export class IssueGeneratorService extends BaseService {
                 if (file.error) {
                     parts.push(`Error: ${file.error}`, '');
                 } else if (file.content) {
-                    parts.push('```' + (type.toLowerCase().includes('typescript') ? 'typescript' : ''));
+                    parts.push(
+                        '```' + (type.toLowerCase().includes('typescript') ? 'typescript' : ''),
+                    );
                     parts.push(file.content);
                     parts.push('```', '');
                 }
@@ -245,12 +289,12 @@ export class IssueGeneratorService extends BaseService {
 
     /**
      * Generate a preview of the issue content
-     * 
+     *
      * Analyzes selected files and generates issue title and body using AI.
-     * 
+     *
      * @param params - Issue generation parameters
      * @returns Generated issue content (title and body)
-     * 
+     *
      * @example
      * ```typescript
      * const preview = await service.generatePreview({
@@ -263,36 +307,43 @@ export class IssueGeneratorService extends BaseService {
     async generatePreview(params: IssueGenerationParams): Promise<GeneratedIssueContent> {
         try {
             this.logger.info('Generating issue preview');
-            
+
             // ファイル解析
-            const fileAnalyses = params.files && params.files.length > 0
-                ? await this.analyzeFiles(params.files)
-                : [];
+            const fileAnalyses =
+                params.files && params.files.length > 0
+                    ? await this.analyzeFiles(params.files)
+                    : [];
 
             if (fileAnalyses.length > 0) {
-                const combinedContent = fileAnalyses.map(a => a.content || '').join('');
+                const combinedContent = fileAnalyses.map((a) => a.content || '').join('');
                 const estimatedTokens = TokenManager.estimateTokens(combinedContent);
                 const maxTokensLimit = this.getMaxTokensLimit();
                 if (estimatedTokens > maxTokensLimit) {
                     this.logger.warning(
-                        `Analysis content exceeds ${Math.floor(maxTokensLimit / 1000)}K tokens limit (estimated ${Math.floor(estimatedTokens / 1000)}K tokens). Some content will be truncated.`
+                        `Analysis content exceeds ${Math.floor(maxTokensLimit / 1000)}K tokens limit (estimated ${Math.floor(estimatedTokens / 1000)}K tokens). Some content will be truncated.`,
                     );
                 }
             }
-            
+
             const analysisResult = this.formatAnalysisResult(fileAnalyses);
             const useEmoji = this.config.useEmoji || false;
-            const emojiInstruction = useEmoji ? 'Use emojis for section headers and key points.' : 'DO NOT use any emojis in the content.';
-            const customMessage = vscode.workspace.getConfiguration('otakCommitter').get<string>('customMessage') || '';
-            const customInstruction = customMessage ? `\n\nAdditional requirements: ${customMessage}` : '';
+            const emojiInstruction = useEmoji
+                ? 'Use emojis for section headers and key points.'
+                : 'DO NOT use any emojis in the content.';
+            const customMessage =
+                vscode.workspace.getConfiguration('otakCommitter').get<string>('customMessage') ||
+                '';
+            const customInstruction = customMessage
+                ? `\n\nAdditional requirements: ${customMessage}`
+                : '';
 
             const [body, title] = await Promise.all([
                 this.openai.createChatCompletion({
                     prompt: `Generate a GitHub issue in recommended format for the following analysis and description. Include appropriate sections like Background, Problem Statement, Expected Behavior, Steps to Reproduce (if applicable), and Additional Context. Keep the technical details but organize them well.\n\n${emojiInstruction}${customInstruction}\n\nRepository Analysis:\n${analysisResult}\n\nUser Description: ${params.description}`,
                     maxTokens: 1000,
-                    temperature: 0.1
+                    temperature: 0.1,
                 }),
-                this.generateTitle(params.type.type, params.description)
+                this.generateTitle(params.type.type, params.description),
             ]);
 
             if (!body) {
@@ -310,11 +361,11 @@ export class IssueGeneratorService extends BaseService {
 
     /**
      * Create a GitHub issue with the generated content
-     * 
+     *
      * @param content - The generated issue content
      * @param type - The issue type
      * @returns The URL of the created issue or undefined if creation fails
-     * 
+     *
      * @example
      * ```typescript
      * const url = await service.createIssue(preview, issueType);
@@ -323,18 +374,21 @@ export class IssueGeneratorService extends BaseService {
      * }
      * ```
      */
-    async createIssue(content: GeneratedIssueContent, type: IssueType): Promise<string | undefined> {
+    async createIssue(
+        content: GeneratedIssueContent,
+        type: IssueType,
+    ): Promise<string | undefined> {
         try {
             this.logger.info(`Creating issue: ${content.title}`);
             const useEmoji = this.config.useEmoji || false;
 
-            const issueTitle = useEmoji 
+            const issueTitle = useEmoji
                 ? `${type.label.split(' ')[0]} ${content.title}`
                 : `[${type.type}] ${content.title}`;
 
             const issue = await this.github.createIssue({
                 title: issueTitle,
-                body: content.body
+                body: content.body,
             });
 
             this.logger.info(`Issue created successfully: ${issue.html_url}`);
@@ -349,7 +403,7 @@ export class IssueGeneratorService extends BaseService {
 
 /**
  * Factory for creating issue generator service instances
- * 
+ *
  * Handles initialization of all required services (OpenAI, GitHub, Git).
  */
 export class IssueGeneratorServiceFactory extends BaseServiceFactory<IssueGeneratorService> {
@@ -368,7 +422,7 @@ export class IssueGeneratorServiceFactory extends BaseServiceFactory<IssueGenera
         // 認証が成功したら他のサービスを初期化
         const [openai, git] = await Promise.all([
             OpenAIServiceFactory.initialize(config, this.context),
-            GitServiceFactory.initialize(config)
+            GitServiceFactory.initialize(config),
         ]);
 
         if (!openai || !git) {
@@ -379,17 +433,22 @@ export class IssueGeneratorServiceFactory extends BaseServiceFactory<IssueGenera
         return new IssueGeneratorService(openai, github, git, config);
     }
 
-    static async initialize(config?: Partial<ServiceConfig>, context?: vscode.ExtensionContext): Promise<IssueGeneratorService | undefined> {
+    static async initialize(
+        config?: Partial<ServiceConfig>,
+        context?: vscode.ExtensionContext,
+    ): Promise<IssueGeneratorService | undefined> {
         try {
             if (!context) {
-                throw new Error('Extension context is required for Issue Generator service initialization');
+                throw new Error(
+                    'Extension context is required for Issue Generator service initialization',
+                );
             }
             const factory = new IssueGeneratorServiceFactory(context);
             return await factory.create(config);
         } catch (error) {
             ErrorHandler.handle(error, {
                 operation: 'Initialize Issue Generator service',
-                component: 'IssueGeneratorServiceFactory'
+                component: 'IssueGeneratorServiceFactory',
             });
             return undefined;
         }

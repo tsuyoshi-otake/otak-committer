@@ -71,9 +71,11 @@ export function generateScopeHint(filePaths: string[]): string {
         // Find the first meaningful directory (skip generic ones)
         for (const part of parts) {
             // Skip generic directories and file names (containing dots or being the last part)
-            if (!GENERIC_DIRECTORIES.includes(part.toLowerCase()) &&
+            if (
+                !GENERIC_DIRECTORIES.includes(part.toLowerCase()) &&
                 !part.includes('.') &&
-                part !== parts[parts.length - 1]) {
+                part !== parts[parts.length - 1]
+            ) {
                 directories.set(part, (directories.get(part) || 0) + 1);
                 break; // Only count the first meaningful directory per file
             }
@@ -82,8 +84,7 @@ export function generateScopeHint(filePaths: string[]): string {
 
     // Return the most common directory
     if (directories.size > 0) {
-        const sortedDirs = Array.from(directories.entries())
-            .sort((a, b) => b[1] - a[1]);
+        const sortedDirs = Array.from(directories.entries()).sort((a, b) => b[1] - a[1]);
         return sortedDirs[0][0];
     }
 

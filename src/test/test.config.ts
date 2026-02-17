@@ -13,18 +13,18 @@ export const TEST_CONFIG = {
          * Minimum 100 as per design requirements
          */
         numRuns: 100,
-        
+
         /**
          * Timeout for property tests (ms)
          */
         timeout: 10000,
-        
+
         /**
          * Verbose output for debugging
          */
         verbose: false,
     },
-    
+
     /**
      * Unit test configuration
      */
@@ -34,7 +34,7 @@ export const TEST_CONFIG = {
          */
         timeout: 5000,
     },
-    
+
     /**
      * Integration test configuration
      */

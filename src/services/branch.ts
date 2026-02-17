@@ -22,10 +22,10 @@ export interface BranchManager {
 
 /**
  * Utility class for branch selection operations
- * 
+ *
  * Provides methods for sorting and selecting branches with user-friendly
  * quick pick interfaces.
- * 
+ *
  * @example
  * ```typescript
  * const selection = await BranchSelector.selectBranches(branchManager);
@@ -40,13 +40,13 @@ export class BranchSelector {
 
     /**
      * Sort branches for display in quick pick
-     * 
+     *
      * Prioritizes default base branches and marks the current branch.
-     * 
+     *
      * @param branches - Array of branch names
      * @param currentBranch - The current branch name (optional)
      * @returns Sorted array of quick pick items
-     * 
+     *
      * @example
      * ```typescript
      * const items = BranchSelector.sortBranches(branches, 'feature/new');
@@ -54,14 +54,17 @@ export class BranchSelector {
      */
     static sortBranches(branches: string[], currentBranch?: string): vscode.QuickPickItem[] {
         return branches
-            .map(branch => ({
+            .map((branch) => ({
                 label: branch,
                 description: branch === currentBranch ? '(current)' : undefined,
-                sortOrder: this.DEFAULT_BASE_BRANCHES.indexOf(branch)
+                sortOrder: this.DEFAULT_BASE_BRANCHES.indexOf(branch),
             }))
             .sort((a, b) => {
                 if (a.sortOrder !== -1 || b.sortOrder !== -1) {
-                    return (a.sortOrder === -1 ? 999 : a.sortOrder) - (b.sortOrder === -1 ? 999 : b.sortOrder);
+                    return (
+                        (a.sortOrder === -1 ? 999 : a.sortOrder) -
+                        (b.sortOrder === -1 ? 999 : b.sortOrder)
+                    );
                 }
                 return a.label.localeCompare(b.label);
             });
@@ -69,13 +72,13 @@ export class BranchSelector {
 
     /**
      * Prompt user to select base and compare branches
-     * 
+     *
      * Shows two sequential quick pick menus for selecting branches.
      * The current branch is highlighted and prioritized in the compare selection.
-     * 
+     *
      * @param manager - Branch manager instance
      * @returns Branch selection or undefined if cancelled
-     * 
+     *
      * @example
      * ```typescript
      * const selection = await BranchSelector.selectBranches(branchManager);
@@ -88,12 +91,10 @@ export class BranchSelector {
         const branches = await manager.getBranches();
         const currentBranch = await manager.getCurrentBranch();
 
-        const baseItems = this.sortBranches(
-            branches.filter(b => b !== currentBranch)
-        );
-        
+        const baseItems = this.sortBranches(branches.filter((b) => b !== currentBranch));
+
         const baseItem = await vscode.window.showQuickPick(baseItems, {
-            placeHolder: 'Select base branch'
+            placeHolder: 'Select base branch',
         });
 
         if (!baseItem) {
@@ -101,10 +102,10 @@ export class BranchSelector {
         }
 
         const compareItems = branches
-            .filter(branch => branch !== baseItem.label)
-            .map(branch => ({
+            .filter((branch) => branch !== baseItem.label)
+            .map((branch) => ({
                 label: branch,
-                description: branch === currentBranch ? '(current)' : undefined
+                description: branch === currentBranch ? '(current)' : undefined,
             }))
             .sort((a, b) => {
                 if (a.label === currentBranch) {
@@ -117,7 +118,7 @@ export class BranchSelector {
             });
 
         const compareItem = await vscode.window.showQuickPick(compareItems, {
-            placeHolder: 'Select compare branch'
+            placeHolder: 'Select compare branch',
         });
 
         if (!compareItem) {
@@ -126,7 +127,7 @@ export class BranchSelector {
 
         return {
             base: baseItem.label,
-            compare: compareItem.label
+            compare: compareItem.label,
         };
     }
 }

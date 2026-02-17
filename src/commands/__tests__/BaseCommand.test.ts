@@ -1,8 +1,8 @@
 /**
  * Unit tests for BaseCommand
- * 
+ *
  * Tests context initialization, withProgress helper, and handleError helper
- * 
+ *
  * _Requirements: 7.1_
  */
 
@@ -70,7 +70,7 @@ suite('BaseCommand Unit Tests', () => {
             delete: async (key: string) => {
                 secretStore.delete(key);
             },
-            onDidChange: new vscode.EventEmitter<vscode.SecretStorageChangeEvent>().event
+            onDidChange: new vscode.EventEmitter<vscode.SecretStorageChangeEvent>().event,
         };
 
         // Create mock global state
@@ -87,7 +87,7 @@ suite('BaseCommand Unit Tests', () => {
                     globalStore.set(key, value);
                 }
             },
-            setKeysForSync: (keys: readonly string[]) => { }
+            setKeysForSync: (keys: readonly string[]) => {},
         } as vscode.Memento & { setKeysForSync(keys: readonly string[]): void };
 
         // Create mock workspace state
@@ -104,7 +104,7 @@ suite('BaseCommand Unit Tests', () => {
                     workspaceStore.set(key, value);
                 }
             },
-            setKeysForSync: (keys: readonly string[]) => { }
+            setKeysForSync: (keys: readonly string[]) => {},
         } as vscode.Memento & { setKeysForSync(keys: readonly string[]): void };
 
         // Create mock extension context
@@ -125,7 +125,7 @@ suite('BaseCommand Unit Tests', () => {
             storageUri: vscode.Uri.file('/mock/storage/uri'),
             globalStorageUri: vscode.Uri.file('/mock/global/storage/uri'),
             logUri: vscode.Uri.file('/mock/log/uri'),
-            languageModelAccessInformation: {} as any
+            languageModelAccessInformation: {} as any,
         } as unknown as vscode.ExtensionContext;
     });
 
@@ -195,7 +195,10 @@ suite('BaseCommand Unit Tests', () => {
     });
 
     suite('withProgress Helper', () => {
-        let progressCalls: Array<{ title: string; location: vscode.ProgressLocation | { viewId: string } }>;
+        let progressCalls: Array<{
+            title: string;
+            location: vscode.ProgressLocation | { viewId: string };
+        }>;
         let originalWithProgress: any;
 
         setup(() => {
@@ -205,16 +208,16 @@ suite('BaseCommand Unit Tests', () => {
             originalWithProgress = vscode.window.withProgress;
             (vscode.window as any).withProgress = async (
                 options: vscode.ProgressOptions,
-                task: (progress: vscode.Progress<any>) => Thenable<any>
+                task: (progress: vscode.Progress<any>) => Thenable<any>,
             ) => {
                 progressCalls.push({
                     title: options.title || '',
-                    location: options.location
+                    location: options.location,
                 });
 
                 // Execute the task
                 const mockProgress = {
-                    report: () => { }
+                    report: () => {},
                 };
                 return await task(mockProgress);
             };
@@ -275,7 +278,7 @@ suite('BaseCommand Unit Tests', () => {
             let counter = 0;
 
             const result = await command.testWithProgress('Async Task', async () => {
-                await new Promise(resolve => setTimeout(resolve, 10));
+                await new Promise((resolve) => setTimeout(resolve, 10));
                 counter++;
                 return counter;
             });
@@ -399,7 +402,7 @@ suite('BaseCommand Unit Tests', () => {
 
         test('should use constructor name as component', () => {
             class CustomCommand extends BaseCommand {
-                async execute(): Promise<void> { }
+                async execute(): Promise<void> {}
 
                 public testError(error: unknown, operation: string): void {
                     this.handleErrorSilently(error, operation);
@@ -516,7 +519,7 @@ suite('BaseCommand Unit Tests', () => {
                 public result: string = '';
 
                 async execute(): Promise<void> {
-                    await new Promise(resolve => setTimeout(resolve, 10));
+                    await new Promise((resolve) => setTimeout(resolve, 10));
                     this.result = 'completed';
                 }
             }

@@ -83,11 +83,13 @@ export interface GitHubError {
 /**
  * GitHub error response
  */
-export type GitHubErrorResponse = {
-    error: GitHubError;
-} | {
-    errors: GitHubError[];
-}
+export type GitHubErrorResponse =
+    | {
+          error: GitHubError;
+      }
+    | {
+          errors: GitHubError[];
+      };
 
 /**
  * GitHub label

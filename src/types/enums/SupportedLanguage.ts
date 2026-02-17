@@ -5,7 +5,7 @@ export enum SupportedLanguage {
     // Primary languages
     English = 'english',
     Japanese = 'japanese',
-    
+
     // European languages
     French = 'french',
     German = 'german',
@@ -18,7 +18,7 @@ export enum SupportedLanguage {
     Turkish = 'turkish',
     Russian = 'russian',
     Polish = 'polish',
-    
+
     // Asian languages
     Chinese = 'chinese',
     TraditionalChinese = 'traditionalChinese',
@@ -30,8 +30,8 @@ export enum SupportedLanguage {
     Javanese = 'javanese',
     Tamil = 'tamil',
     Burmese = 'burmese',
-    
+
     // Middle Eastern languages (RTL)
     Arabic = 'arabic',
-    Hebrew = 'hebrew'
+    Hebrew = 'hebrew',
 }

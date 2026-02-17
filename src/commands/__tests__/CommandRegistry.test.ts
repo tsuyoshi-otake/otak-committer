@@ -1,9 +1,9 @@
 /**
  * Unit tests for CommandRegistry
- * 
+ *
  * Tests command registration, command execution with error handling,
  * and multiple command registration.
- * 
+ *
  * _Requirements: 7.1_
  */
 
@@ -30,7 +30,7 @@ suite('CommandRegistry Unit Tests', () => {
             delete: async (key: string) => {
                 secretStore.delete(key);
             },
-            onDidChange: new vscode.EventEmitter<vscode.SecretStorageChangeEvent>().event
+            onDidChange: new vscode.EventEmitter<vscode.SecretStorageChangeEvent>().event,
         };
 
         // Create mock global state
@@ -47,7 +47,7 @@ suite('CommandRegistry Unit Tests', () => {
                     globalStore.set(key, value);
                 }
             },
-            setKeysForSync: (keys: readonly string[]) => { }
+            setKeysForSync: (keys: readonly string[]) => {},
         } as vscode.Memento & { setKeysForSync(keys: readonly string[]): void };
 
         // Create mock workspace state
@@ -64,7 +64,7 @@ suite('CommandRegistry Unit Tests', () => {
                     workspaceStore.set(key, value);
                 }
             },
-            setKeysForSync: (keys: readonly string[]) => { }
+            setKeysForSync: (keys: readonly string[]) => {},
         } as vscode.Memento & { setKeysForSync(keys: readonly string[]): void };
 
         // Create mock extension context
@@ -85,7 +85,7 @@ suite('CommandRegistry Unit Tests', () => {
             storageUri: vscode.Uri.file('/mock/storage/uri'),
             globalStorageUri: vscode.Uri.file('/mock/global/storage/uri'),
             logUri: vscode.Uri.file('/mock/log/uri'),
-            languageModelAccessInformation: {} as any
+            languageModelAccessInformation: {} as any,
         } as unknown as vscode.ExtensionContext;
 
         // Create new registry for each test
@@ -97,7 +97,7 @@ suite('CommandRegistry Unit Tests', () => {
             const command: Command = {
                 id: 'test.command',
                 title: 'Test Command',
-                handler: async () => { }
+                handler: async () => {},
             };
 
             registry.register(command);
@@ -111,7 +111,7 @@ suite('CommandRegistry Unit Tests', () => {
                 id: 'test.command',
                 title: 'Test Command',
                 category: 'Test Category',
-                handler: async () => { }
+                handler: async () => {},
             };
 
             registry.register(command);
@@ -123,34 +123,31 @@ suite('CommandRegistry Unit Tests', () => {
             const command1: Command = {
                 id: 'test.command',
                 title: 'Test Command 1',
-                handler: async () => { }
+                handler: async () => {},
             };
 
             const command2: Command = {
                 id: 'test.command',
                 title: 'Test Command 2',
-                handler: async () => { }
+                handler: async () => {},
             };
 
             registry.register(command1);
 
-            assert.throws(
-                () => registry.register(command2),
-                /already registered/
-            );
+            assert.throws(() => registry.register(command2), /already registered/);
         });
 
         test('should allow registering commands with different IDs', () => {
             const command1: Command = {
                 id: 'test.command1',
                 title: 'Test Command 1',
-                handler: async () => { }
+                handler: async () => {},
             };
 
             const command2: Command = {
                 id: 'test.command2',
                 title: 'Test Command 2',
-                handler: async () => { }
+                handler: async () => {},
             };
 
             registry.register(command1);
@@ -167,7 +164,7 @@ suite('CommandRegistry Unit Tests', () => {
             registry.register({
                 id: 'test.command1',
                 title: 'Test Command 1',
-                handler: async () => { }
+                handler: async () => {},
             });
 
             assert.strictEqual(registry.getCommandCount(), 1);
@@ -175,7 +172,7 @@ suite('CommandRegistry Unit Tests', () => {
             registry.register({
                 id: 'test.command2',
                 title: 'Test Command 2',
-                handler: async () => { }
+                handler: async () => {},
             });
 
             assert.strictEqual(registry.getCommandCount(), 2);
@@ -189,13 +186,13 @@ suite('CommandRegistry Unit Tests', () => {
             registry.register({
                 id: 'test.command1',
                 title: 'Test Command 1',
-                handler: async () => { }
+                handler: async () => {},
             });
 
             registry.register({
                 id: 'test.command2',
                 title: 'Test Command 2',
-                handler: async () => { }
+                handler: async () => {},
             });
 
             const commandIds = registry.getCommandIds();
@@ -219,24 +216,24 @@ suite('CommandRegistry Unit Tests', () => {
                 {
                     id: 'test.command1',
                     title: 'Test Command 1',
-                    handler: async () => { }
+                    handler: async () => {},
                 },
                 {
                     id: 'test.command2',
                     title: 'Test Command 2',
-                    handler: async () => { }
+                    handler: async () => {},
                 },
                 {
                     id: 'test.command3',
                     title: 'Test Command 3',
-                    handler: async () => { }
-                }
+                    handler: async () => {},
+                },
             ];
 
-            commands.forEach(cmd => registry.register(cmd));
+            commands.forEach((cmd) => registry.register(cmd));
 
             assert.strictEqual(registry.getCommandCount(), 3);
-            commands.forEach(cmd => {
+            commands.forEach((cmd) => {
                 assert.strictEqual(registry.hasCommand(cmd.id), true);
             });
         });
@@ -248,7 +245,7 @@ suite('CommandRegistry Unit Tests', () => {
                 registry.register({
                     id: `test.command${i}`,
                     title: `Test Command ${i}`,
-                    handler: async () => { }
+                    handler: async () => {},
                 });
             }
 
@@ -258,18 +255,18 @@ suite('CommandRegistry Unit Tests', () => {
         test('should maintain command order in getCommandIds', () => {
             const commandIds = ['test.command1', 'test.command2', 'test.command3'];
 
-            commandIds.forEach(id => {
+            commandIds.forEach((id) => {
                 registry.register({
                     id,
                     title: `Title for ${id}`,
-                    handler: async () => { }
+                    handler: async () => {},
                 });
             });
 
             const retrievedIds = registry.getCommandIds();
 
             assert.strictEqual(retrievedIds.length, commandIds.length);
-            commandIds.forEach(id => {
+            commandIds.forEach((id) => {
                 assert.ok(retrievedIds.includes(id));
             });
         });
@@ -287,9 +284,12 @@ suite('CommandRegistry Unit Tests', () => {
 
             // Mock vscode.commands.registerCommand
             originalRegisterCommand = vscode.commands.registerCommand;
-            (vscode.commands as any).registerCommand = (id: string, handler: (...args: any[]) => any) => {
+            (vscode.commands as any).registerCommand = (
+                id: string,
+                handler: (...args: any[]) => any,
+            ) => {
                 registeredCommands.set(id, handler);
-                return { dispose: () => { } };
+                return { dispose: () => {} };
             };
 
             // Mock ErrorHandler.handle
@@ -310,7 +310,7 @@ suite('CommandRegistry Unit Tests', () => {
             const command: Command = {
                 id: 'test.command',
                 title: 'Test Command',
-                handler: async () => { }
+                handler: async () => {},
             };
 
             registry.register(command);
@@ -327,7 +327,7 @@ suite('CommandRegistry Unit Tests', () => {
                 title: 'Test Command',
                 handler: async () => {
                     executed = true;
-                }
+                },
             };
 
             registry.register(command);
@@ -349,7 +349,7 @@ suite('CommandRegistry Unit Tests', () => {
                 title: 'Test Command',
                 handler: async (...args: any[]) => {
                     receivedArgs = args;
-                }
+                },
             };
 
             registry.register(command);
@@ -371,7 +371,7 @@ suite('CommandRegistry Unit Tests', () => {
                 title: 'Test Command',
                 handler: async () => {
                     throw testError;
-                }
+                },
             };
 
             registry.register(command);
@@ -395,7 +395,7 @@ suite('CommandRegistry Unit Tests', () => {
                 category: 'Test Category',
                 handler: async () => {
                     throw testError;
-                }
+                },
             };
 
             registry.register(command);
@@ -422,7 +422,7 @@ suite('CommandRegistry Unit Tests', () => {
                 title: 'Test Command',
                 handler: async () => {
                     throw new Error('Command failed');
-                }
+                },
             };
 
             registry.register(command);
@@ -445,7 +445,7 @@ suite('CommandRegistry Unit Tests', () => {
                 title: 'Test Command',
                 handler: () => {
                     executed = true;
-                }
+                },
             };
 
             registry.register(command);
@@ -467,7 +467,7 @@ suite('CommandRegistry Unit Tests', () => {
                 title: 'Test Command',
                 handler: () => {
                     throw testError;
-                }
+                },
             };
 
             registry.register(command);
@@ -486,7 +486,7 @@ suite('CommandRegistry Unit Tests', () => {
             const command: Command = {
                 id: 'test.command',
                 title: 'Test Command',
-                handler: async () => { }
+                handler: async () => {},
             };
 
             registry.register(command);
@@ -503,25 +503,25 @@ suite('CommandRegistry Unit Tests', () => {
                 {
                     id: 'test.command1',
                     title: 'Test Command 1',
-                    handler: async () => { }
+                    handler: async () => {},
                 },
                 {
                     id: 'test.command2',
                     title: 'Test Command 2',
-                    handler: async () => { }
+                    handler: async () => {},
                 },
                 {
                     id: 'test.command3',
                     title: 'Test Command 3',
-                    handler: async () => { }
-                }
+                    handler: async () => {},
+                },
             ];
 
-            commands.forEach(cmd => registry.register(cmd));
+            commands.forEach((cmd) => registry.register(cmd));
             registry.registerAll(mockContext);
 
             assert.strictEqual(registeredCommands.size, 3);
-            commands.forEach(cmd => {
+            commands.forEach((cmd) => {
                 assert.strictEqual(registeredCommands.has(cmd.id), true);
             });
         });
@@ -534,7 +534,7 @@ suite('CommandRegistry Unit Tests', () => {
                 title: 'Test Command',
                 handler: async () => {
                     executionCount++;
-                }
+                },
             };
 
             registry.register(command);
@@ -556,7 +556,7 @@ suite('CommandRegistry Unit Tests', () => {
                 title: 'Test Command',
                 handler: async () => {
                     throw new Error('Command failed');
-                }
+                },
             };
 
             registry.register(command);
@@ -578,25 +578,25 @@ suite('CommandRegistry Unit Tests', () => {
                     title: 'Error Command 1',
                     handler: async () => {
                         throw new Error('Standard error');
-                    }
+                    },
                 },
                 {
                     id: 'test.error2',
                     title: 'Error Command 2',
                     handler: async () => {
                         throw new TypeError('Type error');
-                    }
+                    },
                 },
                 {
                     id: 'test.error3',
                     title: 'Error Command 3',
                     handler: async () => {
-                        throw 'String error';
-                    }
-                }
+                        throw new Error('String error');
+                    },
+                },
             ];
 
-            commands.forEach(cmd => registry.register(cmd));
+            commands.forEach((cmd) => registry.register(cmd));
             registry.registerAll(mockContext);
 
             for (const cmd of commands) {
@@ -615,9 +615,12 @@ suite('CommandRegistry Unit Tests', () => {
             let registeredCommands: Map<string, (...args: any[]) => any> = new Map();
 
             const originalRegisterCommand = vscode.commands.registerCommand;
-            (vscode.commands as any).registerCommand = (id: string, handler: (...args: any[]) => any) => {
+            (vscode.commands as any).registerCommand = (
+                id: string,
+                handler: (...args: any[]) => any,
+            ) => {
                 registeredCommands.set(id, handler);
-                return { dispose: () => { } };
+                return { dispose: () => {} };
             };
 
             const command: Command = {
@@ -626,7 +629,7 @@ suite('CommandRegistry Unit Tests', () => {
                 category: 'Test',
                 handler: async () => {
                     executed = true;
-                }
+                },
             };
 
             // Register

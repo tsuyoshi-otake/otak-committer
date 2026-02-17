@@ -7,7 +7,7 @@ import { BaseError, ErrorSeverity } from './BaseError';
 export class ValidationError extends BaseError {
     readonly severity = ErrorSeverity.Warning;
 
-    constructor(message: string, context?: Record<string, any>) {
+    constructor(message: string, context?: Record<string, unknown>) {
         super(message, 'VALIDATION_ERROR', context);
     }
 }

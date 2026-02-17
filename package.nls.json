@@ -29,4 +29,3 @@
   "config.useConventionalCommits": "Use Conventional Commits format with scope (<type>(<scope>): <subject>)",
   "config.appendCommitTrailer": "Append 'Commit-Message-By: otak-committer' trailer to generated commit messages"
 }
-

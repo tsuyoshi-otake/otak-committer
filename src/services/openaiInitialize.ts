@@ -22,7 +22,7 @@ export async function showApiKeyErrorDialog(): Promise<void> {
         setApiKeyLabel,
         diagnoseStorageLabel,
         openSettingsLabel,
-        t('apiKey.cancel')
+        t('apiKey.cancel'),
     );
 
     if (action === setApiKeyLabel) {
@@ -37,7 +37,13 @@ export async function showApiKeyErrorDialog(): Promise<void> {
 type ValidationKind = 'auth' | 'rate_limit' | 'network' | 'server' | 'unknown';
 type ValidateApiKeyResult =
     | { ok: true }
-    | { ok: false; kind: ValidationKind; status?: number; reason: string; retryAfterSeconds?: number };
+    | {
+          ok: false;
+          kind: ValidationKind;
+          status?: number;
+          reason: string;
+          retryAfterSeconds?: number;
+      };
 
 function redactApiKey(message: string, apiKey: string): string {
     if (!message || !apiKey) {
@@ -52,7 +58,8 @@ function getErrorStatus(error: unknown): number | undefined {
         return status;
     }
 
-    const responseStatus = (error as { response?: { status?: unknown } } | null | undefined)?.response?.status;
+    const responseStatus = (error as { response?: { status?: unknown } } | null | undefined)
+        ?.response?.status;
     if (typeof responseStatus === 'number') {
         return responseStatus;
     }
@@ -61,7 +68,8 @@ function getErrorStatus(error: unknown): number | undefined {
 }
 
 function getErrorMessage(error: unknown): string {
-    const fromBody = (error as { error?: { message?: unknown } } | null | undefined)?.error?.message;
+    const fromBody = (error as { error?: { message?: unknown } } | null | undefined)?.error
+        ?.message;
     if (typeof fromBody === 'string' && fromBody.trim()) {
         return fromBody;
     }
@@ -76,7 +84,8 @@ function getErrorMessage(error: unknown): string {
 function getRetryAfterSeconds(error: unknown): number | undefined {
     const headers =
         (error as { headers?: Record<string, unknown> } | null | undefined)?.headers ??
-        (error as { response?: { headers?: Record<string, unknown> } } | null | undefined)?.response?.headers;
+        (error as { response?: { headers?: Record<string, unknown> } } | null | undefined)?.response
+            ?.headers;
 
     if (!headers) {
         return undefined;
@@ -145,7 +154,7 @@ async function validateApiKey(apiKey: string): Promise<ValidateApiKeyResult> {
 export async function initializeOpenAIService<T>(
     config: Partial<ServiceConfig> | undefined,
     context: vscode.ExtensionContext | undefined,
-    createService: (config: Partial<ServiceConfig>) => Promise<T>
+    createService: (config: Partial<ServiceConfig>) => Promise<T>,
 ): Promise<T | undefined> {
     const logger = Logger.getInstance();
 
@@ -181,7 +190,7 @@ export async function initializeOpenAIService<T>(
                     t('messages.apiKeyNotConfigured'),
                     setApiKeyLabel,
                     openSettingsLabel,
-                    t('apiKey.cancel')
+                    t('apiKey.cancel'),
                 );
 
                 if (action === openSettingsLabel) {
@@ -211,9 +220,9 @@ export async function initializeOpenAIService<T>(
                     {
                         location: vscode.ProgressLocation.Notification,
                         title: t('apiKey.validating'),
-                        cancellable: false
+                        cancellable: false,
                     },
-                    async () => validateApiKey(apiKey!)
+                    async () => validateApiKey(apiKey!),
                 );
 
                 if (!validation.ok) {
@@ -232,7 +241,7 @@ export async function initializeOpenAIService<T>(
                             updateLabel,
                             removeLabel,
                             diagnoseLabel,
-                            t('apiKey.cancel')
+                            t('apiKey.cancel'),
                         );
 
                         if (action === diagnoseLabel) {
@@ -255,9 +264,10 @@ export async function initializeOpenAIService<T>(
                         return undefined;
                     }
 
-                    const reason = validation.retryAfterSeconds !== undefined
-                        ? `${validation.reason} (retry after ${validation.retryAfterSeconds}s)`
-                        : validation.reason;
+                    const reason =
+                        validation.retryAfterSeconds !== undefined
+                            ? `${validation.reason} (retry after ${validation.retryAfterSeconds}s)`
+                            : validation.reason;
 
                     const retryLabel = t('apiKey.retryValidation');
                     const continueLabel = t('apiKey.continueWithoutValidation');
@@ -267,7 +277,7 @@ export async function initializeOpenAIService<T>(
                         retryLabel,
                         continueLabel,
                         diagnoseLabel,
-                        t('apiKey.cancel')
+                        t('apiKey.cancel'),
                     );
 
                     if (action === diagnoseLabel) {
@@ -296,18 +306,21 @@ export async function initializeOpenAIService<T>(
 
         logger.warning('OpenAI service initialization aborted (too many attempts)');
         return undefined;
-
     } catch (error) {
         // Check if it's an API key related error.
         const errorMessage = error instanceof Error ? error.message : String(error);
-        if (errorMessage.includes('API key') || errorMessage.includes('401') || errorMessage.includes('Unauthorized')) {
+        if (
+            errorMessage.includes('API key') ||
+            errorMessage.includes('401') ||
+            errorMessage.includes('Unauthorized')
+        ) {
             await showApiKeyErrorDialog();
             return undefined;
         }
 
         ErrorHandler.handle(error, {
             operation: 'Initialize OpenAI service',
-            component: 'OpenAIServiceFactory'
+            component: 'OpenAIServiceFactory',
         });
         return undefined;
     }

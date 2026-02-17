@@ -1,6 +1,6 @@
 name: 機能要望
 description: 新機能の提案
-labels: ["enhancement"]
+labels: ['enhancement']
 body:
   - type: markdown
     attributes:
@@ -26,7 +26,7 @@ body:
     attributes:
       label: Visual Studio Codeのバージョン
       description: VSCodeのバージョンを記入してください
-      placeholder: "例：1.85.1"
+      placeholder: '例：1.85.1'
     validations:
       required: true
 
@@ -35,7 +35,7 @@ body:
     attributes:
       label: Otak Committer拡張機能のバージョン
       description: 拡張機能のバージョンを記入してください
-      placeholder: "例：1.2.0"
+      placeholder: '例：1.2.0'
     validations:
       required: true
 
@@ -44,7 +44,7 @@ body:
     attributes:
       label: 関連する問題
       description: この機能要望に関連する問題や不便な点について説明してください
-      placeholder: "例：現在のコミットメッセージ生成では、特定の種類のコミットに対応できていない"
+      placeholder: '例：現在のコミットメッセージ生成では、特定の種類のコミットに対応できていない'
     validations:
       required: true
 
@@ -53,7 +53,7 @@ body:
     attributes:
       label: 提案する解決策
       description: どのような機能があれば良いか、具体的に説明してください
-      placeholder: "例：コミットメッセージ生成時にカスタムテンプレートを選択できるようにする"
+      placeholder: '例：コミットメッセージ生成時にカスタムテンプレートを選択できるようにする'
     validations:
       required: true
 
@@ -62,7 +62,7 @@ body:
     attributes:
       label: 代替案
       description: 検討した他の解決策があれば記入してください
-      placeholder: "例：設定ファイルでテンプレートを定義する方法も検討したが..."
+      placeholder: '例：設定ファイルでテンプレートを定義する方法も検討したが...'
     validations:
       required: false
 

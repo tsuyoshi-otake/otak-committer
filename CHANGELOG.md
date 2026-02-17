@@ -3,11 +3,13 @@
 ## [2.4.0] - 2026-02-17
 
 ### Added
+
 - **Commit message trailer:**
   - Generated commit messages now include `Commit-Message-By: otak-committer` trailer
   - Configurable via `otakCommitter.appendCommitTrailer` setting (default: enabled)
 
 ### Refactored
+
 - **Code duplication elimination:**
   - Consolidated duplicate `openExternalUrl()` and `initializeOpenAI()` into `BaseCommand`
   - Removed 5 duplicate preview methods (~90 lines) from `IssueCommand`, now shared via `utils/preview`
@@ -33,6 +35,7 @@
   - Added named constants for magic numbers (`MAX_VALIDATION_RETRIES`, `GITHUB_PAGE_SIZE`, etc.)
 
 ### Improved (Round 2 - Quality Hardening)
+
 - **Type safety improvements:**
   - Changed `any[]` to `unknown[]` in `BaseCommand.execute()` and `CommandRegistry` handler signatures
   - Fixed unsafe `as Error` casts in `StorageManager.deleteApiKey()` to use `unknown[]`
@@ -51,6 +54,7 @@
   - Added `index.lock` retry with 1-second delay in `GitService.stageFiles()`
 
 ### Security
+
 - **Logger sensitive field redaction:**
   - Added automatic redaction of `apikey`, `token`, `secret`, `password` fields in log output
   - Error objects now logged as `name` + `message` only (no stack traces in output channel)
@@ -79,6 +83,7 @@
 ## [2.2.0] - 2026-02-16
 
 ### Added
+
 - **UI localization expanded:**
   - Added Vietnamese (vi), Korean (ko), Simplified Chinese (zh-cn), and Traditional Chinese (zh-tw) UI translations
   - Locale detection now maps common Chinese variants (zh-Hant/zh-HK/zh-MO) to Traditional Chinese UI
@@ -86,6 +91,7 @@
 ## [2.1.2] - 2025-12-12
 
 ### Changed
+
 - **Upgraded AI model to GPT-5.2:**
   - Commit/PR/Issue generation now uses `gpt-5.2`
   - Requests updated for GPT-5.2 chat completions (`max_completion_tokens`, `reasoning_effort`, `store: false`)
@@ -95,12 +101,14 @@
 ## [2.1.1] - 2025-12-09
 
 ### Fixed
+
 - **Scope hint now included in format instruction:**
   - Changed from optional suggestion to direct format inclusion
   - AI now receives `<prefix>(scope): <subject>` format when scope is detected
   - Improved consistency in commit message scope usage
 
 ### Changed
+
 - **Default for useConventionalCommits set to false:**
   - Traditional format remains default for backward compatibility
   - Users can opt-in to strict Conventional Commits format
@@ -108,6 +116,7 @@
 ## [2.1.0] - 2025-12-09
 
 ### Fixed
+
 - **Windows reserved filename handling:**
   - Fixed `error: invalid path 'nul'` when files with Windows reserved names (nul, con, aux, etc.) exist in the repository
   - Reserved name files are now skipped during `git add` instead of causing errors
@@ -125,6 +134,7 @@
 ## [2.0.5] - 2025-12-07
 
 ### Fixed
+
 - **Language setting now properly respected:**
   - Commit messages are now generated in the language selected via status bar
   - Uses `otakCommitter.language` setting instead of UI locale
@@ -144,12 +154,14 @@
 ## [2.0.0] - 2025-12-07
 
 ### Major Changes
+
 - **Migrated from GPT-4.1 to GPT-5.1:**
   - Updated all AI operations to use OpenAI's GPT-5.1 model
   - Switched from Chat Completions API to Responses API
   - Improved response quality with configurable reasoning effort
 
 ### Added
+
 - **Reasoning effort configuration:**
   - New `otakCommitter.reasoningEffort` setting (none/low/medium/high)
   - Default setting: "low" for optimal balance of speed and quality
@@ -165,6 +177,7 @@
   - Advanced users can adjust based on their needs
 
 ### Changed
+
 - **Token management improvements:**
   - Unified token limit across commit messages, pull requests, and issues
   - Automatic truncation with user-friendly warning messages
@@ -182,6 +195,7 @@
   - Issues: 8,000 tokens
 
 ### Migration Notes
+
 - Existing settings (language, emoji, custom message) are preserved
 - API keys continue to work without reconfiguration
 - No breaking changes to user-facing functionality
@@ -189,12 +203,14 @@
 ## [1.8.6] - 2025-09-20
 
 ### Fixed
+
 - **Migration notification shown only once:**
   - API key migration notification now appears only on first migration
   - Added persistent flag to track notification display status
   - Prevents repetitive notifications on every VS Code restart
 
 ### Documentation
+
 - **Enhanced README with security information:**
   - Added comprehensive Security & Privacy section
   - Documented single-maintainer security benefits
@@ -204,6 +220,7 @@
 ## [1.8.5] - 2025-09-19
 
 ### Security
+
 - **Enhanced backup encryption:**
   - GlobalState backup now uses AES-256-GCM encryption
   - Machine-specific key generation using hostname, platform, and user info
@@ -211,6 +228,7 @@
   - Added encryption self-test in diagnostics
 
 ### Changed
+
 - **Improved security for API key backup:**
   - Backup storage is now encrypted instead of plaintext
   - Uses PBKDF2 for key derivation with 100,000 iterations
@@ -219,6 +237,7 @@
 ## [1.8.4] - 2025-09-19
 
 ### Fixed
+
 - **API key persistence issues in WSL/Remote environments:**
   - Added redundant storage using both SecretStorage and GlobalState
   - Implemented automatic fallback when SecretStorage fails
@@ -226,6 +245,7 @@
   - Improved error handling during storage operations
 
 ### Added
+
 - **Storage diagnostics command:**
   - New command `Diagnose API Key Storage` to troubleshoot storage issues
   - Shows detailed information about API key location and status
@@ -233,6 +253,7 @@
   - Accessible via Command Palette
 
 ### Changed
+
 - **Enhanced logging:**
   - Added detailed environment logging during initialization
   - Improved error messages for storage operations
@@ -241,6 +262,7 @@
 ## [1.8.3] - 2025-09-19
 
 ### Fixed
+
 - **File path handling with spaces and special characters:**
   - Fixed commit message generation failure for files with spaces in paths
   - Improved handling of deleted files in git operations
@@ -250,23 +272,27 @@
 ## [1.8.2] - 2025-09-18
 
 ### Security
+
 - **Removed deprecated API key setting:**
   - Completely removed `otakCommitter.openaiApiKey` from package.json
   - Setting no longer appears in VS Code settings UI
   - API keys now exclusively stored in SecretStorage
 
 ### Changed
+
 - Users must now use the prompt dialog to set API keys (no manual configuration option)
 
 ## [1.8.1] - 2025-09-18
 
 ### Security
+
 - **Enhanced API key migration:**
   - Added forceClearDeprecatedSettings method to ensure complete removal of API keys from settings
   - Clear API keys from all configuration scopes (Global, Workspace, WorkspaceFolder)
   - Improved security by forcing clearance of deprecated settings on every startup
 
 ### Fixed
+
 - **Package vulnerabilities:**
   - Updated all vulnerable dependencies to latest secure versions
   - Fixed axios SSRF and DoS vulnerabilities
@@ -277,18 +303,21 @@
 ## [1.8.0] - 2025-09-18
 
 ### Added
+
 - **CLAUDE.md documentation file:**
   - Added comprehensive development guide for Claude Code instances
   - Documented service architecture and key implementation patterns
   - Included common development commands and tasks
 
 ### Security
+
 - **Secure API key storage:**
   - Migrated OpenAI API key storage to VS Code's SecretStorage API
   - Enhanced security by removing plain text storage options
   - Improved API key validation and error handling
 
 ### Changed
+
 - **Enhanced commit message sanitization:**
   - Added utility function to sanitize commit messages
   - Prevents command injection vulnerabilities
@@ -297,16 +326,21 @@
 ## [1.7.1] - 2025-04-27
 
 ### Changed
+
 - Modified Git diff handling for commit message generation: Diffs exceeding 200K tokens will now be truncated to the first ~200K tokens, and a warning message will be displayed. This prevents errors with very large diffs while still allowing AI processing.
+
 ## [1.7.0] - 2025-04-27
 
 ### Added
+
 - **Support for GPT-4.1:**
   - Integrated the latest GPT-4.1 model for enhanced AI capabilities in commit message, issue, and PR generation.
   - Updated OpenAI service to utilize the new model endpoints and features.
+
 ## [1.6.1] - 2025-03-02
 
 ### Changed
+
 - **Improved error message handling:**
   - Standardized notification display times to 3 seconds
   - Unified error message format for better consistency
@@ -316,6 +350,7 @@
 ## [1.6.0] - 2025-03-02
 
 ### Changed
+
 - **Switched to VS Code's built-in GitHub authentication:**
   - Removed custom GitHub token configuration.
   - Removed GitHub App authentication.
@@ -329,6 +364,7 @@
 ## [1.5.3] - 2025-03-02
 
 ### Added
+
 - Added GitHub App authentication support
   - New configuration options for GitHub App authentication (appId, privateKey, installationId)
   - Automatic selection between token and GitHub App authentication
@@ -337,12 +373,14 @@
 ## [1.5.2] - 2025-02-28
 
 ### Added
+
 - Enhanced commit message generation to support untracked files
 - Improved file status detection for better coverage of Git changes
 
 ## [1.5.1] - 2025-02-28
 
 ### Changed
+
 - Implemented 100K token limit for all content generation
   - Applied to commits, issues, and pull requests
   - Added content truncation with appropriate warnings
@@ -350,6 +388,7 @@
 ## [1.5.0] - 2025-02-26
 
 ### Added
+
 - Added new Issue generation feature
   - Generate GitHub Issues with AI assistance
   - Supports file analysis for issue content
@@ -362,6 +401,7 @@
   - Applied to commit messages, PRs, and Issues
 
 ### Changed
+
 - Major code refactoring for improved maintainability
   - Reorganized service layer architecture
   - Enhanced type safety across the codebase
@@ -371,6 +411,7 @@
 ## [1.4.2] - 2025-02-26
 
 ### Changed
+
 - Improved the language selection menu UI
   - Now displays using native language names
   - Changed to a simple two-column layout
@@ -378,6 +419,7 @@
 ## [1.4.1] - 2025-02-25
 
 ### Changed
+
 - Refactored the entire codebase
 - Improved error handling
 - Strengthened TypeScript type definitions

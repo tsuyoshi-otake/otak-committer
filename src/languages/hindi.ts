@@ -1,4 +1,4 @@
-import { PromptType } from '../types/language';
+import { PromptType } from '../types/enums/PromptType';
 
 export const getHindiPrompt = (type: PromptType): string => {
     const prompts: Record<PromptType, string> = {
@@ -112,7 +112,7 @@ export const getHindiPrompt = (type: PromptType): string => {
 - किस दस्तावेज़ीकरण की आवश्यकता है?
 - क्या परीक्षण किया जाना चाहिए?
 - क्या कोई ब्रेकिंग चेंज हैं?
-`
+`,
     };
 
     return prompts[type] || '';

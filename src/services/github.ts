@@ -10,7 +10,7 @@ import {
     GitHubApiError,
     CreatePullRequestResponse,
     GitHubDiffFile,
-    GitHubLabel
+    GitHubLabel,
 } from '../types';
 import { authentication } from 'vscode';
 import { t } from '../i18n';
@@ -30,10 +30,10 @@ interface GitExtensionAPI {
 
 /**
  * Service for GitHub API operations
- * 
+ *
  * Provides methods for interacting with GitHub including creating pull requests,
  * managing issues, retrieving branch information, and comparing commits.
- * 
+ *
  * @example
  * ```typescript
  * const github = await GitHubService.initialize();
@@ -54,20 +54,24 @@ export class GitHubService extends BaseService implements BranchManager {
     }
 
     private async ensureInitialized(): Promise<void> {
-        if (this.initialized) { return; }
+        if (this.initialized) {
+            return;
+        }
 
         try {
             this.logger.info('Initializing GitHub service');
-            
+
             // Use VS Code's built-in GitHub authentication
-            let authSession = await authentication.getSession('github', ['repo'], { createIfNone: false });
+            let authSession = await authentication.getSession('github', ['repo'], {
+                createIfNone: false,
+            });
 
             if (!authSession) {
                 this.logger.info('No GitHub authentication session found, prompting user');
                 const choice = await vscode.window.showInformationMessage(
                     t('messages.githubAuthPrompt'),
                     t('buttons.yes'),
-                    t('buttons.no')
+                    t('buttons.no'),
                 );
 
                 if (choice !== t('buttons.yes')) {
@@ -76,7 +80,9 @@ export class GitHubService extends BaseService implements BranchManager {
                 }
 
                 // Execute authentication if the user agrees
-                authSession = await authentication.getSession('github', ['repo'], { createIfNone: true });
+                authSession = await authentication.getSession('github', ['repo'], {
+                    createIfNone: true,
+                });
                 if (!authSession) {
                     this.logger.error('GitHub authentication failed');
                     throw new Error('GitHub authentication failed.');
@@ -97,11 +103,13 @@ export class GitHubService extends BaseService implements BranchManager {
             this.octokit = new Octokit({
                 auth: authSession.accessToken,
                 userAgent: 'otak-committer',
-                ...(proxyUrl ? {
-                    request: {
-                        agent: new HttpsProxyAgent(proxyUrl)
-                    }
-                } : {})
+                ...(proxyUrl
+                    ? {
+                          request: {
+                              agent: new HttpsProxyAgent(proxyUrl),
+                          },
+                      }
+                    : {}),
             }) as unknown as GitHubAPI;
 
             // Initialize the Git API
@@ -117,12 +125,11 @@ export class GitHubService extends BaseService implements BranchManager {
 
             this.initialized = true;
             this.logger.info('GitHub service initialized successfully');
-
         } catch (error) {
             this.logger.error('Failed to initialize GitHub service', error);
             ErrorHandler.handle(error, {
                 operation: 'Initialize GitHub service',
-                component: 'GitHubService'
+                component: 'GitHubService',
             });
             throw error;
         }
@@ -132,17 +139,34 @@ export class GitHubService extends BaseService implements BranchManager {
      * Check if a GitHub API error indicates no commits between branches (422)
      */
     private isNoCommitsBetweenBranchesError(error: unknown): boolean {
-        if (typeof error !== 'object' || error === null) { return false; }
+        if (typeof error !== 'object' || error === null) {
+            return false;
+        }
         const status = 'status' in error ? error.status : undefined;
-        const respStatus = 'response' in error && typeof error.response === 'object' && error.response !== null && 'status' in error.response ? error.response.status : undefined;
+        const respStatus =
+            'response' in error &&
+            typeof error.response === 'object' &&
+            error.response !== null &&
+            'status' in error.response
+                ? error.response.status
+                : undefined;
         const effectiveStatus = status ?? respStatus;
-        if (effectiveStatus !== 422) { return false; }
+        if (effectiveStatus !== 422) {
+            return false;
+        }
 
         const message = error instanceof Error ? error.message : '';
-        const dataMessage = 'response' in error && typeof error.response === 'object' && error.response !== null
-            && 'data' in error.response && typeof error.response.data === 'object' && error.response.data !== null
-            && 'message' in error.response.data && typeof error.response.data.message === 'string'
-            ? error.response.data.message : '';
+        const dataMessage =
+            'response' in error &&
+            typeof error.response === 'object' &&
+            error.response !== null &&
+            'data' in error.response &&
+            typeof error.response.data === 'object' &&
+            error.response.data !== null &&
+            'message' in error.response.data &&
+            typeof error.response.data.message === 'string'
+                ? error.response.data.message
+                : '';
 
         return message.includes('No commits between') || dataMessage.includes('No commits between');
     }
@@ -174,7 +198,7 @@ export class GitHubService extends BaseService implements BranchManager {
 
     /**
      * Get the current Git branch name
-     * 
+     *
      * @returns The current branch name or undefined if not available
      */
     async getCurrentBranch(): Promise<string | undefined> {
@@ -191,7 +215,7 @@ export class GitHubService extends BaseService implements BranchManager {
 
     /**
      * Prompt user to select base and compare branches
-     * 
+     *
      * @returns Branch selection or undefined if cancelled
      */
     static async selectBranches(): Promise<BranchSelection | undefined> {
@@ -201,14 +225,14 @@ export class GitHubService extends BaseService implements BranchManager {
 
     /**
      * Get detailed diff between two branches
-     * 
+     *
      * Retrieves file changes, additions, deletions, and patches between branches.
      * Automatically truncates large diffs to stay within token limits.
-     * 
+     *
      * @param base - The base branch name
      * @param compare - The compare branch name
      * @returns Pull request diff information
-     * 
+     *
      * @example
      * ```typescript
      * const diff = await github.getBranchDiffDetails('main', 'feature');
@@ -221,24 +245,21 @@ export class GitHubService extends BaseService implements BranchManager {
 
         try {
             this.logger.info(`Getting diff between ${base} and ${compare}`);
-            
+
             const response = await this.octokit.repos.compareCommits({
                 owner: this.owner,
                 repo: this.repo,
                 base,
-                head: compare
+                head: compare,
             });
 
             if (response.status !== 200 || !response.data.files) {
                 this.logger.error(`Failed to get diff: status ${response.status}`);
-                throw new GitHubApiError(
-                    'Failed to get diff',
-                    response.status
-                );
+                throw new GitHubApiError('Failed to get diff', response.status);
             }
 
             let totalTokens = 0;
-            const files: GitHubDiffFile[] = response.data.files.map(file => ({
+            const files: GitHubDiffFile[] = response.data.files.map((file) => ({
                 filename: file.filename,
                 additions: file.additions,
                 deletions: file.deletions,
@@ -256,12 +277,16 @@ export class GitHubService extends BaseService implements BranchManager {
 
             // Truncate patches if the size limit is exceeded
             if (totalTokens > maxTokensLimit) {
-                this.logger.warning(`Diff size (${totalTokens} tokens) exceeds limit (${maxTokensLimit}), truncating`);
+                this.logger.warning(
+                    `Diff size (${totalTokens} tokens) exceeds limit (${maxTokensLimit}), truncating`,
+                );
                 const ratio = maxTokensLimit / totalTokens;
                 for (const file of files) {
                     const maxLength = Math.floor(file.patch.length * ratio);
                     if (file.patch.length > maxLength) {
-                        file.patch = file.patch.substring(0, maxLength) + '\n... (diff truncated due to token limit)';
+                        file.patch =
+                            file.patch.substring(0, maxLength) +
+                            '\n... (diff truncated due to token limit)';
                     }
                 }
             }
@@ -269,9 +294,15 @@ export class GitHubService extends BaseService implements BranchManager {
             return {
                 files,
                 stats: {
-                    additions: files.reduce((sum: number, file: GitHubDiffFile) => sum + file.additions, 0),
-                    deletions: files.reduce((sum: number, file: GitHubDiffFile) => sum + file.deletions, 0)
-                }
+                    additions: files.reduce(
+                        (sum: number, file: GitHubDiffFile) => sum + file.additions,
+                        0,
+                    ),
+                    deletions: files.reduce(
+                        (sum: number, file: GitHubDiffFile) => sum + file.deletions,
+                        0,
+                    ),
+                },
             };
         } catch (error) {
             this.logger.error('Failed to get branch diff details', error);
@@ -281,10 +312,10 @@ export class GitHubService extends BaseService implements BranchManager {
 
     /**
      * Get a specific GitHub issue by number
-     * 
+     *
      * @param number - The issue number
      * @returns Issue information
-     * 
+     *
      * @example
      * ```typescript
      * const issue = await github.getIssue(42);
@@ -297,11 +328,11 @@ export class GitHubService extends BaseService implements BranchManager {
 
         try {
             this.logger.info(`Getting issue #${number}`);
-            
+
             const response = await this.octokit.issues.get({
                 owner: this.owner,
                 repo: this.repo,
-                issue_number: number
+                issue_number: number,
             });
 
             if (response.status !== 200) {
@@ -315,8 +346,8 @@ export class GitHubService extends BaseService implements BranchManager {
                 title: response.data.title,
                 body: response.data.body || '',
                 labels: response.data.labels.map((label: string | GitHubLabel) =>
-                    typeof label === 'string' ? label : label.name || ''
-                )
+                    typeof label === 'string' ? label : label.name || '',
+                ),
             };
         } catch (error) {
             this.logger.error(`Failed to get issue #${number}`, error);
@@ -326,13 +357,13 @@ export class GitHubService extends BaseService implements BranchManager {
 
     /**
      * Create a pull request on GitHub
-     * 
+     *
      * Creates a new pull request with the specified parameters.
      * Optionally links to an existing issue.
-     * 
+     *
      * @param params - Pull request parameters
      * @returns Created pull request information
-     * 
+     *
      * @example
      * ```typescript
      * const pr = await github.createPullRequest({
@@ -351,7 +382,7 @@ export class GitHubService extends BaseService implements BranchManager {
 
         try {
             this.logger.info(`Creating pull request from ${params.compare} to ${params.base}`);
-            
+
             let title = params.title;
             let body = params.body;
 
@@ -369,7 +400,7 @@ export class GitHubService extends BaseService implements BranchManager {
                 head: params.compare,
                 title: title || 'Pull Request',
                 body: body || '',
-                draft: params.draft || false
+                draft: params.draft || false,
             });
 
             if (response.status !== 201) {
@@ -381,7 +412,7 @@ export class GitHubService extends BaseService implements BranchManager {
             return {
                 number: response.data.number,
                 html_url: response.data.html_url,
-                draft: params.draft || false
+                draft: params.draft || false,
             };
         } catch (error: unknown) {
             if (this.isNoCommitsBetweenBranchesError(error)) {
@@ -395,10 +426,10 @@ export class GitHubService extends BaseService implements BranchManager {
 
     /**
      * Create a GitHub issue
-     * 
+     *
      * @param params - Issue parameters
      * @returns Created issue information
-     * 
+     *
      * @example
      * ```typescript
      * const issue = await github.createIssue({
@@ -414,13 +445,13 @@ export class GitHubService extends BaseService implements BranchManager {
 
         try {
             this.logger.info(`Creating issue: ${params.title}`);
-            
+
             const response = await this.octokit.issues.create({
                 owner: this.owner,
                 repo: this.repo,
                 title: params.title,
                 body: params.body,
-                labels: params.labels
+                labels: params.labels,
             });
 
             if (response.status !== 201) {
@@ -431,7 +462,7 @@ export class GitHubService extends BaseService implements BranchManager {
             this.logger.info(`Issue #${response.data.number} created successfully`);
             return {
                 number: response.data.number,
-                html_url: response.data.html_url
+                html_url: response.data.html_url,
             };
         } catch (error) {
             this.logger.error('Failed to create issue', error);
@@ -441,9 +472,9 @@ export class GitHubService extends BaseService implements BranchManager {
 
     /**
      * Get all branches in the repository
-     * 
+     *
      * @returns Array of branch names
-     * 
+     *
      * @example
      * ```typescript
      * const branches = await github.getBranches();
@@ -456,11 +487,11 @@ export class GitHubService extends BaseService implements BranchManager {
 
         try {
             this.logger.debug('Getting branches');
-            
+
             const response = await this.octokit.repos.listBranches({
                 owner: this.owner,
                 repo: this.repo,
-                per_page: GitHubService.GITHUB_PAGE_SIZE
+                per_page: GitHubService.GITHUB_PAGE_SIZE,
             });
 
             if (response.status !== 200) {
@@ -468,7 +499,7 @@ export class GitHubService extends BaseService implements BranchManager {
                 throw new GitHubApiError('Failed to get branches', response.status);
             }
 
-            const branches = response.data.map(branch => branch.name);
+            const branches = response.data.map((branch) => branch.name);
             this.logger.info(`Retrieved ${branches.length} branches`);
             return branches;
         } catch (error) {
@@ -479,9 +510,9 @@ export class GitHubService extends BaseService implements BranchManager {
 
     /**
      * Get all open issues in the repository
-     * 
+     *
      * @returns Array of issue information
-     * 
+     *
      * @example
      * ```typescript
      * const issues = await github.getIssues();
@@ -494,14 +525,14 @@ export class GitHubService extends BaseService implements BranchManager {
 
         try {
             this.logger.debug('Getting issues');
-            
+
             const response = await this.octokit.issues.listForRepo({
                 owner: this.owner,
                 repo: this.repo,
                 state: 'open',
                 sort: 'updated',
                 direction: 'desc',
-                per_page: GitHubService.GITHUB_PAGE_SIZE
+                per_page: GitHubService.GITHUB_PAGE_SIZE,
             });
 
             if (response.status !== 200) {
@@ -510,16 +541,16 @@ export class GitHubService extends BaseService implements BranchManager {
             }
 
             const issues = response.data
-                .filter(item => !('pull_request' in item))
-                .map(issue => ({
+                .filter((item) => !('pull_request' in item))
+                .map((issue) => ({
                     number: issue.number,
                     title: issue.title,
                     body: issue.body || '',
                     labels: (issue.labels || []).map((label: string | GitHubLabel) =>
-                        typeof label === 'string' ? label : label.name || ''
-                    )
+                        typeof label === 'string' ? label : label.name || '',
+                    ),
                 }));
-            
+
             this.logger.info(`Retrieved ${issues.length} open issues`);
             return issues;
         } catch (error) {
@@ -531,7 +562,7 @@ export class GitHubService extends BaseService implements BranchManager {
 
 /**
  * Factory for creating GitHub service instances
- * 
+ *
  * Handles service initialization and GitHub authentication.
  */
 export class GitHubServiceFactory extends BaseServiceFactory<GitHubService> {
@@ -546,7 +577,7 @@ export class GitHubServiceFactory extends BaseServiceFactory<GitHubService> {
         } catch (error) {
             ErrorHandler.handle(error, {
                 operation: 'Initialize GitHub service',
-                component: 'GitHubServiceFactory'
+                component: 'GitHubServiceFactory',
             });
             return undefined;
         }

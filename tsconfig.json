@@ -1,22 +1,22 @@
 {
-    "compilerOptions": {
-        "module": "CommonJS",
-        "target": "ES2022",
-        "outDir": "out",
-        "lib": ["ES2020"],
-        "moduleResolution": "node",
-        "resolveJsonModule": true,
-        "sourceMap": true,
-        "rootDir": "src",
-        "strict": true,
-        "noImplicitAny": true,
-        "noImplicitReturns": true,
-        "noFallthroughCasesInSwitch": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": false,
-        "noEmit": true,
-        "skipLibCheck": true,
-        "esModuleInterop": true
-    },
-    "exclude": ["node_modules", ".vscode-test"]
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ES2022",
+    "outDir": "out",
+    "lib": ["ES2020"],
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "rootDir": "src",
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": false,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true
+  },
+  "exclude": ["node_modules", ".vscode-test"]
 }
