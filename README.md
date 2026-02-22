@@ -61,6 +61,10 @@ Generates clear titles, structured descriptions, and relevant labels.
 ### Commit Message Flow
 
 - Analyzes staged diffs locally.
+- Handles large diffs with a 3-tier hybrid strategy:
+  - **Tier 1**: Diffs within the token limit are sent as-is.
+  - **Tier 2**: Oversized diffs are parsed per file. Lock files (package-lock.json, yarn.lock, etc.) are excluded, source code is prioritized, and a change summary of all files is always included.
+  - **Tier 3**: If Tier 2 still exceeds the budget, remaining files are chunked and summarized via parallel API calls, then combined for commit message generation.
 - Applies your commit template and style.
 - Generates output in your selected language and detail level.
 
@@ -153,8 +157,9 @@ The extension uses GPT-5.2 for high-quality commit message generation.
 ### Data Handling
 
 - Git diff analysis happens locally.
+- **Secret detection**: Before any API call, the full diff is scanned for potential secrets (API keys, tokens, passwords, private keys, etc.). If secrets are detected, generation is blocked entirely.
 - Only necessary diff context is sent to OpenAI for generation.
-- Large diffs are truncated to avoid excessive exposure.
+- Large diffs are intelligently prioritized: lock files and generated files are excluded or summarized to minimize data sent to the API.
 
 ### Privacy Guarantees
 

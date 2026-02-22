@@ -1,5 +1,23 @@
 # Change Log
 
+## [2.5.0] - 2026-02-22
+
+### Added
+
+- **Hybrid large-diff processing (Tier 2/3):**
+  - Diffs exceeding the token limit are now processed intelligently instead of being simply truncated
+  - **Tier 2 — Smart Prioritization:** Parses diffs per file, excludes lock file content (package-lock.json, yarn.lock, etc.), prioritizes source code, and always includes a full change summary header
+  - **Tier 3 — Map-Reduce Summarization:** When Tier 2 still exceeds the budget, overflow files are chunked and summarized via parallel API calls, then combined with the prioritized diff
+  - New `DiffProcessor` orchestrator automatically selects the appropriate tier
+  - New `MapReduceSummarizer` service for chunked parallel summarization
+  - File classification system (`diffClassification.ts`) to categorize files by priority (EXCLUDE / LOW / HIGH)
+  - New diff parsing utilities: `parseDiffIntoFiles()`, `buildChangeSummaryHeader()`, `assemblePrioritizedDiff()`
+  - `GitService.getRawDiff()` method for retrieving untruncated diffs
+  - `OpenAIService.summarizeChunk()` method for Tier 3 chunk summarization
+  - `PromptService.createSummarizationPrompt()` for generating summarization prompts
+  - Added `TIER2_THRESHOLD`, `MAP_REDUCE_CHUNK_SIZE`, `SAFETY_MARGIN` constants to `TokenManager`
+  - i18n support for all new messages in 6 languages (en, ja, ko, zh-cn, zh-tw, vi)
+
 ## [2.4.2] - 2026-02-17
 
 ### Added
