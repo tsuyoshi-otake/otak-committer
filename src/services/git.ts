@@ -50,22 +50,15 @@ export class GitService extends BaseService {
     }
 
     /**
-     * Get the Git diff for staged changes
+     * Collect the raw diff without truncation (shared logic)
      *
-     * Automatically stages modified files and retrieves the diff.
-     * Handles Windows reserved filenames and truncates large diffs.
+     * Contains all diff collection logic: status check, staging prompt,
+     * file staging, cached diff retrieval, and reserved file info.
+     * Does NOT apply truncation — callers are responsible for token management.
      *
-     * @returns The Git diff string or undefined if no changes
-     *
-     * @example
-     * ```typescript
-     * const diff = await git.getDiff();
-     * if (diff) {
-     *   console.log('Changes detected:', diff);
-     * }
-     * ```
+     * @returns The raw Git diff string or undefined if no changes
      */
-    async getDiff(globalState?: vscode.Memento): Promise<string | undefined> {
+    private async collectDiff(globalState?: vscode.Memento): Promise<string | undefined> {
         try {
             this.logger.debug('Getting git diff');
             const status = await this.git.status();
@@ -99,7 +92,6 @@ export class GitService extends BaseService {
 
             this.logger.info(`Processing diff, ${reservedNameFiles.length} reserved name files`);
             diff = this.appendReservedFileInfo(diff, reservedNameFiles);
-            diff = this.truncateDiffByTokenLimit(diff);
 
             this.logger.info('Git diff retrieved successfully');
             return diff;
@@ -107,6 +99,50 @@ export class GitService extends BaseService {
             this.logger.error('Failed to get git diff', error);
             this.handleErrorAndRethrow(error);
         }
+    }
+
+    /**
+     * Get the Git diff for staged changes (with truncation for backward compatibility)
+     *
+     * Automatically stages modified files and retrieves the diff.
+     * Handles Windows reserved filenames and truncates large diffs.
+     *
+     * @returns The Git diff string or undefined if no changes
+     *
+     * @example
+     * ```typescript
+     * const diff = await git.getDiff();
+     * if (diff) {
+     *   console.log('Changes detected:', diff);
+     * }
+     * ```
+     */
+    async getDiff(globalState?: vscode.Memento): Promise<string | undefined> {
+        const diff = await this.collectDiff(globalState);
+        if (!diff) {
+            return undefined;
+        }
+        return this.truncateDiffByTokenLimit(diff);
+    }
+
+    /**
+     * Get the raw Git diff without truncation
+     *
+     * Used by DiffProcessor for smart diff processing (Tier 2/3).
+     * The caller is responsible for managing token limits.
+     *
+     * @returns The raw Git diff string or undefined if no changes
+     *
+     * @example
+     * ```typescript
+     * const rawDiff = await git.getRawDiff();
+     * if (rawDiff) {
+     *   const result = await diffProcessor.process(rawDiff, tokenBudget);
+     * }
+     * ```
+     */
+    async getRawDiff(globalState?: vscode.Memento): Promise<string | undefined> {
+        return this.collectDiff(globalState);
     }
 
     /**

@@ -89,12 +89,16 @@
     "stageAllPrompt": "No staged changes found. Stage all changes and continue?",
     "busyIndexLock": "Git is busy. Please wait for other Git operations to complete, or delete .git/index.lock if the problem persists.",
     "reservedNamesInfo": "Files with reserved names ({files}) will be included but their content cannot be displayed in diff.",
-    "diffTruncatedWarning": "Diff size ({estimatedKTokens}K tokens) exceeds the {thresholdKTokens}K limit. The content will be truncated for AI processing."
+    "diffTruncatedWarning": "Diff size ({estimatedKTokens}K tokens) exceeds the {thresholdKTokens}K limit. The content will be truncated for AI processing.",
+    "smartDiffApplied": "Large diff ({tokenCount}K tokens): applied smart prioritization ({included}/{total} files with full diff)",
+    "mapReduceApplied": "Very large diff ({tokenCount}K tokens): using chunked summarization ({chunks} chunks)"
   },
   "progress": {
     "generatingCommitMessage": "Generating commit message...",
     "analyzingChanges": "Generate Pull Request - Analyzing changes...",
-    "creatingPR": "Creating {prType} Pull Request..."
+    "creatingPR": "Creating {prType} Pull Request...",
+    "processingLargeDiff": "Processing large diff...",
+    "summarizingChunks": "Summarizing changes ({current}/{total})..."
   },
   "errors": {
     "gitExtensionNotFound": "Git extension is not available",

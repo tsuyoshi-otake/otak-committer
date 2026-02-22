@@ -89,12 +89,16 @@
     "stageAllPrompt": "Khong co thay doi da duoc stage. Stage tat ca thay doi va tiep tuc?",
     "busyIndexLock": "Git dang ban. Vui long doi cac thao tac Git khac hoan tat, hoac xoa .git/index.lock neu van con loi.",
     "reservedNamesInfo": "Cac tep co ten du tru ({files}) se duoc bao gom nhung noi dung khong the hien thi trong diff.",
-    "diffTruncatedWarning": "Kich thuoc diff (uoc tinh {estimatedKTokens}K tokens) vuot qua gioi han {thresholdKTokens}K. Noi dung se bi cat bot de AI xu ly."
+    "diffTruncatedWarning": "Kich thuoc diff (uoc tinh {estimatedKTokens}K tokens) vuot qua gioi han {thresholdKTokens}K. Noi dung se bi cat bot de AI xu ly.",
+    "smartDiffApplied": "Diff lớn ({tokenCount}K token): đã áp dụng ưu tiên thông minh ({included}/{total} file có diff đầy đủ)",
+    "mapReduceApplied": "Diff rất lớn ({tokenCount}K token): sử dụng tóm tắt theo khối ({chunks} khối)"
   },
   "progress": {
     "generatingCommitMessage": "Dang tao thong diep commit...",
     "analyzingChanges": "Tao Pull Request - Dang phan tich thay doi...",
-    "creatingPR": "Dang tao {prType} Pull Request..."
+    "creatingPR": "Dang tao {prType} Pull Request...",
+    "processingLargeDiff": "Đang xử lý diff lớn...",
+    "summarizingChunks": "Đang tóm tắt thay đổi ({current}/{total})..."
   },
   "errors": {
     "gitExtensionNotFound": "Phan mo rong Git khong kha dung",

@@ -66,7 +66,9 @@ async function runUnitTests() {
                 !test.includes('services.test') &&
                 !test.includes('openai') &&
                 !test.includes('prompt.property') &&
-                !test.includes('ApiKeyManager'),
+                !test.includes('ApiKeyManager') &&
+                !test.includes('diffProcessor') &&
+                !test.includes('mapReduceSummarizer'),
         );
 
         // Add new robustness tests from __tests__/services and __tests__/utils and __tests__/commands

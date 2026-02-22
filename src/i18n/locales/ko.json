@@ -89,12 +89,16 @@
     "stageAllPrompt": "스테이징된 변경 사항이 없습니다. 모든 변경 사항을 스테이징하고 계속하시겠습니까?",
     "busyIndexLock": "Git이 사용 중입니다. 다른 Git 작업이 완료될 때까지 기다리거나 문제가 계속되면 .git/index.lock을 삭제하세요.",
     "reservedNamesInfo": "예약된 이름의 파일({files})은 포함되지만 내용은 diff에 표시할 수 없습니다.",
-    "diffTruncatedWarning": "diff 크기(추정 {estimatedKTokens}K tokens)가 한도 {thresholdKTokens}K를 초과합니다. AI 처리를 위해 내용을 잘라냅니다."
+    "diffTruncatedWarning": "diff 크기(추정 {estimatedKTokens}K tokens)가 한도 {thresholdKTokens}K를 초과합니다. AI 처리를 위해 내용을 잘라냅니다.",
+    "smartDiffApplied": "대규모 diff ({tokenCount}K 토큰): 스마트 우선순위 지정 적용됨 ({included}/{total} 파일 전체 diff 포함)",
+    "mapReduceApplied": "매우 큰 diff ({tokenCount}K 토큰): 청크 요약 사용 ({chunks} 청크)"
   },
   "progress": {
     "generatingCommitMessage": "커밋 메시지 생성 중...",
     "analyzingChanges": "Pull Request 생성 - 변경 사항 분석 중...",
-    "creatingPR": "{prType} Pull Request 생성 중..."
+    "creatingPR": "{prType} Pull Request 생성 중...",
+    "processingLargeDiff": "대규모 diff 처리 중...",
+    "summarizingChunks": "변경 사항 요약 중 ({current}/{total})..."
   },
   "errors": {
     "gitExtensionNotFound": "Git 확장 프로그램을 사용할 수 없습니다",

@@ -6,6 +6,7 @@ import { MessageStyle } from '../types/enums/MessageStyle';
 import { TemplateInfo } from '../types';
 import { detectPotentialSecrets, sanitizeCommitMessage } from '../utils';
 import { t } from '../i18n/index.js';
+import type { DiffProcessResult } from '../services/diffProcessor';
 
 /**
  * Command for generating commit messages using AI
@@ -25,11 +26,13 @@ export class CommitCommand extends BaseCommand {
      * Execute the commit message generation command
      *
      * Workflow:
-     * 1. Initialize Git service and retrieve diff
-     * 2. Find commit message templates (if any)
-     * 3. Initialize OpenAI service with API key from storage
-     * 4. Generate commit message using AI
-     * 5. Sanitize and set the message in source control input
+     * 1. Initialize Git service and retrieve raw diff
+     * 2. Check for potential secrets
+     * 3. Initialize OpenAI service (needed early for Tier 3 map-reduce)
+     * 4. Process diff through hybrid tier system (Tier 1/2/3)
+     * 5. Find commit message templates (if any)
+     * 6. Generate commit message using AI
+     * 7. Sanitize and set the message in source control input
      *
      * @returns A promise that resolves when the command completes
      */
@@ -44,27 +47,31 @@ export class CommitCommand extends BaseCommand {
                 return;
             }
 
-            // Get diff
-            const diff = await this.getDiff(git);
-            if (!diff) {
+            // Get raw diff (without truncation — DiffProcessor handles token management)
+            const rawDiff = await this.getRawDiff(git);
+            if (!rawDiff) {
                 return;
             }
 
-            if (await this.shouldBlockForPotentialSecrets(diff)) {
+            if (await this.shouldBlockForPotentialSecrets(rawDiff)) {
                 return;
             }
 
-            // Find commit message templates
-            const templates = await this.findTemplates(git);
-
-            // Initialize OpenAI service
+            // Initialize OpenAI service (moved earlier — needed for Tier 3 map-reduce)
             const openai = await this.initializeOpenAI();
             if (!openai) {
                 return;
             }
 
-            // Generate commit message
-            const message = await this.generateMessage(openai, diff, templates.commit);
+            // Process diff through hybrid tier system
+            const language = this.config.get('language') || 'english';
+            const diffResult = await this.processDiff(rawDiff, openai, language);
+
+            // Find commit message templates
+            const templates = await this.findTemplates(git);
+
+            // Generate commit message using processed diff
+            const message = await this.generateMessage(openai, diffResult.processedDiff, templates.commit);
             if (!message) {
                 return;
             }
@@ -83,13 +90,13 @@ export class CommitCommand extends BaseCommand {
     }
 
     /**
-     * Get the Git diff for staged changes
+     * Get the raw Git diff without truncation
      *
-     * @returns The diff string or undefined if no changes
+     * @returns The raw diff string or undefined if no changes
      */
-    private async getDiff(git: GitService): Promise<string | undefined> {
-        this.logger.debug('Getting Git diff');
-        const diff = await git.getDiff(this.context.globalState);
+    private async getRawDiff(git: GitService): Promise<string | undefined> {
+        this.logger.debug('Getting raw Git diff');
+        const diff = await git.getRawDiff(this.context.globalState);
 
         if (!diff) {
             this.logger.info('No changes to commit');
@@ -98,6 +105,58 @@ export class CommitCommand extends BaseCommand {
         }
 
         return diff;
+    }
+
+    /**
+     * Process diff through the hybrid tier system (Tier 1/2/3)
+     *
+     * @param rawDiff - The raw Git diff string
+     * @param openai - OpenAI service instance (needed for Tier 3 map-reduce)
+     * @param language - The configured language for summarization
+     * @returns The processed diff result with tier information
+     */
+    private async processDiff(
+        rawDiff: string,
+        openai: OpenAIService,
+        language: string,
+    ): Promise<DiffProcessResult> {
+        const { DiffProcessor } = await import('../services/diffProcessor');
+        const { DiffTier } = await import('../services/diffProcessor');
+        const { TokenManager } = await import('../services/tokenManager');
+
+        const tokenBudget = TokenManager.getConfiguredMaxTokens();
+        const processor = new DiffProcessor(
+            openai,
+            language,
+            (msg) => this.logger.info(`Map-reduce progress: ${msg}`),
+        );
+
+        const result = await this.withProgress<DiffProcessResult>(
+            t('progress.processingLargeDiff'),
+            async () => processor.process(rawDiff, tokenBudget),
+        );
+
+        // Log the tier used
+        if (result.tier === DiffTier.SmartPrioritized) {
+            const tokenCount = Math.floor(rawDiff.length / 4 / 1000);
+            this.logger.info(
+                t('git.smartDiffApplied', {
+                    tokenCount,
+                    included: result.includedFiles,
+                    total: result.totalFiles,
+                }),
+            );
+        } else if (result.tier === DiffTier.MapReduce) {
+            const tokenCount = Math.floor(rawDiff.length / 4 / 1000);
+            this.logger.info(
+                t('git.mapReduceApplied', {
+                    tokenCount,
+                    chunks: result.excludedFiles,
+                }),
+            );
+        }
+
+        return result;
     }
 
     /**

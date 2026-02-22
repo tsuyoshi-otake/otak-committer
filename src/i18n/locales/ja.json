@@ -89,12 +89,16 @@
     "stageAllPrompt": "ステージされた変更がありません。すべての変更をステージして続行しますか？",
     "busyIndexLock": "Git がビジー状態です。他の Git 操作が完了するまで待つか、問題が続く場合は .git/index.lock を削除してください。",
     "reservedNamesInfo": "予約名のファイル（{files}）は含めますが、その内容は diff に表示できません。",
-    "diffTruncatedWarning": "差分サイズ（推定 {estimatedKTokens}K トークン）が上限 {thresholdKTokens}K を超えています。AI 処理のため内容を切り詰めます。"
+    "diffTruncatedWarning": "差分サイズ（推定 {estimatedKTokens}K トークン）が上限 {thresholdKTokens}K を超えています。AI 処理のため内容を切り詰めます。",
+    "smartDiffApplied": "大規模な差分（{tokenCount}Kトークン）: スマート優先順位付けを適用しました（{included}/{total}ファイルのフルdiffを含む）",
+    "mapReduceApplied": "非常に大規模な差分（{tokenCount}Kトークン）: チャンク要約を使用します（{chunks}チャンク）"
   },
   "progress": {
     "generatingCommitMessage": "コミットメッセージを生成中...",
     "analyzingChanges": "プルリクエスト生成 - 変更を解析中...",
-    "creatingPR": "{prType}プルリクエストを作成中..."
+    "creatingPR": "{prType}プルリクエストを作成中...",
+    "processingLargeDiff": "大規模な差分を処理中...",
+    "summarizingChunks": "変更を要約中（{current}/{total}）..."
   },
   "errors": {
     "gitExtensionNotFound": "Git拡張機能が利用できません",

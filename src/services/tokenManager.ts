@@ -41,6 +41,18 @@ export class TokenManager {
     /** Buffer reserved for reasoning tokens */
     public static readonly REASONING_BUFFER = 10 * 1000;
 
+    /** Token threshold for Tier 2 smart prioritization */
+    public static readonly TIER2_THRESHOLD = 200 * 1000;
+
+    /** Chunk size for Tier 3 map-reduce summarization */
+    public static readonly MAP_REDUCE_CHUNK_SIZE = 80 * 1000;
+
+    /** Max output tokens for summarization sub-calls */
+    public static readonly SUMMARIZATION_OUTPUT_TOKENS = 2000;
+
+    /** Safety margin for token budget calculations (accounts for estimation imprecision) */
+    public static readonly SAFETY_MARGIN = 0.95;
+
     /** Output token allocations by content type */
     public static readonly OUTPUT_TOKENS: OutputTokenAllocations = {
         COMMIT_MESSAGE: 4000, // Increased for Japanese/CJK languages

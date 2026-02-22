@@ -89,12 +89,16 @@
     "stageAllPrompt": "未找到已暫存的變更。是否暫存所有變更並繼續？",
     "busyIndexLock": "Git 正在忙碌。請等待其他 Git 操作完成；如果問題仍然存在，請刪除 .git/index.lock。",
     "reservedNamesInfo": "將包含保留名稱的檔案（{files}），但其內容無法在 diff 中顯示。",
-    "diffTruncatedWarning": "diff 大小（估計 {estimatedKTokens}K tokens）超過上限 {thresholdKTokens}K。將為 AI 處理截斷內容。"
+    "diffTruncatedWarning": "diff 大小（估計 {estimatedKTokens}K tokens）超過上限 {thresholdKTokens}K。將為 AI 處理截斷內容。",
+    "smartDiffApplied": "大型差異（{tokenCount}K令牌）：已套用智慧優先排序（{included}/{total}個檔案包含完整差異）",
+    "mapReduceApplied": "超大型差異（{tokenCount}K令牌）：使用分塊摘要（{chunks}個塊）"
   },
   "progress": {
     "generatingCommitMessage": "正在產生提交訊息...",
     "analyzingChanges": "產生 Pull Request - 正在分析變更...",
-    "creatingPR": "正在建立 {prType} Pull Request..."
+    "creatingPR": "正在建立 {prType} Pull Request...",
+    "processingLargeDiff": "正在處理大型差異...",
+    "summarizingChunks": "正在摘要變更（{current}/{total}）..."
   },
   "errors": {
     "gitExtensionNotFound": "Git 擴充功能不可用",

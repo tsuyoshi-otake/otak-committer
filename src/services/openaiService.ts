@@ -160,6 +160,57 @@ export class OpenAIService extends BaseService {
     }
 
     /**
+     * Summarize a chunk of diff content for map-reduce processing
+     *
+     * Used by Tier 3 large-diff processing to summarize chunks that exceed
+     * the token budget after smart prioritization.
+     *
+     * @param chunkContent - The diff chunk to summarize
+     * @param language - The target language for the summary
+     * @returns The summarized content or undefined if summarization fails
+     */
+    async summarizeChunk(
+        chunkContent: string,
+        language: string,
+    ): Promise<string | undefined> {
+        try {
+            this.logger.info('Summarizing diff chunk for map-reduce');
+
+            const prompt = this.promptService.createSummarizationPrompt(chunkContent, language);
+            const systemPrompt = getPrompt(language as SupportedLanguage, PromptType.System);
+
+            const temperature = this.getTemperature();
+            const response = await this.openai.chat.completions.create({
+                model: OpenAIService.MODEL,
+                messages: [
+                    { role: 'developer', content: systemPrompt },
+                    { role: 'user', content: prompt },
+                ],
+                ...(temperature !== undefined ? { temperature } : {}),
+                reasoning_effort: 'low',
+                max_completion_tokens: 2000,
+                response_format: { type: 'text' },
+                store: false,
+            });
+
+            const summary = response.choices?.[0]?.message?.content?.trim();
+            if (!summary) {
+                this.logger.warning('Empty summary returned from chunk summarization');
+                return undefined;
+            }
+
+            this.logger.info('Chunk summarization completed');
+            return summary;
+        } catch (error) {
+            this.logger.error('Failed to summarize diff chunk', error);
+            if (this.isAuthenticationError(error)) {
+                await this.promptToUpdateApiKey();
+            }
+            return undefined;
+        }
+    }
+
+    /**
      * Generate pull request title and body content
      *
      * Analyzes the diff between branches and generates appropriate PR content

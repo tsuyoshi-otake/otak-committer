@@ -282,4 +282,23 @@ Note: Please ensure all content is written in ${language}. ${emojiInstruction}${
             body: bodyPrompt,
         };
     }
+
+    /**
+     * Create a prompt for summarizing a chunk of diff content (Tier 3 map-reduce)
+     *
+     * @param chunkDiff - The chunk of diff content to summarize
+     * @param language - The target language for the summary
+     * @returns The summarization prompt string
+     */
+    createSummarizationPrompt(chunkDiff: string, language: string): string {
+        return `Summarize the following code changes concisely in ${language}. Focus on:
+- What was changed (files, functions, components)
+- Why it was likely changed (bug fix, feature, refactor)
+- Key technical details
+
+Changes:
+${chunkDiff}
+
+Provide a concise technical summary.`;
+    }
 }
