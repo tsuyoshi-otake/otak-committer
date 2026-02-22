@@ -1,5 +1,26 @@
 # Change Log
 
+## [2.6.0] - 2026-02-22
+
+### Added
+
+- **Bullet list format for commit messages:**
+  - New `otakCommitter.useBulletList` setting (default: `true`)
+  - When enabled, the commit message body is formatted as a bullet list (`- ` prefix)
+  - Each bullet point describes one logical change for better readability
+  - i18n support in all 6 UI languages (en, ja, ko, zh-cn, zh-tw, vi)
+
+### Changed
+
+- **Message style character/token limits tripled:**
+  - Simple: 200 → 600 chars, 100 → 300 tokens (commit), 400 → 1200 tokens (PR)
+  - Normal: 400 → 1200 chars, 200 → 600 tokens (commit), 800 → 2400 tokens (PR)
+  - Detailed: 800 → 2400 chars, 500 → 1500 tokens (commit), 2000 → 6000 tokens (PR)
+
+- **Conventional Commits enabled by default:**
+  - `otakCommitter.useConventionalCommits` default changed from `false` to `true`
+  - Commit messages now use `<type>(<scope>): <subject>` format out of the box
+
 ## [2.5.0] - 2026-02-22
 
 ### Added

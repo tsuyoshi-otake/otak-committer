@@ -15,9 +15,9 @@ import {
  * Updated to provide longer commit messages for better context
  */
 export const MESSAGE_LENGTH_LIMITS = {
-    [MessageStyle.Simple]: 200,
-    [MessageStyle.Normal]: 400,
-    [MessageStyle.Detailed]: 800,
+    [MessageStyle.Simple]: 600,
+    [MessageStyle.Normal]: 1200,
+    [MessageStyle.Detailed]: 2400,
 } as const;
 
 /**
@@ -104,7 +104,8 @@ export class PromptService {
         const config = vscode.workspace.getConfiguration('otakCommitter');
         const useEmoji = config.get<boolean>('useEmoji') || false;
         const rawCustomMessage = config.get<string>('customMessage') || '';
-        const useConventionalCommits = config.get<boolean>('useConventionalCommits') ?? false;
+        const useConventionalCommits = config.get<boolean>('useConventionalCommits') ?? true;
+        const useBulletList = config.get<boolean>('useBulletList') ?? true;
 
         const emojiInstruction = useEmoji
             ? 'Feel free to use emojis for emphasis and key points.'
@@ -165,6 +166,7 @@ Git diff:
 ${diff}
 
 Please provide a clear and ${messageStyle} commit message following the format above.
+${useBulletList ? 'Format the body as a bullet list (use "- " prefix for each item). Each bullet point should describe one logical change.' : ''}
 ${emojiInstruction}${customInstruction}`;
     }
 

@@ -12,9 +12,9 @@
 
   "config.language": "Ngon ngu cho thong diep commit",
   "config.messageStyle": "Kieu va do dai cua thong diep commit duoc tao",
-  "config.messageStyle.simple": "Don gian va ngan gon (200 ky tu)",
-  "config.messageStyle.normal": "Do dai binh thuong co mot chut ngu canh (400 ky tu)",
-  "config.messageStyle.detailed": "Giai thich chi tiet (800 ky tu)",
+  "config.messageStyle.simple": "Don gian va ngan gon (600 ky tu)",
+  "config.messageStyle.normal": "Do dai binh thuong co mot chut ngu canh (1200 ky tu)",
+  "config.messageStyle.detailed": "Giai thich chi tiet (2400 ky tu)",
   "config.customMessage": "Thong diep tuy chinh de them vao system prompt (them sau diff message)",
   "config.useEmoji": "Su dung emoji trong thong diep commit va mo ta PR",
   "config.emojiStyle": "Kieu emoji su dung trong thong diep",
@@ -26,6 +26,7 @@
   "config.reasoningEffort.medium": "Reasoning vua (can bang)",
   "config.reasoningEffort.high": "Reasoning cao (cham nhat, chat luong cao nhat)",
   "config.maxInputTokens": "So token dau vao toi da cho AI xu ly (mac dinh: 200K)",
+  "config.useBulletList": "Dinh dang noi dung thong diep commit thanh danh sach gach dau dong",
   "config.useConventionalCommits": "Su dung dinh dang Conventional Commits voi scope (<type>(<scope>): <subject>)",
   "config.appendCommitTrailer": "Them dong 'Commit-Message-By: otak-committer' vao cuoi thong diep commit da tao",
   "config.syncApiKeys": "Dong bo API key qua VS Code Settings Sync (luu key trong trang thai mo rong duoc dong bo)"

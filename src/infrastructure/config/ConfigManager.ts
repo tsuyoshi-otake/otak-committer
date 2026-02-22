@@ -12,6 +12,7 @@ export interface ExtensionConfig {
     emojiStyle: EmojiStyle;
     customMessage: string;
     appendCommitTrailer: boolean;
+    useBulletList: boolean;
     useConventionalCommits: boolean;
     maxInputTokens: number;
 }
@@ -91,6 +92,7 @@ export class ConfigManager {
             emojiStyle: this.get('emojiStyle'),
             customMessage: this.get('customMessage'),
             appendCommitTrailer: this.get('appendCommitTrailer'),
+            useBulletList: this.get('useBulletList'),
             useConventionalCommits: this.get('useConventionalCommits'),
             maxInputTokens: this.get('maxInputTokens'),
         };

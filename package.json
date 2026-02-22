@@ -13,7 +13,7 @@
     "url": "https://github.com/tsuyoshi-otake/otak-committer/issues"
   },
   "homepage": "https://github.com/tsuyoshi-otake/otak-committer#readme",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -159,9 +159,14 @@
           "maximum": 400000,
           "description": "%config.maxInputTokens%"
         },
+        "otakCommitter.useBulletList": {
+          "type": "boolean",
+          "default": true,
+          "description": "%config.useBulletList%"
+        },
         "otakCommitter.useConventionalCommits": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "%config.useConventionalCommits%"
         },
         "otakCommitter.appendCommitTrailer": {

@@ -12,9 +12,9 @@
 
   "config.language": "Language for commit messages",
   "config.messageStyle": "Style and length of generated commit messages",
-  "config.messageStyle.simple": "Simple and concise (200 chars)",
-  "config.messageStyle.normal": "Normal length with some context (400 chars)",
-  "config.messageStyle.detailed": "Detailed explanation (800 chars)",
+  "config.messageStyle.simple": "Simple and concise (600 chars)",
+  "config.messageStyle.normal": "Normal length with some context (1200 chars)",
+  "config.messageStyle.detailed": "Detailed explanation (2400 chars)",
   "config.customMessage": "Custom message to append to the system prompt (added after the diff message)",
   "config.useEmoji": "Use emoji in commit messages and PR descriptions",
   "config.emojiStyle": "Style of emoji to use in messages",
@@ -26,6 +26,7 @@
   "config.reasoningEffort.medium": "Medium reasoning (balanced)",
   "config.reasoningEffort.high": "High reasoning (slowest, highest quality)",
   "config.maxInputTokens": "Maximum input tokens for AI processing (default: 200K)",
+  "config.useBulletList": "Format commit message body as a bullet list",
   "config.useConventionalCommits": "Use Conventional Commits format with scope (<type>(<scope>): <subject>)",
   "config.appendCommitTrailer": "Append 'Commit-Message-By: otak-committer' trailer to generated commit messages",
   "config.syncApiKeys": "Sync API keys via VS Code Settings Sync (stores keys in synced extension state)"

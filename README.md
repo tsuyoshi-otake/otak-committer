@@ -99,7 +99,8 @@ Uses VS Code's built-in GitHub authentication. Sign in and out through the Accou
 - **`otakCommitter.emojiStyle`**: Emoji format (`github` or `unicode`)
 - **`otakCommitter.reasoningEffort`**: AI reasoning depth — `none`, `low`, `medium`, `high` (default: `low`)
 - **`otakCommitter.maxInputTokens`**: Maximum input tokens for diff analysis (default: `200000`)
-- **`otakCommitter.useConventionalCommits`**: Use strict Conventional Commits format (default: `false`)
+- **`otakCommitter.useBulletList`**: Format commit message body as a bullet list (default: `true`)
+- **`otakCommitter.useConventionalCommits`**: Use Conventional Commits format (default: `true`)
 - **`otakCommitter.appendCommitTrailer`**: Append `Commit-Message-By: otak-committer` trailer (default: `true`)
 - **`otakCommitter.syncApiKeys`**: Sync API keys via VS Code Settings Sync (default: `false`)
 

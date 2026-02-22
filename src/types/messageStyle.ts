@@ -17,22 +17,22 @@ export const MESSAGE_STYLES: Record<
 > = {
     simple: {
         tokens: {
-            commit: 100,
-            pr: 400,
+            commit: 300,
+            pr: 1200,
         },
         description: 'Generate a very concise message focusing only on the core changes.',
     },
     normal: {
         tokens: {
-            commit: 200,
-            pr: 800,
+            commit: 600,
+            pr: 2400,
         },
         description: 'Generate a message with a brief explanation of the changes.',
     },
     detailed: {
         tokens: {
-            commit: 500,
-            pr: 2000,
+            commit: 1500,
+            pr: 6000,
         },
         description:
             'Generate a detailed message including context, reasoning, and impact of the changes.',

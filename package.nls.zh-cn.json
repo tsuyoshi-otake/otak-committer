@@ -12,9 +12,9 @@
 
   "config.language": "提交消息语言",
   "config.messageStyle": "生成的提交消息的风格和长度",
-  "config.messageStyle.simple": "简单精炼（200 字符）",
-  "config.messageStyle.normal": "正常长度，带少量上下文（400 字符）",
-  "config.messageStyle.detailed": "详细说明（800 字符）",
+  "config.messageStyle.simple": "简单精炼（600 字符）",
+  "config.messageStyle.normal": "正常长度，带少量上下文（1200 字符）",
+  "config.messageStyle.detailed": "详细说明（2400 字符）",
   "config.customMessage": "要追加到系统提示中的自定义消息（添加在 diff 消息之后）",
   "config.useEmoji": "在提交消息和 PR 描述中使用表情符号",
   "config.emojiStyle": "消息中使用的表情符号风格",
@@ -26,6 +26,7 @@
   "config.reasoningEffort.medium": "中（均衡）",
   "config.reasoningEffort.high": "高（最慢，质量最高）",
   "config.maxInputTokens": "AI 处理的最大输入 token 数（默认：200K）",
+  "config.useBulletList": "提交消息正文使用项目符号列表格式",
   "config.useConventionalCommits": "使用带 scope 的 Conventional Commits 格式（<type>(<scope>): <subject>）",
   "config.appendCommitTrailer": "在生成的提交消息末尾追加 'Commit-Message-By: otak-committer' 标记",
   "config.syncApiKeys": "通过 VS Code 设置同步同步 API 密钥（将密钥存储在同步的扩展状态中）"

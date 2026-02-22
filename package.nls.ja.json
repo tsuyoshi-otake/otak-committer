@@ -12,9 +12,9 @@
 
   "config.language": "コミットメッセージの言語",
   "config.messageStyle": "生成するコミットメッセージのスタイルと長さ",
-  "config.messageStyle.simple": "シンプルで簡潔（200文字）",
-  "config.messageStyle.normal": "標準（400文字、文脈を少し含む）",
-  "config.messageStyle.detailed": "詳細（800文字、詳しい説明）",
+  "config.messageStyle.simple": "シンプルで簡潔（600文字）",
+  "config.messageStyle.normal": "標準（1200文字、文脈を少し含む）",
+  "config.messageStyle.detailed": "詳細（2400文字、詳しい説明）",
   "config.customMessage": "システムプロンプトに追加するカスタムメッセージ（差分メッセージの後に追加）",
   "config.useEmoji": "コミットメッセージとPR説明で絵文字を使用",
   "config.emojiStyle": "メッセージで使用する絵文字の形式",
@@ -26,6 +26,7 @@
   "config.reasoningEffort.medium": "中（バランス）",
   "config.reasoningEffort.high": "高（最も遅い、品質最高）",
   "config.maxInputTokens": "AI処理の最大入力トークン数（デフォルト: 200K）",
+  "config.useBulletList": "コミットメッセージの本文を箇条書き形式で生成",
   "config.useConventionalCommits": "スコープ付きの Conventional Commits 形式を使用（<type>(<scope>): <subject>）",
   "config.appendCommitTrailer": "生成されたコミットメッセージに 'Commit-Message-By: otak-committer' トレーラーを追加",
   "config.syncApiKeys": "VS Code の設定同期で API キーを同期（拡張機能の同期状態にキーを保存）"
