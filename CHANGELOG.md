@@ -1,5 +1,33 @@
 # Change Log
 
+## [2.8.0] - 2026-02-22
+
+### Security
+
+- **Comprehensive security audit (5-agent review):**
+  - Extended secret detection to PR descriptions and issue generation workflows
+  - Added secret detection guard in map-reduce chunk summarization
+  - Logger now performs value-based redaction for known secret formats (OpenAI, GitHub, AWS, Slack, GitLab tokens)
+  - Logger redacts credentials embedded in URLs (e.g., `user:password@host`)
+  - Logger sanitizes secrets from error stack traces
+  - Added `bearer` to sensitive field name list in Logger
+
+- **Hardened API key validation:**
+  - `ApiKeyValidator` now enforces strict OpenAI key prefix format (`sk-proj-`, `sk-svcacct-`, `sk-admin-`, `sk-or-`, `sk-ant-`) with minimum 20 character length
+
+- **Strengthened encryption:**
+  - PBKDF2 iterations increased from 100,000 to 600,000 (OWASP 2023 recommendation)
+
+- **API request hardening:**
+  - Added 2-minute timeout for OpenAI API calls to prevent hung connections
+  - Capped `Retry-After` header to 1 hour maximum to prevent abuse via malicious headers
+
+- **Expanded secret detection patterns:**
+  - Added Mistral AI (`mist-`) and DeepSeek (`sk-ds-`) API key patterns
+  - Added AWS `SECRET_ACCESS_KEY` environment variable reference detection
+  - Added Neon PostgreSQL and Turso (`libsql://`) connection string detection
+  - Added context-based detection for `NEXTAUTH_SECRET`, `DATABASE_URL`, `PRISMA_DATABASE_URL`, `TURSO_CONNECTION_URL`, `LANGCHAIN_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ANON_KEY`, `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`
+
 ## [2.7.0] - 2026-02-22
 
 ### Added

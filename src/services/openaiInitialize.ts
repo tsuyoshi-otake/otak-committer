@@ -81,6 +81,9 @@ function getErrorMessage(error: unknown): string {
     return String(error);
 }
 
+/** Maximum retry-after value to accept (1 hour) to prevent abuse via malicious headers */
+const MAX_RETRY_AFTER_SECONDS = 3600;
+
 function getRetryAfterSeconds(error: unknown): number | undefined {
     const headers =
         (error as { headers?: Record<string, unknown> } | null | undefined)?.headers ??
@@ -98,12 +101,12 @@ function getRetryAfterSeconds(error: unknown): number | undefined {
         (headers['X-RateLimit-Reset'] as unknown);
 
     if (typeof raw === 'number') {
-        return raw;
+        return raw >= 0 && raw <= MAX_RETRY_AFTER_SECONDS ? raw : undefined;
     }
 
     if (typeof raw === 'string') {
         const parsed = Number.parseInt(raw, 10);
-        if (Number.isFinite(parsed) && parsed >= 0) {
+        if (Number.isFinite(parsed) && parsed >= 0 && parsed <= MAX_RETRY_AFTER_SECONDS) {
             return parsed;
         }
     }

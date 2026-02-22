@@ -9,6 +9,7 @@
 import { Logger } from '../infrastructure/logging/Logger';
 import { TokenManager } from './tokenManager';
 import { ParsedFileDiff, estimateTokenCount } from '../utils/diffUtils';
+import { detectPotentialSecrets } from '../utils/secretDetection';
 
 // Use a type-only import to avoid circular dependency at runtime
 import type { OpenAIService } from './openaiService';
@@ -155,6 +156,17 @@ export class MapReduceSummarizer {
     ): Promise<string | undefined> {
         const chunkContent = chunk.map((f) => f.content).join('\n');
         this.logger.debug(`Summarizing chunk ${chunkIndex} (${estimateTokenCount(chunkContent)} tokens, ${chunk.length} files)`);
+
+        // Block chunk summarization if potential secrets are detected
+        const detection = detectPotentialSecrets(chunkContent);
+        if (detection.hasPotentialSecrets) {
+            const fileList = chunk.map((f) => f.filePath).join(', ');
+            this.logger.warning(
+                `Potential secrets detected in chunk ${chunkIndex}, skipping summarization`,
+                { matchedPatternIds: detection.matchedPatternIds, files: fileList },
+            );
+            return `[Skipped: potential secrets detected in ${fileList}]`;
+        }
 
         try {
             return await this.openaiService.summarizeChunk(chunkContent, language);

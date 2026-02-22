@@ -1100,11 +1100,19 @@ Before submitting a PR:
 - **API validation timeout**: API key validation requests have a 30-second timeout via `AbortController`
 - **Sequential storage operations**: `SecretStorageProvider.set()` and `delete()` execute primary and backup operations sequentially for consistency
 - **Git index.lock retry**: Automatic 1-second delay retry when `index.lock` is detected during staging
-- **Sensitive field redaction**: Logger automatically redacts `apikey`, `token`, `secret`, `password` fields
+- **Sensitive field redaction**: Logger automatically redacts `apikey`, `token`, `secret`, `password`, `authorization`, `credential`, `bearer` fields
+- **Value-based secret redaction**: Logger detects and redacts known secret formats (OpenAI, GitHub, AWS, Slack, GitLab tokens) regardless of field name
+- **URL credential redaction**: Logger redacts credentials embedded in URLs (e.g., `user:password@host` becomes `user:[REDACTED]@host`)
+- **Stack trace sanitization**: Logger sanitizes known secret patterns from error stack traces
 - **Error context sanitization**: `BaseError.toString()` redacts sensitive fields in error context
+- **Secret detection in all generation paths**: PR descriptions, issue generation, and map-reduce summarization all scan for secrets before sending to AI
+- **PBKDF2 hardening**: Encryption uses 600,000 iterations (OWASP 2023 recommendation)
+- **API request timeout**: OpenAI API calls have a 2-minute timeout to prevent hung connections
+- **Retry-After cap**: Maximum 1-hour cap on `Retry-After` headers to prevent abuse
+- **Strict API key validation**: OpenAI key format enforces known prefixes and minimum 20 character length
 
 ---
 
 **Last Updated**: February 2026
-**Version**: 2.4.0
+**Version**: 2.8.0
 **Maintainers**: otak-committer team

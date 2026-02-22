@@ -6,6 +6,7 @@ import { OpenAIService } from '../services/openai';
 import { GitServiceFactory } from '../services/git';
 import { ServiceError } from '../types/errors';
 import { PullRequestDiff, TemplateInfo } from '../types';
+import { detectPotentialSecrets } from '../utils';
 import { t } from '../i18n/index.js';
 import { selectIssue, selectPRType } from './pr.input';
 import { showPRPreview } from './pr.preview';
@@ -31,6 +32,10 @@ export class PRCommand extends BaseCommand {
             const templates = await this.findTemplates();
             const diff = await this.getBranchDiff(github, branches);
             if (!diff) {
+                return;
+            }
+
+            if (this.shouldBlockForPotentialSecrets(diff)) {
                 return;
             }
 
@@ -183,6 +188,28 @@ export class PRCommand extends BaseCommand {
         } catch (error: unknown) {
             handleCreatePRError(error);
         }
+    }
+
+    private shouldBlockForPotentialSecrets(diff: PullRequestDiff): boolean {
+        const combined = diff.files.map((f) => f.patch).join('\n');
+        const detection = detectPotentialSecrets(combined);
+        if (!detection.hasPotentialSecrets) {
+            return false;
+        }
+
+        const patterns = detection.matchedPatternIds.join(', ');
+        this.logger.warning('Potential secrets detected in PR diff', {
+            matchedPatternIds: detection.matchedPatternIds,
+        });
+
+        vscode.window.showWarningMessage(
+            t('messages.commitGenerationSecretWarning', {
+                count: detection.matchedPatternIds.length,
+                patterns,
+            }),
+        );
+
+        return true;
     }
 
     private async showSuccessNotification(

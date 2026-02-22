@@ -43,7 +43,7 @@ export class EncryptionUtil {
             const iv = crypto.randomBytes(this.IV_LENGTH);
 
             // Derive key with salt
-            const derivedKey = crypto.pbkdf2Sync(key, salt, 100000, 32, 'sha256');
+            const derivedKey = crypto.pbkdf2Sync(key, salt, 600000, 32, 'sha256');
 
             // Create cipher
             const cipher = crypto.createCipheriv(this.ALGORITHM, derivedKey, iv);
@@ -88,7 +88,7 @@ export class EncryptionUtil {
             const encrypted = combined.slice(this.SALT_LENGTH + this.IV_LENGTH + this.TAG_LENGTH);
 
             // Derive key with salt
-            const derivedKey = crypto.pbkdf2Sync(key, salt, 100000, 32, 'sha256');
+            const derivedKey = crypto.pbkdf2Sync(key, salt, 600000, 32, 'sha256');
 
             // Create decipher
             const decipher = crypto.createDecipheriv(this.ALGORITHM, derivedKey, iv);

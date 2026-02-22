@@ -151,7 +151,7 @@ The extension uses GPT-5.2 for high-quality commit message generation.
 
 - **Secure Storage (default)**: API keys are stored using VS Code SecretStorage.
 - **Settings Sync (optional)**: If `otakCommitter.syncApiKeys` is enabled, a copy of your API keys is stored in synced extension state for cross-device usage.
-- **Encrypted Backups**: Redundant storage uses AES-256-GCM encryption with machine-specific keys.
+- **Encrypted Backups**: Redundant storage uses AES-256-GCM encryption with PBKDF2 (600,000 iterations) and machine-specific keys.
 - **Automatic Migration**: Legacy API keys in settings are migrated to secure storage and deleted.
 - **No `settings.json` secrets**: Keys never appear in `settings.json`.
 - **Diagnostic Tools**: Built-in diagnostics verify storage health.
@@ -159,7 +159,8 @@ The extension uses GPT-5.2 for high-quality commit message generation.
 ### Data Handling
 
 - Git diff analysis happens locally.
-- **Secret detection**: Before any API call, the full diff is scanned for potential secrets (API keys, tokens, passwords, private keys, etc.). If secrets are detected, generation is blocked entirely.
+- **Secret detection**: Before any API call, diffs and file content are scanned for potential secrets (API keys, tokens, passwords, private keys, connection strings, environment variable references, etc.). If secrets are detected, generation is blocked entirely. This applies to commit messages, PR descriptions, issue generation, and map-reduce summarization.
+- **Log redaction**: Logger automatically redacts sensitive field values, known secret formats, URL-embedded credentials, and secrets in error stack traces.
 - Only necessary diff context is sent to OpenAI for generation.
 - Large diffs are intelligently prioritized: lock files and generated files are excluded or summarized to minimize data sent to the API.
 

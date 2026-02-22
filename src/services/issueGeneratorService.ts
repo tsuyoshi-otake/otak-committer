@@ -6,6 +6,8 @@ import { OpenAIService } from './openai';
 import { GitService } from './git';
 import { GitHubService } from './github';
 import { TokenManager } from './tokenManager';
+import { detectPotentialSecrets } from '../utils';
+import { t } from '../i18n/index.js';
 import { analyzeFiles, formatAnalysisResult } from './issueGenerator.analysis';
 import {
     buildIssueBodyPrompt,
@@ -46,6 +48,23 @@ export class IssueGeneratorService extends BaseService {
 
             if (fileAnalyses.length > 0) {
                 const combinedContent = fileAnalyses.map((a) => a.content || '').join('');
+
+                // Block generation if potential secrets are found in file content
+                const detection = detectPotentialSecrets(combinedContent);
+                if (detection.hasPotentialSecrets) {
+                    const patterns = detection.matchedPatternIds.join(', ');
+                    this.logger.warning('Potential secrets detected in files for issue generation', {
+                        matchedPatternIds: detection.matchedPatternIds,
+                    });
+                    await vscode.window.showWarningMessage(
+                        t('messages.commitGenerationSecretWarning', {
+                            count: detection.matchedPatternIds.length,
+                            patterns,
+                        }),
+                    );
+                    throw new Error('Issue generation blocked: potential secrets detected in selected files');
+                }
+
                 const estimatedTokens = TokenManager.estimateTokens(combinedContent);
                 const maxTokensLimit = this.getMaxTokensLimit();
                 if (estimatedTokens > maxTokensLimit) {

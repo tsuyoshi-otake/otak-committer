@@ -40,10 +40,17 @@ const SECRET_PATTERN_DEFINITIONS: readonly SecretPatternDefinition[] = [
     { id: 'fireworks_api_key', source: String.raw`\bfw_[A-Za-z0-9]{32}\b` },
     { id: 'pinecone_api_key', source: String.raw`\bpcsk_[A-Za-z0-9]{40}\b` },
     { id: 'xai_api_key', source: String.raw`\bxai-[A-Za-z0-9]{40}\b` },
+    { id: 'mistral_api_key', source: String.raw`\bmist-[A-Za-z0-9]{32}\b` },
+    { id: 'deepseek_api_key', source: String.raw`\bsk-ds-[A-Za-z0-9]{20,}\b` },
 
     // Cloud providers
     { id: 'aws_access_key_id', source: String.raw`\bAKIA[0-9A-Z]{16}\b` },
     { id: 'aws_session_key_id', source: String.raw`\bASIA[0-9A-Z]{16}\b` },
+    {
+        id: 'aws_secret_access_key_reference',
+        source: String.raw`AWS_SECRET_ACCESS_KEY\s*[=:]`,
+        flags: 'i',
+    },
     { id: 'google_api_key', source: String.raw`\bAIza[0-9A-Za-z_-]{35}\b` },
     { id: 'google_oauth_token', source: String.raw`\bya29\.[0-9A-Za-z_-]+\b` },
     { id: 'google_oauth_client_secret', source: String.raw`\bGOCSPX-[A-Za-z0-9_-]{28}\b` },
@@ -159,6 +166,14 @@ const SECRET_PATTERN_DEFINITIONS: readonly SecretPatternDefinition[] = [
     },
     { id: 'mysql_connection_string_with_password', source: String.raw`mysql:\/\/[^:\s]+:[^@\s]+@` },
     { id: 'redis_connection_string_with_password', source: String.raw`rediss?:\/\/:[^@\s]+@` },
+    {
+        id: 'neon_connection_string_with_password',
+        source: String.raw`postgres(?:ql)?:\/\/[^:\s]+:[^@\s]+@.*neon\.tech`,
+    },
+    {
+        id: 'turso_connection_string',
+        source: String.raw`libsql:\/\/[^\s]+`,
+    },
 
     // Context-based indicators (variable names + assignment)
     {
@@ -235,6 +250,26 @@ const SECRET_PATTERN_DEFINITIONS: readonly SecretPatternDefinition[] = [
         flags: 'i',
     },
     { id: 'service_account_json_type', source: String.raw`"type"\s*:\s*"service_account"`, flags: 'i' },
+
+    // Additional context-based references for modern services
+    { id: 'nextauth_secret_reference', source: String.raw`NEXTAUTH_SECRET\s*[=:]`, flags: 'i' },
+    {
+        id: 'database_url_reference',
+        source: String.raw`(?:DATABASE_URL|PRISMA_DATABASE_URL|TURSO_CONNECTION_URL)\s*[=:]`,
+        flags: 'i',
+    },
+    { id: 'langchain_api_key_reference', source: String.raw`LANGCHAIN_API_KEY\s*[=:]`, flags: 'i' },
+    {
+        id: 'supabase_key_reference',
+        source: String.raw`SUPABASE_(?:SERVICE_ROLE_KEY|ANON_KEY)\s*[=:]`,
+        flags: 'i',
+    },
+    { id: 'openai_api_key_reference', source: String.raw`OPENAI_API_KEY\s*[=:]`, flags: 'i' },
+    {
+        id: 'anthropic_api_key_reference',
+        source: String.raw`ANTHROPIC_API_KEY\s*[=:]`,
+        flags: 'i',
+    },
 ];
 
 const SECRET_PATTERNS: readonly SecretPattern[] = SECRET_PATTERN_DEFINITIONS.map((definition) => ({

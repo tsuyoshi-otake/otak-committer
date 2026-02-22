@@ -8,9 +8,10 @@ import { Logger } from '../infrastructure/logging/Logger';
 export class ApiKeyValidator {
     /**
      * Regular expression for validating OpenAI API key format
-     * Format: sk- followed by at least one character
+     * Accepts known OpenAI key prefixes: sk-proj-, sk-svcacct-, sk-admin-, sk-or-,
+     * or legacy keys starting with sk- followed by 20+ alphanumeric characters.
      */
-    private static readonly API_KEY_PATTERN = /^sk-.+$/;
+    private static readonly API_KEY_PATTERN = /^sk-(?:proj-|svcacct-|admin-|or-|ant-)?[A-Za-z0-9_-]{20,}$/;
 
     /** Timeout for API validation requests (30 seconds) */
     private static readonly VALIDATION_TIMEOUT_MS = 30000;

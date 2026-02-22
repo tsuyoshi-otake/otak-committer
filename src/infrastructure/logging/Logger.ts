@@ -87,7 +87,25 @@ export class Logger {
     /**
      * JSON replacer that redacts sensitive fields from log output
      */
+    /** Patterns that match common secret formats in string values */
+    private static readonly SECRET_VALUE_PATTERNS = [
+        /^sk-(?:proj-|svcacct-|admin-|or-|ant-)?[A-Za-z0-9_-]{20,}/,
+        /^(?:ghp_|gho_|ghu_|ghs_)[A-Za-z0-9_]{36,}/,
+        /^(?:AKIA|ASIA)[0-9A-Z]{16}/,
+        /^(?:xoxb-|xoxp-|xoxs-|xapp-)[0-9A-Za-z-]{10,}/,
+        /^(?:glpat-|glrt-)[0-9A-Za-z_-]{20}/,
+    ];
+
+    /** Redact secret values embedded in URLs (e.g. user:password@host) */
+    private static redactUrlCredentials(value: string): string {
+        return value.replace(
+            /(:\/\/)([^:]+):([^@]+)@/g,
+            '$1$2:[REDACTED]@',
+        );
+    }
+
     private static sensitiveFieldReplacer(_key: string, value: unknown): unknown {
+        // Key-name based redaction
         if (typeof _key === 'string') {
             const lower = _key.toLowerCase();
             if (
@@ -97,9 +115,22 @@ export class Logger {
                 lower.includes('secret') ||
                 lower.includes('password') ||
                 lower.includes('authorization') ||
-                lower.includes('credential')
+                lower.includes('credential') ||
+                lower.includes('bearer')
             ) {
                 return typeof value === 'string' ? '[REDACTED]' : value;
+            }
+        }
+        // Value-based redaction for known secret formats
+        if (typeof value === 'string') {
+            for (const pattern of Logger.SECRET_VALUE_PATTERNS) {
+                if (pattern.test(value)) {
+                    return '[REDACTED]';
+                }
+            }
+            // Redact credentials embedded in URLs
+            if (value.includes('://') && value.includes('@')) {
+                return Logger.redactUrlCredentials(value);
             }
         }
         return value;
@@ -108,9 +139,21 @@ export class Logger {
     private static errorToLogObject(error: Error): Record<string, unknown> {
         const obj: Record<string, unknown> = { name: error.name, message: error.message };
 
+        // Redact any secrets that may appear in stack traces
+        if (error.stack) {
+            let sanitizedStack = error.stack;
+            for (const pattern of Logger.SECRET_VALUE_PATTERNS) {
+                sanitizedStack = sanitizedStack.replace(
+                    new RegExp(pattern.source, 'g'),
+                    '[REDACTED]',
+                );
+            }
+            obj.stack = sanitizedStack;
+        }
+
         const cause = (error as Error & { cause?: unknown }).cause;
         if (cause instanceof Error) {
-            obj.cause = { name: cause.name, message: cause.message };
+            obj.cause = Logger.errorToLogObject(cause);
         } else if (cause !== undefined) {
             obj.cause = cause;
         }
