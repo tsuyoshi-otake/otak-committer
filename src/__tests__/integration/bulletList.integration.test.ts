@@ -70,7 +70,7 @@ Git diff:
 ${diff}
 
 Please provide a clear and ${options.messageStyle} commit message following the format above.
-${options.useBulletList ? 'Format the body as a bullet list (use "- " prefix for each item). Each bullet point should describe one logical change.' : ''}
+${options.useBulletList ? 'Format the body as follows: first write a brief summary of the changes in up to 3 lines of prose, then leave a blank line, then list the specific changes as a bullet list (use "- " prefix for each item). Each bullet point should describe one logical change.' : ''}
 DO NOT use any emojis in the content.`;
 }
 
@@ -154,15 +154,22 @@ suite('Bullet List Integration Tests', () => {
 
             assert.ok(message, 'Should return a commit message');
 
-            // The body (lines after the first line) should contain bullet points
+            // The body (lines after the first line) should contain:
+            // 1. A prose summary (non-bullet lines)
+            // 2. Bullet points after the summary
             const lines = message.split('\n').filter((l) => l.trim().length > 0);
             const bodyLines = lines.slice(1); // skip subject line
 
             const bulletLines = bodyLines.filter((l) => l.trim().startsWith('- '));
+            const proseLines = bodyLines.filter((l) => !l.trim().startsWith('- '));
             console.log(
-                `Body lines: ${bodyLines.length}, Bullet lines: ${bulletLines.length}`,
+                `Body lines: ${bodyLines.length}, Prose lines: ${proseLines.length}, Bullet lines: ${bulletLines.length}`,
             );
 
+            assert.ok(
+                proseLines.length >= 1,
+                `Expected at least 1 prose summary line before bullets, got ${proseLines.length}. Body:\n${bodyLines.join('\n')}`,
+            );
             assert.ok(
                 bulletLines.length >= 1,
                 `Expected at least 1 bullet line in body, got ${bulletLines.length}. Body:\n${bodyLines.join('\n')}`,

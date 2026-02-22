@@ -166,7 +166,7 @@ Git diff:
 ${diff}
 
 Please provide a clear and ${messageStyle} commit message following the format above.
-${useBulletList ? 'Format the body as a bullet list (use "- " prefix for each item). Each bullet point should describe one logical change.' : ''}
+${useBulletList ? 'Format the body as follows: first write a brief summary of the changes in up to 3 lines of prose, then leave a blank line, then list the specific changes as a bullet list (use "- " prefix for each item). Each bullet point should describe one logical change.' : ''}
 ${emojiInstruction}${customInstruction}`;
     }
 
@@ -237,6 +237,7 @@ ${file.patch}`,
 Requirements:
 1. Title should be concise and accurately represent the changes
 2. Include a prefix (e.g., "Feature:", "Fix:", "Improvement:", etc.) ${useEmoji ? 'with appropriate emoji prefix' : 'without emoji'}
+3. Output ONLY the title text itself. Do not include labels like "Title:" or wrap in quotes.
 
 ${customInstruction}Git diff: ${diffSummary}`;
 

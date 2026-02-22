@@ -1,0 +1,129 @@
+{
+  "commands": {
+    "generateCommit": "Generer un message de commit",
+    "generatePR": "Generer une pull request",
+    "generateIssue": "Generer une issue",
+    "changeLanguage": "Changer la langue",
+    "changeMessageStyle": "Changer le style de message",
+    "setApiKey": "Definir la cle API",
+    "openSettings": "Ouvrir les parametres",
+    "diagnoseStorage": "Diagnostiquer le stockage des cles API"
+  },
+  "messages": {
+    "apiKeyNotConfigured": "La cle API OpenAI n'est pas configuree. Voulez-vous la configurer maintenant ?",
+    "apiKeySaved": "Cle API enregistree avec succes",
+    "storageDiagnosisWritten": "Diagnostic de stockage ecrit dans Output : otak-committer",
+    "authRequired": "L'authentification GitHub est requise. Veuillez vous connecter.",
+    "githubAuthPrompt": "Les operations GitHub necessitent une authentification. Veuillez vous authentifier.",
+    "languageChanged": "Langue changee en {language}",
+    "messageStyleChanged": "Style de message change en {style}",
+    "noChangesToCommit": "Aucun changement a valider",
+    "commitMessageGenerated": "Le message de commit a ete genere",
+    "openAIInitFailed": "Echec de l'initialisation du service OpenAI",
+    "emptyMessageReceived": "Message vide recu",
+    "noChangesBetweenBranches": "Aucune modification trouvee entre les branches selectionnees. Veuillez effectuer des changements avant de creer une PR.",
+    "failedToGeneratePR": "Echec de la generation du contenu de la PR. Veuillez reessayer.",
+    "failedToShowPreview": "Impossible d'afficher l'apercu",
+    "prCreatedSuccess": "{prType} #{number} cree avec succes !",
+    "draftPRNotSupported": "Les PR en brouillon ne sont disponibles que sur GitHub Team et Enterprise. Creation d'une PR classique a la place.",
+    "issueCreatedSuccess": "Issue creee avec succes",
+    "noFilesSelectedConfirm": "Aucun fichier selectionne. Generer une issue avec uniquement la structure du depot ?",
+    "generatingIssue": "Generation de l'issue...",
+    "analyzingRepository": "Analyse du depot...",
+    "creatingIssue": "Creation de l'issue...",
+    "updatingContent": "Mise a jour du contenu...",
+    "waitingForModificationInput": "En attente d'instructions de modification...",
+    "storageFallbackWarning": "otak-committer : la cle API est stockee dans un stockage de secours. Le stockage securise n'est pas disponible.",
+    "commitGenerationSecretWarning": "Des cles API ou secrets potentiels ont ete trouves dans la cible de generation de message de commit ({count} motif(s) detecte(s) : {patterns}). La generation a ete annulee pour eviter d'envoyer des donnees sensibles a l'IA."
+  },
+  "statusBar": {
+    "configuration": "Configuration",
+    "currentStyle": "Style actuel",
+    "setApiKey": "Definir la cle API",
+    "openSettings": "Ouvrir les parametres"
+  },
+  "quickPick": {
+    "selectCommitLanguage": "Selectionner la langue du message de commit",
+    "selectMessageStyle": "Selectionner le style du message",
+    "selectRelatedIssue": "Selectionner une issue liee (optionnel, appuyez sur Escape pour ignorer)",
+    "selectPRType": "Selectionner le type de PR (appuyez sur Escape pour ignorer)",
+    "selectIssueType": "Selectionner le type d'issue",
+    "enterIssueDescription": "Saisir la description de l'issue",
+    "describeIssue": "Decrivez l'issue, le probleme ou la tache",
+    "enterModificationInstructions": "Saisir les instructions de modification (appuyez sur Escape pour ignorer)",
+    "describeModification": "Decrivez comment le contenu doit etre modifie",
+    "chooseAction": "Choisir une action",
+    "enterApiKey": "Saisissez votre cle API OpenAI"
+  },
+  "prTypes": {
+    "draft": "Pull request brouillon",
+    "draftDescription": "Revue requise avant fusion",
+    "regular": "Pull request classique",
+    "regularDescription": "Prete pour revue et fusion"
+  },
+  "issueActions": {
+    "modify": "Modifier le contenu",
+    "modifyDescription": "Fournir des retours pour ameliorer le contenu",
+    "create": "Creer l'issue",
+    "createDescription": "Creer l'issue avec le contenu actuel",
+    "cancel": "Annuler",
+    "cancelDescription": "Annuler la creation de l'issue"
+  },
+  "messageStyles": {
+    "simple": "Simple",
+    "simpleDetail": "Messages de commit brefs avec un minimum de details",
+    "normal": "Normal",
+    "normalDetail": "Messages de commit standard avec un niveau de detail modere",
+    "detailed": "Detaille",
+    "detailedDetail": "Messages de commit complets avec tout le contexte"
+  },
+  "buttons": {
+    "yes": "Oui",
+    "no": "Non",
+    "openInBrowser": "Ouvrir dans le navigateur",
+    "openIssue": "Ouvrir l'issue"
+  },
+  "git": {
+    "stageAll": "Tout indexer",
+    "alwaysStageAll": "Toujours indexer",
+    "stageAllPrompt": "Aucun changement indexe trouve. Indexer tous les changements et continuer ?",
+    "busyIndexLock": "Git est occupe. Attendez la fin des autres operations Git ou supprimez .git/index.lock si le probleme persiste.",
+    "reservedNamesInfo": "Les fichiers avec des noms reserves ({files}) seront inclus, mais leur contenu ne peut pas etre affiche dans le diff.",
+    "diffTruncatedWarning": "La taille du diff ({estimatedKTokens}K tokens) depasse la limite de {thresholdKTokens}K. Le contenu sera tronque pour le traitement IA.",
+    "smartDiffApplied": "Diff volumineux ({tokenCount}K tokens) : priorisation intelligente appliquee ({included}/{total} fichiers avec diff complet)",
+    "mapReduceApplied": "Diff tres volumineux ({tokenCount}K tokens) : utilisation de la synthese par segments ({chunks} segments)"
+  },
+  "progress": {
+    "generatingCommitMessage": "Generation du message de commit...",
+    "analyzingChanges": "Generer une pull request - Analyse des changements...",
+    "creatingPR": "Creation de la pull request {prType}...",
+    "processingLargeDiff": "Traitement du diff...",
+    "summarizingChunks": "Synthese des changements ({current}/{total})..."
+  },
+  "errors": {
+    "gitExtensionNotFound": "L'extension Git n'est pas disponible",
+    "noGitRepository": "Aucun depot Git trouve"
+  },
+  "apiKey": {
+    "enterKey": "Saisissez votre cle API OpenAI",
+    "placeholder": "sk-...",
+    "invalidFormat": "Format de cle API invalide. Format attendu : sk-...",
+    "keyExists": "Une cle API est deja configuree",
+    "chooseAction": "Choisir une action",
+    "updateKey": "Mettre a jour la cle API",
+    "validateKey": "Valider la cle API",
+    "removeKey": "Supprimer la cle API",
+    "cancel": "Annuler",
+    "removed": "Cle API supprimee avec succes",
+    "validatePrompt": "Voulez-vous valider la cle API avec OpenAI ?",
+    "validating": "Validation de la cle API...",
+    "validationSuccess": "La cle API est valide",
+    "validationFailed": "Echec de la validation de la cle API : {reason}",
+    "retryValidation": "Reessayer la validation",
+    "continueWithoutValidation": "Continuer sans validation",
+    "retryPrompt": "Voulez-vous saisir une autre cle API ?",
+    "invalidKeyPrompt": "Cle API OpenAI invalide. Voulez-vous la mettre a jour ?",
+    "errorPrompt": "Erreur de cle API OpenAI. Voulez-vous la mettre a jour ?",
+    "setApiKey": "Definir la cle API"
+  }
+}

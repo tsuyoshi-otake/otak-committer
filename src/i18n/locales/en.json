@@ -97,7 +97,7 @@
     "generatingCommitMessage": "Generating commit message...",
     "analyzingChanges": "Generate Pull Request - Analyzing changes...",
     "creatingPR": "Creating {prType} Pull Request...",
-    "processingLargeDiff": "Processing large diff...",
+    "processingLargeDiff": "Processing diff...",
     "summarizingChunks": "Summarizing changes ({current}/{total})..."
   },
   "errors": {

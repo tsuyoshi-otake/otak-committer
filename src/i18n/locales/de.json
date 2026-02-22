@@ -1,0 +1,129 @@
+{
+  "commands": {
+    "generateCommit": "Commit-Nachricht generieren",
+    "generatePR": "Pull Request generieren",
+    "generateIssue": "Issue generieren",
+    "changeLanguage": "Sprache andern",
+    "changeMessageStyle": "Nachrichtenstil andern",
+    "setApiKey": "API-Schlussel festlegen",
+    "openSettings": "Einstellungen offnen",
+    "diagnoseStorage": "API-Schlussel-Speicher diagnostizieren"
+  },
+  "messages": {
+    "apiKeyNotConfigured": "Der OpenAI-API-Schlussel ist nicht konfiguriert. Mochten Sie ihn jetzt konfigurieren?",
+    "apiKeySaved": "API-Schlussel erfolgreich gespeichert",
+    "storageDiagnosisWritten": "Speicherdiagnose in Output geschrieben: otak-committer",
+    "authRequired": "GitHub-Authentifizierung ist erforderlich. Bitte melden Sie sich an.",
+    "githubAuthPrompt": "GitHub-Operationen erfordern eine Authentifizierung. Bitte authentifizieren Sie sich.",
+    "languageChanged": "Sprache auf {language} geandert",
+    "messageStyleChanged": "Nachrichtenstil auf {style} geandert",
+    "noChangesToCommit": "Keine Anderungen zum Committen",
+    "commitMessageGenerated": "Commit-Nachricht wurde generiert",
+    "openAIInitFailed": "Initialisierung des OpenAI-Dienstes fehlgeschlagen",
+    "emptyMessageReceived": "Leere Nachricht erhalten",
+    "noChangesBetweenBranches": "Keine Anderungen zwischen den ausgewahlten Branches gefunden. Bitte nehmen Sie Anderungen vor, bevor Sie eine PR erstellen.",
+    "failedToGeneratePR": "PR-Inhalt konnte nicht generiert werden. Bitte erneut versuchen.",
+    "failedToShowPreview": "Vorschau konnte nicht angezeigt werden",
+    "prCreatedSuccess": "{prType} #{number} erfolgreich erstellt!",
+    "draftPRNotSupported": "Entwurfs-PRs sind nur in GitHub Team und Enterprise verfugbar. Stattdessen wird eine normale PR erstellt.",
+    "issueCreatedSuccess": "Issue erfolgreich erstellt",
+    "noFilesSelectedConfirm": "Keine Dateien ausgewahlt. Issue nur mit Repository-Struktur generieren?",
+    "generatingIssue": "Issue wird generiert...",
+    "analyzingRepository": "Repository wird analysiert...",
+    "creatingIssue": "Issue wird erstellt...",
+    "updatingContent": "Inhalt wird aktualisiert...",
+    "waitingForModificationInput": "Warte auf Anderungsanweisungen...",
+    "storageFallbackWarning": "otak-committer: API-Schlussel im Fallback-Speicher gespeichert. Sicherer Speicher ist nicht verfugbar.",
+    "commitGenerationSecretWarning": "Mogliche API-Schlussel oder Geheimnisse wurden im Ziel der Commit-Nachrichtengenerierung gefunden ({count} gefundene Muster: {patterns}). Die Generierung wurde abgebrochen, um das Senden sensibler Daten an die KI zu vermeiden."
+  },
+  "statusBar": {
+    "configuration": "Konfiguration",
+    "currentStyle": "Aktueller Stil",
+    "setApiKey": "API-Schlussel festlegen",
+    "openSettings": "Einstellungen offnen"
+  },
+  "quickPick": {
+    "selectCommitLanguage": "Sprache fur Commit-Nachricht auswahlen",
+    "selectMessageStyle": "Nachrichtenstil auswahlen",
+    "selectRelatedIssue": "Zugehoriges Issue auswahlen (optional, Escape zum Uberspringen)",
+    "selectPRType": "PR-Typ auswahlen (Escape zum Uberspringen)",
+    "selectIssueType": "Issue-Typ auswahlen",
+    "enterIssueDescription": "Issue-Beschreibung eingeben",
+    "describeIssue": "Beschreiben Sie das Issue, Problem oder die Aufgabe",
+    "enterModificationInstructions": "Anderungsanweisungen eingeben (Escape zum Uberspringen)",
+    "describeModification": "Beschreiben Sie, wie der Inhalt geandert werden soll",
+    "chooseAction": "Aktion auswahlen",
+    "enterApiKey": "Geben Sie Ihren OpenAI-API-Schlussel ein"
+  },
+  "prTypes": {
+    "draft": "Entwurfs-Pull-Request",
+    "draftDescription": "Uberprufung vor dem Mergen erforderlich",
+    "regular": "Normaler Pull-Request",
+    "regularDescription": "Bereit fur Uberprufung und Merge"
+  },
+  "issueActions": {
+    "modify": "Inhalt bearbeiten",
+    "modifyDescription": "Feedback geben, um den Inhalt zu verbessern",
+    "create": "Issue erstellen",
+    "createDescription": "Issue mit aktuellem Inhalt erstellen",
+    "cancel": "Abbrechen",
+    "cancelDescription": "Issue-Erstellung abbrechen"
+  },
+  "messageStyles": {
+    "simple": "Einfach",
+    "simpleDetail": "Kurze Commit-Nachrichten mit minimalen Details",
+    "normal": "Normal",
+    "normalDetail": "Standard-Commit-Nachrichten mit moderatem Detailgrad",
+    "detailed": "Detailliert",
+    "detailedDetail": "Umfassende Commit-Nachrichten mit vollem Kontext"
+  },
+  "buttons": {
+    "yes": "Ja",
+    "no": "Nein",
+    "openInBrowser": "Im Browser offnen",
+    "openIssue": "Issue offnen"
+  },
+  "git": {
+    "stageAll": "Alle stagen",
+    "alwaysStageAll": "Immer stagen",
+    "stageAllPrompt": "Keine gestagten Anderungen gefunden. Alle Anderungen stagen und fortfahren?",
+    "busyIndexLock": "Git ist beschaftigt. Warten Sie, bis andere Git-Operationen abgeschlossen sind, oder loschen Sie .git/index.lock, falls das Problem bestehen bleibt.",
+    "reservedNamesInfo": "Dateien mit reservierten Namen ({files}) werden einbezogen, ihr Inhalt kann im Diff jedoch nicht angezeigt werden.",
+    "diffTruncatedWarning": "Diff-Groesse ({estimatedKTokens}K Tokens) uberschreitet das Limit von {thresholdKTokens}K. Der Inhalt wird fur die KI-Verarbeitung gekurzt.",
+    "smartDiffApplied": "Grosser Diff ({tokenCount}K Tokens): intelligente Priorisierung angewendet ({included}/{total} Dateien mit vollstandigem Diff)",
+    "mapReduceApplied": "Sehr grosser Diff ({tokenCount}K Tokens): segmentierte Zusammenfassung wird verwendet ({chunks} Segmente)"
+  },
+  "progress": {
+    "generatingCommitMessage": "Commit-Nachricht wird generiert...",
+    "analyzingChanges": "Pull Request generieren - Anderungen werden analysiert...",
+    "creatingPR": "{prType} Pull Request wird erstellt...",
+    "processingLargeDiff": "Diff wird verarbeitet...",
+    "summarizingChunks": "Anderungen werden zusammengefasst ({current}/{total})..."
+  },
+  "errors": {
+    "gitExtensionNotFound": "Git-Erweiterung ist nicht verfugbar",
+    "noGitRepository": "Kein Git-Repository gefunden"
+  },
+  "apiKey": {
+    "enterKey": "Geben Sie Ihren OpenAI-API-Schlussel ein",
+    "placeholder": "sk-...",
+    "invalidFormat": "Ungultiges API-Schlussel-Format. Erwartetes Format: sk-...",
+    "keyExists": "Ein API-Schlussel ist bereits konfiguriert",
+    "chooseAction": "Aktion auswahlen",
+    "updateKey": "API-Schlussel aktualisieren",
+    "validateKey": "API-Schlussel validieren",
+    "removeKey": "API-Schlussel entfernen",
+    "cancel": "Abbrechen",
+    "removed": "API-Schlussel erfolgreich entfernt",
+    "validatePrompt": "Mochten Sie den API-Schlussel mit OpenAI validieren?",
+    "validating": "API-Schlussel wird validiert...",
+    "validationSuccess": "API-Schlussel ist gultig",
+    "validationFailed": "Validierung des API-Schlussels fehlgeschlagen: {reason}",
+    "retryValidation": "Validierung erneut versuchen",
+    "continueWithoutValidation": "Ohne Validierung fortfahren",
+    "retryPrompt": "Mochten Sie einen anderen API-Schlussel eingeben?",
+    "invalidKeyPrompt": "Ungultiger OpenAI-API-Schlussel. Mochten Sie ihn aktualisieren?",
+    "errorPrompt": "OpenAI-API-Schlussel-Fehler. Mochten Sie ihn aktualisieren?",
+    "setApiKey": "API-Schlussel festlegen"
+  }
+}

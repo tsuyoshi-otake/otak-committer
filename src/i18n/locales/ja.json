@@ -97,7 +97,7 @@
     "generatingCommitMessage": "コミットメッセージを生成中...",
     "analyzingChanges": "プルリクエスト生成 - 変更を解析中...",
     "creatingPR": "{prType}プルリクエストを作成中...",
-    "processingLargeDiff": "大規模な差分を処理中...",
+    "processingLargeDiff": "差分を処理中...",
     "summarizingChunks": "変更を要約中（{current}/{total}）..."
   },
   "errors": {

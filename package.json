@@ -13,7 +13,7 @@
     "url": "https://github.com/tsuyoshi-otake/otak-committer/issues"
   },
   "homepage": "https://github.com/tsuyoshi-otake/otak-committer#readme",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -137,7 +137,7 @@
         },
         "otakCommitter.reasoningEffort": {
           "type": "string",
-          "default": "low",
+          "default": "high",
           "enum": [
             "none",
             "low",

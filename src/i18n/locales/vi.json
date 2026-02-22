@@ -97,7 +97,7 @@
     "generatingCommitMessage": "Dang tao thong diep commit...",
     "analyzingChanges": "Tao Pull Request - Dang phan tich thay doi...",
     "creatingPR": "Dang tao {prType} Pull Request...",
-    "processingLargeDiff": "Đang xử lý diff lớn...",
+    "processingLargeDiff": "Đang xử lý diff...",
     "summarizingChunks": "Đang tóm tắt thay đổi ({current}/{total})..."
   },
   "errors": {

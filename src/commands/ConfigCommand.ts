@@ -71,12 +71,16 @@ export class ConfigCommand extends BaseCommand {
                 );
 
                 // UI localization is supported for English, Japanese, Vietnamese, Korean,
-                // and Chinese (Simplified/Traditional).
+                // Chinese (Simplified/Traditional), French, German, Spanish, and Portuguese.
                 // Keep the stored "preferred locale" in sync for these languages.
                 const localeMap: Record<string, SupportedLocale | undefined> = {
                     japanese: 'ja',
                     vietnamese: 'vi',
                     korean: 'ko',
+                    french: 'fr',
+                    german: 'de',
+                    spanish: 'es',
+                    portuguese: 'pt',
                     chinese: 'zh-cn',
                     traditionalChinese: 'zh-tw',
                     english: 'en',

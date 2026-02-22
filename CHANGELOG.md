@@ -1,5 +1,35 @@
 # Change Log
 
+## [2.7.0] - 2026-02-22
+
+### Added
+
+- **UI localization for 4 new languages:**
+  - Added French (fr), German (de), Spanish (es), and Portuguese (pt) UI translations
+  - New `package.nls.de.json`, `package.nls.es.json`, `package.nls.fr.json`, `package.nls.pt.json` for VS Code settings/command localization
+  - Total supported UI languages: 10 (en, ja, ko, vi, fr, de, es, pt, zh-cn, zh-tw)
+
+- **Integration tests for Issue and PR commands:**
+  - New `issue.integration.test.ts` covering the full issue generation workflow
+  - New `pr.integration.test.ts` covering the full PR generation workflow
+
+### Refactored
+
+- **Module decomposition (SRP):**
+  - Split `IssueCommand` (370+ lines) into `IssueCommand` + `issue.input.ts` + `issue.previewFlow.ts`
+  - Split `PRCommand` (350+ lines) into `PRCommand` + `pr.input.ts` + `pr.preview.ts` + `pr.creation.ts` + `pr.error.ts`
+  - Split `diffUtils` (550+ lines) into `diffUtils` + `diff.types.ts` + `diff.categorize.ts` + `diff.truncate.ts` + `diff.assemble.ts`
+  - Split `dependencyAnalyzer` (460+ lines) into `dependencyAnalyzer` + `dependency.types.ts` + `dependency.collect.ts` + `dependency.cycles.ts` + `dependency.layers.ts` + `dependency.stats.ts`
+  - Further decomposed `openaiService`, `issueGenerator`, `github`, `git`, `ApiKeyManager`, and `StorageManager` into focused modules
+
+- **i18n architecture improvements:**
+  - Refactored `LanguagePreferenceManager`, `LocaleDetector`, and `TranslationManager` for cleaner locale handling
+
+### Changed
+
+- **Default reasoning effort set to `high`:**
+  - `otakCommitter.reasoningEffort` default changed from `low` to `high`
+
 ## [2.6.0] - 2026-02-22
 
 ### Added
@@ -8,7 +38,7 @@
   - New `otakCommitter.useBulletList` setting (default: `true`)
   - When enabled, the commit message body is formatted as a bullet list (`- ` prefix)
   - Each bullet point describes one logical change for better readability
-  - i18n support in all 6 UI languages (en, ja, ko, zh-cn, zh-tw, vi)
+  - i18n support in all 10 UI languages (en, ja, ko, vi, fr, de, es, pt, zh-cn, zh-tw)
 
 ### Changed
 
@@ -20,6 +50,10 @@
 - **Conventional Commits enabled by default:**
   - `otakCommitter.useConventionalCommits` default changed from `false` to `true`
   - Commit messages now use `<type>(<scope>): <subject>` format out of the box
+
+- **README configuration docs aligned with implementation:**
+  - Removed outdated `otakCommitter.i18n.uiLanguage` setting reference
+  - Clarified that extension UI language follows VS Code display language
 
 ## [2.5.0] - 2026-02-22
 

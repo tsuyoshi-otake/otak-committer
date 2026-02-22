@@ -97,7 +97,7 @@
     "generatingCommitMessage": "正在生成提交消息...",
     "analyzingChanges": "生成 Pull Request - 正在分析更改...",
     "creatingPR": "正在创建 {prType} Pull Request...",
-    "processingLargeDiff": "正在处理大型差异...",
+    "processingLargeDiff": "正在处理差异...",
     "summarizingChunks": "正在摘要更改（{current}/{total}）..."
   },
   "errors": {

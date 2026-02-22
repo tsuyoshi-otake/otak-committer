@@ -1,0 +1,33 @@
+{
+  "extension.description": "Extension VS Code pour des operations SCM intelligentes : generation multilingue de messages de commit avec l'IA (25 langues prises en charge) et futures fonctionnalites de gestion des PR.",
+
+  "command.generateMessage": "Generer un message de commit",
+  "command.generatePR": "Generer une pull request",
+  "command.generateIssue": "Generer une issue",
+  "command.openSettings": "Ouvrir les parametres de otak-committer",
+  "command.changeLanguage": "Changer la langue des messages de commit",
+  "command.changeMessageStyle": "Changer le style du message de commit",
+  "command.setApiKey": "Definir la cle API OpenAI",
+  "command.diagnoseStorage": "Diagnostiquer le stockage des cles API",
+
+  "config.language": "Langue des messages de commit",
+  "config.messageStyle": "Style et longueur des messages de commit generes",
+  "config.messageStyle.simple": "Simple et concis (600 caracteres)",
+  "config.messageStyle.normal": "Longueur normale avec un peu de contexte (1200 caracteres)",
+  "config.messageStyle.detailed": "Explication detaillee (2400 caracteres)",
+  "config.customMessage": "Message personnalise a ajouter au prompt systeme (ajoute apres le message de diff)",
+  "config.useEmoji": "Utiliser des emoji dans les messages de commit et descriptions de PR",
+  "config.emojiStyle": "Style d'emoji a utiliser dans les messages",
+  "config.emojiStyle.github": "Codes emoji style GitHub (:smile:)",
+  "config.emojiStyle.unicode": "Caracteres emoji Unicode",
+  "config.reasoningEffort": "Niveau de raisonnement GPT-5.2 (impacte la qualite et la latence)",
+  "config.reasoningEffort.none": "Aucun raisonnement (le plus rapide, qualite la plus faible)",
+  "config.reasoningEffort.low": "Raisonnement faible (rapide, bonne qualite) - Recommande",
+  "config.reasoningEffort.medium": "Raisonnement moyen (equilibre)",
+  "config.reasoningEffort.high": "Raisonnement eleve (le plus lent, meilleure qualite)",
+  "config.maxInputTokens": "Nombre maximal de tokens en entree pour le traitement IA (par defaut : 200K)",
+  "config.useBulletList": "Formatter le corps du message de commit en liste a puces",
+  "config.useConventionalCommits": "Utiliser le format Conventional Commits avec portee (<type>(<scope>): <subject>)",
+  "config.appendCommitTrailer": "Ajouter la mention 'Commit-Message-By: otak-committer' aux messages de commit generes",
+  "config.syncApiKeys": "Synchroniser les cles API via VS Code Settings Sync (stocke les cles dans l'etat synchronise de l'extension)"
+}

@@ -9,11 +9,16 @@
  * - Japanese (ja)
  * - Vietnamese (vi)
  * - Korean (ko)
+ * - French (fr)
+ * - German (de)
+ * - Spanish (es)
+ * - Portuguese (pt)
  * - Simplified Chinese (zh-cn)
  * - Traditional Chinese (zh-tw)
  * - English (en)
  *
- * Note: We intentionally only localize the extension UI to Japanese, Vietnamese, Korean, and Chinese (Simplified/Traditional), plus English.
+ * Note: Supported UI locales include English, Japanese, Vietnamese, Korean,
+ * Chinese (Simplified/Traditional), French, German, Spanish, and Portuguese.
  * For any other VS Code display language, the extension UI falls back to English.
  *
  * @example
@@ -25,7 +30,7 @@
 /**
  * Supported locale types
  */
-export type SupportedLocale = 'ja' | 'vi' | 'ko' | 'zh-cn' | 'zh-tw' | 'en';
+export type SupportedLocale = 'ja' | 'vi' | 'ko' | 'fr' | 'de' | 'es' | 'pt' | 'zh-cn' | 'zh-tw' | 'en';
 
 /**
  * @deprecated Use SupportedLocale instead
@@ -39,7 +44,7 @@ export class LocaleDetector {
     /**
      * Get the current locale based on VS Code's display language
      *
-     * @returns Supported locale code ('ja', 'vi', 'ko', 'zh-cn', 'zh-tw', or 'en')
+     * @returns Supported locale code ('ja', 'vi', 'ko', 'fr', 'de', 'es', 'pt', 'zh-cn', 'zh-tw', or 'en')
      */
     static getLocale(): SupportedLocale {
         try {
@@ -58,7 +63,7 @@ export class LocaleDetector {
      * This method is public for testing purposes.
      *
      * @param language - The language code to detect (e.g., 'ja', 'ja-JP', 'en', 'en-US')
-     * @returns Supported locale code ('ja', 'vi', 'ko', 'zh-cn', 'zh-tw', or 'en')
+     * @returns Supported locale code ('ja', 'vi', 'ko', 'fr', 'de', 'es', 'pt', 'zh-cn', 'zh-tw', or 'en')
      */
     static detectLocale(language: string | undefined): SupportedLocale {
         if (!language) {
@@ -80,6 +85,26 @@ export class LocaleDetector {
         // Check if language starts with 'ko' (handles 'ko', 'ko-KR', etc.)
         if (lowerLang.startsWith('ko')) {
             return 'ko';
+        }
+
+        // Check if language starts with 'fr' (handles 'fr', 'fr-FR', etc.)
+        if (lowerLang.startsWith('fr')) {
+            return 'fr';
+        }
+
+        // Check if language starts with 'de' (handles 'de', 'de-DE', etc.)
+        if (lowerLang.startsWith('de')) {
+            return 'de';
+        }
+
+        // Check if language starts with 'es' (handles 'es', 'es-ES', etc.)
+        if (lowerLang.startsWith('es')) {
+            return 'es';
+        }
+
+        // Check if language starts with 'pt' (handles 'pt', 'pt-BR', 'pt-PT', etc.)
+        if (lowerLang.startsWith('pt')) {
+            return 'pt';
         }
 
         // Check Chinese variants.

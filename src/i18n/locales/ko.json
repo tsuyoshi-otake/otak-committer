@@ -97,7 +97,7 @@
     "generatingCommitMessage": "커밋 메시지 생성 중...",
     "analyzingChanges": "Pull Request 생성 - 변경 사항 분석 중...",
     "creatingPR": "{prType} Pull Request 생성 중...",
-    "processingLargeDiff": "대규모 diff 처리 중...",
+    "processingLargeDiff": "diff 처리 중...",
     "summarizingChunks": "변경 사항 요약 중 ({current}/{total})..."
   },
   "errors": {

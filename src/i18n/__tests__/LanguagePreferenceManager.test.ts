@@ -2,7 +2,7 @@
  * Tests for LanguagePreferenceManager
  *
  * Note: UI localization supports English, Japanese, Vietnamese, Korean,
- * and Chinese (Simplified/Traditional).
+ * Chinese (Simplified/Traditional), French, German, Spanish, and Portuguese.
  * Other VS Code display languages fall back to English.
  */
 
@@ -55,6 +55,10 @@ suite('LanguagePreferenceManager Property Tests', () => {
                     'ja',
                     'vi',
                     'ko',
+                    'fr',
+                    'de',
+                    'es',
+                    'pt',
                     'zh-cn',
                     'zh-tw',
                     'en',
@@ -103,7 +107,18 @@ suite('LanguagePreferenceManager Unit Tests', () => {
     });
 
     test('LOCALE_TO_LANGUAGE_MAP should have all supported locales', () => {
-        const supportedLocales: SupportedLocale[] = ['ja', 'vi', 'ko', 'zh-cn', 'zh-tw', 'en'];
+        const supportedLocales: SupportedLocale[] = [
+            'ja',
+            'vi',
+            'ko',
+            'fr',
+            'de',
+            'es',
+            'pt',
+            'zh-cn',
+            'zh-tw',
+            'en',
+        ];
         for (const locale of supportedLocales) {
             assert.ok(
                 LOCALE_TO_LANGUAGE_MAP[locale],
@@ -117,6 +132,10 @@ suite('LanguagePreferenceManager Unit Tests', () => {
             { locale: 'ja', expected: 'japanese' },
             { locale: 'vi', expected: 'vietnamese' },
             { locale: 'ko', expected: 'korean' },
+            { locale: 'fr', expected: 'french' },
+            { locale: 'de', expected: 'german' },
+            { locale: 'es', expected: 'spanish' },
+            { locale: 'pt', expected: 'portuguese' },
             { locale: 'zh-cn', expected: 'chinese' },
             { locale: 'zh-tw', expected: 'traditionalChinese' },
             { locale: 'en', expected: 'english' },

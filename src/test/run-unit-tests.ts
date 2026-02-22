@@ -36,6 +36,12 @@ async function runUnitTests() {
             '__tests__/integration/bulletList*.test.js',
             { cwd: testsRoot },
         );
+        const prIntegrationTests = await glob('__tests__/integration/pr*.test.js', {
+            cwd: testsRoot,
+        });
+        const issueIntegrationTests = await glob('__tests__/integration/issue*.test.js', {
+            cwd: testsRoot,
+        });
 
         // Filter out tests that require VS Code APIs (all infra tests need VS Code context)
         const filteredInfraTests: string[] = [];
@@ -104,6 +110,8 @@ async function runUnitTests() {
             ...i18nTests,
             ...i18nIntegrationTests,
             ...bulletListIntegrationTests,
+            ...prIntegrationTests,
+            ...issueIntegrationTests,
             ...filteredRobustnessServiceTests,
             ...filteredRobustnessUtilTests,
             ...filteredRobustnessCommandTests,
@@ -118,6 +126,8 @@ async function runUnitTests() {
         console.log(`  - i18n tests: ${i18nTests.length}`);
         console.log(`  - i18n integration tests: ${i18nIntegrationTests.length}`);
         console.log(`  - Bullet list integration tests: ${bulletListIntegrationTests.length}`);
+        console.log(`  - PR integration tests: ${prIntegrationTests.length}`);
+        console.log(`  - Issue integration tests: ${issueIntegrationTests.length}`);
         console.log(
             `  - Robustness tests: ${filteredRobustnessServiceTests.length + filteredRobustnessUtilTests.length + filteredRobustnessCommandTests.length}`,
         );

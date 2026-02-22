@@ -6,7 +6,8 @@
  * For all user-facing messages in the API key management flow,
  * the messages should use the i18n translation system rather than hardcoded strings.
  *
- * Note: UI localization supports English, Japanese, and Vietnamese.
+ * Note: UI localization supports English, Japanese, Vietnamese, Korean,
+ * Chinese (Simplified/Traditional), French, German, Spanish, and Portuguese.
  */
 
 import * as assert from 'assert';
@@ -17,6 +18,10 @@ import en from '../../i18n/locales/en.json';
 import ja from '../../i18n/locales/ja.json';
 import vi from '../../i18n/locales/vi.json';
 import ko from '../../i18n/locales/ko.json';
+import fr from '../../i18n/locales/fr.json';
+import de from '../../i18n/locales/de.json';
+import es from '../../i18n/locales/es.json';
+import pt from '../../i18n/locales/pt.json';
 import zhCN from '../../i18n/locales/zh-cn.json';
 import zhTW from '../../i18n/locales/zh-tw.json';
 
@@ -50,6 +55,10 @@ suite('ApiKeyManager i18n Property Tests', () => {
             { name: 'Japanese', data: ja },
             { name: 'Vietnamese', data: vi },
             { name: 'Korean', data: ko },
+            { name: 'French', data: fr },
+            { name: 'German', data: de },
+            { name: 'Spanish', data: es },
+            { name: 'Portuguese', data: pt },
             { name: 'Chinese (Simplified)', data: zhCN },
             { name: 'Chinese (Traditional)', data: zhTW },
         ];

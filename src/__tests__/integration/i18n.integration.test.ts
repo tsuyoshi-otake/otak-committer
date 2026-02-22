@@ -29,7 +29,9 @@ suite('i18n Integration Tests', () => {
 
             // Should be one of supported locales
             assert.ok(
-                ['ja', 'vi', 'ko', 'zh-cn', 'zh-tw', 'en'].includes(locale),
+                ['ja', 'vi', 'ko', 'fr', 'de', 'es', 'pt', 'zh-cn', 'zh-tw', 'en'].includes(
+                    locale,
+                ),
                 `Expected locale to be a supported locale, got '${locale}'`,
             );
         });
@@ -87,6 +89,50 @@ suite('i18n Integration Tests', () => {
 
             const configuration = manager.t('statusBar.configuration');
             assert.strictEqual(configuration, '구성');
+        });
+
+        test('should translate keys correctly for French locale', () => {
+            const manager = TranslationManager.getInstance();
+            manager.setLocale('fr');
+
+            const apiKeySaved = manager.t('messages.apiKeySaved');
+            assert.strictEqual(apiKeySaved, 'Cle API enregistree avec succes');
+
+            const configuration = manager.t('statusBar.configuration');
+            assert.strictEqual(configuration, 'Configuration');
+        });
+
+        test('should translate keys correctly for German locale', () => {
+            const manager = TranslationManager.getInstance();
+            manager.setLocale('de');
+
+            const apiKeySaved = manager.t('messages.apiKeySaved');
+            assert.strictEqual(apiKeySaved, 'API-Schlussel erfolgreich gespeichert');
+
+            const configuration = manager.t('statusBar.configuration');
+            assert.strictEqual(configuration, 'Konfiguration');
+        });
+
+        test('should translate keys correctly for Spanish locale', () => {
+            const manager = TranslationManager.getInstance();
+            manager.setLocale('es');
+
+            const apiKeySaved = manager.t('messages.apiKeySaved');
+            assert.strictEqual(apiKeySaved, 'Clave API guardada correctamente');
+
+            const configuration = manager.t('statusBar.configuration');
+            assert.strictEqual(configuration, 'Configuracion');
+        });
+
+        test('should translate keys correctly for Portuguese locale', () => {
+            const manager = TranslationManager.getInstance();
+            manager.setLocale('pt');
+
+            const apiKeySaved = manager.t('messages.apiKeySaved');
+            assert.strictEqual(apiKeySaved, 'Chave de API salva com sucesso');
+
+            const configuration = manager.t('statusBar.configuration');
+            assert.strictEqual(configuration, 'Configuracao');
         });
 
         test('should translate keys correctly for Simplified Chinese locale', () => {
@@ -176,6 +222,27 @@ suite('i18n Integration Tests', () => {
             assert.strictEqual(LocaleDetector.detectLocale('ko-kr'), 'ko');
         });
 
+        test('should detect French locale correctly', () => {
+            assert.strictEqual(LocaleDetector.detectLocale('fr'), 'fr');
+            assert.strictEqual(LocaleDetector.detectLocale('fr-FR'), 'fr');
+        });
+
+        test('should detect German locale correctly', () => {
+            assert.strictEqual(LocaleDetector.detectLocale('de'), 'de');
+            assert.strictEqual(LocaleDetector.detectLocale('de-DE'), 'de');
+        });
+
+        test('should detect Spanish locale correctly', () => {
+            assert.strictEqual(LocaleDetector.detectLocale('es'), 'es');
+            assert.strictEqual(LocaleDetector.detectLocale('es-ES'), 'es');
+        });
+
+        test('should detect Portuguese locale correctly', () => {
+            assert.strictEqual(LocaleDetector.detectLocale('pt'), 'pt');
+            assert.strictEqual(LocaleDetector.detectLocale('pt-BR'), 'pt');
+            assert.strictEqual(LocaleDetector.detectLocale('pt-PT'), 'pt');
+        });
+
         test('should detect Chinese locales correctly', () => {
             assert.strictEqual(LocaleDetector.detectLocale('zh-cn'), 'zh-cn');
             assert.strictEqual(LocaleDetector.detectLocale('zh-CN'), 'zh-cn');
@@ -193,9 +260,9 @@ suite('i18n Integration Tests', () => {
         });
 
         test('should default to English for unsupported locales', () => {
-            assert.strictEqual(LocaleDetector.detectLocale('fr'), 'en');
-            assert.strictEqual(LocaleDetector.detectLocale('de'), 'en');
-            assert.strictEqual(LocaleDetector.detectLocale('es'), 'en');
+            assert.strictEqual(LocaleDetector.detectLocale('it'), 'en');
+            assert.strictEqual(LocaleDetector.detectLocale('nl'), 'en');
+            assert.strictEqual(LocaleDetector.detectLocale('sv-SE'), 'en');
         });
 
         test('should default to English for undefined/empty', () => {
@@ -223,6 +290,22 @@ suite('i18n Integration Tests', () => {
             // Switch to Korean
             manager.setLocale('ko');
             assert.strictEqual(manager.t('statusBar.configuration'), '구성');
+
+            // Switch to French
+            manager.setLocale('fr');
+            assert.strictEqual(manager.t('statusBar.configuration'), 'Configuration');
+
+            // Switch to German
+            manager.setLocale('de');
+            assert.strictEqual(manager.t('statusBar.configuration'), 'Konfiguration');
+
+            // Switch to Spanish
+            manager.setLocale('es');
+            assert.strictEqual(manager.t('statusBar.configuration'), 'Configuracion');
+
+            // Switch to Portuguese
+            manager.setLocale('pt');
+            assert.strictEqual(manager.t('statusBar.configuration'), 'Configuracao');
 
             // Switch to Simplified Chinese
             manager.setLocale('zh-cn');
@@ -271,7 +354,18 @@ suite('i18n Integration Tests', () => {
     });
 
     suite('Translation Coverage', () => {
-        const supportedLocales = ['en', 'ja', 'vi', 'ko', 'zh-cn', 'zh-tw'] as const;
+        const supportedLocales = [
+            'en',
+            'ja',
+            'vi',
+            'ko',
+            'fr',
+            'de',
+            'es',
+            'pt',
+            'zh-cn',
+            'zh-tw',
+        ] as const;
 
         test('should have translations for all command strings', () => {
             const manager = TranslationManager.getInstance();

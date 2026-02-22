@@ -11,6 +11,10 @@
  * - Japanese (ja)
  * - Vietnamese (vi)
  * - Korean (ko)
+ * - French (fr)
+ * - German (de)
+ * - Spanish (es)
+ * - Portuguese (pt)
  * - Simplified Chinese (zh-cn)
  * - Traditional Chinese (zh-tw)
  * - English (en)
@@ -28,6 +32,10 @@ import en from './locales/en.json';
 import ja from './locales/ja.json';
 import vi from './locales/vi.json';
 import ko from './locales/ko.json';
+import fr from './locales/fr.json';
+import de from './locales/de.json';
+import es from './locales/es.json';
+import pt from './locales/pt.json';
 import zhCN from './locales/zh-cn.json';
 import zhTW from './locales/zh-tw.json';
 
@@ -63,6 +71,10 @@ export class TranslationManager {
             ja: ja as TranslationDictionary,
             vi: vi as TranslationDictionary,
             ko: ko as TranslationDictionary,
+            fr: fr as TranslationDictionary,
+            de: de as TranslationDictionary,
+            es: es as TranslationDictionary,
+            pt: pt as TranslationDictionary,
             'zh-cn': zhCN as TranslationDictionary,
             'zh-tw': zhTW as TranslationDictionary,
         };
@@ -91,7 +103,7 @@ export class TranslationManager {
     /**
      * Get the current locale
      *
-     * @returns Current locale ('ja', 'vi', 'ko', 'zh-cn', 'zh-tw', or 'en')
+     * @returns Current locale ('ja', 'vi', 'ko', 'fr', 'de', 'es', 'pt', 'zh-cn', 'zh-tw', or 'en')
      */
     getLocale(): SupportedLocale {
         return this.locale;
@@ -100,7 +112,7 @@ export class TranslationManager {
     /**
      * Update locale and reload translations
      *
-     * @param locale - New locale ('ja', 'vi', 'ko', 'zh-cn', 'zh-tw', or 'en')
+     * @param locale - New locale ('ja', 'vi', 'ko', 'fr', 'de', 'es', 'pt', 'zh-cn', 'zh-tw', or 'en')
      */
     setLocale(locale: SupportedLocale): void {
         this.locale = locale;

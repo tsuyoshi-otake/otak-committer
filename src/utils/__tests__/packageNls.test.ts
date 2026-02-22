@@ -53,6 +53,10 @@ suite('Manifest Localization (package.nls) Tests', () => {
             'package.nls.ja.json',
             'package.nls.vi.json',
             'package.nls.ko.json',
+            'package.nls.fr.json',
+            'package.nls.de.json',
+            'package.nls.es.json',
+            'package.nls.pt.json',
             'package.nls.zh-cn.json',
             'package.nls.zh-tw.json',
         ];

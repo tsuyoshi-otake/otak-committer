@@ -49,7 +49,7 @@ Generates clear titles, structured descriptions, and relevant labels.
 
 ## Features
 
-- **UI internationalization** — Auto-detect VS Code UI language or pick one manually. Supported UI languages: English, Japanese, Korean, Vietnamese, Simplified Chinese, Traditional Chinese.
+- **UI internationalization** — Auto-detect VS Code UI language or pick one manually. Supported UI languages: English, Japanese, Korean, Vietnamese, French, German, Spanish, Portuguese, Simplified Chinese, Traditional Chinese.
 - **Multilingual commit messages** — 25 languages: English, Français, Deutsch, Italiano, Español, Português, Čeština, Magyar, Български, Türkçe, Polski, Русский, 日本語, 中文, 繁體中文, 한국어, Tiếng Việt, ไทย, हिन्दी, বাংলা, Basa Jawa, தமிழ், မြန်မာဘာသာ, العربية, עברית.
 - **Message styles** — `simple`, `normal`, or `detailed`.
 - **Deep VS Code integration** — Source Control panel actions, status bar controls, and full UI localization.
@@ -92,12 +92,13 @@ Uses VS Code's built-in GitHub authentication. Sign in and out through the Accou
 
 - **`otakCommitter.language`**: Commit message language (default: `english`)
 - **`otakCommitter.messageStyle`**: Message detail level (default: `normal`)
-- **`otakCommitter.i18n.uiLanguage`**: UI language preference (default: `auto`)
-  - `auto`, `en`, `ja`, `ko`, `vi`, `zh-cn`, `zh-tw`
+- **UI language (extension UI)**: Follows VS Code display language (`Configure Display Language` command).
+  - Supported UI locales: `en`, `ja`, `ko`, `vi`, `fr`, `de`, `es`, `pt`, `zh-cn`, `zh-tw`
+  - Other locales automatically fall back to English
 - **`otakCommitter.customMessage`**: Custom AI instructions (optional)
 - **`otakCommitter.useEmoji`**: Enable emoji prefixes (default: `false`)
 - **`otakCommitter.emojiStyle`**: Emoji format (`github` or `unicode`)
-- **`otakCommitter.reasoningEffort`**: AI reasoning depth — `none`, `low`, `medium`, `high` (default: `low`)
+- **`otakCommitter.reasoningEffort`**: AI reasoning depth — `none`, `low`, `medium`, `high` (default: `high`)
 - **`otakCommitter.maxInputTokens`**: Maximum input tokens for diff analysis (default: `200000`)
 - **`otakCommitter.useBulletList`**: Format commit message body as a bullet list (default: `true`)
 - **`otakCommitter.useConventionalCommits`**: Use Conventional Commits format (default: `true`)
@@ -184,7 +185,7 @@ The extension uses GPT-5.2 for high-quality commit message generation.
 
 - **No output or empty results**: Ensure you have staged changes and an OpenAI API key configured.
 - **PR/issue creation fails**: Verify GitHub auth is signed in via the Accounts icon in the Activity Bar.
-- **Wrong UI language**: Check `otakCommitter.i18n.uiLanguage` (default: `auto`).
+- **Wrong UI language**: Run `Configure Display Language` in VS Code and reload the window. Unsupported locales fall back to English.
 
 ## Related Extensions
 
