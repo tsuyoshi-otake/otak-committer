@@ -33,7 +33,8 @@
     "creatingIssue": "正在创建 Issue...",
     "updatingContent": "正在更新内容...",
     "waitingForModificationInput": "等待修改输入...",
-    "storageFallbackWarning": "otak-committer: API 密钥已存储在备用存储中。安全存储不可用。"
+    "storageFallbackWarning": "otak-committer: API 密钥已存储在备用存储中。安全存储不可用。",
+    "commitGenerationSecretWarning": "在提交消息生成目标中检测到可能的 API 密钥或敏感信息（{count} 个匹配模式：{patterns}）。为避免将敏感数据发送给 AI，已取消生成。"
   },
   "statusBar": {
     "configuration": "配置",

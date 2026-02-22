@@ -4,7 +4,7 @@ import { GitService, GitServiceFactory } from '../services/git';
 import { OpenAIService } from '../services/openai';
 import { MessageStyle } from '../types/enums/MessageStyle';
 import { TemplateInfo } from '../types';
-import { sanitizeCommitMessage } from '../utils';
+import { detectPotentialSecrets, sanitizeCommitMessage } from '../utils';
 import { t } from '../i18n/index.js';
 
 /**
@@ -47,6 +47,10 @@ export class CommitCommand extends BaseCommand {
             // Get diff
             const diff = await this.getDiff(git);
             if (!diff) {
+                return;
+            }
+
+            if (await this.shouldBlockForPotentialSecrets(diff)) {
                 return;
             }
 
@@ -173,6 +177,33 @@ export class CommitCommand extends BaseCommand {
             return message;
         }
         return `${message}\n\nCommit-Message-By: otak-committer`;
+    }
+
+    /**
+     * Detect potential secrets in diff before sending content to AI.
+     *
+     * @returns true when commit message generation should be blocked
+     */
+    private async shouldBlockForPotentialSecrets(diff: string): Promise<boolean> {
+        const detection = detectPotentialSecrets(diff);
+        if (!detection.hasPotentialSecrets) {
+            return false;
+        }
+
+        const patterns = detection.matchedPatternIds.join(', ');
+
+        this.logger.warning('Potential secrets detected in commit generation target', {
+            matchedPatternIds: detection.matchedPatternIds,
+        });
+
+        await vscode.window.showWarningMessage(
+            t('messages.commitGenerationSecretWarning', {
+                count: detection.matchedPatternIds.length,
+                patterns,
+            }),
+        );
+
+        return true;
     }
 
     /**

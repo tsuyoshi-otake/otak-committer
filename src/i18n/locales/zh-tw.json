@@ -33,7 +33,8 @@
     "creatingIssue": "正在建立 Issue...",
     "updatingContent": "正在更新內容...",
     "waitingForModificationInput": "等待修改輸入...",
-    "storageFallbackWarning": "otak-committer: API 金鑰已儲存在備用儲存中。安全儲存不可用。"
+    "storageFallbackWarning": "otak-committer: API 金鑰已儲存在備用儲存中。安全儲存不可用。",
+    "commitGenerationSecretWarning": "在提交訊息產生目標中偵測到可能的 API 金鑰或敏感資訊（{count} 個匹配模式：{patterns}）。為避免將敏感資料傳送給 AI，已取消產生。"
   },
   "statusBar": {
     "configuration": "設定",

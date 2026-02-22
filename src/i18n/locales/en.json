@@ -33,7 +33,8 @@
     "creatingIssue": "Creating issue...",
     "updatingContent": "Updating content...",
     "waitingForModificationInput": "Waiting for modification input...",
-    "storageFallbackWarning": "otak-committer: API key stored in fallback storage. Secure storage is unavailable."
+    "storageFallbackWarning": "otak-committer: API key stored in fallback storage. Secure storage is unavailable.",
+    "commitGenerationSecretWarning": "Potential API keys or secrets were found in the commit message generation target ({count} matched pattern(s): {patterns}). Generation was canceled to avoid sending sensitive data to AI."
   },
   "statusBar": {
     "configuration": "Configuration",

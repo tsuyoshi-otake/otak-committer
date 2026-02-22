@@ -33,7 +33,8 @@
     "creatingIssue": "イシューを作成中...",
     "updatingContent": "コンテンツを更新中...",
     "waitingForModificationInput": "修正内容の入力を待っています...",
-    "storageFallbackWarning": "otak-committer: APIキーをフォールバックストレージに保存しました。安全なストレージは利用できません。"
+    "storageFallbackWarning": "otak-committer: APIキーをフォールバックストレージに保存しました。安全なストレージは利用できません。",
+    "commitGenerationSecretWarning": "コミットメッセージ生成対象にAPIキーまたは秘密情報の可能性がある文字列を検出しました（{count}件: {patterns}）。機密データのAI送信を避けるため、生成を中断しました。"
   },
   "statusBar": {
     "configuration": "設定",
