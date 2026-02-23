@@ -1,0 +1,129 @@
+{
+  "commands": {
+    "generateCommit": "Commit uzenet generalasa",
+    "generatePR": "Pull Request generalasa",
+    "generateIssue": "Issue generalasa",
+    "changeLanguage": "Nyelv valtoztatasa",
+    "changeMessageStyle": "Uzenetstilus valtoztatasa",
+    "setApiKey": "API kulcs beallitasa",
+    "openSettings": "Beallitasok megnyitasa",
+    "diagnoseStorage": "API kulcs tarolo diagnosztikaja"
+  },
+  "messages": {
+    "apiKeyNotConfigured": "Az OpenAI API kulcs nincs beallitva. Szeretne most beallitani?",
+    "apiKeySaved": "API kulcs sikeresen mentve",
+    "storageDiagnosisWritten": "Tarolo diagnosztika kiirva a kimenetbe: otak-committer",
+    "authRequired": "GitHub hitelesites szukseges. Kerem, jelentkezzen be.",
+    "githubAuthPrompt": "A GitHub muveletek hitelesitett szuksegesek. Kerem, hitelesitse magat.",
+    "languageChanged": "Nyelv megvaltoztatva: {language}",
+    "messageStyleChanged": "Uzenetstilus megvaltoztatva: {style}",
+    "noChangesToCommit": "Nincs commitolni valo valtozas",
+    "commitMessageGenerated": "Commit uzenet generalva",
+    "openAIInitFailed": "Az OpenAI szolgaltatas inicializalasa sikertelen",
+    "emptyMessageReceived": "Ures uzenet erkezett",
+    "noChangesBetweenBranches": "Nem talalhato valtozas a kivalasztott agak kozott. Vegezzen valtoztatast a PR letrehozasa elott.",
+    "failedToGeneratePR": "A PR tartalom generalasa sikertelen. Problja ujra.",
+    "failedToShowPreview": "Az elonezet megjelenitese sikertelen",
+    "prCreatedSuccess": "{prType} #{number} sikeresen letrehozva!",
+    "draftPRNotSupported": "A piszkozat PR-ek csak GitHub Team es Enterprise csomagban erhatok el. Helyette hagyomanyos PR lesz letrehozva.",
+    "issueCreatedSuccess": "Issue sikeresen letrehozva",
+    "noFilesSelectedConfirm": "Nincs kivalasztott fajl. Issue generalasa csak a repozitorium-szerkezettel?",
+    "generatingIssue": "Issue generalasa...",
+    "analyzingRepository": "Repozitorium elemzese...",
+    "creatingIssue": "Issue letrehozasa...",
+    "updatingContent": "Tartalom frissitese...",
+    "waitingForModificationInput": "Varakozas a modositasi bemenetre...",
+    "storageFallbackWarning": "otak-committer: API kulcs tartalek taroloba mentve. A biztonsagos tarolo nem erheto el.",
+    "commitGenerationSecretWarning": "Potencialis API kulcsok vagy titkok talalhatok a commit uzenet generalasi celban ({count} egyezo minta: {patterns}). A generalas megszakitva az erzekeny adatok AI-nak torteno kuldese elkerulese erdekeben."
+  },
+  "statusBar": {
+    "configuration": "Konfiguraciot",
+    "currentStyle": "Jelenlegi stilus",
+    "setApiKey": "API kulcs beallitasa",
+    "openSettings": "Beallitasok megnyitasa"
+  },
+  "quickPick": {
+    "selectCommitLanguage": "Valassza ki a commit uzenet nyelvet",
+    "selectMessageStyle": "Valassza ki az uzenet stilusat",
+    "selectRelatedIssue": "Valassza ki a kapcsolodo issue-t (opcionalis, nyomjon Escape-et a kihagyashoz)",
+    "selectPRType": "Valassza ki a PR tipusat (nyomjon Escape-et a kihagyashoz)",
+    "selectIssueType": "Valassza ki az issue tipusat",
+    "enterIssueDescription": "Adja meg az issue leirasat",
+    "describeIssue": "Irja le a problemat, kerdest vagy feladatot",
+    "enterModificationInstructions": "Adja meg a modositasi utasitasokat (nyomjon Escape-et a kihagyashoz)",
+    "describeModification": "Irja le, hogyan kell modositani a tartalmat",
+    "chooseAction": "Valasszon muveletet",
+    "enterApiKey": "Adja meg az OpenAI API kulcsat"
+  },
+  "prTypes": {
+    "draft": "Piszkozat Pull Request",
+    "draftDescription": "Egyesites elott felulvizsgalat szukseges",
+    "regular": "Hagyomanyos Pull Request",
+    "regularDescription": "Kesz a felulvizsgalatra es egyesitesre"
+  },
+  "issueActions": {
+    "modify": "Tartalom modositasa",
+    "modifyDescription": "Visszajelzes a tartalom javitasahoz",
+    "create": "Issue letrehozasa",
+    "createDescription": "Issue letrehozasa a jelenlegi tartalommal",
+    "cancel": "Megse",
+    "cancelDescription": "Issue letrehozas megszakitasa"
+  },
+  "messageStyles": {
+    "simple": "Egyszeru",
+    "simpleDetail": "Rovid commit uzenetek minimalis reszletekkel",
+    "normal": "Normal",
+    "normalDetail": "Standard commit uzenetek mersekeltreszletekkel",
+    "detailed": "Reszletes",
+    "detailedDetail": "Atfogo commit uzenetek teljes kontextussal"
+  },
+  "buttons": {
+    "yes": "Igen",
+    "no": "Nem",
+    "openInBrowser": "Megnyitas bongeszobe",
+    "openIssue": "Issue megnyitasa"
+  },
+  "git": {
+    "stageAll": "Mindent hozzaadas a stage-hez",
+    "alwaysStageAll": "Mindig hozzaadas",
+    "stageAllPrompt": "Nem talalhato stage-elt valtozas. Minden valtozas stage-elese es folytatas?",
+    "busyIndexLock": "A Git foglalt. Varjon a tobbi Git muvelet befejezesere, vagy torolje a .git/index.lock fajlt, ha a problema fennall.",
+    "reservedNamesInfo": "A fenntartott nevu fajlok ({files}) szerepelni fognak, de tartalmuk nem jelenitheato meg a diffben.",
+    "diffTruncatedWarning": "A diff merete ({estimatedKTokens}K token) meghaladja a(z) {thresholdKTokens}K hatart. A tartalom csonkitva lesz az AI feldolgozashoz.",
+    "smartDiffApplied": "Nagy diff ({tokenCount}K token): okos prioritizalas alkalmazva ({included}/{total} fajl teljes diff-fel)",
+    "mapReduceApplied": "Nagyon nagy diff ({tokenCount}K token): darabolt osszefoglalo hasznalata ({chunks} darab)"
+  },
+  "progress": {
+    "generatingCommitMessage": "Commit uzenet generalasa...",
+    "analyzingChanges": "Pull Request generalasa - Valtozasok elemzese...",
+    "creatingPR": "{prType} Pull Request letrehozasa...",
+    "processingLargeDiff": "Diff feldolgozasa...",
+    "summarizingChunks": "Valtozasok osszefoglalasa ({current}/{total})..."
+  },
+  "errors": {
+    "gitExtensionNotFound": "A Git bovitmeny nem erheto el",
+    "noGitRepository": "Nem talalhato Git repozitorium"
+  },
+  "apiKey": {
+    "enterKey": "Adja meg az OpenAI API kulcsat",
+    "placeholder": "sk-...",
+    "invalidFormat": "Ervenytelen API kulcs formatum. Elvart formatum: sk-...",
+    "keyExists": "Mar be van allitva egy API kulcs",
+    "chooseAction": "Valasszon muveletet",
+    "updateKey": "API kulcs frissitese",
+    "validateKey": "API kulcs ellenorzese",
+    "removeKey": "API kulcs eltavolitasa",
+    "cancel": "Megse",
+    "removed": "API kulcs sikeresen eltavolitva",
+    "validatePrompt": "Szeretne ellenorizni az API kulcsot az OpenAI-nal?",
+    "validating": "API kulcs ellenorzese...",
+    "validationSuccess": "Az API kulcs ervenyes",
+    "validationFailed": "Az API kulcs ellenorzese sikertelen: {reason}",
+    "retryValidation": "Ellenorzes ujraprobatasa",
+    "continueWithoutValidation": "Folytatas ellenorzes nelkul",
+    "retryPrompt": "Szeretne masik API kulcsot megadni?",
+    "invalidKeyPrompt": "Ervenytelen OpenAI API kulcs. Szeretne frissiteni?",
+    "errorPrompt": "OpenAI API kulcs hiba. Szeretne frissiteni?",
+    "setApiKey": "API kulcs beallitasa"
+  }
+}

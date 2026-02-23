@@ -1,0 +1,33 @@
+{
+  "extension.description": "תוסף VS Code לפעולות SCM חכמות - יצירת הודעות commit רב-לשוניות עם תמיכת AI (תמיכה ב-25 שפות) ותכונות ניהול PR עתידיות.",
+
+  "command.generateMessage": "יצירת הודעת Commit",
+  "command.generatePR": "יצירת Pull Request",
+  "command.generateIssue": "יצירת Issue",
+  "command.openSettings": "פתיחת הגדרות otak-committer",
+  "command.changeLanguage": "שינוי שפת הודעת Commit",
+  "command.changeMessageStyle": "שינוי סגנון הודעת Commit",
+  "command.setApiKey": "הגדרת מפתח OpenAI API",
+  "command.diagnoseStorage": "אבחון אחסון מפתח API",
+
+  "config.language": "שפה להודעות commit",
+  "config.messageStyle": "סגנון ואורך הודעות commit שנוצרו",
+  "config.messageStyle.simple": "פשוט ותמציתי (600 תווים)",
+  "config.messageStyle.normal": "אורך רגיל עם הקשר מסוים (1200 תווים)",
+  "config.messageStyle.detailed": "הסבר מפורט (2400 תווים)",
+  "config.customMessage": "הודעה מותאמת אישית להוספה לפרומפט המערכת (מתווספת אחרי הודעת ה-diff)",
+  "config.useEmoji": "שימוש באמוג'י בהודעות commit ותיאורי PR",
+  "config.emojiStyle": "סגנון אמוג'י לשימוש בהודעות",
+  "config.emojiStyle.github": "קודי אמוג'י בסגנון GitHub (:smile:)",
+  "config.emojiStyle.unicode": "תווי אמוג'י Unicode",
+  "config.reasoningEffort": "רמת מאמץ החשיבה של GPT-5.2 (משפיעה על איכות התגובה והשהייה)",
+  "config.reasoningEffort.none": "ללא חשיבה (מהיר ביותר, איכות נמוכה ביותר)",
+  "config.reasoningEffort.low": "חשיבה נמוכה (מהיר, איכות טובה) - מומלץ",
+  "config.reasoningEffort.medium": "חשיבה בינונית (מאוזן)",
+  "config.reasoningEffort.high": "חשיבה גבוהה (איטי ביותר, איכות גבוהה ביותר)",
+  "config.maxInputTokens": "מספר מרבי של טוקנים לעיבוד AI (ברירת מחדל: 200K)",
+  "config.useBulletList": "עיצוב גוף הודעת commit כרשימת תבליטים",
+  "config.useConventionalCommits": "שימוש בפורמט Conventional Commits עם scope (<type>(<scope>): <subject>)",
+  "config.appendCommitTrailer": "הוספת סיומת 'Commit-Message-By: otak-committer' להודעות commit שנוצרו",
+  "config.syncApiKeys": "סנכרון מפתחות API דרך VS Code Settings Sync (שמירת מפתחות במצב תוסף מסונכרן)"
+}

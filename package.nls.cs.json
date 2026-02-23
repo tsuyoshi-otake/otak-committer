@@ -1,0 +1,33 @@
+{
+  "extension.description": "Rozsireni VS Code pro inteligentni operace SCM - Vicejazycne generovani zprav commitu s podporou AI (25 jazyku) a budouci funkce spravay PR.",
+
+  "command.generateMessage": "Vygenerovat zpravu commitu",
+  "command.generatePR": "Vygenerovat Pull Request",
+  "command.generateIssue": "Vygenerovat Issue",
+  "command.openSettings": "Otevrit nastaveni otak-committer",
+  "command.changeLanguage": "Zmenit jazyk zpravy commitu",
+  "command.changeMessageStyle": "Zmenit styl zpravy commitu",
+  "command.setApiKey": "Nastavit API klic OpenAI",
+  "command.diagnoseStorage": "Diagnostikovat uloziste API klice",
+
+  "config.language": "Jazyk pro zpravy commitu",
+  "config.messageStyle": "Styl a delka generovanych zprav commitu",
+  "config.messageStyle.simple": "Jednoduchy a strucny (600 znaku)",
+  "config.messageStyle.normal": "Normalni delka s kontextem (1200 znaku)",
+  "config.messageStyle.detailed": "Podrobne vysvetleni (2400 znaku)",
+  "config.customMessage": "Vlastni zprava pro pripojeni k systemovemu promptu (pridana za zpravu diffu)",
+  "config.useEmoji": "Pouzivat emoji ve zpravach commitu a popisech PR",
+  "config.emojiStyle": "Styl emoji pouzivanych ve zpravach",
+  "config.emojiStyle.github": "Emoji kody ve stylu GitHub (:smile:)",
+  "config.emojiStyle.unicode": "Znaky Unicode emoji",
+  "config.reasoningEffort": "Uroven uvazovani GPT-5.2 (ovlivnuje kvalitu a latenci odpovedi)",
+  "config.reasoningEffort.none": "Zadne uvazovani (nejrychlejsi, nejnizsi kvalita)",
+  "config.reasoningEffort.low": "Nizke uvazovani (rychle, dobra kvalita) - Doporuceno",
+  "config.reasoningEffort.medium": "Stredni uvazovani (vyvazene)",
+  "config.reasoningEffort.high": "Vysoke uvazovani (nejpomalejsi, nejvyssi kvalita)",
+  "config.maxInputTokens": "Maximalni vstupni tokeny pro zpracovani AI (vychozi: 200K)",
+  "config.useBulletList": "Formatovat telo zpravy commitu jako odrazkovy seznam",
+  "config.useConventionalCommits": "Pouzit format Conventional Commits se scope (<type>(<scope>): <subject>)",
+  "config.appendCommitTrailer": "Pripojit trailer 'Commit-Message-By: otak-committer' ke generovanym zpravam commitu",
+  "config.syncApiKeys": "Synchronizovat API klice pres VS Code Settings Sync (uklada klice v synchronizovanem stavu rozsireni)"
+}

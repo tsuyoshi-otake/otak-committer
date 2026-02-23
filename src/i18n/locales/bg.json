@@ -1,0 +1,129 @@
+{
+  "commands": {
+    "generateCommit": "Генериране на съобщение за комит",
+    "generatePR": "Генериране на Pull Request",
+    "generateIssue": "Генериране на Issue",
+    "changeLanguage": "Промяна на езика",
+    "changeMessageStyle": "Промяна на стила на съобщенията",
+    "setApiKey": "Задаване на API ключ",
+    "openSettings": "Отваряне на настройки",
+    "diagnoseStorage": "Диагностика на хранилището за API ключ"
+  },
+  "messages": {
+    "apiKeyNotConfigured": "API ключът за OpenAI не е конфигуриран. Желаете ли да го конфигурирате сега?",
+    "apiKeySaved": "API ключът е запазен успешно",
+    "storageDiagnosisWritten": "Диагностиката на хранилището е записана в Изход: otak-committer",
+    "authRequired": "Необходима е автентикация в GitHub. Моля, влезте в профила си.",
+    "githubAuthPrompt": "Операциите с GitHub изискват автентикация. Моля, автентикирайте се.",
+    "languageChanged": "Езикът е променен на {language}",
+    "messageStyleChanged": "Стилът на съобщенията е променен на {style}",
+    "noChangesToCommit": "Няма промени за комит",
+    "commitMessageGenerated": "Съобщението за комит е генерирано",
+    "openAIInitFailed": "Инициализацията на услугата OpenAI е неуспешна",
+    "emptyMessageReceived": "Получено е празно съобщение",
+    "noChangesBetweenBranches": "Не са намерени промени между избраните клонове. Моля, направете промени преди да създадете PR.",
+    "failedToGeneratePR": "Неуспешно генериране на съдържание за PR. Моля, опитайте отново.",
+    "failedToShowPreview": "Неуспешно показване на визуализация",
+    "prCreatedSuccess": "{prType} #{number} е създаден успешно!",
+    "draftPRNotSupported": "Чернови PR са достъпни само в GitHub Team и Enterprise. Вместо това ще бъде създаден обикновен PR.",
+    "issueCreatedSuccess": "Issue е създаден успешно",
+    "noFilesSelectedConfirm": "Не са избрани файлове. Да се генерира issue само със структурата на хранилището?",
+    "generatingIssue": "Генериране на issue...",
+    "analyzingRepository": "Анализиране на хранилището...",
+    "creatingIssue": "Създаване на issue...",
+    "updatingContent": "Актуализиране на съдържанието...",
+    "waitingForModificationInput": "Изчакване на въвеждане на модификация...",
+    "storageFallbackWarning": "otak-committer: API ключът е запазен в резервно хранилище. Защитеното хранилище не е налично.",
+    "commitGenerationSecretWarning": "Бяха открити потенциални API ключове или тайни в целта за генериране на съобщение за комит ({count} съвпаднали шаблон(а): {patterns}). Генерирането беше отменено, за да се избегне изпращането на чувствителни данни към AI."
+  },
+  "statusBar": {
+    "configuration": "Конфигурация",
+    "currentStyle": "Текущ стил",
+    "setApiKey": "Задаване на API ключ",
+    "openSettings": "Отваряне на настройки"
+  },
+  "quickPick": {
+    "selectCommitLanguage": "Изберете език за съобщенията за комит",
+    "selectMessageStyle": "Изберете стил на съобщенията",
+    "selectRelatedIssue": "Изберете свързан issue (по избор, натиснете Escape за пропускане)",
+    "selectPRType": "Изберете тип PR (натиснете Escape за пропускане)",
+    "selectIssueType": "Изберете тип issue",
+    "enterIssueDescription": "Въведете описание на issue",
+    "describeIssue": "Опишете проблема, задачата или въпроса",
+    "enterModificationInstructions": "Въведете инструкции за модификация (натиснете Escape за пропускане)",
+    "describeModification": "Опишете как да бъде модифицирано съдържанието",
+    "chooseAction": "Изберете действие",
+    "enterApiKey": "Въведете вашия OpenAI API ключ"
+  },
+  "prTypes": {
+    "draft": "Чернова на Pull Request",
+    "draftDescription": "Необходим е преглед преди сливане",
+    "regular": "Обикновен Pull Request",
+    "regularDescription": "Готов за преглед и сливане"
+  },
+  "issueActions": {
+    "modify": "Модифициране на съдържанието",
+    "modifyDescription": "Дайте обратна връзка за подобряване на съдържанието",
+    "create": "Създаване на Issue",
+    "createDescription": "Създаване на issue с текущото съдържание",
+    "cancel": "Отказ",
+    "cancelDescription": "Отказ от създаването на issue"
+  },
+  "messageStyles": {
+    "simple": "Прост",
+    "simpleDetail": "Кратки съобщения за комит с минимални детайли",
+    "normal": "Нормален",
+    "normalDetail": "Стандартни съобщения за комит с умерени детайли",
+    "detailed": "Подробен",
+    "detailedDetail": "Изчерпателни съобщения за комит с пълен контекст"
+  },
+  "buttons": {
+    "yes": "Да",
+    "no": "Не",
+    "openInBrowser": "Отваряне в браузър",
+    "openIssue": "Отваряне на Issue"
+  },
+  "git": {
+    "stageAll": "Добавяне на всички",
+    "alwaysStageAll": "Винаги добавяй всички",
+    "stageAllPrompt": "Не са намерени подготвени промени. Да се добавят всички промени и да се продължи?",
+    "busyIndexLock": "Git е зает. Моля, изчакайте другите Git операции да завършат или изтрийте .git/index.lock, ако проблемът продължава.",
+    "reservedNamesInfo": "Файлове с резервирани имена ({files}) ще бъдат включени, но тяхното съдържание не може да бъде показано в diff.",
+    "diffTruncatedWarning": "Размерът на diff ({estimatedKTokens}K токена) надвишава лимита от {thresholdKTokens}K. Съдържанието ще бъде съкратено за обработка от AI.",
+    "smartDiffApplied": "Голям diff ({tokenCount}K токена): приложена интелигентна приоритизация ({included}/{total} файла с пълен diff)",
+    "mapReduceApplied": "Много голям diff ({tokenCount}K токена): използване на обобщение по части ({chunks} части)"
+  },
+  "progress": {
+    "generatingCommitMessage": "Генериране на съобщение за комит...",
+    "analyzingChanges": "Генериране на Pull Request - Анализиране на промените...",
+    "creatingPR": "Създаване на {prType} Pull Request...",
+    "processingLargeDiff": "Обработка на diff...",
+    "summarizingChunks": "Обобщаване на промените ({current}/{total})..."
+  },
+  "errors": {
+    "gitExtensionNotFound": "Git разширението не е налично",
+    "noGitRepository": "Не е намерено Git хранилище"
+  },
+  "apiKey": {
+    "enterKey": "Въведете вашия OpenAI API ключ",
+    "placeholder": "sk-...",
+    "invalidFormat": "Невалиден формат на API ключ. Очакван формат: sk-...",
+    "keyExists": "API ключ вече е конфигуриран",
+    "chooseAction": "Изберете действие",
+    "updateKey": "Актуализиране на API ключ",
+    "validateKey": "Валидиране на API ключ",
+    "removeKey": "Премахване на API ключ",
+    "cancel": "Отказ",
+    "removed": "API ключът е премахнат успешно",
+    "validatePrompt": "Желаете ли да валидирате API ключа с OpenAI?",
+    "validating": "Валидиране на API ключ...",
+    "validationSuccess": "API ключът е валиден",
+    "validationFailed": "Валидирането на API ключа е неуспешно: {reason}",
+    "retryValidation": "Повторен опит за валидиране",
+    "continueWithoutValidation": "Продължаване без валидиране",
+    "retryPrompt": "Желаете ли да въведете друг API ключ?",
+    "invalidKeyPrompt": "Невалиден OpenAI API ключ. Желаете ли да го актуализирате?",
+    "errorPrompt": "Грешка с OpenAI API ключ. Желаете ли да го актуализирате?",
+    "setApiKey": "Задаване на API ключ"
+  }
+}

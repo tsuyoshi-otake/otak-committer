@@ -49,7 +49,7 @@ Generates clear titles, structured descriptions, and relevant labels.
 
 ## Features
 
-- **UI internationalization** — Auto-detect VS Code UI language or pick one manually. Supported UI languages: English, Japanese, Korean, Vietnamese, French, German, Spanish, Portuguese, Simplified Chinese, Traditional Chinese.
+- **UI internationalization** — Auto-detect VS Code UI language or pick one manually. Supported UI languages: English, Japanese, Korean, Vietnamese, French, German, Spanish, Portuguese, Simplified Chinese, Traditional Chinese, Italian, Czech, Hungarian, Bulgarian, Turkish, Polish, Russian, Thai, Hindi, Bengali, Javanese, Tamil, Burmese, Arabic, Hebrew.
 - **Multilingual commit messages** — 25 languages: English, Français, Deutsch, Italiano, Español, Português, Čeština, Magyar, Български, Türkçe, Polski, Русский, 日本語, 中文, 繁體中文, 한국어, Tiếng Việt, ไทย, हिन्दी, বাংলা, Basa Jawa, தமிழ், မြန်မာဘာသာ, العربية, עברית.
 - **Message styles** — `simple`, `normal`, or `detailed`.
 - **Deep VS Code integration** — Source Control panel actions, status bar controls, and full UI localization.
@@ -93,7 +93,7 @@ Uses VS Code's built-in GitHub authentication. Sign in and out through the Accou
 - **`otakCommitter.language`**: Commit message language (default: `english`)
 - **`otakCommitter.messageStyle`**: Message detail level (default: `normal`)
 - **UI language (extension UI)**: Follows VS Code display language (`Configure Display Language` command).
-  - Supported UI locales: `en`, `ja`, `ko`, `vi`, `fr`, `de`, `es`, `pt`, `zh-cn`, `zh-tw`
+  - Supported UI locales: `en`, `ja`, `ko`, `vi`, `fr`, `de`, `es`, `pt`, `zh-cn`, `zh-tw`, `it`, `cs`, `hu`, `bg`, `tr`, `pl`, `ru`, `th`, `hi`, `bn`, `jv`, `ta`, `my`, `ar`, `he`
   - Other locales automatically fall back to English
 - **`otakCommitter.customMessage`**: Custom AI instructions (optional)
 - **`otakCommitter.useEmoji`**: Enable emoji prefixes (default: `false`)

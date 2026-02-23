@@ -1,0 +1,129 @@
+{
+  "commands": {
+    "generateCommit": "Genera messaggio di commit",
+    "generatePR": "Genera Pull Request",
+    "generateIssue": "Genera Issue",
+    "changeLanguage": "Cambia lingua",
+    "changeMessageStyle": "Cambia stile messaggio",
+    "setApiKey": "Imposta chiave API",
+    "openSettings": "Apri impostazioni",
+    "diagnoseStorage": "Diagnostica archiviazione chiave API"
+  },
+  "messages": {
+    "apiKeyNotConfigured": "La chiave API OpenAI non e configurata. Vuoi configurarla ora?",
+    "apiKeySaved": "Chiave API salvata con successo",
+    "storageDiagnosisWritten": "Diagnosi archiviazione scritta su Output: otak-committer",
+    "authRequired": "Autenticazione GitHub richiesta. Effettua l'accesso.",
+    "githubAuthPrompt": "Le operazioni GitHub richiedono l'autenticazione. Effettua l'autenticazione.",
+    "languageChanged": "Lingua cambiata in {language}",
+    "messageStyleChanged": "Stile messaggio cambiato in {style}",
+    "noChangesToCommit": "Nessuna modifica da committare",
+    "commitMessageGenerated": "Messaggio di commit generato",
+    "openAIInitFailed": "Inizializzazione del servizio OpenAI fallita",
+    "emptyMessageReceived": "Messaggio vuoto ricevuto",
+    "noChangesBetweenBranches": "Nessuna modifica trovata tra i branch selezionati. Effettua delle modifiche prima di creare una PR.",
+    "failedToGeneratePR": "Generazione del contenuto PR fallita. Riprova.",
+    "failedToShowPreview": "Impossibile mostrare l'anteprima",
+    "prCreatedSuccess": "{prType} #{number} creata con successo!",
+    "draftPRNotSupported": "Le PR bozza sono disponibili solo in GitHub Team e Enterprise. Verra creata una PR normale.",
+    "issueCreatedSuccess": "Issue creata con successo",
+    "noFilesSelectedConfirm": "Nessun file selezionato. Generare l'issue solo con la struttura del repository?",
+    "generatingIssue": "Generazione issue...",
+    "analyzingRepository": "Analisi repository...",
+    "creatingIssue": "Creazione issue...",
+    "updatingContent": "Aggiornamento contenuto...",
+    "waitingForModificationInput": "In attesa dell'input di modifica...",
+    "storageFallbackWarning": "otak-committer: Chiave API salvata nell'archiviazione di fallback. L'archiviazione sicura non e disponibile.",
+    "commitGenerationSecretWarning": "Sono state trovate potenziali chiavi API o segreti nel target di generazione del messaggio di commit ({count} pattern trovati: {patterns}). La generazione e stata annullata per evitare l'invio di dati sensibili all'AI."
+  },
+  "statusBar": {
+    "configuration": "Configurazione",
+    "currentStyle": "Stile attuale",
+    "setApiKey": "Imposta chiave API",
+    "openSettings": "Apri impostazioni"
+  },
+  "quickPick": {
+    "selectCommitLanguage": "Seleziona la lingua del messaggio di commit",
+    "selectMessageStyle": "Seleziona lo stile del messaggio",
+    "selectRelatedIssue": "Seleziona issue correlata (opzionale, premi Escape per saltare)",
+    "selectPRType": "Seleziona tipo PR (premi Escape per saltare)",
+    "selectIssueType": "Seleziona tipo issue",
+    "enterIssueDescription": "Inserisci descrizione issue",
+    "describeIssue": "Descrivi il problema, la questione o l'attivita",
+    "enterModificationInstructions": "Inserisci istruzioni di modifica (premi Escape per saltare)",
+    "describeModification": "Descrivi come modificare il contenuto",
+    "chooseAction": "Scegli un'azione",
+    "enterApiKey": "Inserisci la tua chiave API OpenAI"
+  },
+  "prTypes": {
+    "draft": "Pull Request bozza",
+    "draftDescription": "Revisione richiesta prima del merge",
+    "regular": "Pull Request normale",
+    "regularDescription": "Pronta per revisione e merge"
+  },
+  "issueActions": {
+    "modify": "Modifica contenuto",
+    "modifyDescription": "Fornisci feedback per migliorare il contenuto",
+    "create": "Crea Issue",
+    "createDescription": "Crea issue con il contenuto attuale",
+    "cancel": "Annulla",
+    "cancelDescription": "Annulla creazione issue"
+  },
+  "messageStyles": {
+    "simple": "Semplice",
+    "simpleDetail": "Messaggi di commit brevi con dettagli minimi",
+    "normal": "Normale",
+    "normalDetail": "Messaggi di commit standard con dettagli moderati",
+    "detailed": "Dettagliato",
+    "detailedDetail": "Messaggi di commit completi con contesto completo"
+  },
+  "buttons": {
+    "yes": "Si",
+    "no": "No",
+    "openInBrowser": "Apri nel browser",
+    "openIssue": "Apri Issue"
+  },
+  "git": {
+    "stageAll": "Aggiungi tutto allo stage",
+    "alwaysStageAll": "Aggiungi sempre allo stage",
+    "stageAllPrompt": "Nessuna modifica nello stage. Aggiungere tutte le modifiche allo stage e continuare?",
+    "busyIndexLock": "Git e occupato. Attendi il completamento delle altre operazioni Git o elimina .git/index.lock se il problema persiste.",
+    "reservedNamesInfo": "I file con nomi riservati ({files}) saranno inclusi ma il loro contenuto non puo essere visualizzato nel diff.",
+    "diffTruncatedWarning": "La dimensione del diff ({estimatedKTokens}K token) supera il limite di {thresholdKTokens}K. Il contenuto sara troncato per l'elaborazione AI.",
+    "smartDiffApplied": "Diff grande ({tokenCount}K token): applicata prioritizzazione smart ({included}/{total} file con diff completo)",
+    "mapReduceApplied": "Diff molto grande ({tokenCount}K token): utilizzo di riepilogo a blocchi ({chunks} blocchi)"
+  },
+  "progress": {
+    "generatingCommitMessage": "Generazione messaggio di commit...",
+    "analyzingChanges": "Genera Pull Request - Analisi modifiche...",
+    "creatingPR": "Creazione {prType} Pull Request...",
+    "processingLargeDiff": "Elaborazione diff...",
+    "summarizingChunks": "Riepilogo modifiche ({current}/{total})..."
+  },
+  "errors": {
+    "gitExtensionNotFound": "Estensione Git non disponibile",
+    "noGitRepository": "Nessun repository Git trovato"
+  },
+  "apiKey": {
+    "enterKey": "Inserisci la tua chiave API OpenAI",
+    "placeholder": "sk-...",
+    "invalidFormat": "Formato chiave API non valido. Formato atteso: sk-...",
+    "keyExists": "Una chiave API e gia configurata",
+    "chooseAction": "Scegli un'azione",
+    "updateKey": "Aggiorna chiave API",
+    "validateKey": "Verifica chiave API",
+    "removeKey": "Rimuovi chiave API",
+    "cancel": "Annulla",
+    "removed": "Chiave API rimossa con successo",
+    "validatePrompt": "Vuoi verificare la chiave API con OpenAI?",
+    "validating": "Verifica chiave API...",
+    "validationSuccess": "Chiave API valida",
+    "validationFailed": "Verifica chiave API fallita: {reason}",
+    "retryValidation": "Riprova verifica",
+    "continueWithoutValidation": "Continua senza verifica",
+    "retryPrompt": "Vuoi inserire una chiave API diversa?",
+    "invalidKeyPrompt": "Chiave API OpenAI non valida. Vuoi aggiornarla?",
+    "errorPrompt": "Errore chiave API OpenAI. Vuoi aggiornarla?",
+    "setApiKey": "Imposta chiave API"
+  }
+}

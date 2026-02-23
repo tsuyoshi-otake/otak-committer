@@ -1,0 +1,129 @@
+{
+  "commands": {
+    "generateCommit": "কমিট বার্তা তৈরি করুন",
+    "generatePR": "Pull Request তৈরি করুন",
+    "generateIssue": "Issue তৈরি করুন",
+    "changeLanguage": "ভাষা পরিবর্তন করুন",
+    "changeMessageStyle": "বার্তার শৈলী পরিবর্তন করুন",
+    "setApiKey": "API Key সেট করুন",
+    "openSettings": "সেটিংস খুলুন",
+    "diagnoseStorage": "API Key স্টোরেজ নির্ণয় করুন"
+  },
+  "messages": {
+    "apiKeyNotConfigured": "OpenAI API key কনফিগার করা হয়নি। আপনি কি এখনই কনফিগার করতে চান?",
+    "apiKeySaved": "API key সফলভাবে সংরক্ষিত হয়েছে",
+    "storageDiagnosisWritten": "স্টোরেজ নির্ণয় আউটপুটে লেখা হয়েছে: otak-committer",
+    "authRequired": "GitHub প্রমাণীকরণ প্রয়োজন। অনুগ্রহ করে সাইন ইন করুন।",
+    "githubAuthPrompt": "GitHub অপারেশনের জন্য প্রমাণীকরণ প্রয়োজন। অনুগ্রহ করে প্রমাণীকরণ করুন।",
+    "languageChanged": "ভাষা {language}-এ পরিবর্তিত হয়েছে",
+    "messageStyleChanged": "বার্তার শৈলী {style}-এ পরিবর্তিত হয়েছে",
+    "noChangesToCommit": "কমিট করার জন্য কোনো পরিবর্তন নেই",
+    "commitMessageGenerated": "কমিট বার্তা তৈরি হয়েছে",
+    "openAIInitFailed": "OpenAI সেবা আরম্ভ করতে ব্যর্থ",
+    "emptyMessageReceived": "খালি বার্তা প্রাপ্ত হয়েছে",
+    "noChangesBetweenBranches": "নির্বাচিত ব্রাঞ্চগুলোর মধ্যে কোনো পরিবর্তন পাওয়া যায়নি। অনুগ্রহ করে PR তৈরি করার আগে কিছু পরিবর্তন করুন।",
+    "failedToGeneratePR": "PR বিষয়বস্তু তৈরি করতে ব্যর্থ। অনুগ্রহ করে আবার চেষ্টা করুন।",
+    "failedToShowPreview": "প্রিভিউ দেখাতে ব্যর্থ",
+    "prCreatedSuccess": "{prType} #{number} সফলভাবে তৈরি হয়েছে!",
+    "draftPRNotSupported": "Draft PR শুধুমাত্র GitHub Team এবং Enterprise-এ উপলব্ধ। পরিবর্তে একটি সাধারণ PR তৈরি করা হচ্ছে।",
+    "issueCreatedSuccess": "Issue সফলভাবে তৈরি হয়েছে",
+    "noFilesSelectedConfirm": "কোনো ফাইল নির্বাচিত হয়নি। শুধুমাত্র রিপোজিটরি কাঠামো দিয়ে Issue তৈরি করবেন?",
+    "generatingIssue": "Issue তৈরি হচ্ছে...",
+    "analyzingRepository": "রিপোজিটরি বিশ্লেষণ হচ্ছে...",
+    "creatingIssue": "Issue তৈরি করা হচ্ছে...",
+    "updatingContent": "বিষয়বস্তু আপডেট হচ্ছে...",
+    "waitingForModificationInput": "সংশোধন ইনপুটের জন্য অপেক্ষা করা হচ্ছে...",
+    "storageFallbackWarning": "otak-committer: API key ফলব্যাক স্টোরেজে সংরক্ষিত। নিরাপদ স্টোরেজ উপলব্ধ নয়।",
+    "commitGenerationSecretWarning": "কমিট বার্তা তৈরির লক্ষ্যে সম্ভাব্য API key বা গোপনীয় তথ্য পাওয়া গেছে ({count}টি মিলিত প্যাটার্ন: {patterns})। সংবেদনশীল ডেটা AI-তে পাঠানো এড়াতে তৈরি বাতিল করা হয়েছে।"
+  },
+  "statusBar": {
+    "configuration": "কনফিগারেশন",
+    "currentStyle": "বর্তমান শৈলী",
+    "setApiKey": "API Key সেট করুন",
+    "openSettings": "সেটিংস খুলুন"
+  },
+  "quickPick": {
+    "selectCommitLanguage": "কমিট বার্তার ভাষা নির্বাচন করুন",
+    "selectMessageStyle": "বার্তার শৈলী নির্বাচন করুন",
+    "selectRelatedIssue": "সম্পর্কিত Issue নির্বাচন করুন (ঐচ্ছিক, এড়াতে Escape চাপুন)",
+    "selectPRType": "PR ধরন নির্বাচন করুন (এড়াতে Escape চাপুন)",
+    "selectIssueType": "Issue ধরন নির্বাচন করুন",
+    "enterIssueDescription": "Issue-এর বিবরণ লিখুন",
+    "describeIssue": "সমস্যা, ত্রুটি, বা কাজটি বর্ণনা করুন",
+    "enterModificationInstructions": "সংশোধন নির্দেশনা লিখুন (এড়াতে Escape চাপুন)",
+    "describeModification": "বিষয়বস্তু কীভাবে সংশোধন করা উচিত তা বর্ণনা করুন",
+    "chooseAction": "একটি কাজ বেছে নিন",
+    "enterApiKey": "আপনার OpenAI API key লিখুন"
+  },
+  "prTypes": {
+    "draft": "Draft Pull Request",
+    "draftDescription": "মার্জ করার আগে পর্যালোচনা প্রয়োজন",
+    "regular": "সাধারণ Pull Request",
+    "regularDescription": "পর্যালোচনা এবং মার্জের জন্য প্রস্তুত"
+  },
+  "issueActions": {
+    "modify": "বিষয়বস্তু সংশোধন করুন",
+    "modifyDescription": "বিষয়বস্তু উন্নত করতে মতামত দিন",
+    "create": "Issue তৈরি করুন",
+    "createDescription": "বর্তমান বিষয়বস্তু দিয়ে Issue তৈরি করুন",
+    "cancel": "বাতিল",
+    "cancelDescription": "Issue তৈরি বাতিল করুন"
+  },
+  "messageStyles": {
+    "simple": "সরল",
+    "simpleDetail": "ন্যূনতম বিবরণসহ সংক্ষিপ্ত কমিট বার্তা",
+    "normal": "সাধারণ",
+    "normalDetail": "মাঝারি বিবরণসহ মানক কমিট বার্তা",
+    "detailed": "বিস্তারিত",
+    "detailedDetail": "সম্পূর্ণ প্রসঙ্গসহ ব্যাপক কমিট বার্তা"
+  },
+  "buttons": {
+    "yes": "হ্যাঁ",
+    "no": "না",
+    "openInBrowser": "ব্রাউজারে খুলুন",
+    "openIssue": "Issue খুলুন"
+  },
+  "git": {
+    "stageAll": "সব স্টেজ করুন",
+    "alwaysStageAll": "সর্বদা স্টেজ করুন",
+    "stageAllPrompt": "কোনো স্টেজ করা পরিবর্তন পাওয়া যায়নি। সব পরিবর্তন স্টেজ করে চালিয়ে যাবেন?",
+    "busyIndexLock": "Git ব্যস্ত। অনুগ্রহ করে অন্যান্য Git অপারেশন সম্পন্ন হওয়া পর্যন্ত অপেক্ষা করুন, অথবা সমস্যা অব্যাহত থাকলে .git/index.lock মুছে ফেলুন।",
+    "reservedNamesInfo": "সংরক্ষিত নামের ফাইলগুলো ({files}) অন্তর্ভুক্ত হবে তবে তাদের বিষয়বস্তু diff-এ প্রদর্শন করা যাবে না।",
+    "diffTruncatedWarning": "Diff-এর আকার ({estimatedKTokens}K টোকেন) {thresholdKTokens}K সীমা অতিক্রম করেছে। AI প্রক্রিয়াকরণের জন্য বিষয়বস্তু কাটা হবে।",
+    "smartDiffApplied": "বড় diff ({tokenCount}K টোকেন): স্মার্ট অগ্রাধিকার প্রয়োগ করা হয়েছে ({included}/{total} ফাইলে সম্পূর্ণ diff)",
+    "mapReduceApplied": "অতি বড় diff ({tokenCount}K টোকেন): খণ্ডিত সারাংশ ব্যবহার করা হচ্ছে ({chunks}টি খণ্ড)"
+  },
+  "progress": {
+    "generatingCommitMessage": "কমিট বার্তা তৈরি হচ্ছে...",
+    "analyzingChanges": "Pull Request তৈরি - পরিবর্তন বিশ্লেষণ হচ্ছে...",
+    "creatingPR": "{prType} Pull Request তৈরি করা হচ্ছে...",
+    "processingLargeDiff": "Diff প্রক্রিয়াকরণ হচ্ছে...",
+    "summarizingChunks": "পরিবর্তন সারাংশ করা হচ্ছে ({current}/{total})..."
+  },
+  "errors": {
+    "gitExtensionNotFound": "Git এক্সটেনশন উপলব্ধ নয়",
+    "noGitRepository": "কোনো Git রিপোজিটরি পাওয়া যায়নি"
+  },
+  "apiKey": {
+    "enterKey": "আপনার OpenAI API key লিখুন",
+    "placeholder": "sk-...",
+    "invalidFormat": "অবৈধ API key ফরম্যাট। প্রত্যাশিত ফরম্যাট: sk-...",
+    "keyExists": "একটি API key ইতিমধ্যে কনফিগার করা আছে",
+    "chooseAction": "একটি কাজ বেছে নিন",
+    "updateKey": "API Key আপডেট করুন",
+    "validateKey": "API Key যাচাই করুন",
+    "removeKey": "API Key সরান",
+    "cancel": "বাতিল",
+    "removed": "API key সফলভাবে সরানো হয়েছে",
+    "validatePrompt": "আপনি কি OpenAI-এর সাথে API key যাচাই করতে চান?",
+    "validating": "API key যাচাই করা হচ্ছে...",
+    "validationSuccess": "API key বৈধ",
+    "validationFailed": "API key যাচাই ব্যর্থ: {reason}",
+    "retryValidation": "পুনরায় যাচাই করুন",
+    "continueWithoutValidation": "যাচাই ছাড়া চালিয়ে যান",
+    "retryPrompt": "আপনি কি একটি ভিন্ন API key লিখতে চান?",
+    "invalidKeyPrompt": "অবৈধ OpenAI API key। আপনি কি এটি আপডেট করতে চান?",
+    "errorPrompt": "OpenAI API key ত্রুটি। আপনি কি এটি আপডেট করতে চান?",
+    "setApiKey": "API Key সেট করুন"
+  }
+}

@@ -70,9 +70,7 @@ export class ConfigCommand extends BaseCommand {
                     vscode.ConfigurationTarget.Global,
                 );
 
-                // UI localization is supported for English, Japanese, Vietnamese, Korean,
-                // Chinese (Simplified/Traditional), French, German, Spanish, and Portuguese.
-                // Keep the stored "preferred locale" in sync for these languages.
+                // Keep the stored "preferred locale" in sync for all supported UI languages.
                 const localeMap: Record<string, SupportedLocale | undefined> = {
                     japanese: 'ja',
                     vietnamese: 'vi',
@@ -83,6 +81,21 @@ export class ConfigCommand extends BaseCommand {
                     portuguese: 'pt',
                     chinese: 'zh-cn',
                     traditionalChinese: 'zh-tw',
+                    italian: 'it',
+                    czech: 'cs',
+                    hungarian: 'hu',
+                    bulgarian: 'bg',
+                    turkish: 'tr',
+                    polish: 'pl',
+                    russian: 'ru',
+                    thai: 'th',
+                    hindi: 'hi',
+                    bengali: 'bn',
+                    javanese: 'jv',
+                    tamil: 'ta',
+                    burmese: 'my',
+                    arabic: 'ar',
+                    hebrew: 'he',
                     english: 'en',
                 };
                 const locale = localeMap[selected.description as string];

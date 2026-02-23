@@ -1,0 +1,129 @@
+{
+  "commands": {
+    "generateCommit": "Commit Mesajı Oluştur",
+    "generatePR": "Pull Request Oluştur",
+    "generateIssue": "Issue Oluştur",
+    "changeLanguage": "Dili Değiştir",
+    "changeMessageStyle": "Mesaj Stilini Değiştir",
+    "setApiKey": "API Anahtarını Ayarla",
+    "openSettings": "Ayarları Aç",
+    "diagnoseStorage": "API Anahtarı Depolamasını Tanıla"
+  },
+  "messages": {
+    "apiKeyNotConfigured": "OpenAI API anahtarı yapılandırılmamış. Şimdi yapılandırmak ister misiniz?",
+    "apiKeySaved": "API anahtarı başarıyla kaydedildi",
+    "storageDiagnosisWritten": "Depolama tanılaması Çıktı'ya yazıldı: otak-committer",
+    "authRequired": "GitHub kimlik doğrulaması gerekli. Lütfen giriş yapın.",
+    "githubAuthPrompt": "GitHub işlemleri kimlik doğrulaması gerektirir. Lütfen kimlik doğrulaması yapın.",
+    "languageChanged": "Dil {language} olarak değiştirildi",
+    "messageStyleChanged": "Mesaj stili {style} olarak değiştirildi",
+    "noChangesToCommit": "Commit yapılacak değişiklik yok",
+    "commitMessageGenerated": "Commit mesajı oluşturuldu",
+    "openAIInitFailed": "OpenAI hizmeti başlatılamadı",
+    "emptyMessageReceived": "Boş mesaj alındı",
+    "noChangesBetweenBranches": "Seçilen dallar arasında değişiklik bulunamadı. Lütfen PR oluşturmadan önce değişiklik yapın.",
+    "failedToGeneratePR": "PR içeriği oluşturulamadı. Lütfen tekrar deneyin.",
+    "failedToShowPreview": "Önizleme gösterilemedi",
+    "prCreatedSuccess": "{prType} #{number} başarıyla oluşturuldu!",
+    "draftPRNotSupported": "Taslak PR'ler yalnızca GitHub Team ve Enterprise'da kullanılabilir. Bunun yerine normal bir PR oluşturuluyor.",
+    "issueCreatedSuccess": "Issue başarıyla oluşturuldu",
+    "noFilesSelectedConfirm": "Dosya seçilmedi. Yalnızca depo yapısıyla issue oluşturulsun mu?",
+    "generatingIssue": "Issue oluşturuluyor...",
+    "analyzingRepository": "Depo analiz ediliyor...",
+    "creatingIssue": "Issue oluşturuluyor...",
+    "updatingContent": "İçerik güncelleniyor...",
+    "waitingForModificationInput": "Değişiklik girişi bekleniyor...",
+    "storageFallbackWarning": "otak-committer: API anahtarı yedek depolamaya kaydedildi. Güvenli depolama kullanılamıyor.",
+    "commitGenerationSecretWarning": "Commit mesajı oluşturma hedefinde potansiyel API anahtarları veya gizli bilgiler bulundu ({count} eşleşen kalıp: {patterns}). Hassas verilerin AI'ya gönderilmesini önlemek için oluşturma iptal edildi."
+  },
+  "statusBar": {
+    "configuration": "Yapılandırma",
+    "currentStyle": "Mevcut Stil",
+    "setApiKey": "API Anahtarını Ayarla",
+    "openSettings": "Ayarları Aç"
+  },
+  "quickPick": {
+    "selectCommitLanguage": "Commit mesajı dilini seçin",
+    "selectMessageStyle": "Mesaj stilini seçin",
+    "selectRelatedIssue": "İlgili issue'yu seçin (isteğe bağlı, atlamak için Escape'e basın)",
+    "selectPRType": "PR türünü seçin (atlamak için Escape'e basın)",
+    "selectIssueType": "Issue türünü seçin",
+    "enterIssueDescription": "Issue açıklamasını girin",
+    "describeIssue": "Sorunu, problemi veya görevi açıklayın",
+    "enterModificationInstructions": "Değişiklik talimatlarını girin (atlamak için Escape'e basın)",
+    "describeModification": "İçeriğin nasıl değiştirilmesi gerektiğini açıklayın",
+    "chooseAction": "Bir eylem seçin",
+    "enterApiKey": "OpenAI API anahtarınızı girin"
+  },
+  "prTypes": {
+    "draft": "Taslak Pull Request",
+    "draftDescription": "Birleştirmeden önce inceleme gerekli",
+    "regular": "Normal Pull Request",
+    "regularDescription": "İnceleme ve birleştirme için hazır"
+  },
+  "issueActions": {
+    "modify": "İçeriği Değiştir",
+    "modifyDescription": "İçeriği iyileştirmek için geri bildirim sağlayın",
+    "create": "Issue Oluştur",
+    "createDescription": "Mevcut içerikle issue oluştur",
+    "cancel": "İptal",
+    "cancelDescription": "Issue oluşturmayı iptal et"
+  },
+  "messageStyles": {
+    "simple": "Basit",
+    "simpleDetail": "Minimum ayrıntıyla kısa commit mesajları",
+    "normal": "Normal",
+    "normalDetail": "Orta düzeyde ayrıntılı standart commit mesajları",
+    "detailed": "Ayrıntılı",
+    "detailedDetail": "Tam bağlamlı kapsamlı commit mesajları"
+  },
+  "buttons": {
+    "yes": "Evet",
+    "no": "Hayır",
+    "openInBrowser": "Tarayıcıda Aç",
+    "openIssue": "Issue'yu Aç"
+  },
+  "git": {
+    "stageAll": "Tümünü Hazırla",
+    "alwaysStageAll": "Her Zaman Hazırla",
+    "stageAllPrompt": "Hazırlanmış değişiklik bulunamadı. Tüm değişiklikler hazırlanıp devam edilsin mi?",
+    "busyIndexLock": "Git meşgul. Lütfen diğer Git işlemlerinin tamamlanmasını bekleyin veya sorun devam ederse .git/index.lock dosyasını silin.",
+    "reservedNamesInfo": "Ayrılmış adlara sahip dosyalar ({files}) dahil edilecek ancak içerikleri diff'te görüntülenemez.",
+    "diffTruncatedWarning": "Diff boyutu ({estimatedKTokens}K token) {thresholdKTokens}K sınırını aşıyor. İçerik AI işleme için kırpılacak.",
+    "smartDiffApplied": "Büyük diff ({tokenCount}K token): akıllı önceliklendirme uygulandı ({included}/{total} dosya tam diff ile)",
+    "mapReduceApplied": "Çok büyük diff ({tokenCount}K token): parçalı özetleme kullanılıyor ({chunks} parça)"
+  },
+  "progress": {
+    "generatingCommitMessage": "Commit mesajı oluşturuluyor...",
+    "analyzingChanges": "Pull Request Oluştur - Değişiklikler analiz ediliyor...",
+    "creatingPR": "{prType} Pull Request oluşturuluyor...",
+    "processingLargeDiff": "Diff işleniyor...",
+    "summarizingChunks": "Değişiklikler özetleniyor ({current}/{total})..."
+  },
+  "errors": {
+    "gitExtensionNotFound": "Git eklentisi kullanılamıyor",
+    "noGitRepository": "Git deposu bulunamadı"
+  },
+  "apiKey": {
+    "enterKey": "OpenAI API anahtarınızı girin",
+    "placeholder": "sk-...",
+    "invalidFormat": "Geçersiz API anahtarı biçimi. Beklenen biçim: sk-...",
+    "keyExists": "Bir API anahtarı zaten yapılandırılmış",
+    "chooseAction": "Bir eylem seçin",
+    "updateKey": "API Anahtarını Güncelle",
+    "validateKey": "API Anahtarını Doğrula",
+    "removeKey": "API Anahtarını Kaldır",
+    "cancel": "İptal",
+    "removed": "API anahtarı başarıyla kaldırıldı",
+    "validatePrompt": "API anahtarını OpenAI ile doğrulamak ister misiniz?",
+    "validating": "API anahtarı doğrulanıyor...",
+    "validationSuccess": "API anahtarı geçerli",
+    "validationFailed": "API anahtarı doğrulaması başarısız oldu: {reason}",
+    "retryValidation": "Doğrulamayı Tekrar Dene",
+    "continueWithoutValidation": "Doğrulama Olmadan Devam Et",
+    "retryPrompt": "Farklı bir API anahtarı girmek ister misiniz?",
+    "invalidKeyPrompt": "Geçersiz OpenAI API anahtarı. Güncellemek ister misiniz?",
+    "errorPrompt": "OpenAI API anahtarı hatası. Güncellemek ister misiniz?",
+    "setApiKey": "API Anahtarını Ayarla"
+  }
+}

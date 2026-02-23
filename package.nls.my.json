@@ -1,0 +1,33 @@
+{
+  "extension.description": "VS Code extension - AI ဖြင့် ဘာသာစကားမျိုးစုံ commit မက်ဆေ့ချ် ဖန်တီးခြင်း (ဘာသာစကား ၂၅ မျိုး ပံ့ပိုးထားသည်) နှင့် အနာဂတ် PR စီမံခန့်ခွဲမှု အင်္ဂါရပ်များပါဝင်သော ထိရောက်သည့် SCM လုပ်ဆောင်ချက်များ။",
+
+  "command.generateMessage": "Commit မက်ဆေ့ချ် ဖန်တီးရန်",
+  "command.generatePR": "Pull Request ဖန်တီးရန်",
+  "command.generateIssue": "Issue ဖန်တီးရန်",
+  "command.openSettings": "otak-committer ဆက်တင်များ ဖွင့်ရန်",
+  "command.changeLanguage": "Commit မက်ဆေ့ချ် ဘာသာစကား ပြောင်းရန်",
+  "command.changeMessageStyle": "Commit မက်ဆေ့ချ် ပုံစံ ပြောင်းရန်",
+  "command.setApiKey": "OpenAI API Key သတ်မှတ်ရန်",
+  "command.diagnoseStorage": "API Key သိုလှောင်မှု စစ်ဆေးရန်",
+
+  "config.language": "Commit မက်ဆေ့ချ်များအတွက် ဘာသာစကား",
+  "config.messageStyle": "ဖန်တီးထားသော commit မက်ဆေ့ချ်များ၏ ပုံစံနှင့် အရှည်",
+  "config.messageStyle.simple": "ရိုးရှင်းတိုတောင်း (စာလုံး ၆၀၀)",
+  "config.messageStyle.normal": "ပုံမှန်အရှည် အကြောင်းအရာအနည်းငယ်ပါ (စာလုံး ၁၂၀၀)",
+  "config.messageStyle.detailed": "အသေးစိတ် ရှင်းလင်းချက် (စာလုံး ၂၄၀၀)",
+  "config.customMessage": "System prompt သို့ ထပ်ဖြည့်ရန် စိတ်ကြိုက်မက်ဆေ့ချ် (diff မက်ဆေ့ချ်နောက်တွင် ထည့်သွင်းသည်)",
+  "config.useEmoji": "Commit မက်ဆေ့ချ်များနှင့် PR ဖော်ပြချက်များတွင် emoji အသုံးပြုရန်",
+  "config.emojiStyle": "မက်ဆေ့ချ်များတွင် အသုံးပြုမည့် emoji ပုံစံ",
+  "config.emojiStyle.github": "GitHub ပုံစံ emoji ကုဒ်များ (:smile:)",
+  "config.emojiStyle.unicode": "Unicode emoji စာလုံးများ",
+  "config.reasoningEffort": "GPT-5.2 ကျိုးကြောင်းဆင်ခြင်မှု အဆင့် (တုံ့ပြန်မှု အရည်အသွေးနှင့် ကြာချိန်ကို သက်ရောက်သည်)",
+  "config.reasoningEffort.none": "ကျိုးကြောင်းဆင်ခြင်မှု မရှိ (အမြန်ဆုံး၊ အရည်အသွေး အနိမ့်ဆုံး)",
+  "config.reasoningEffort.low": "ကျိုးကြောင်းဆင်ခြင်မှု နည်း (မြန်ဆန်၊ အရည်အသွေး ကောင်း) - အကြံပြုထားသည်",
+  "config.reasoningEffort.medium": "ကျိုးကြောင်းဆင်ခြင်မှု အလယ်အလတ် (မျှတသော)",
+  "config.reasoningEffort.high": "ကျိုးကြောင်းဆင်ခြင်မှု မြင့် (အနှေးဆုံး၊ အရည်အသွေး အမြင့်ဆုံး)",
+  "config.maxInputTokens": "AI လုပ်ဆောင်ခြင်းအတွက် အမြင့်ဆုံး input tokens (မူလ: 200K)",
+  "config.useBulletList": "Commit မက်ဆေ့ချ် body ကို bullet list ပုံစံဖြင့် ဖော်မတ်ရန်",
+  "config.useConventionalCommits": "Conventional Commits ပုံစံ scope ဖြင့် အသုံးပြုရန် (<type>(<scope>): <subject>)",
+  "config.appendCommitTrailer": "ဖန်တီးထားသော commit မက်ဆေ့ချ်များတွင် 'Commit-Message-By: otak-committer' trailer ထည့်သွင်းရန်",
+  "config.syncApiKeys": "VS Code Settings Sync မှတစ်ဆင့် API key များ ညှိကိုက်ရန် (ညှိကိုက်ထားသော extension state တွင် key များ သိမ်းဆည်းသည်)"
+}

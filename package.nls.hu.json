@@ -1,0 +1,33 @@
+{
+  "extension.description": "VS Code bovitmeny intelligens SCM muveletekhez - Tobbnyelvukommit uzenet generalas AI tamogatassal (25 nyelv tamogatva) es jovobeni PR kezelesi funkciok.",
+
+  "command.generateMessage": "Commit uzenet generalasa",
+  "command.generatePR": "Pull Request generalasa",
+  "command.generateIssue": "Issue generalasa",
+  "command.openSettings": "otak-committer beallitasok megnyitasa",
+  "command.changeLanguage": "Commit uzenet nyelvvaltas",
+  "command.changeMessageStyle": "Commit uzenet stilusvaltas",
+  "command.setApiKey": "OpenAI API kulcs beallitasa",
+  "command.diagnoseStorage": "API kulcs tarolo diagnosztikaja",
+
+  "config.language": "Commit uzenetek nyelve",
+  "config.messageStyle": "A generalt commit uzenetek stilusa es hossza",
+  "config.messageStyle.simple": "Egyszeru es tomor (600 karakter)",
+  "config.messageStyle.normal": "Normalis hossz kontextussal (1200 karakter)",
+  "config.messageStyle.detailed": "Reszletes magyarzat (2400 karakter)",
+  "config.customMessage": "Egyeni uzenet a rendszer prompthoz (a diff uzenet utan kerul hozzaadasra)",
+  "config.useEmoji": "Emoji hasznalata commit uzenetekben es PR leirasokban",
+  "config.emojiStyle": "Az uzenetekben hasznalt emoji stilusa",
+  "config.emojiStyle.github": "GitHub stilusu emoji kodok (:smile:)",
+  "config.emojiStyle.unicode": "Unicode emoji karakterek",
+  "config.reasoningEffort": "GPT-5.2 gondolkodasi szint (hatassal van a valasz minosegere es lateniciajara)",
+  "config.reasoningEffort.none": "Nincs gondolkodas (leggyorsabb, legalacsonyabb minoseg)",
+  "config.reasoningEffort.low": "Alacsony gondolkodas (gyors, jo minoseg) - Ajanlott",
+  "config.reasoningEffort.medium": "Kozepes gondolkodas (kiegyensulyozott)",
+  "config.reasoningEffort.high": "Magas gondolkodas (leglassabb, legmagasabb minoseg)",
+  "config.maxInputTokens": "Maximalis bemeneti tokenek az AI feldolgozashoz (alapertelmezett: 200K)",
+  "config.useBulletList": "Commit uzenet torzs formatazasa felsorolas listaval",
+  "config.useConventionalCommits": "Conventional Commits formatum hasznalata scope-pal (<type>(<scope>): <subject>)",
+  "config.appendCommitTrailer": "'Commit-Message-By: otak-committer' trailer hozzafuzese a generalt commit uzenetekhez",
+  "config.syncApiKeys": "API kulcsok szinkronizalasa VS Code Settings Sync-kel (kulcsok tarolasa szinkronizalt bovitmeny allapotban)"
+}

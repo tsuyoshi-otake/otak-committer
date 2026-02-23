@@ -1,0 +1,129 @@
+{
+  "commands": {
+    "generateCommit": "יצירת הודעת Commit",
+    "generatePR": "יצירת Pull Request",
+    "generateIssue": "יצירת Issue",
+    "changeLanguage": "שינוי שפה",
+    "changeMessageStyle": "שינוי סגנון הודעה",
+    "setApiKey": "הגדרת מפתח API",
+    "openSettings": "פתיחת הגדרות",
+    "diagnoseStorage": "אבחון אחסון מפתח API"
+  },
+  "messages": {
+    "apiKeyNotConfigured": "מפתח OpenAI API לא הוגדר. האם ברצונך להגדיר אותו עכשיו?",
+    "apiKeySaved": "מפתח API נשמר בהצלחה",
+    "storageDiagnosisWritten": "אבחון האחסון נכתב לפלט: otak-committer",
+    "authRequired": "נדרש אימות GitHub. אנא התחבר.",
+    "githubAuthPrompt": "פעולות GitHub דורשות אימות. אנא בצע אימות.",
+    "languageChanged": "השפה שונתה ל-{language}",
+    "messageStyleChanged": "סגנון ההודעה שונה ל-{style}",
+    "noChangesToCommit": "אין שינויים להגשה",
+    "commitMessageGenerated": "הודעת ה-commit נוצרה",
+    "openAIInitFailed": "אתחול שירות OpenAI נכשל",
+    "emptyMessageReceived": "התקבלה הודעה ריקה",
+    "noChangesBetweenBranches": "לא נמצאו שינויים בין הענפים שנבחרו. אנא בצע שינויים לפני יצירת PR.",
+    "failedToGeneratePR": "יצירת תוכן PR נכשלה. אנא נסה שנית.",
+    "failedToShowPreview": "הצגת התצוגה המקדימה נכשלה",
+    "prCreatedSuccess": "{prType} #{number} נוצר בהצלחה!",
+    "draftPRNotSupported": "טיוטות PR זמינות רק ב-GitHub Team ו-Enterprise. נוצר PR רגיל במקום.",
+    "issueCreatedSuccess": "Issue נוצר בהצלחה",
+    "noFilesSelectedConfirm": "לא נבחרו קבצים. ליצור issue עם מבנה המאגר בלבד?",
+    "generatingIssue": "יוצר issue...",
+    "analyzingRepository": "מנתח מאגר...",
+    "creatingIssue": "יוצר issue...",
+    "updatingContent": "מעדכן תוכן...",
+    "waitingForModificationInput": "ממתין לקלט שינויים...",
+    "storageFallbackWarning": "otak-committer: מפתח API אוחסן באחסון חלופי. אחסון מאובטח אינו זמין.",
+    "commitGenerationSecretWarning": "נמצאו מפתחות API או סודות פוטנציאליים ביעד יצירת הודעת ה-commit ({count} דפוסים תואמים: {patterns}). היצירה בוטלה כדי למנוע שליחת נתונים רגישים ל-AI."
+  },
+  "statusBar": {
+    "configuration": "הגדרות",
+    "currentStyle": "סגנון נוכחי",
+    "setApiKey": "הגדרת מפתח API",
+    "openSettings": "פתיחת הגדרות"
+  },
+  "quickPick": {
+    "selectCommitLanguage": "בחר שפה להודעת commit",
+    "selectMessageStyle": "בחר סגנון הודעה",
+    "selectRelatedIssue": "בחר issue קשור (אופציונלי, לחץ Escape לדילוג)",
+    "selectPRType": "בחר סוג PR (לחץ Escape לדילוג)",
+    "selectIssueType": "בחר סוג issue",
+    "enterIssueDescription": "הזן תיאור issue",
+    "describeIssue": "תאר את הבעיה או המשימה",
+    "enterModificationInstructions": "הזן הוראות שינוי (לחץ Escape לדילוג)",
+    "describeModification": "תאר כיצד יש לשנות את התוכן",
+    "chooseAction": "בחר פעולה",
+    "enterApiKey": "הזן את מפתח OpenAI API שלך"
+  },
+  "prTypes": {
+    "draft": "טיוטת Pull Request",
+    "draftDescription": "נדרשת סקירה לפני מיזוג",
+    "regular": "Pull Request רגיל",
+    "regularDescription": "מוכן לסקירה ומיזוג"
+  },
+  "issueActions": {
+    "modify": "עריכת תוכן",
+    "modifyDescription": "ספק משוב לשיפור התוכן",
+    "create": "יצירת Issue",
+    "createDescription": "יצירת issue עם התוכן הנוכחי",
+    "cancel": "ביטול",
+    "cancelDescription": "ביטול יצירת issue"
+  },
+  "messageStyles": {
+    "simple": "פשוט",
+    "simpleDetail": "הודעות commit קצרות עם פרטים מינימליים",
+    "normal": "רגיל",
+    "normalDetail": "הודעות commit סטנדרטיות עם פירוט מתון",
+    "detailed": "מפורט",
+    "detailedDetail": "הודעות commit מקיפות עם הקשר מלא"
+  },
+  "buttons": {
+    "yes": "כן",
+    "no": "לא",
+    "openInBrowser": "פתיחה בדפדפן",
+    "openIssue": "פתיחת Issue"
+  },
+  "git": {
+    "stageAll": "הוספת הכל ל-Stage",
+    "alwaysStageAll": "הוספה תמידית ל-Stage",
+    "stageAllPrompt": "לא נמצאו שינויים מוכנים. להוסיף את כל השינויים ולהמשיך?",
+    "busyIndexLock": "Git עסוק. אנא המתן לסיום פעולות Git אחרות, או מחק את .git/index.lock אם הבעיה נמשכת.",
+    "reservedNamesInfo": "קבצים עם שמות שמורים ({files}) ייכללו אך לא ניתן להציג את תוכנם ב-diff.",
+    "diffTruncatedWarning": "גודל ה-diff ({estimatedKTokens}K tokens) חורג ממגבלת {thresholdKTokens}K. התוכן ייקטע לעיבוד AI.",
+    "smartDiffApplied": "Diff גדול ({tokenCount}K tokens): הופעלה תעדוף חכם ({included}/{total} קבצים עם diff מלא)",
+    "mapReduceApplied": "Diff גדול מאוד ({tokenCount}K tokens): שימוש בסיכום מחולק ({chunks} חלקים)"
+  },
+  "progress": {
+    "generatingCommitMessage": "יוצר הודעת commit...",
+    "analyzingChanges": "יצירת Pull Request - מנתח שינויים...",
+    "creatingPR": "יוצר {prType} Pull Request...",
+    "processingLargeDiff": "מעבד diff...",
+    "summarizingChunks": "מסכם שינויים ({current}/{total})..."
+  },
+  "errors": {
+    "gitExtensionNotFound": "תוסף Git אינו זמין",
+    "noGitRepository": "לא נמצא מאגר Git"
+  },
+  "apiKey": {
+    "enterKey": "הזן את מפתח OpenAI API שלך",
+    "placeholder": "sk-...",
+    "invalidFormat": "פורמט מפתח API לא תקין. פורמט צפוי: sk-...",
+    "keyExists": "מפתח API כבר מוגדר",
+    "chooseAction": "בחר פעולה",
+    "updateKey": "עדכון מפתח API",
+    "validateKey": "אימות מפתח API",
+    "removeKey": "הסרת מפתח API",
+    "cancel": "ביטול",
+    "removed": "מפתח API הוסר בהצלחה",
+    "validatePrompt": "האם ברצונך לאמת את מפתח ה-API עם OpenAI?",
+    "validating": "מאמת מפתח API...",
+    "validationSuccess": "מפתח API תקין",
+    "validationFailed": "אימות מפתח API נכשל: {reason}",
+    "retryValidation": "ניסיון אימות חוזר",
+    "continueWithoutValidation": "המשך ללא אימות",
+    "retryPrompt": "האם ברצונך להזין מפתח API אחר?",
+    "invalidKeyPrompt": "מפתח OpenAI API לא תקין. האם ברצונך לעדכן אותו?",
+    "errorPrompt": "שגיאה במפתח OpenAI API. האם ברצונך לעדכן אותו?",
+    "setApiKey": "הגדרת מפתח API"
+  }
+}

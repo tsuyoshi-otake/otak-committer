@@ -1,0 +1,129 @@
+{
+  "commands": {
+    "generateCommit": "Commit မက်ဆေ့ချ် ဖန်တီးရန်",
+    "generatePR": "Pull Request ဖန်တီးရန်",
+    "generateIssue": "Issue ဖန်တီးရန်",
+    "changeLanguage": "ဘာသာစကား ပြောင်းရန်",
+    "changeMessageStyle": "မက်ဆေ့ချ်ပုံစံ ပြောင်းရန်",
+    "setApiKey": "API Key သတ်မှတ်ရန်",
+    "openSettings": "ဆက်တင်များ ဖွင့်ရန်",
+    "diagnoseStorage": "API Key သိုလှောင်မှု စစ်ဆေးရန်"
+  },
+  "messages": {
+    "apiKeyNotConfigured": "OpenAI API key ကို ပြင်ဆင်သတ်မှတ်ထားခြင်း မရှိပါ။ ယခု ပြင်ဆင်သတ်မှတ်လိုပါသလား?",
+    "apiKeySaved": "API key ကို အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ",
+    "storageDiagnosisWritten": "သိုလှောင်မှု စစ်ဆေးချက်ကို Output: otak-committer တွင် ရေးသားပြီးပါပြီ",
+    "authRequired": "GitHub အထောက်အထား စိစစ်ခြင်း လိုအပ်ပါသည်။ ကျေးဇူးပြု၍ ဝင်ရောက်ပါ။",
+    "githubAuthPrompt": "GitHub လုပ်ဆောင်ချက်များအတွက် အထောက်အထား စိစစ်ခြင်း လိုအပ်ပါသည်။ ကျေးဇူးပြု၍ အထောက်အထား စိစစ်ပါ။",
+    "languageChanged": "ဘာသာစကားကို {language} သို့ ပြောင်းလဲပြီးပါပြီ",
+    "messageStyleChanged": "မက်ဆေ့ချ်ပုံစံကို {style} သို့ ပြောင်းလဲပြီးပါပြီ",
+    "noChangesToCommit": "Commit လုပ်ရန် ပြောင်းလဲမှုများ မရှိပါ",
+    "commitMessageGenerated": "Commit မက်ဆေ့ချ် ဖန်တီးပြီးပါပြီ",
+    "openAIInitFailed": "OpenAI ဝန်ဆောင်မှု စတင်ခြင်း မအောင်မြင်ပါ",
+    "emptyMessageReceived": "မက်ဆေ့ချ် အလွတ် လက်ခံရရှိပါသည်",
+    "noChangesBetweenBranches": "ရွေးချယ်ထားသော branch များအကြား ပြောင်းလဲမှုများ မတွေ့ပါ။ PR ဖန်တီးခြင်းမပြုမီ ပြောင်းလဲမှုအချို့ ပြုလုပ်ပါ။",
+    "failedToGeneratePR": "PR အကြောင်းအရာ ဖန်တီးခြင်း မအောင်မြင်ပါ။ ကျေးဇူးပြု၍ ထပ်မံကြိုးစားပါ။",
+    "failedToShowPreview": "အကြိုကြည့်ရှုခြင်း ပြသခြင်း မအောင်မြင်ပါ",
+    "prCreatedSuccess": "{prType} #{number} ကို အောင်မြင်စွာ ဖန်တီးပြီးပါပြီ!",
+    "draftPRNotSupported": "Draft PR များကို GitHub Team နှင့် Enterprise တွင်သာ ရရှိနိုင်ပါသည်။ ပုံမှန် PR အစား ဖန်တီးပါမည်။",
+    "issueCreatedSuccess": "Issue ကို အောင်မြင်စွာ ဖန်တီးပြီးပါပြီ",
+    "noFilesSelectedConfirm": "ဖိုင်များ ရွေးချယ်ထားခြင်း မရှိပါ။ repository ဖွဲ့စည်းပုံဖြင့်သာ issue ဖန်တီးမည်လား?",
+    "generatingIssue": "Issue ဖန်တီးနေသည်...",
+    "analyzingRepository": "Repository ခွဲခြမ်းစိတ်ဖြာနေသည်...",
+    "creatingIssue": "Issue ဖန်တီးနေသည်...",
+    "updatingContent": "အကြောင်းအရာ မွမ်းမံနေသည်...",
+    "waitingForModificationInput": "ပြင်ဆင်မှု ထည့်သွင်းချက်ကို စောင့်နေသည်...",
+    "storageFallbackWarning": "otak-committer: API key ကို အရန်သိုလှောင်မှုတွင် သိမ်းဆည်းထားပါသည်။ လုံခြုံသော သိုလှောင်မှု မရရှိနိုင်ပါ။",
+    "commitGenerationSecretWarning": "Commit မက်ဆေ့ချ် ဖန်တီးမှုပစ်မှတ်တွင် API key များ သို့မဟုတ် လျှို့ဝှက်ချက်များ တွေ့ရှိပါသည် ({count} ကိုက်ညီသော ပုံစံ: {patterns})။ AI သို့ အရေးကြီးသောဒေတာ ပေးပို့ခြင်းကို ရှောင်ရှားရန် ဖန်တီးခြင်းကို ပယ်ဖျက်ပါသည်။"
+  },
+  "statusBar": {
+    "configuration": "ပြင်ဆင်သတ်မှတ်ချက်",
+    "currentStyle": "လက်ရှိပုံစံ",
+    "setApiKey": "API Key သတ်မှတ်ရန်",
+    "openSettings": "ဆက်တင်များ ဖွင့်ရန်"
+  },
+  "quickPick": {
+    "selectCommitLanguage": "Commit မက်ဆေ့ချ် ဘာသာစကား ရွေးချယ်ပါ",
+    "selectMessageStyle": "မက်ဆေ့ချ်ပုံစံ ရွေးချယ်ပါ",
+    "selectRelatedIssue": "ဆက်စပ် issue ရွေးချယ်ပါ (ရွေးချယ်မှု၊ ကျော်ရန် Escape နှိပ်ပါ)",
+    "selectPRType": "PR အမျိုးအစား ရွေးချယ်ပါ (ကျော်ရန် Escape နှိပ်ပါ)",
+    "selectIssueType": "Issue အမျိုးအစား ရွေးချယ်ပါ",
+    "enterIssueDescription": "Issue ဖော်ပြချက် ထည့်သွင်းပါ",
+    "describeIssue": "Issue၊ ပြဿနာ သို့မဟုတ် လုပ်ဆောင်ရမည့်အရာကို ဖော်ပြပါ",
+    "enterModificationInstructions": "ပြင်ဆင်မှု ညွှန်ကြားချက်များ ထည့်သွင်းပါ (ကျော်ရန် Escape နှိပ်ပါ)",
+    "describeModification": "အကြောင်းအရာကို မည်သို့ ပြင်ဆင်သင့်သည်ကို ဖော်ပြပါ",
+    "chooseAction": "လုပ်ဆောင်ချက်တစ်ခု ရွေးချယ်ပါ",
+    "enterApiKey": "သင့် OpenAI API key ကို ထည့်သွင်းပါ"
+  },
+  "prTypes": {
+    "draft": "Draft Pull Request",
+    "draftDescription": "ပေါင်းစည်းခြင်းမပြုမီ သုံးသပ်ခြင်း လိုအပ်သည်",
+    "regular": "ပုံမှန် Pull Request",
+    "regularDescription": "သုံးသပ်ခြင်းနှင့် ပေါင်းစည်းခြင်းအတွက် အဆင်သင့်ဖြစ်သည်"
+  },
+  "issueActions": {
+    "modify": "အကြောင်းအရာ ပြင်ဆင်ရန်",
+    "modifyDescription": "အကြောင်းအရာ တိုးတက်ကောင်းမွန်ရန် အကြံပြုချက် ပေးပါ",
+    "create": "Issue ဖန်တီးရန်",
+    "createDescription": "လက်ရှိ အကြောင်းအရာဖြင့် issue ဖန်တီးရန်",
+    "cancel": "ပယ်ဖျက်ရန်",
+    "cancelDescription": "Issue ဖန်တီးခြင်းကို ပယ်ဖျက်ရန်"
+  },
+  "messageStyles": {
+    "simple": "ရိုးရှင်း",
+    "simpleDetail": "အသေးစိတ်နည်းသော တိုတောင်းသည့် commit မက်ဆေ့ချ်များ",
+    "normal": "ပုံမှန်",
+    "normalDetail": "အလယ်အလတ် အသေးစိတ်ပါဝင်သော စံ commit မက်ဆေ့ချ်များ",
+    "detailed": "အသေးစိတ်",
+    "detailedDetail": "အပြည့်အစုံ အကြောင်းအရာပါဝင်သော ပြည့်စုံသည့် commit မက်ဆေ့ချ်များ"
+  },
+  "buttons": {
+    "yes": "ဟုတ်ကဲ့",
+    "no": "မဟုတ်ပါ",
+    "openInBrowser": "ဘရောက်ဆာတွင် ဖွင့်ရန်",
+    "openIssue": "Issue ဖွင့်ရန်"
+  },
+  "git": {
+    "stageAll": "အားလုံး Stage လုပ်ရန်",
+    "alwaysStageAll": "အမြဲတမ်း Stage လုပ်ရန်",
+    "stageAllPrompt": "Stage လုပ်ထားသော ပြောင်းလဲမှုများ မတွေ့ပါ။ ပြောင်းလဲမှုအားလုံးကို stage လုပ်၍ ဆက်လက်မည်လား?",
+    "busyIndexLock": "Git အလုပ်များနေပါသည်။ ကျေးဇူးပြု၍ အခြား Git လုပ်ဆောင်ချက်များ ပြီးဆုံးရန် စောင့်ပါ၊ သို့မဟုတ် ပြဿနာ ဆက်လက်ရှိပါက .git/index.lock ကို ဖျက်ပါ။",
+    "reservedNamesInfo": "ကြိုတင်သတ်မှတ်ထားသော အမည်များပါ ဖိုင်များ ({files}) ပါဝင်မည်ဖြစ်သော်လည်း ၎င်းတို့၏ အကြောင်းအရာကို diff တွင် ပြသ၍ မရပါ။",
+    "diffTruncatedWarning": "Diff အရွယ်အစား ({estimatedKTokens}K tokens) သည် {thresholdKTokens}K ကန့်သတ်ချက်ထက် ကျော်လွန်နေပါသည်။ AI လုပ်ဆောင်ခြင်းအတွက် အကြောင်းအရာကို ဖြတ်တောက်ပါမည်။",
+    "smartDiffApplied": "Diff ကြီး ({tokenCount}K tokens): စမတ်ဦးစားပေး အသုံးပြုပြီး ({included}/{total} ဖိုင်များ အပြည့်အစုံ diff ဖြင့်)",
+    "mapReduceApplied": "Diff အလွန်ကြီး ({tokenCount}K tokens): အပိုင်းခွဲ အကျဉ်းချုပ် အသုံးပြုနေသည် ({chunks} အပိုင်း)"
+  },
+  "progress": {
+    "generatingCommitMessage": "Commit မက်ဆေ့ချ် ဖန်တီးနေသည်...",
+    "analyzingChanges": "Pull Request ဖန်တီးခြင်း - ပြောင်းလဲမှုများ ခွဲခြမ်းစိတ်ဖြာနေသည်...",
+    "creatingPR": "{prType} Pull Request ဖန်တီးနေသည်...",
+    "processingLargeDiff": "Diff လုပ်ဆောင်နေသည်...",
+    "summarizingChunks": "ပြောင်းလဲမှုများ အကျဉ်းချုပ်နေသည် ({current}/{total})..."
+  },
+  "errors": {
+    "gitExtensionNotFound": "Git extension မရရှိနိုင်ပါ",
+    "noGitRepository": "Git repository မတွေ့ပါ"
+  },
+  "apiKey": {
+    "enterKey": "သင့် OpenAI API key ကို ထည့်သွင်းပါ",
+    "placeholder": "sk-...",
+    "invalidFormat": "API key ပုံစံ မမှန်ကန်ပါ။ မျှော်မှန်းထားသော ပုံစံ: sk-...",
+    "keyExists": "API key တစ်ခု ပြင်ဆင်သတ်မှတ်ပြီးသားဖြစ်ပါသည်",
+    "chooseAction": "လုပ်ဆောင်ချက်တစ်ခု ရွေးချယ်ပါ",
+    "updateKey": "API Key မွမ်းမံရန်",
+    "validateKey": "API Key အတည်ပြုရန်",
+    "removeKey": "API Key ဖယ်ရှားရန်",
+    "cancel": "ပယ်ဖျက်ရန်",
+    "removed": "API key ကို အောင်မြင်စွာ ဖယ်ရှားပြီးပါပြီ",
+    "validatePrompt": "OpenAI ဖြင့် API key ကို အတည်ပြုလိုပါသလား?",
+    "validating": "API key အတည်ပြုနေသည်...",
+    "validationSuccess": "API key သည် မှန်ကန်ပါသည်",
+    "validationFailed": "API key အတည်ပြုခြင်း မအောင်မြင်ပါ: {reason}",
+    "retryValidation": "ထပ်မံအတည်ပြုရန်",
+    "continueWithoutValidation": "အတည်ပြုခြင်းမပြုဘဲ ဆက်လက်ရန်",
+    "retryPrompt": "အခြား API key တစ်ခု ထည့်သွင်းလိုပါသလား?",
+    "invalidKeyPrompt": "OpenAI API key မမှန်ကန်ပါ။ မွမ်းမံလိုပါသလား?",
+    "errorPrompt": "OpenAI API key အမှား။ မွမ်းမံလိုပါသလား?",
+    "setApiKey": "API Key သတ်မှတ်ရန်"
+  }
+}

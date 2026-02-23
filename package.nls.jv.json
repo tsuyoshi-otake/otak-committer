@@ -1,0 +1,33 @@
+{
+  "extension.description": "Ekstensi VS Code kanggo operasi SCM cerdas — Generasi pesen commit multibasa kanthi dhukungan AI (25 basa didhukung) lan fitur manajemen PR ing mangsa ngarep.",
+
+  "command.generateMessage": "Gawe Pesen Commit",
+  "command.generatePR": "Gawe Pull Request",
+  "command.generateIssue": "Gawe Issue",
+  "command.openSettings": "Bukak Setelan otak-committer",
+  "command.changeLanguage": "Ganti Basa Pesen Commit",
+  "command.changeMessageStyle": "Ganti Gaya Pesen Commit",
+  "command.setApiKey": "Setel API Key OpenAI",
+  "command.diagnoseStorage": "Diagnosa Panyimpenan API Key",
+
+  "config.language": "Basa kanggo pesen commit",
+  "config.messageStyle": "Gaya lan dawané pesen commit sing digawe",
+  "config.messageStyle.simple": "Prasaja lan ringkes (600 karakter)",
+  "config.messageStyle.normal": "Dawa normal kanthi sawetara konteks (1200 karakter)",
+  "config.messageStyle.detailed": "Panjelasan rinci (2400 karakter)",
+  "config.customMessage": "Pesen kustom sing ditambahake menyang prompt sistem (ditambahake sawisé pesen diff)",
+  "config.useEmoji": "Gunakake emoji ing pesen commit lan deskripsi PR",
+  "config.emojiStyle": "Gaya emoji sing digunakake ing pesen",
+  "config.emojiStyle.github": "Kode emoji gaya GitHub (:smile:)",
+  "config.emojiStyle.unicode": "Karakter emoji Unicode",
+  "config.reasoningEffort": "Tingkat upaya penalaran GPT-5.2 (mengaruhi kualitas respons lan latensi)",
+  "config.reasoningEffort.none": "Tanpa penalaran (paling cepet, kualitas paling endhek)",
+  "config.reasoningEffort.low": "Penalaran endhek (cepet, kualitas apik) — Disaranake",
+  "config.reasoningEffort.medium": "Penalaran sedhengan (seimbang)",
+  "config.reasoningEffort.high": "Penalaran dhuwur (paling alon, kualitas paling dhuwur)",
+  "config.maxInputTokens": "Token input maksimal kanggo proses AI (standar: 200K)",
+  "config.useBulletList": "Format badan pesen commit minangka dhaptar bullet",
+  "config.useConventionalCommits": "Gunakake format Conventional Commits kanthi scope (<type>(<scope>): <subject>)",
+  "config.appendCommitTrailer": "Tambahake trailer 'Commit-Message-By: otak-committer' menyang pesen commit sing digawe",
+  "config.syncApiKeys": "Sinkronake API key lewat VS Code Settings Sync (nyimpen key ing state ekstensi sing disinkronake)"
+}

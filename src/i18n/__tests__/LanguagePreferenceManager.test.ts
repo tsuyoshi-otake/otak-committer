@@ -1,9 +1,7 @@
 /**
  * Tests for LanguagePreferenceManager
  *
- * Note: UI localization supports English, Japanese, Vietnamese, Korean,
- * Chinese (Simplified/Traditional), French, German, Spanish, and Portuguese.
- * Other VS Code display languages fall back to English.
+ * Note: UI localization supports 25 languages matching commit message language support.
  */
 
 import * as assert from 'assert';
@@ -52,16 +50,9 @@ suite('LanguagePreferenceManager Property Tests', () => {
             'Manual language preference overrides UI language',
             async () => {
                 const supportedLocales: SupportedLocale[] = [
-                    'ja',
-                    'vi',
-                    'ko',
-                    'fr',
-                    'de',
-                    'es',
-                    'pt',
-                    'zh-cn',
-                    'zh-tw',
-                    'en',
+                    'ja', 'vi', 'ko', 'fr', 'de', 'es', 'pt', 'zh-cn', 'zh-tw',
+                    'it', 'cs', 'hu', 'bg', 'tr', 'pl', 'ru', 'th', 'hi',
+                    'bn', 'jv', 'ta', 'my', 'ar', 'he', 'en',
                 ];
 
                 for (const preferredLocale of supportedLocales) {
@@ -108,16 +99,9 @@ suite('LanguagePreferenceManager Unit Tests', () => {
 
     test('LOCALE_TO_LANGUAGE_MAP should have all supported locales', () => {
         const supportedLocales: SupportedLocale[] = [
-            'ja',
-            'vi',
-            'ko',
-            'fr',
-            'de',
-            'es',
-            'pt',
-            'zh-cn',
-            'zh-tw',
-            'en',
+            'ja', 'vi', 'ko', 'fr', 'de', 'es', 'pt', 'zh-cn', 'zh-tw',
+            'it', 'cs', 'hu', 'bg', 'tr', 'pl', 'ru', 'th', 'hi',
+            'bn', 'jv', 'ta', 'my', 'ar', 'he', 'en',
         ];
         for (const locale of supportedLocales) {
             assert.ok(
@@ -138,6 +122,21 @@ suite('LanguagePreferenceManager Unit Tests', () => {
             { locale: 'pt', expected: 'portuguese' },
             { locale: 'zh-cn', expected: 'chinese' },
             { locale: 'zh-tw', expected: 'traditionalChinese' },
+            { locale: 'it', expected: 'italian' },
+            { locale: 'cs', expected: 'czech' },
+            { locale: 'hu', expected: 'hungarian' },
+            { locale: 'bg', expected: 'bulgarian' },
+            { locale: 'tr', expected: 'turkish' },
+            { locale: 'pl', expected: 'polish' },
+            { locale: 'ru', expected: 'russian' },
+            { locale: 'th', expected: 'thai' },
+            { locale: 'hi', expected: 'hindi' },
+            { locale: 'bn', expected: 'bengali' },
+            { locale: 'jv', expected: 'javanese' },
+            { locale: 'ta', expected: 'tamil' },
+            { locale: 'my', expected: 'burmese' },
+            { locale: 'ar', expected: 'arabic' },
+            { locale: 'he', expected: 'hebrew' },
             { locale: 'en', expected: 'english' },
         ];
 

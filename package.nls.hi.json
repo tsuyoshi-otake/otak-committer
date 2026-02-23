@@ -1,0 +1,33 @@
+{
+  "extension.description": "बुद्धिमान SCM संचालन के लिए VS Code एक्सटेंशन — AI समर्थन के साथ बहुभाषी कमिट संदेश जनरेशन (25 भाषाएँ समर्थित) और भविष्य की PR प्रबंधन सुविधाएँ।",
+
+  "command.generateMessage": "कमिट संदेश जनरेट करें",
+  "command.generatePR": "Pull Request जनरेट करें",
+  "command.generateIssue": "Issue बनाएँ",
+  "command.openSettings": "otak-committer सेटिंग्स खोलें",
+  "command.changeLanguage": "कमिट संदेश की भाषा बदलें",
+  "command.changeMessageStyle": "कमिट संदेश शैली बदलें",
+  "command.setApiKey": "OpenAI API Key सेट करें",
+  "command.diagnoseStorage": "API Key स्टोरेज का निदान करें",
+
+  "config.language": "कमिट संदेशों के लिए भाषा",
+  "config.messageStyle": "जनरेट किए गए कमिट संदेशों की शैली और लंबाई",
+  "config.messageStyle.simple": "सरल और संक्षिप्त (600 अक्षर)",
+  "config.messageStyle.normal": "कुछ संदर्भ के साथ सामान्य लंबाई (1200 अक्षर)",
+  "config.messageStyle.detailed": "विस्तृत विवरण (2400 अक्षर)",
+  "config.customMessage": "सिस्टम प्रॉम्प्ट में जोड़ने के लिए कस्टम संदेश (diff संदेश के बाद जोड़ा जाता है)",
+  "config.useEmoji": "कमिट संदेशों और PR विवरणों में इमोजी का उपयोग करें",
+  "config.emojiStyle": "संदेशों में उपयोग करने के लिए इमोजी की शैली",
+  "config.emojiStyle.github": "GitHub शैली इमोजी कोड (:smile:)",
+  "config.emojiStyle.unicode": "Unicode इमोजी अक्षर",
+  "config.reasoningEffort": "GPT-5.2 तर्क प्रयास स्तर (प्रतिक्रिया गुणवत्ता और विलंबता को प्रभावित करता है)",
+  "config.reasoningEffort.none": "कोई तर्क नहीं (सबसे तेज़, सबसे कम गुणवत्ता)",
+  "config.reasoningEffort.low": "कम तर्क (तेज़, अच्छी गुणवत्ता) — अनुशंसित",
+  "config.reasoningEffort.medium": "मध्यम तर्क (संतुलित)",
+  "config.reasoningEffort.high": "उच्च तर्क (सबसे धीमा, सर्वोच्च गुणवत्ता)",
+  "config.maxInputTokens": "AI प्रोसेसिंग के लिए अधिकतम इनपुट टोकन (डिफ़ॉल्ट: 200K)",
+  "config.useBulletList": "कमिट संदेश बॉडी को बुलेट सूची के रूप में प्रारूपित करें",
+  "config.useConventionalCommits": "स्कोप के साथ Conventional Commits प्रारूप का उपयोग करें (<प्रकार>(<स्कोप>): <विषय>)",
+  "config.appendCommitTrailer": "जनरेट किए गए कमिट संदेशों में 'Commit-Message-By: otak-committer' ट्रेलर जोड़ें",
+  "config.syncApiKeys": "VS Code Settings Sync के माध्यम से API key सिंक करें (सिंक किए गए एक्सटेंशन स्टेट में key संग्रहीत करता है)"
+}

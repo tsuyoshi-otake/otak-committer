@@ -1,5 +1,16 @@
 # Change Log
 
+## [2.9.0] - 2026-02-23
+
+### Added
+
+- **UI localization expanded to 25 languages (matching commit message support):**
+  - Added 15 new UI languages: Italian (it), Czech (cs), Hungarian (hu), Bulgarian (bg), Turkish (tr), Polish (pl), Russian (ru), Thai (th), Hindi (hi), Bengali (bn), Javanese (jv), Tamil (ta), Burmese (my), Arabic (ar), Hebrew (he)
+  - New `src/i18n/locales/*.json` and `package.nls.*.json` files for each language
+  - Updated `LocaleDetector` to auto-detect all 25 locales from VS Code display language
+  - Updated `TranslationManager`, `LanguagePreferenceManager`, and `ConfigCommand` for full 25-language support
+  - Total supported UI languages: 25 (en, ja, ko, vi, fr, de, es, pt, zh-cn, zh-tw, it, cs, hu, bg, tr, pl, ru, th, hi, bn, jv, ta, my, ar, he)
+
 ## [2.8.0] - 2026-02-22
 
 ### Security

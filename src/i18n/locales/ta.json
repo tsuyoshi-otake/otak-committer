@@ -1,0 +1,129 @@
+{
+  "commands": {
+    "generateCommit": "கமிட் செய்தியை உருவாக்கு",
+    "generatePR": "Pull Request உருவாக்கு",
+    "generateIssue": "Issue உருவாக்கு",
+    "changeLanguage": "மொழியை மாற்று",
+    "changeMessageStyle": "செய்தி பாணியை மாற்று",
+    "setApiKey": "API Key அமை",
+    "openSettings": "அமைப்புகளைத் திற",
+    "diagnoseStorage": "API Key சேமிப்பகத்தைக் கண்டறி"
+  },
+  "messages": {
+    "apiKeyNotConfigured": "OpenAI API key கட்டமைக்கப்படவில்லை. இப்போது கட்டமைக்க விரும்புகிறீர்களா?",
+    "apiKeySaved": "API key வெற்றிகரமாகச் சேமிக்கப்பட்டது",
+    "storageDiagnosisWritten": "சேமிப்பகக் கண்டறிதல் வெளியீட்டில் எழுதப்பட்டது: otak-committer",
+    "authRequired": "GitHub அங்கீகாரம் தேவை. தயவுசெய்து உள்நுழையவும்.",
+    "githubAuthPrompt": "GitHub செயல்பாடுகளுக்கு அங்கீகாரம் தேவை. தயவுசெய்து அங்கீகரிக்கவும்.",
+    "languageChanged": "மொழி {language} ஆக மாற்றப்பட்டது",
+    "messageStyleChanged": "செய்தி பாணி {style} ஆக மாற்றப்பட்டது",
+    "noChangesToCommit": "கமிட் செய்ய மாற்றங்கள் எதுவும் இல்லை",
+    "commitMessageGenerated": "கமிட் செய்தி உருவாக்கப்பட்டது",
+    "openAIInitFailed": "OpenAI சேவை துவக்கம் தோல்வியடைந்தது",
+    "emptyMessageReceived": "காலி செய்தி பெறப்பட்டது",
+    "noChangesBetweenBranches": "தேர்ந்தெடுக்கப்பட்ட கிளைகளுக்கிடையே மாற்றங்கள் எதுவும் இல்லை. PR உருவாக்குவதற்கு முன் சில மாற்றங்களைச் செய்யவும்.",
+    "failedToGeneratePR": "PR உள்ளடக்கத்தை உருவாக்குவதில் தோல்வி. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.",
+    "failedToShowPreview": "முன்னோட்டத்தைக் காண்பிப்பதில் தோல்வி",
+    "prCreatedSuccess": "{prType} #{number} வெற்றிகரமாக உருவாக்கப்பட்டது!",
+    "draftPRNotSupported": "Draft PR-கள் GitHub Team மற்றும் Enterprise-ல் மட்டுமே கிடைக்கும். அதற்கு பதிலாக வழக்கமான PR உருவாக்கப்படுகிறது.",
+    "issueCreatedSuccess": "Issue வெற்றிகரமாக உருவாக்கப்பட்டது",
+    "noFilesSelectedConfirm": "கோப்புகள் எதுவும் தேர்ந்தெடுக்கப்படவில்லை. களஞ்சிய கட்டமைப்பை மட்டும் கொண்டு Issue உருவாக்கவா?",
+    "generatingIssue": "Issue உருவாக்கப்படுகிறது...",
+    "analyzingRepository": "களஞ்சியம் பகுப்பாய்வு செய்யப்படுகிறது...",
+    "creatingIssue": "Issue உருவாக்கப்படுகிறது...",
+    "updatingContent": "உள்ளடக்கம் புதுப்பிக்கப்படுகிறது...",
+    "waitingForModificationInput": "மாற்ற உள்ளீட்டுக்காகக் காத்திருக்கிறது...",
+    "storageFallbackWarning": "otak-committer: API key இடைநிலைச் சேமிப்பகத்தில் சேமிக்கப்பட்டது. பாதுகாப்பான சேமிப்பகம் கிடைக்கவில்லை.",
+    "commitGenerationSecretWarning": "கமிட் செய்தி உருவாக்க இலக்கில் சாத்தியமான API key-கள் அல்லது ரகசியங்கள் கண்டறியப்பட்டன ({count} பொருந்திய வடிவம்(கள்): {patterns}). முக்கியமான தரவை AI-க்கு அனுப்புவதைத் தவிர்க்க உருவாக்கம் ரத்து செய்யப்பட்டது."
+  },
+  "statusBar": {
+    "configuration": "கட்டமைப்பு",
+    "currentStyle": "தற்போதைய பாணி",
+    "setApiKey": "API Key அமை",
+    "openSettings": "அமைப்புகளைத் திற"
+  },
+  "quickPick": {
+    "selectCommitLanguage": "கமிட் செய்தி மொழியைத் தேர்ந்தெடுக்கவும்",
+    "selectMessageStyle": "செய்தி பாணியைத் தேர்ந்தெடுக்கவும்",
+    "selectRelatedIssue": "தொடர்புடைய Issue-ஐத் தேர்ந்தெடுக்கவும் (விருப்பத்தேர்வு, தவிர்க்க Escape அழுத்தவும்)",
+    "selectPRType": "PR வகையைத் தேர்ந்தெடுக்கவும் (தவிர்க்க Escape அழுத்தவும்)",
+    "selectIssueType": "Issue வகையைத் தேர்ந்தெடுக்கவும்",
+    "enterIssueDescription": "Issue விவரத்தை உள்ளிடவும்",
+    "describeIssue": "சிக்கல், பிழை அல்லது பணியை விவரிக்கவும்",
+    "enterModificationInstructions": "மாற்ற வழிமுறைகளை உள்ளிடவும் (தவிர்க்க Escape அழுத்தவும்)",
+    "describeModification": "உள்ளடக்கத்தை எவ்வாறு மாற்ற வேண்டும் என்பதை விவரிக்கவும்",
+    "chooseAction": "ஒரு செயலைத் தேர்ந்தெடுக்கவும்",
+    "enterApiKey": "உங்கள் OpenAI API key-ஐ உள்ளிடவும்"
+  },
+  "prTypes": {
+    "draft": "Draft Pull Request",
+    "draftDescription": "இணைப்பதற்கு முன் மதிப்பாய்வு தேவை",
+    "regular": "வழக்கமான Pull Request",
+    "regularDescription": "மதிப்பாய்வு மற்றும் இணைப்புக்குத் தயார்"
+  },
+  "issueActions": {
+    "modify": "உள்ளடக்கத்தை மாற்று",
+    "modifyDescription": "உள்ளடக்கத்தை மேம்படுத்த கருத்து தெரிவிக்கவும்",
+    "create": "Issue உருவாக்கு",
+    "createDescription": "தற்போதைய உள்ளடக்கத்துடன் Issue உருவாக்கு",
+    "cancel": "ரத்து",
+    "cancelDescription": "Issue உருவாக்கத்தை ரத்து செய்"
+  },
+  "messageStyles": {
+    "simple": "எளிமை",
+    "simpleDetail": "குறைந்தபட்ச விவரத்துடன் சுருக்கமான கமிட் செய்திகள்",
+    "normal": "சாதாரணம்",
+    "normalDetail": "மிதமான விவரத்துடன் நிலையான கமிட் செய்திகள்",
+    "detailed": "விரிவான",
+    "detailedDetail": "முழு சூழலுடன் விரிவான கமிட் செய்திகள்"
+  },
+  "buttons": {
+    "yes": "ஆம்",
+    "no": "இல்லை",
+    "openInBrowser": "உலாவியில் திற",
+    "openIssue": "Issue-ஐத் திற"
+  },
+  "git": {
+    "stageAll": "அனைத்தையும் நிலைப்படுத்து",
+    "alwaysStageAll": "எப்போதும் நிலைப்படுத்து",
+    "stageAllPrompt": "நிலைப்படுத்தப்பட்ட மாற்றங்கள் எதுவும் இல்லை. அனைத்து மாற்றங்களையும் நிலைப்படுத்தித் தொடரவா?",
+    "busyIndexLock": "Git பிஸியாக உள்ளது. மற்ற Git செயல்பாடுகள் முடியும் வரை காத்திருக்கவும், அல்லது சிக்கல் தொடர்ந்தால் .git/index.lock ஐ நீக்கவும்.",
+    "reservedNamesInfo": "ஒதுக்கப்பட்ட பெயர்களைக் கொண்ட கோப்புகள் ({files}) சேர்க்கப்படும் ஆனால் அவற்றின் உள்ளடக்கத்தை diff-ல் காட்ட இயலாது.",
+    "diffTruncatedWarning": "Diff அளவு ({estimatedKTokens}K டோக்கன்கள்) {thresholdKTokens}K வரம்பைத் தாண்டுகிறது. AI செயலாக்கத்திற்காக உள்ளடக்கம் வெட்டப்படும்.",
+    "smartDiffApplied": "பெரிய diff ({tokenCount}K டோக்கன்கள்): புத்திசாலி முன்னுரிமை பயன்படுத்தப்பட்டது ({included}/{total} கோப்புகளுக்கு முழு diff)",
+    "mapReduceApplied": "மிகப் பெரிய diff ({tokenCount}K டோக்கன்கள்): துண்டு சுருக்கம் பயன்படுத்தப்படுகிறது ({chunks} துண்டுகள்)"
+  },
+  "progress": {
+    "generatingCommitMessage": "கமிட் செய்தி உருவாக்கப்படுகிறது...",
+    "analyzingChanges": "Pull Request உருவாக்கு - மாற்றங்கள் பகுப்பாய்வு செய்யப்படுகிறது...",
+    "creatingPR": "{prType} Pull Request உருவாக்கப்படுகிறது...",
+    "processingLargeDiff": "Diff செயலாக்கப்படுகிறது...",
+    "summarizingChunks": "மாற்றங்கள் சுருக்கப்படுகிறது ({current}/{total})..."
+  },
+  "errors": {
+    "gitExtensionNotFound": "Git நீட்டிப்பு கிடைக்கவில்லை",
+    "noGitRepository": "Git களஞ்சியம் எதுவும் கிடைக்கவில்லை"
+  },
+  "apiKey": {
+    "enterKey": "உங்கள் OpenAI API key-ஐ உள்ளிடவும்",
+    "placeholder": "sk-...",
+    "invalidFormat": "தவறான API key வடிவம். எதிர்பார்க்கப்படும் வடிவம்: sk-...",
+    "keyExists": "ஒரு API key ஏற்கனவே கட்டமைக்கப்பட்டுள்ளது",
+    "chooseAction": "ஒரு செயலைத் தேர்ந்தெடுக்கவும்",
+    "updateKey": "API Key-ஐப் புதுப்பி",
+    "validateKey": "API Key-ஐச் சரிபார்",
+    "removeKey": "API Key-ஐ நீக்கு",
+    "cancel": "ரத்து",
+    "removed": "API key வெற்றிகரமாக நீக்கப்பட்டது",
+    "validatePrompt": "OpenAI உடன் API key-ஐச் சரிபார்க்க விரும்புகிறீர்களா?",
+    "validating": "API key சரிபார்க்கப்படுகிறது...",
+    "validationSuccess": "API key செல்லுபடியாகும்",
+    "validationFailed": "API key சரிபார்ப்பு தோல்வி: {reason}",
+    "retryValidation": "மீண்டும் சரிபார்",
+    "continueWithoutValidation": "சரிபார்ப்பு இல்லாமல் தொடர்",
+    "retryPrompt": "வேறு API key உள்ளிட விரும்புகிறீர்களா?",
+    "invalidKeyPrompt": "தவறான OpenAI API key. புதுப்பிக்க விரும்புகிறீர்களா?",
+    "errorPrompt": "OpenAI API key பிழை. புதுப்பிக்க விரும்புகிறீர்களா?",
+    "setApiKey": "API Key அமை"
+  }
+}

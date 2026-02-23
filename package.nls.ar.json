@@ -1,0 +1,33 @@
+{
+  "extension.description": "إضافة VS Code لعمليات SCM الذكية - إنشاء رسائل إيداع متعددة اللغات بدعم الذكاء الاصطناعي (دعم 25 لغة) وميزات إدارة PR المستقبلية.",
+
+  "command.generateMessage": "إنشاء رسالة Commit",
+  "command.generatePR": "إنشاء Pull Request",
+  "command.generateIssue": "إنشاء Issue",
+  "command.openSettings": "فتح إعدادات otak-committer",
+  "command.changeLanguage": "تغيير لغة رسالة الإيداع",
+  "command.changeMessageStyle": "تغيير نمط رسالة الإيداع",
+  "command.setApiKey": "تعيين مفتاح OpenAI API",
+  "command.diagnoseStorage": "تشخيص تخزين مفتاح API",
+
+  "config.language": "لغة رسائل الإيداع",
+  "config.messageStyle": "نمط وطول رسائل الإيداع المُنشأة",
+  "config.messageStyle.simple": "بسيط ومختصر (600 حرف)",
+  "config.messageStyle.normal": "طول عادي مع بعض السياق (1200 حرف)",
+  "config.messageStyle.detailed": "شرح مفصّل (2400 حرف)",
+  "config.customMessage": "رسالة مخصصة لإلحاقها بموجه النظام (تُضاف بعد رسالة الفروقات)",
+  "config.useEmoji": "استخدام الرموز التعبيرية في رسائل الإيداع وأوصاف PR",
+  "config.emojiStyle": "نمط الرموز التعبيرية المستخدمة في الرسائل",
+  "config.emojiStyle.github": "أكواد رموز GitHub التعبيرية (:smile:)",
+  "config.emojiStyle.unicode": "أحرف رموز Unicode التعبيرية",
+  "config.reasoningEffort": "مستوى جهد الاستدلال GPT-5.2 (يؤثر على جودة الاستجابة والتأخير)",
+  "config.reasoningEffort.none": "بدون استدلال (الأسرع، أقل جودة)",
+  "config.reasoningEffort.low": "استدلال منخفض (سريع، جودة جيدة) - موصى به",
+  "config.reasoningEffort.medium": "استدلال متوسط (متوازن)",
+  "config.reasoningEffort.high": "استدلال عالي (الأبطأ، أعلى جودة)",
+  "config.maxInputTokens": "الحد الأقصى لرموز الإدخال لمعالجة الذكاء الاصطناعي (الافتراضي: 200K)",
+  "config.useBulletList": "تنسيق نص رسالة الإيداع كقائمة نقطية",
+  "config.useConventionalCommits": "استخدام تنسيق Conventional Commits مع النطاق (<type>(<scope>): <subject>)",
+  "config.appendCommitTrailer": "إلحاق تذييل 'Commit-Message-By: otak-committer' برسائل الإيداع المُنشأة",
+  "config.syncApiKeys": "مزامنة مفاتيح API عبر VS Code Settings Sync (تخزين المفاتيح في حالة الإضافة المُزامنة)"
+}

@@ -1,0 +1,129 @@
+{
+  "commands": {
+    "generateCommit": "إنشاء رسالة Commit",
+    "generatePR": "إنشاء Pull Request",
+    "generateIssue": "إنشاء Issue",
+    "changeLanguage": "تغيير اللغة",
+    "changeMessageStyle": "تغيير نمط الرسالة",
+    "setApiKey": "تعيين مفتاح API",
+    "openSettings": "فتح الإعدادات",
+    "diagnoseStorage": "تشخيص تخزين مفتاح API"
+  },
+  "messages": {
+    "apiKeyNotConfigured": "لم يتم تكوين مفتاح OpenAI API. هل تريد تكوينه الآن؟",
+    "apiKeySaved": "تم حفظ مفتاح API بنجاح",
+    "storageDiagnosisWritten": "تمت كتابة تشخيص التخزين في المخرجات: otak-committer",
+    "authRequired": "مصادقة GitHub مطلوبة. يرجى تسجيل الدخول.",
+    "githubAuthPrompt": "عمليات GitHub تتطلب المصادقة. يرجى المصادقة.",
+    "languageChanged": "تم تغيير اللغة إلى {language}",
+    "messageStyleChanged": "تم تغيير نمط الرسالة إلى {style}",
+    "noChangesToCommit": "لا توجد تغييرات للإيداع",
+    "commitMessageGenerated": "تم إنشاء رسالة الإيداع",
+    "openAIInitFailed": "فشل تهيئة خدمة OpenAI",
+    "emptyMessageReceived": "تم استلام رسالة فارغة",
+    "noChangesBetweenBranches": "لم يتم العثور على تغييرات بين الفروع المحددة. يرجى إجراء بعض التغييرات قبل إنشاء PR.",
+    "failedToGeneratePR": "فشل إنشاء محتوى PR. يرجى المحاولة مرة أخرى.",
+    "failedToShowPreview": "فشل عرض المعاينة",
+    "prCreatedSuccess": "تم إنشاء {prType} #{number} بنجاح!",
+    "draftPRNotSupported": "طلبات السحب المسودة متاحة فقط في GitHub Team و Enterprise. سيتم إنشاء PR عادي بدلاً من ذلك.",
+    "issueCreatedSuccess": "تم إنشاء المشكلة بنجاح",
+    "noFilesSelectedConfirm": "لم يتم تحديد ملفات. هل تريد إنشاء المشكلة بهيكل المستودع فقط؟",
+    "generatingIssue": "جارٍ إنشاء المشكلة...",
+    "analyzingRepository": "جارٍ تحليل المستودع...",
+    "creatingIssue": "جارٍ إنشاء المشكلة...",
+    "updatingContent": "جارٍ تحديث المحتوى...",
+    "waitingForModificationInput": "في انتظار إدخال التعديل...",
+    "storageFallbackWarning": "otak-committer: تم تخزين مفتاح API في التخزين الاحتياطي. التخزين الآمن غير متاح.",
+    "commitGenerationSecretWarning": "تم العثور على مفاتيح API أو أسرار محتملة في هدف إنشاء رسالة الإيداع ({count} نمط مطابق: {patterns}). تم إلغاء الإنشاء لتجنب إرسال بيانات حساسة إلى الذكاء الاصطناعي."
+  },
+  "statusBar": {
+    "configuration": "التكوين",
+    "currentStyle": "النمط الحالي",
+    "setApiKey": "تعيين مفتاح API",
+    "openSettings": "فتح الإعدادات"
+  },
+  "quickPick": {
+    "selectCommitLanguage": "اختر لغة رسالة الإيداع",
+    "selectMessageStyle": "اختر نمط الرسالة",
+    "selectRelatedIssue": "اختر المشكلة ذات الصلة (اختياري، اضغط Escape للتخطي)",
+    "selectPRType": "اختر نوع PR (اضغط Escape للتخطي)",
+    "selectIssueType": "اختر نوع المشكلة",
+    "enterIssueDescription": "أدخل وصف المشكلة",
+    "describeIssue": "صف المشكلة أو المهمة",
+    "enterModificationInstructions": "أدخل تعليمات التعديل (اضغط Escape للتخطي)",
+    "describeModification": "صف كيف يجب تعديل المحتوى",
+    "chooseAction": "اختر إجراءً",
+    "enterApiKey": "أدخل مفتاح OpenAI API الخاص بك"
+  },
+  "prTypes": {
+    "draft": "طلب سحب مسودة",
+    "draftDescription": "يتطلب المراجعة قبل الدمج",
+    "regular": "طلب سحب عادي",
+    "regularDescription": "جاهز للمراجعة والدمج"
+  },
+  "issueActions": {
+    "modify": "تعديل المحتوى",
+    "modifyDescription": "قدم ملاحظات لتحسين المحتوى",
+    "create": "إنشاء مشكلة",
+    "createDescription": "إنشاء مشكلة بالمحتوى الحالي",
+    "cancel": "إلغاء",
+    "cancelDescription": "إلغاء إنشاء المشكلة"
+  },
+  "messageStyles": {
+    "simple": "بسيط",
+    "simpleDetail": "رسائل إيداع مختصرة بأقل تفاصيل",
+    "normal": "عادي",
+    "normalDetail": "رسائل إيداع قياسية بتفاصيل معتدلة",
+    "detailed": "مفصّل",
+    "detailedDetail": "رسائل إيداع شاملة بسياق كامل"
+  },
+  "buttons": {
+    "yes": "نعم",
+    "no": "لا",
+    "openInBrowser": "فتح في المتصفح",
+    "openIssue": "فتح المشكلة"
+  },
+  "git": {
+    "stageAll": "تجهيز الكل",
+    "alwaysStageAll": "تجهيز دائم",
+    "stageAllPrompt": "لم يتم العثور على تغييرات مُجهّزة. هل تريد تجهيز جميع التغييرات والمتابعة؟",
+    "busyIndexLock": "Git مشغول. يرجى الانتظار حتى تكتمل عمليات Git الأخرى، أو حذف .git/index.lock إذا استمرت المشكلة.",
+    "reservedNamesInfo": "الملفات ذات الأسماء المحجوزة ({files}) ستُضمّن لكن لا يمكن عرض محتواها في الفروقات.",
+    "diffTruncatedWarning": "حجم الفروقات ({estimatedKTokens}K tokens) يتجاوز حد {thresholdKTokens}K. سيتم اقتطاع المحتوى لمعالجة الذكاء الاصطناعي.",
+    "smartDiffApplied": "فروقات كبيرة ({tokenCount}K tokens): تم تطبيق الأولوية الذكية ({included}/{total} ملف بفروقات كاملة)",
+    "mapReduceApplied": "فروقات كبيرة جداً ({tokenCount}K tokens): استخدام التلخيص المجزأ ({chunks} أجزاء)"
+  },
+  "progress": {
+    "generatingCommitMessage": "جارٍ إنشاء رسالة الإيداع...",
+    "analyzingChanges": "إنشاء Pull Request - جارٍ تحليل التغييرات...",
+    "creatingPR": "جارٍ إنشاء {prType} Pull Request...",
+    "processingLargeDiff": "جارٍ معالجة الفروقات...",
+    "summarizingChunks": "جارٍ تلخيص التغييرات ({current}/{total})..."
+  },
+  "errors": {
+    "gitExtensionNotFound": "إضافة Git غير متاحة",
+    "noGitRepository": "لم يتم العثور على مستودع Git"
+  },
+  "apiKey": {
+    "enterKey": "أدخل مفتاح OpenAI API الخاص بك",
+    "placeholder": "sk-...",
+    "invalidFormat": "تنسيق مفتاح API غير صالح. التنسيق المتوقع: sk-...",
+    "keyExists": "تم تكوين مفتاح API بالفعل",
+    "chooseAction": "اختر إجراءً",
+    "updateKey": "تحديث مفتاح API",
+    "validateKey": "التحقق من مفتاح API",
+    "removeKey": "إزالة مفتاح API",
+    "cancel": "إلغاء",
+    "removed": "تمت إزالة مفتاح API بنجاح",
+    "validatePrompt": "هل تريد التحقق من مفتاح API مع OpenAI؟",
+    "validating": "جارٍ التحقق من مفتاح API...",
+    "validationSuccess": "مفتاح API صالح",
+    "validationFailed": "فشل التحقق من مفتاح API: {reason}",
+    "retryValidation": "إعادة التحقق",
+    "continueWithoutValidation": "المتابعة بدون تحقق",
+    "retryPrompt": "هل تريد إدخال مفتاح API مختلف؟",
+    "invalidKeyPrompt": "مفتاح OpenAI API غير صالح. هل تريد تحديثه؟",
+    "errorPrompt": "خطأ في مفتاح OpenAI API. هل تريد تحديثه؟",
+    "setApiKey": "تعيين مفتاح API"
+  }
+}

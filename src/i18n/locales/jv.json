@@ -1,0 +1,129 @@
+{
+  "commands": {
+    "generateCommit": "Gawe Pesen Commit",
+    "generatePR": "Gawe Pull Request",
+    "generateIssue": "Gawe Issue",
+    "changeLanguage": "Ganti Basa",
+    "changeMessageStyle": "Ganti Gaya Pesen",
+    "setApiKey": "Setel API Key",
+    "openSettings": "Bukak Setelan",
+    "diagnoseStorage": "Diagnosa Panyimpenan API Key"
+  },
+  "messages": {
+    "apiKeyNotConfigured": "API key OpenAI durung dikonfigurasi. Apa sampeyan pengin ngonfigurasi saiki?",
+    "apiKeySaved": "API key kasil disimpen",
+    "storageDiagnosisWritten": "Diagnosa panyimpenan wis ditulis menyang Output: otak-committer",
+    "authRequired": "Otentikasi GitHub dibutuhake. Mangga mlebu.",
+    "githubAuthPrompt": "Operasi GitHub mbutuhake otentikasi. Mangga otentikasi.",
+    "languageChanged": "Basa diganti menyang {language}",
+    "messageStyleChanged": "Gaya pesen diganti menyang {style}",
+    "noChangesToCommit": "Ora ana owah-owahan kanggo di-commit",
+    "commitMessageGenerated": "Pesen commit wis digawe",
+    "openAIInitFailed": "Inisialisasi layanan OpenAI gagal",
+    "emptyMessageReceived": "Pesen kosong ditampa",
+    "noChangesBetweenBranches": "Ora ana owah-owahan ing antarane cabang sing dipilih. Mangga gawe owah-owahan sadurunge nggawe PR.",
+    "failedToGeneratePR": "Gagal nggawe konten PR. Mangga coba maneh.",
+    "failedToShowPreview": "Gagal nuduhake pratinjau",
+    "prCreatedSuccess": "{prType} #{number} kasil digawe!",
+    "draftPRNotSupported": "Draft PR mung kasedhiya ing GitHub Team lan Enterprise. Nggawe PR biasa minangka gantiné.",
+    "issueCreatedSuccess": "Issue kasil digawe",
+    "noFilesSelectedConfirm": "Ora ana berkas sing dipilih. Gawe Issue mung nganggo struktur repositori?",
+    "generatingIssue": "Nggawe Issue...",
+    "analyzingRepository": "Nganalisis repositori...",
+    "creatingIssue": "Nggawe Issue...",
+    "updatingContent": "Nganyari konten...",
+    "waitingForModificationInput": "Nunggu input modifikasi...",
+    "storageFallbackWarning": "otak-committer: API key disimpen ing panyimpenan cadangan. Panyimpenan aman ora kasedhiya.",
+    "commitGenerationSecretWarning": "API key utawa rahasia sing potensial ditemokake ing target generasi pesen commit ({count} pola cocog: {patterns}). Generasi dibatalake supaya ora ngirim data sensitif menyang AI."
+  },
+  "statusBar": {
+    "configuration": "Konfigurasi",
+    "currentStyle": "Gaya Saiki",
+    "setApiKey": "Setel API Key",
+    "openSettings": "Bukak Setelan"
+  },
+  "quickPick": {
+    "selectCommitLanguage": "Pilih basa pesen commit",
+    "selectMessageStyle": "Pilih gaya pesen",
+    "selectRelatedIssue": "Pilih Issue sing gegayutan (opsional, pencet Escape kanggo ngliwati)",
+    "selectPRType": "Pilih jenis PR (pencet Escape kanggo ngliwati)",
+    "selectIssueType": "Pilih jenis Issue",
+    "enterIssueDescription": "Lebokake deskripsi Issue",
+    "describeIssue": "Jelasake masalah, bug, utawa tugas",
+    "enterModificationInstructions": "Lebokake instruksi modifikasi (pencet Escape kanggo ngliwati)",
+    "describeModification": "Jelasake kepiye konten kudu diowahi",
+    "chooseAction": "Pilih tumindak",
+    "enterApiKey": "Lebokake API key OpenAI sampeyan"
+  },
+  "prTypes": {
+    "draft": "Draft Pull Request",
+    "draftDescription": "Butuh tinjauan sadurunge gabung",
+    "regular": "Pull Request Biasa",
+    "regularDescription": "Siap ditinjau lan digabung"
+  },
+  "issueActions": {
+    "modify": "Modifikasi Konten",
+    "modifyDescription": "Wenehi tanggapan kanggo ningkatake konten",
+    "create": "Gawe Issue",
+    "createDescription": "Gawe Issue nganggo konten saiki",
+    "cancel": "Batal",
+    "cancelDescription": "Batalake pembuatan Issue"
+  },
+  "messageStyles": {
+    "simple": "Prasaja",
+    "simpleDetail": "Pesen commit cekak kanthi detail minimal",
+    "normal": "Normal",
+    "normalDetail": "Pesen commit standar kanthi detail sedhengan",
+    "detailed": "Rinci",
+    "detailedDetail": "Pesen commit lengkap kanthi konteks kebak"
+  },
+  "buttons": {
+    "yes": "Ya",
+    "no": "Ora",
+    "openInBrowser": "Bukak ing Browser",
+    "openIssue": "Bukak Issue"
+  },
+  "git": {
+    "stageAll": "Stage Kabeh",
+    "alwaysStageAll": "Tansah Stage",
+    "stageAllPrompt": "Ora ana owah-owahan sing di-stage. Stage kabeh owah-owahan lan terusake?",
+    "busyIndexLock": "Git lagi sibuk. Mangga tunggu operasi Git liyane rampung, utawa busak .git/index.lock yen masalah tetep ana.",
+    "reservedNamesInfo": "Berkas kanthi jeneng sing dicadhangake ({files}) bakal dilebokake nanging kontenné ora bisa ditampilake ing diff.",
+    "diffTruncatedWarning": "Ukuran diff ({estimatedKTokens}K token) ngluwihi watesan {thresholdKTokens}K. Konten bakal dicukur kanggo proses AI.",
+    "smartDiffApplied": "Diff gedhé ({tokenCount}K token): prioritas cerdas diterapake ({included}/{total} berkas kanthi diff lengkap)",
+    "mapReduceApplied": "Diff gedhé banget ({tokenCount}K token): nggunakake ringkesan potongan ({chunks} potongan)"
+  },
+  "progress": {
+    "generatingCommitMessage": "Nggawe pesen commit...",
+    "analyzingChanges": "Gawe Pull Request - Nganalisis owah-owahan...",
+    "creatingPR": "Nggawe {prType} Pull Request...",
+    "processingLargeDiff": "Ngolah diff...",
+    "summarizingChunks": "Ngringkes owah-owahan ({current}/{total})..."
+  },
+  "errors": {
+    "gitExtensionNotFound": "Ekstensi Git ora kasedhiya",
+    "noGitRepository": "Ora ana repositori Git sing ditemokake"
+  },
+  "apiKey": {
+    "enterKey": "Lebokake API key OpenAI sampeyan",
+    "placeholder": "sk-...",
+    "invalidFormat": "Format API key ora valid. Format sing dikarepake: sk-...",
+    "keyExists": "API key wis dikonfigurasi",
+    "chooseAction": "Pilih tumindak",
+    "updateKey": "Perbarui API Key",
+    "validateKey": "Validasi API Key",
+    "removeKey": "Busak API Key",
+    "cancel": "Batal",
+    "removed": "API key kasil dibusak",
+    "validatePrompt": "Apa sampeyan pengin validasi API key karo OpenAI?",
+    "validating": "Nvalidasi API key...",
+    "validationSuccess": "API key valid",
+    "validationFailed": "Validasi API key gagal: {reason}",
+    "retryValidation": "Coba Validasi Maneh",
+    "continueWithoutValidation": "Terusake Tanpa Validasi",
+    "retryPrompt": "Apa sampeyan pengin ngetik API key sing béda?",
+    "invalidKeyPrompt": "API key OpenAI ora valid. Apa sampeyan pengin nganyari?",
+    "errorPrompt": "Kesalahan API key OpenAI. Apa sampeyan pengin nganyari?",
+    "setApiKey": "Setel API Key"
+  }
+}

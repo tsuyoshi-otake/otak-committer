@@ -1,0 +1,33 @@
+{
+  "extension.description": "புத்திசாலி SCM செயல்பாடுகளுக்கான VS Code நீட்டிப்பு — AI ஆதரவுடன் பல மொழி கமிட் செய்தி உருவாக்கம் (25 மொழிகள் ஆதரிக்கப்படுகின்றன) மற்றும் எதிர்கால PR மேலாண்மை அம்சங்கள்.",
+
+  "command.generateMessage": "கமிட் செய்தியை உருவாக்கு",
+  "command.generatePR": "Pull Request உருவாக்கு",
+  "command.generateIssue": "Issue உருவாக்கு",
+  "command.openSettings": "otak-committer அமைப்புகளைத் திற",
+  "command.changeLanguage": "கமிட் செய்தி மொழியை மாற்று",
+  "command.changeMessageStyle": "கமிட் செய்தி பாணியை மாற்று",
+  "command.setApiKey": "OpenAI API Key அமை",
+  "command.diagnoseStorage": "API Key சேமிப்பகத்தைக் கண்டறி",
+
+  "config.language": "கமிட் செய்திகளுக்கான மொழி",
+  "config.messageStyle": "உருவாக்கப்பட்ட கமிட் செய்திகளின் பாணி மற்றும் நீளம்",
+  "config.messageStyle.simple": "எளிமையான மற்றும் சுருக்கமான (600 எழுத்துகள்)",
+  "config.messageStyle.normal": "சில சூழலுடன் சாதாரண நீளம் (1200 எழுத்துகள்)",
+  "config.messageStyle.detailed": "விரிவான விளக்கம் (2400 எழுத்துகள்)",
+  "config.customMessage": "சிஸ்டம் ப்ராம்ப்ட்டுடன் இணைக்க தனிப்பயன் செய்தி (diff செய்திக்குப் பின் சேர்க்கப்படும்)",
+  "config.useEmoji": "கமிட் செய்திகள் மற்றும் PR விவரங்களில் ஈமோஜி பயன்படுத்து",
+  "config.emojiStyle": "செய்திகளில் பயன்படுத்தும் ஈமோஜி பாணி",
+  "config.emojiStyle.github": "GitHub பாணி ஈமோஜி குறியீடுகள் (:smile:)",
+  "config.emojiStyle.unicode": "Unicode ஈமோஜி எழுத்துகள்",
+  "config.reasoningEffort": "GPT-5.2 பகுத்தறிவு முயற்சி நிலை (பதிலின் தரம் மற்றும் தாமதத்தைப் பாதிக்கும்)",
+  "config.reasoningEffort.none": "பகுத்தறிவு இல்லை (விரைவான, குறைந்த தரம்)",
+  "config.reasoningEffort.low": "குறைந்த பகுத்தறிவு (விரைவான, நல்ல தரம்) — பரிந்துரைக்கப்படுகிறது",
+  "config.reasoningEffort.medium": "நடுத்தர பகுத்தறிவு (சமநிலை)",
+  "config.reasoningEffort.high": "உயர் பகுத்தறிவு (மெதுவான, உயர்ந்த தரம்)",
+  "config.maxInputTokens": "AI செயலாக்கத்திற்கான அதிகபட்ச உள்ளீட்டு டோக்கன்கள் (இயல்புநிலை: 200K)",
+  "config.useBulletList": "கமிட் செய்தியின் உடலைப் புல்லட் பட்டியலாக வடிவமைக்க",
+  "config.useConventionalCommits": "ஸ்கோப்புடன் Conventional Commits வடிவத்தைப் பயன்படுத்து (<type>(<scope>): <subject>)",
+  "config.appendCommitTrailer": "உருவாக்கப்பட்ட கமிட் செய்திகளுக்கு 'Commit-Message-By: otak-committer' டிரெய்லர் சேர்",
+  "config.syncApiKeys": "VS Code Settings Sync மூலம் API key-களை ஒத்திசை (ஒத்திசைக்கப்பட்ட நீட்டிப்பு நிலையில் key-களைச் சேமிக்கும்)"
+}

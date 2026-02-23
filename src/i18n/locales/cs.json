@@ -1,0 +1,129 @@
+{
+  "commands": {
+    "generateCommit": "Vygenerovat zpravu commitu",
+    "generatePR": "Vygenerovat Pull Request",
+    "generateIssue": "Vygenerovat Issue",
+    "changeLanguage": "Zmenit jazyk",
+    "changeMessageStyle": "Zmenit styl zpravy",
+    "setApiKey": "Nastavit API klic",
+    "openSettings": "Otevrit nastaveni",
+    "diagnoseStorage": "Diagnostikovat uloziste API klice"
+  },
+  "messages": {
+    "apiKeyNotConfigured": "API klic OpenAI neni nakonfigurovan. Chcete ho nakonfigurovat nyni?",
+    "apiKeySaved": "API klic uspesne ulozen",
+    "storageDiagnosisWritten": "Diagnostika uloziste zapsana do vystupu: otak-committer",
+    "authRequired": "Je vyzadovana autentizace GitHub. Prihlaste se.",
+    "githubAuthPrompt": "Operace GitHub vyzaduji autentizaci. Provedte autentizaci.",
+    "languageChanged": "Jazyk zmenen na {language}",
+    "messageStyleChanged": "Styl zpravy zmenen na {style}",
+    "noChangesToCommit": "Zadne zmeny k odeslani",
+    "commitMessageGenerated": "Zprava commitu vygenerovana",
+    "openAIInitFailed": "Inicializace sluzby OpenAI selhala",
+    "emptyMessageReceived": "Prijata prazdna zprava",
+    "noChangesBetweenBranches": "Mezi vybranymi vetvemi nebyly nalezeny zadne zmeny. Pred vytvorenim PR provedte nejake zmeny.",
+    "failedToGeneratePR": "Generovani obsahu PR selhalo. Zkuste to znovu.",
+    "failedToShowPreview": "Nelze zobrazit nahled",
+    "prCreatedSuccess": "{prType} #{number} uspesne vytvoren!",
+    "draftPRNotSupported": "Konceptni PR jsou dostupne pouze v GitHub Team a Enterprise. Bude vytvoren bezny PR.",
+    "issueCreatedSuccess": "Issue uspesne vytvoren",
+    "noFilesSelectedConfirm": "Nejsou vybrane zadne soubory. Vygenerovat issue pouze se strukturou repozitare?",
+    "generatingIssue": "Generovani issue...",
+    "analyzingRepository": "Analyza repozitare...",
+    "creatingIssue": "Vytvareni issue...",
+    "updatingContent": "Aktualizace obsahu...",
+    "waitingForModificationInput": "Cekani na vstup uprav...",
+    "storageFallbackWarning": "otak-committer: API klic ulozen v nahradnim ulozisti. Bezpecne uloziste neni dostupne.",
+    "commitGenerationSecretWarning": "V cili generovani zpravy commitu byly nalezeny potencialni API klice nebo tajna data ({count} nalezenych vzoru: {patterns}). Generovani bylo zruseno, aby se zabranilo odeslani citlivych dat do AI."
+  },
+  "statusBar": {
+    "configuration": "Konfigurace",
+    "currentStyle": "Aktualni styl",
+    "setApiKey": "Nastavit API klic",
+    "openSettings": "Otevrit nastaveni"
+  },
+  "quickPick": {
+    "selectCommitLanguage": "Vyberte jazyk zpravy commitu",
+    "selectMessageStyle": "Vyberte styl zpravy",
+    "selectRelatedIssue": "Vyberte souvisejici issue (volitelne, stisknete Escape pro preskoceni)",
+    "selectPRType": "Vyberte typ PR (stisknete Escape pro preskoceni)",
+    "selectIssueType": "Vyberte typ issue",
+    "enterIssueDescription": "Zadejte popis issue",
+    "describeIssue": "Popiste problem, otazku nebo ukol",
+    "enterModificationInstructions": "Zadejte pokyny pro upravu (stisknete Escape pro preskoceni)",
+    "describeModification": "Popiste, jak ma byt obsah upraven",
+    "chooseAction": "Vyberte akci",
+    "enterApiKey": "Zadejte svuj API klic OpenAI"
+  },
+  "prTypes": {
+    "draft": "Konceptni Pull Request",
+    "draftDescription": "Pred sloucenim je nutna revize",
+    "regular": "Bezny Pull Request",
+    "regularDescription": "Pripraveno k revizi a slouceni"
+  },
+  "issueActions": {
+    "modify": "Upravit obsah",
+    "modifyDescription": "Poskytnete zpetnou vazbu pro zlepseni obsahu",
+    "create": "Vytvorit Issue",
+    "createDescription": "Vytvorit issue s aktualnim obsahem",
+    "cancel": "Zrusit",
+    "cancelDescription": "Zrusit vytvareni issue"
+  },
+  "messageStyles": {
+    "simple": "Jednoduchy",
+    "simpleDetail": "Strucne zpravy commitu s minimalnimi detaily",
+    "normal": "Normalni",
+    "normalDetail": "Standardni zpravy commitu s primerenymi detaily",
+    "detailed": "Podrobny",
+    "detailedDetail": "Komplexni zpravy commitu s uplnym kontextem"
+  },
+  "buttons": {
+    "yes": "Ano",
+    "no": "Ne",
+    "openInBrowser": "Otevrit v prohlizeci",
+    "openIssue": "Otevrit Issue"
+  },
+  "git": {
+    "stageAll": "Pridat vse do stage",
+    "alwaysStageAll": "Vzdy pridat do stage",
+    "stageAllPrompt": "Nebyly nalezeny zadne zmeny ve stage. Pridat vsechny zmeny do stage a pokracovat?",
+    "busyIndexLock": "Git je zaneprazdnen. Pockejte na dokonceni ostatnich operaci Git nebo smazte .git/index.lock, pokud problem pretrvava.",
+    "reservedNamesInfo": "Soubory s rezervovanymi nazvy ({files}) budou zahrnuty, ale jejich obsah nelze zobrazit v diffu.",
+    "diffTruncatedWarning": "Velikost diffu ({estimatedKTokens}K tokenu) presahuje limit {thresholdKTokens}K. Obsah bude orezan pro zpracovani AI.",
+    "smartDiffApplied": "Velky diff ({tokenCount}K tokenu): pouzita chytra prioritizace ({included}/{total} souboru s uplnym diffem)",
+    "mapReduceApplied": "Velmi velky diff ({tokenCount}K tokenu): pouzito shrnuti po castech ({chunks} casti)"
+  },
+  "progress": {
+    "generatingCommitMessage": "Generovani zpravy commitu...",
+    "analyzingChanges": "Generovani Pull Request - Analyza zmen...",
+    "creatingPR": "Vytvareni {prType} Pull Request...",
+    "processingLargeDiff": "Zpracovani diffu...",
+    "summarizingChunks": "Shrnuti zmen ({current}/{total})..."
+  },
+  "errors": {
+    "gitExtensionNotFound": "Rozsireni Git neni dostupne",
+    "noGitRepository": "Nebyl nalezen zadny repozitar Git"
+  },
+  "apiKey": {
+    "enterKey": "Zadejte svuj API klic OpenAI",
+    "placeholder": "sk-...",
+    "invalidFormat": "Neplatny format API klice. Ocekavany format: sk-...",
+    "keyExists": "API klic je jiz nakonfigurovan",
+    "chooseAction": "Vyberte akci",
+    "updateKey": "Aktualizovat API klic",
+    "validateKey": "Overit API klic",
+    "removeKey": "Odebrat API klic",
+    "cancel": "Zrusit",
+    "removed": "API klic uspesne odebran",
+    "validatePrompt": "Chcete overit API klic u OpenAI?",
+    "validating": "Overovani API klice...",
+    "validationSuccess": "API klic je platny",
+    "validationFailed": "Overeni API klice selhalo: {reason}",
+    "retryValidation": "Opakovat overeni",
+    "continueWithoutValidation": "Pokracovat bez overeni",
+    "retryPrompt": "Chcete zadat jiny API klic?",
+    "invalidKeyPrompt": "Neplatny API klic OpenAI. Chcete ho aktualizovat?",
+    "errorPrompt": "Chyba API klice OpenAI. Chcete ho aktualizovat?",
+    "setApiKey": "Nastavit API klic"
+  }
+}

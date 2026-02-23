@@ -15,11 +15,22 @@
  * - Portuguese (pt)
  * - Simplified Chinese (zh-cn)
  * - Traditional Chinese (zh-tw)
+ * - Italian (it)
+ * - Czech (cs)
+ * - Hungarian (hu)
+ * - Bulgarian (bg)
+ * - Turkish (tr)
+ * - Polish (pl)
+ * - Russian (ru)
+ * - Thai (th)
+ * - Hindi (hi)
+ * - Bengali (bn)
+ * - Javanese (jv)
+ * - Tamil (ta)
+ * - Burmese (my)
+ * - Arabic (ar)
+ * - Hebrew (he)
  * - English (en)
- *
- * Note: Supported UI locales include English, Japanese, Vietnamese, Korean,
- * Chinese (Simplified/Traditional), French, German, Spanish, and Portuguese.
- * For any other VS Code display language, the extension UI falls back to English.
  *
  * @example
  * ```typescript
@@ -30,7 +41,7 @@
 /**
  * Supported locale types
  */
-export type SupportedLocale = 'ja' | 'vi' | 'ko' | 'fr' | 'de' | 'es' | 'pt' | 'zh-cn' | 'zh-tw' | 'en';
+export type SupportedLocale = 'ja' | 'vi' | 'ko' | 'fr' | 'de' | 'es' | 'pt' | 'zh-cn' | 'zh-tw' | 'it' | 'cs' | 'hu' | 'bg' | 'tr' | 'pl' | 'ru' | 'th' | 'hi' | 'bn' | 'jv' | 'ta' | 'my' | 'ar' | 'he' | 'en';
 
 /**
  * @deprecated Use SupportedLocale instead
@@ -63,7 +74,7 @@ export class LocaleDetector {
      * This method is public for testing purposes.
      *
      * @param language - The language code to detect (e.g., 'ja', 'ja-JP', 'en', 'en-US')
-     * @returns Supported locale code ('ja', 'vi', 'ko', 'fr', 'de', 'es', 'pt', 'zh-cn', 'zh-tw', or 'en')
+     * @returns Supported locale code
      */
     static detectLocale(language: string | undefined): SupportedLocale {
         if (!language) {
@@ -122,6 +133,81 @@ export class LocaleDetector {
 
             // Default Chinese to Simplified.
             return 'zh-cn';
+        }
+
+        // Italian
+        if (lowerLang.startsWith('it')) {
+            return 'it';
+        }
+
+        // Czech
+        if (lowerLang.startsWith('cs')) {
+            return 'cs';
+        }
+
+        // Hungarian
+        if (lowerLang.startsWith('hu')) {
+            return 'hu';
+        }
+
+        // Bulgarian
+        if (lowerLang.startsWith('bg')) {
+            return 'bg';
+        }
+
+        // Turkish
+        if (lowerLang.startsWith('tr')) {
+            return 'tr';
+        }
+
+        // Polish
+        if (lowerLang.startsWith('pl')) {
+            return 'pl';
+        }
+
+        // Russian
+        if (lowerLang.startsWith('ru')) {
+            return 'ru';
+        }
+
+        // Thai
+        if (lowerLang.startsWith('th')) {
+            return 'th';
+        }
+
+        // Hindi
+        if (lowerLang.startsWith('hi')) {
+            return 'hi';
+        }
+
+        // Bengali
+        if (lowerLang.startsWith('bn')) {
+            return 'bn';
+        }
+
+        // Javanese
+        if (lowerLang.startsWith('jv')) {
+            return 'jv';
+        }
+
+        // Tamil
+        if (lowerLang.startsWith('ta')) {
+            return 'ta';
+        }
+
+        // Burmese
+        if (lowerLang.startsWith('my')) {
+            return 'my';
+        }
+
+        // Arabic
+        if (lowerLang.startsWith('ar')) {
+            return 'ar';
+        }
+
+        // Hebrew
+        if (lowerLang.startsWith('he')) {
+            return 'he';
         }
 
         // Default to English for all other languages

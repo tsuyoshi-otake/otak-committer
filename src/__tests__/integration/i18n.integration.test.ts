@@ -28,10 +28,13 @@ suite('i18n Integration Tests', () => {
             const locale = manager.getLocale();
 
             // Should be one of supported locales
+            const allLocales = [
+                'ja', 'vi', 'ko', 'fr', 'de', 'es', 'pt', 'zh-cn', 'zh-tw',
+                'it', 'cs', 'hu', 'bg', 'tr', 'pl', 'ru', 'th', 'hi',
+                'bn', 'jv', 'ta', 'my', 'ar', 'he', 'en',
+            ];
             assert.ok(
-                ['ja', 'vi', 'ko', 'fr', 'de', 'es', 'pt', 'zh-cn', 'zh-tw', 'en'].includes(
-                    locale,
-                ),
+                allLocales.includes(locale),
                 `Expected locale to be a supported locale, got '${locale}'`,
             );
         });
@@ -259,8 +262,25 @@ suite('i18n Integration Tests', () => {
             assert.strictEqual(LocaleDetector.detectLocale('en-GB'), 'en');
         });
 
+        test('should detect new locales correctly', () => {
+            assert.strictEqual(LocaleDetector.detectLocale('it'), 'it');
+            assert.strictEqual(LocaleDetector.detectLocale('cs'), 'cs');
+            assert.strictEqual(LocaleDetector.detectLocale('hu'), 'hu');
+            assert.strictEqual(LocaleDetector.detectLocale('bg'), 'bg');
+            assert.strictEqual(LocaleDetector.detectLocale('tr'), 'tr');
+            assert.strictEqual(LocaleDetector.detectLocale('pl'), 'pl');
+            assert.strictEqual(LocaleDetector.detectLocale('ru'), 'ru');
+            assert.strictEqual(LocaleDetector.detectLocale('th'), 'th');
+            assert.strictEqual(LocaleDetector.detectLocale('hi'), 'hi');
+            assert.strictEqual(LocaleDetector.detectLocale('bn'), 'bn');
+            assert.strictEqual(LocaleDetector.detectLocale('jv'), 'jv');
+            assert.strictEqual(LocaleDetector.detectLocale('ta'), 'ta');
+            assert.strictEqual(LocaleDetector.detectLocale('my'), 'my');
+            assert.strictEqual(LocaleDetector.detectLocale('ar'), 'ar');
+            assert.strictEqual(LocaleDetector.detectLocale('he'), 'he');
+        });
+
         test('should default to English for unsupported locales', () => {
-            assert.strictEqual(LocaleDetector.detectLocale('it'), 'en');
             assert.strictEqual(LocaleDetector.detectLocale('nl'), 'en');
             assert.strictEqual(LocaleDetector.detectLocale('sv-SE'), 'en');
         });
@@ -355,16 +375,9 @@ suite('i18n Integration Tests', () => {
 
     suite('Translation Coverage', () => {
         const supportedLocales = [
-            'en',
-            'ja',
-            'vi',
-            'ko',
-            'fr',
-            'de',
-            'es',
-            'pt',
-            'zh-cn',
-            'zh-tw',
+            'en', 'ja', 'vi', 'ko', 'fr', 'de', 'es', 'pt', 'zh-cn', 'zh-tw',
+            'it', 'cs', 'hu', 'bg', 'tr', 'pl', 'ru', 'th', 'hi',
+            'bn', 'jv', 'ta', 'my', 'ar', 'he',
         ] as const;
 
         test('should have translations for all command strings', () => {

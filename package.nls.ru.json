@@ -1,0 +1,33 @@
+{
+  "extension.description": "Расширение VS Code для интеллектуальных операций SCM — многоязычная генерация сообщений коммитов с поддержкой ИИ (поддерживается 25 языков) и будущие функции управления PR.",
+
+  "command.generateMessage": "Сгенерировать сообщение коммита",
+  "command.generatePR": "Сгенерировать Pull Request",
+  "command.generateIssue": "Создать Issue",
+  "command.openSettings": "Открыть настройки otak-committer",
+  "command.changeLanguage": "Изменить язык сообщения коммита",
+  "command.changeMessageStyle": "Изменить стиль сообщения коммита",
+  "command.setApiKey": "Установить API-ключ OpenAI",
+  "command.diagnoseStorage": "Диагностика хранилища API-ключей",
+
+  "config.language": "Язык сообщений коммитов",
+  "config.messageStyle": "Стиль и длина генерируемых сообщений коммитов",
+  "config.messageStyle.simple": "Простой и краткий (600 символов)",
+  "config.messageStyle.normal": "Обычная длина с некоторым контекстом (1200 символов)",
+  "config.messageStyle.detailed": "Подробное описание (2400 символов)",
+  "config.customMessage": "Пользовательское сообщение для добавления к системному промпту (добавляется после сообщения diff)",
+  "config.useEmoji": "Использовать эмодзи в сообщениях коммитов и описаниях PR",
+  "config.emojiStyle": "Стиль эмодзи в сообщениях",
+  "config.emojiStyle.github": "Коды эмодзи в стиле GitHub (:smile:)",
+  "config.emojiStyle.unicode": "Символы Unicode-эмодзи",
+  "config.reasoningEffort": "Уровень рассуждения GPT-5.2 (влияет на качество ответа и задержку)",
+  "config.reasoningEffort.none": "Без рассуждения (самый быстрый, низшее качество)",
+  "config.reasoningEffort.low": "Низкий уровень рассуждения (быстрый, хорошее качество) — Рекомендуется",
+  "config.reasoningEffort.medium": "Средний уровень рассуждения (сбалансированный)",
+  "config.reasoningEffort.high": "Высокий уровень рассуждения (самый медленный, высшее качество)",
+  "config.maxInputTokens": "Максимальное количество входных токенов для обработки ИИ (по умолчанию: 200K)",
+  "config.useBulletList": "Форматировать тело сообщения коммита как маркированный список",
+  "config.useConventionalCommits": "Использовать формат Conventional Commits с областью (<тип>(<область>): <тема>)",
+  "config.appendCommitTrailer": "Добавлять трейлер 'Commit-Message-By: otak-committer' к сгенерированным сообщениям коммитов",
+  "config.syncApiKeys": "Синхронизировать API-ключи через VS Code Settings Sync (ключи хранятся в синхронизируемом состоянии расширения)"
+}

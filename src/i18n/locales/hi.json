@@ -1,0 +1,129 @@
+{
+  "commands": {
+    "generateCommit": "कमिट संदेश जनरेट करें",
+    "generatePR": "Pull Request जनरेट करें",
+    "generateIssue": "Issue बनाएँ",
+    "changeLanguage": "भाषा बदलें",
+    "changeMessageStyle": "संदेश शैली बदलें",
+    "setApiKey": "API Key सेट करें",
+    "openSettings": "सेटिंग्स खोलें",
+    "diagnoseStorage": "API Key स्टोरेज का निदान करें"
+  },
+  "messages": {
+    "apiKeyNotConfigured": "OpenAI API key कॉन्फ़िगर नहीं है। क्या आप इसे अभी कॉन्फ़िगर करना चाहेंगे?",
+    "apiKeySaved": "API key सफलतापूर्वक सहेजी गई",
+    "storageDiagnosisWritten": "स्टोरेज निदान आउटपुट में लिखा गया: otak-committer",
+    "authRequired": "GitHub प्रमाणीकरण आवश्यक है। कृपया साइन इन करें।",
+    "githubAuthPrompt": "GitHub संचालन के लिए प्रमाणीकरण आवश्यक है। कृपया प्रमाणीकरण करें।",
+    "languageChanged": "भाषा {language} में बदल दी गई",
+    "messageStyleChanged": "संदेश शैली {style} में बदल दी गई",
+    "noChangesToCommit": "कमिट करने के लिए कोई परिवर्तन नहीं",
+    "commitMessageGenerated": "कमिट संदेश जनरेट हो गया",
+    "openAIInitFailed": "OpenAI सेवा का आरंभीकरण विफल रहा",
+    "emptyMessageReceived": "खाली संदेश प्राप्त हुआ",
+    "noChangesBetweenBranches": "चयनित शाखाओं के बीच कोई परिवर्तन नहीं मिला। कृपया PR बनाने से पहले कुछ परिवर्तन करें।",
+    "failedToGeneratePR": "PR सामग्री जनरेट करने में विफल। कृपया पुनः प्रयास करें।",
+    "failedToShowPreview": "पूर्वावलोकन दिखाने में विफल",
+    "prCreatedSuccess": "{prType} #{number} सफलतापूर्वक बनाया गया!",
+    "draftPRNotSupported": "ड्राफ्ट PR केवल GitHub Team और Enterprise में उपलब्ध हैं। इसके बजाय एक सामान्य PR बनाया जाएगा।",
+    "issueCreatedSuccess": "Issue सफलतापूर्वक बनाया गया",
+    "noFilesSelectedConfirm": "कोई फ़ाइल चयनित नहीं। केवल रिपॉज़िटरी संरचना के साथ Issue बनाएँ?",
+    "generatingIssue": "Issue जनरेट हो रहा है...",
+    "analyzingRepository": "रिपॉज़िटरी का विश्लेषण हो रहा है...",
+    "creatingIssue": "Issue बनाया जा रहा है...",
+    "updatingContent": "सामग्री अपडेट हो रही है...",
+    "waitingForModificationInput": "संशोधन इनपुट की प्रतीक्षा हो रही है...",
+    "storageFallbackWarning": "otak-committer: API key फ़ॉलबैक स्टोरेज में सहेजी गई। सुरक्षित स्टोरेज उपलब्ध नहीं है।",
+    "commitGenerationSecretWarning": "कमिट संदेश जनरेशन लक्ष्य में संभावित API key या गोपनीय जानकारी पाई गई ({count} मिलान पैटर्न: {patterns})। संवेदनशील डेटा AI को भेजने से बचने के लिए जनरेशन रद्द कर दिया गया।"
+  },
+  "statusBar": {
+    "configuration": "कॉन्फ़िगरेशन",
+    "currentStyle": "वर्तमान शैली",
+    "setApiKey": "API Key सेट करें",
+    "openSettings": "सेटिंग्स खोलें"
+  },
+  "quickPick": {
+    "selectCommitLanguage": "कमिट संदेश की भाषा चुनें",
+    "selectMessageStyle": "संदेश शैली चुनें",
+    "selectRelatedIssue": "संबंधित Issue चुनें (वैकल्पिक, छोड़ने के लिए Escape दबाएँ)",
+    "selectPRType": "PR प्रकार चुनें (छोड़ने के लिए Escape दबाएँ)",
+    "selectIssueType": "Issue प्रकार चुनें",
+    "enterIssueDescription": "Issue का विवरण दर्ज करें",
+    "describeIssue": "समस्या, दोष, या कार्य का वर्णन करें",
+    "enterModificationInstructions": "संशोधन निर्देश दर्ज करें (छोड़ने के लिए Escape दबाएँ)",
+    "describeModification": "बताएँ कि सामग्री को कैसे संशोधित किया जाना चाहिए",
+    "chooseAction": "एक कार्रवाई चुनें",
+    "enterApiKey": "अपनी OpenAI API key दर्ज करें"
+  },
+  "prTypes": {
+    "draft": "ड्राफ्ट Pull Request",
+    "draftDescription": "मर्ज से पहले समीक्षा आवश्यक",
+    "regular": "सामान्य Pull Request",
+    "regularDescription": "समीक्षा और मर्ज के लिए तैयार"
+  },
+  "issueActions": {
+    "modify": "सामग्री संशोधित करें",
+    "modifyDescription": "सामग्री को बेहतर बनाने के लिए प्रतिक्रिया दें",
+    "create": "Issue बनाएँ",
+    "createDescription": "वर्तमान सामग्री के साथ Issue बनाएँ",
+    "cancel": "रद्द करें",
+    "cancelDescription": "Issue निर्माण रद्द करें"
+  },
+  "messageStyles": {
+    "simple": "सरल",
+    "simpleDetail": "न्यूनतम विवरण के साथ संक्षिप्त कमिट संदेश",
+    "normal": "सामान्य",
+    "normalDetail": "मध्यम विवरण के साथ मानक कमिट संदेश",
+    "detailed": "विस्तृत",
+    "detailedDetail": "पूर्ण संदर्भ के साथ व्यापक कमिट संदेश"
+  },
+  "buttons": {
+    "yes": "हाँ",
+    "no": "नहीं",
+    "openInBrowser": "ब्राउज़र में खोलें",
+    "openIssue": "Issue खोलें"
+  },
+  "git": {
+    "stageAll": "सभी स्टेज करें",
+    "alwaysStageAll": "हमेशा स्टेज करें",
+    "stageAllPrompt": "कोई स्टेज किए गए परिवर्तन नहीं मिले। सभी परिवर्तन स्टेज करें और जारी रखें?",
+    "busyIndexLock": "Git व्यस्त है। कृपया अन्य Git संचालन पूरे होने तक प्रतीक्षा करें, या समस्या बनी रहने पर .git/index.lock हटाएँ।",
+    "reservedNamesInfo": "आरक्षित नाम वाली फ़ाइलें ({files}) शामिल की जाएँगी लेकिन उनकी सामग्री diff में प्रदर्शित नहीं की जा सकती।",
+    "diffTruncatedWarning": "Diff का आकार ({estimatedKTokens}K टोकन) {thresholdKTokens}K सीमा से अधिक है। AI प्रोसेसिंग के लिए सामग्री काट दी जाएगी।",
+    "smartDiffApplied": "बड़ा diff ({tokenCount}K टोकन): स्मार्ट प्राथमिकता लागू ({included}/{total} फ़ाइलें पूर्ण diff के साथ)",
+    "mapReduceApplied": "बहुत बड़ा diff ({tokenCount}K टोकन): खंडित सारांशीकरण का उपयोग ({chunks} खंड)"
+  },
+  "progress": {
+    "generatingCommitMessage": "कमिट संदेश जनरेट हो रहा है...",
+    "analyzingChanges": "Pull Request जनरेट करें - परिवर्तनों का विश्लेषण हो रहा है...",
+    "creatingPR": "{prType} Pull Request बनाया जा रहा है...",
+    "processingLargeDiff": "Diff प्रोसेस हो रहा है...",
+    "summarizingChunks": "परिवर्तनों का सारांश हो रहा है ({current}/{total})..."
+  },
+  "errors": {
+    "gitExtensionNotFound": "Git एक्सटेंशन उपलब्ध नहीं है",
+    "noGitRepository": "कोई Git रिपॉज़िटरी नहीं मिली"
+  },
+  "apiKey": {
+    "enterKey": "अपनी OpenAI API key दर्ज करें",
+    "placeholder": "sk-...",
+    "invalidFormat": "अमान्य API key प्रारूप। अपेक्षित प्रारूप: sk-...",
+    "keyExists": "एक API key पहले से कॉन्फ़िगर है",
+    "chooseAction": "एक कार्रवाई चुनें",
+    "updateKey": "API Key अपडेट करें",
+    "validateKey": "API Key सत्यापित करें",
+    "removeKey": "API Key हटाएँ",
+    "cancel": "रद्द करें",
+    "removed": "API key सफलतापूर्वक हटाई गई",
+    "validatePrompt": "क्या आप OpenAI के साथ API key को सत्यापित करना चाहेंगे?",
+    "validating": "API key सत्यापित हो रही है...",
+    "validationSuccess": "API key मान्य है",
+    "validationFailed": "API key सत्यापन विफल: {reason}",
+    "retryValidation": "सत्यापन पुनः प्रयास करें",
+    "continueWithoutValidation": "सत्यापन के बिना जारी रखें",
+    "retryPrompt": "क्या आप एक अलग API key दर्ज करना चाहेंगे?",
+    "invalidKeyPrompt": "अमान्य OpenAI API key। क्या आप इसे अपडेट करना चाहेंगे?",
+    "errorPrompt": "OpenAI API key में त्रुटि। क्या आप इसे अपडेट करना चाहेंगे?",
+    "setApiKey": "API Key सेट करें"
+  }
+}

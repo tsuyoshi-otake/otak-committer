@@ -1,0 +1,129 @@
+{
+  "commands": {
+    "generateCommit": "Wygeneruj komunikat commita",
+    "generatePR": "Wygeneruj Pull Request",
+    "generateIssue": "Wygeneruj Issue",
+    "changeLanguage": "Zmień język",
+    "changeMessageStyle": "Zmień styl wiadomości",
+    "setApiKey": "Ustaw klucz API",
+    "openSettings": "Otwórz ustawienia",
+    "diagnoseStorage": "Diagnozuj przechowywanie klucza API"
+  },
+  "messages": {
+    "apiKeyNotConfigured": "Klucz API OpenAI nie jest skonfigurowany. Czy chcesz go teraz skonfigurować?",
+    "apiKeySaved": "Klucz API został pomyślnie zapisany",
+    "storageDiagnosisWritten": "Diagnoza przechowywania została zapisana w Dane wyjściowe: otak-committer",
+    "authRequired": "Wymagane jest uwierzytelnienie GitHub. Proszę się zalogować.",
+    "githubAuthPrompt": "Operacje GitHub wymagają uwierzytelnienia. Proszę się uwierzytelnić.",
+    "languageChanged": "Język zmieniono na {language}",
+    "messageStyleChanged": "Styl wiadomości zmieniono na {style}",
+    "noChangesToCommit": "Brak zmian do zatwierdzenia",
+    "commitMessageGenerated": "Komunikat commita został wygenerowany",
+    "openAIInitFailed": "Inicjalizacja usługi OpenAI nie powiodła się",
+    "emptyMessageReceived": "Otrzymano pustą wiadomość",
+    "noChangesBetweenBranches": "Nie znaleziono zmian między wybranymi gałęziami. Proszę wprowadzić zmiany przed utworzeniem PR.",
+    "failedToGeneratePR": "Nie udało się wygenerować zawartości PR. Proszę spróbować ponownie.",
+    "failedToShowPreview": "Nie udało się wyświetlić podglądu",
+    "prCreatedSuccess": "{prType} #{number} został pomyślnie utworzony!",
+    "draftPRNotSupported": "Wersje robocze PR są dostępne tylko w GitHub Team i Enterprise. Zamiast tego zostanie utworzony zwykły PR.",
+    "issueCreatedSuccess": "Issue został pomyślnie utworzony",
+    "noFilesSelectedConfirm": "Nie wybrano plików. Wygenerować issue tylko ze strukturą repozytorium?",
+    "generatingIssue": "Generowanie issue...",
+    "analyzingRepository": "Analiza repozytorium...",
+    "creatingIssue": "Tworzenie issue...",
+    "updatingContent": "Aktualizacja zawartości...",
+    "waitingForModificationInput": "Oczekiwanie na dane do modyfikacji...",
+    "storageFallbackWarning": "otak-committer: Klucz API zapisano w zapasowym magazynie. Bezpieczne przechowywanie jest niedostępne.",
+    "commitGenerationSecretWarning": "W celu generowania komunikatu commita wykryto potencjalne klucze API lub dane poufne ({count} dopasowanych wzorców: {patterns}). Generowanie zostało anulowane, aby uniknąć wysyłania wrażliwych danych do AI."
+  },
+  "statusBar": {
+    "configuration": "Konfiguracja",
+    "currentStyle": "Bieżący styl",
+    "setApiKey": "Ustaw klucz API",
+    "openSettings": "Otwórz ustawienia"
+  },
+  "quickPick": {
+    "selectCommitLanguage": "Wybierz język komunikatów commitów",
+    "selectMessageStyle": "Wybierz styl wiadomości",
+    "selectRelatedIssue": "Wybierz powiązany issue (opcjonalnie, naciśnij Escape, aby pominąć)",
+    "selectPRType": "Wybierz typ PR (naciśnij Escape, aby pominąć)",
+    "selectIssueType": "Wybierz typ issue",
+    "enterIssueDescription": "Wprowadź opis issue",
+    "describeIssue": "Opisz problem, zagadnienie lub zadanie",
+    "enterModificationInstructions": "Wprowadź instrukcje modyfikacji (naciśnij Escape, aby pominąć)",
+    "describeModification": "Opisz, jak zawartość powinna zostać zmodyfikowana",
+    "chooseAction": "Wybierz akcję",
+    "enterApiKey": "Wprowadź swój klucz API OpenAI"
+  },
+  "prTypes": {
+    "draft": "Wersja robocza Pull Request",
+    "draftDescription": "Wymagany przegląd przed scaleniem",
+    "regular": "Zwykły Pull Request",
+    "regularDescription": "Gotowy do przeglądu i scalenia"
+  },
+  "issueActions": {
+    "modify": "Modyfikuj zawartość",
+    "modifyDescription": "Podaj uwagi w celu poprawy zawartości",
+    "create": "Utwórz Issue",
+    "createDescription": "Utwórz issue z bieżącą zawartością",
+    "cancel": "Anuluj",
+    "cancelDescription": "Anuluj tworzenie issue"
+  },
+  "messageStyles": {
+    "simple": "Prosty",
+    "simpleDetail": "Krótkie komunikaty commitów z minimalnymi szczegółami",
+    "normal": "Normalny",
+    "normalDetail": "Standardowe komunikaty commitów z umiarkowanymi szczegółami",
+    "detailed": "Szczegółowy",
+    "detailedDetail": "Wyczerpujące komunikaty commitów z pełnym kontekstem"
+  },
+  "buttons": {
+    "yes": "Tak",
+    "no": "Nie",
+    "openInBrowser": "Otwórz w przeglądarce",
+    "openIssue": "Otwórz Issue"
+  },
+  "git": {
+    "stageAll": "Dodaj wszystkie",
+    "alwaysStageAll": "Zawsze dodawaj wszystkie",
+    "stageAllPrompt": "Nie znaleziono przygotowanych zmian. Czy dodać wszystkie zmiany i kontynuować?",
+    "busyIndexLock": "Git jest zajęty. Proszę poczekać na zakończenie innych operacji Git lub usunąć .git/index.lock, jeśli problem się utrzymuje.",
+    "reservedNamesInfo": "Pliki z zarezerwowanymi nazwami ({files}) zostaną uwzględnione, ale ich zawartość nie może być wyświetlona w diff.",
+    "diffTruncatedWarning": "Rozmiar diff ({estimatedKTokens}K tokenów) przekracza limit {thresholdKTokens}K. Zawartość zostanie skrócona na potrzeby przetwarzania AI.",
+    "smartDiffApplied": "Duży diff ({tokenCount}K tokenów): zastosowano inteligentną priorytetyzację ({included}/{total} plików z pełnym diff)",
+    "mapReduceApplied": "Bardzo duży diff ({tokenCount}K tokenów): zastosowano podsumowanie fragmentami ({chunks} fragmentów)"
+  },
+  "progress": {
+    "generatingCommitMessage": "Generowanie komunikatu commita...",
+    "analyzingChanges": "Generowanie Pull Request - Analiza zmian...",
+    "creatingPR": "Tworzenie {prType} Pull Request...",
+    "processingLargeDiff": "Przetwarzanie diff...",
+    "summarizingChunks": "Podsumowywanie zmian ({current}/{total})..."
+  },
+  "errors": {
+    "gitExtensionNotFound": "Rozszerzenie Git jest niedostępne",
+    "noGitRepository": "Nie znaleziono repozytorium Git"
+  },
+  "apiKey": {
+    "enterKey": "Wprowadź swój klucz API OpenAI",
+    "placeholder": "sk-...",
+    "invalidFormat": "Nieprawidłowy format klucza API. Oczekiwany format: sk-...",
+    "keyExists": "Klucz API jest już skonfigurowany",
+    "chooseAction": "Wybierz akcję",
+    "updateKey": "Zaktualizuj klucz API",
+    "validateKey": "Zweryfikuj klucz API",
+    "removeKey": "Usuń klucz API",
+    "cancel": "Anuluj",
+    "removed": "Klucz API został pomyślnie usunięty",
+    "validatePrompt": "Czy chcesz zweryfikować klucz API z OpenAI?",
+    "validating": "Weryfikacja klucza API...",
+    "validationSuccess": "Klucz API jest prawidłowy",
+    "validationFailed": "Weryfikacja klucza API nie powiodła się: {reason}",
+    "retryValidation": "Ponów weryfikację",
+    "continueWithoutValidation": "Kontynuuj bez weryfikacji",
+    "retryPrompt": "Czy chcesz wprowadzić inny klucz API?",
+    "invalidKeyPrompt": "Nieprawidłowy klucz API OpenAI. Czy chcesz go zaktualizować?",
+    "errorPrompt": "Błąd klucza API OpenAI. Czy chcesz go zaktualizować?",
+    "setApiKey": "Ustaw klucz API"
+  }
+}

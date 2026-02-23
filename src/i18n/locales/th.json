@@ -1,0 +1,129 @@
+{
+  "commands": {
+    "generateCommit": "สร้างข้อความคอมมิต",
+    "generatePR": "สร้าง Pull Request",
+    "generateIssue": "สร้าง Issue",
+    "changeLanguage": "เปลี่ยนภาษา",
+    "changeMessageStyle": "เปลี่ยนรูปแบบข้อความ",
+    "setApiKey": "ตั้งค่า API Key",
+    "openSettings": "เปิดการตั้งค่า",
+    "diagnoseStorage": "วินิจฉัยที่เก็บ API Key"
+  },
+  "messages": {
+    "apiKeyNotConfigured": "ยังไม่ได้กำหนดค่า API key ของ OpenAI คุณต้องการกำหนดค่าตอนนี้หรือไม่?",
+    "apiKeySaved": "บันทึก API key สำเร็จแล้ว",
+    "storageDiagnosisWritten": "ผลการวินิจฉัยที่เก็บข้อมูลถูกเขียนลงใน เอาต์พุต: otak-committer",
+    "authRequired": "ต้องการการยืนยันตัวตน GitHub กรุณาลงชื่อเข้าใช้",
+    "githubAuthPrompt": "การดำเนินการ GitHub ต้องการการยืนยันตัวตน กรุณายืนยันตัวตน",
+    "languageChanged": "เปลี่ยนภาษาเป็น {language} แล้ว",
+    "messageStyleChanged": "เปลี่ยนรูปแบบข้อความเป็น {style} แล้ว",
+    "noChangesToCommit": "ไม่มีการเปลี่ยนแปลงสำหรับคอมมิต",
+    "commitMessageGenerated": "สร้างข้อความคอมมิตแล้ว",
+    "openAIInitFailed": "การเริ่มต้นบริการ OpenAI ล้มเหลว",
+    "emptyMessageReceived": "ได้รับข้อความว่างเปล่า",
+    "noChangesBetweenBranches": "ไม่พบการเปลี่ยนแปลงระหว่างสาขาที่เลือก กรุณาทำการเปลี่ยนแปลงก่อนสร้าง PR",
+    "failedToGeneratePR": "ไม่สามารถสร้างเนื้อหา PR ได้ กรุณาลองอีกครั้ง",
+    "failedToShowPreview": "ไม่สามารถแสดงตัวอย่างได้",
+    "prCreatedSuccess": "สร้าง {prType} #{number} สำเร็จแล้ว!",
+    "draftPRNotSupported": "PR แบบร่างใช้ได้เฉพาะใน GitHub Team และ Enterprise เท่านั้น จะสร้าง PR แบบปกติแทน",
+    "issueCreatedSuccess": "สร้าง Issue สำเร็จแล้ว",
+    "noFilesSelectedConfirm": "ไม่ได้เลือกไฟล์ สร้าง Issue ด้วยโครงสร้างรีพอสิทอรีเท่านั้นหรือไม่?",
+    "generatingIssue": "กำลังสร้าง Issue...",
+    "analyzingRepository": "กำลังวิเคราะห์รีพอสิทอรี...",
+    "creatingIssue": "กำลังสร้าง Issue...",
+    "updatingContent": "กำลังอัปเดตเนื้อหา...",
+    "waitingForModificationInput": "กำลังรอข้อมูลการแก้ไข...",
+    "storageFallbackWarning": "otak-committer: API key ถูกเก็บในที่เก็บสำรอง ที่เก็บแบบปลอดภัยไม่พร้อมใช้งาน",
+    "commitGenerationSecretWarning": "พบ API key หรือข้อมูลลับที่อาจเป็นไปได้ในเป้าหมายการสร้างข้อความคอมมิต (ตรงกับรูปแบบ {count} รายการ: {patterns}) การสร้างถูกยกเลิกเพื่อหลีกเลี่ยงการส่งข้อมูลที่ละเอียดอ่อนไปยัง AI"
+  },
+  "statusBar": {
+    "configuration": "การกำหนดค่า",
+    "currentStyle": "รูปแบบปัจจุบัน",
+    "setApiKey": "ตั้งค่า API Key",
+    "openSettings": "เปิดการตั้งค่า"
+  },
+  "quickPick": {
+    "selectCommitLanguage": "เลือกภาษาข้อความคอมมิต",
+    "selectMessageStyle": "เลือกรูปแบบข้อความ",
+    "selectRelatedIssue": "เลือก Issue ที่เกี่ยวข้อง (ไม่บังคับ กด Escape เพื่อข้าม)",
+    "selectPRType": "เลือกประเภท PR (กด Escape เพื่อข้าม)",
+    "selectIssueType": "เลือกประเภท Issue",
+    "enterIssueDescription": "ป้อนคำอธิบาย Issue",
+    "describeIssue": "อธิบายปัญหา ข้อบกพร่อง หรืองานที่ต้องทำ",
+    "enterModificationInstructions": "ป้อนคำแนะนำการแก้ไข (กด Escape เพื่อข้าม)",
+    "describeModification": "อธิบายว่าควรแก้ไขเนื้อหาอย่างไร",
+    "chooseAction": "เลือกการดำเนินการ",
+    "enterApiKey": "ป้อน API key OpenAI ของคุณ"
+  },
+  "prTypes": {
+    "draft": "Pull Request แบบร่าง",
+    "draftDescription": "ต้องตรวจสอบก่อนรวม",
+    "regular": "Pull Request แบบปกติ",
+    "regularDescription": "พร้อมสำหรับการตรวจสอบและรวม"
+  },
+  "issueActions": {
+    "modify": "แก้ไขเนื้อหา",
+    "modifyDescription": "ให้ข้อเสนอแนะเพื่อปรับปรุงเนื้อหา",
+    "create": "สร้าง Issue",
+    "createDescription": "สร้าง Issue ด้วยเนื้อหาปัจจุบัน",
+    "cancel": "ยกเลิก",
+    "cancelDescription": "ยกเลิกการสร้าง Issue"
+  },
+  "messageStyles": {
+    "simple": "เรียบง่าย",
+    "simpleDetail": "ข้อความคอมมิตสั้นกระชับพร้อมรายละเอียดน้อย",
+    "normal": "ปกติ",
+    "normalDetail": "ข้อความคอมมิตมาตรฐานพร้อมรายละเอียดปานกลาง",
+    "detailed": "ละเอียด",
+    "detailedDetail": "ข้อความคอมมิตครอบคลุมพร้อมบริบทครบถ้วน"
+  },
+  "buttons": {
+    "yes": "ใช่",
+    "no": "ไม่",
+    "openInBrowser": "เปิดในเบราว์เซอร์",
+    "openIssue": "เปิด Issue"
+  },
+  "git": {
+    "stageAll": "จัดเตรียมทั้งหมด",
+    "alwaysStageAll": "จัดเตรียมเสมอ",
+    "stageAllPrompt": "ไม่พบการเปลี่ยนแปลงที่จัดเตรียมไว้ จัดเตรียมการเปลี่ยนแปลงทั้งหมดและดำเนินการต่อหรือไม่?",
+    "busyIndexLock": "Git กำลังทำงานอยู่ กรุณารอให้การดำเนินการ Git อื่นเสร็จสิ้น หรือลบ .git/index.lock หากปัญหายังคงอยู่",
+    "reservedNamesInfo": "ไฟล์ที่มีชื่อสงวน ({files}) จะถูกรวมไว้แต่ไม่สามารถแสดงเนื้อหาใน diff ได้",
+    "diffTruncatedWarning": "ขนาด diff ({estimatedKTokens}K โทเคน) เกินขีดจำกัด {thresholdKTokens}K เนื้อหาจะถูกตัดทอนสำหรับการประมวลผล AI",
+    "smartDiffApplied": "diff ขนาดใหญ่ ({tokenCount}K โทเคน): ใช้การจัดลำดับความสำคัญอัจฉริยะ ({included}/{total} ไฟล์พร้อม diff เต็ม)",
+    "mapReduceApplied": "diff ขนาดใหญ่มาก ({tokenCount}K โทเคน): ใช้การสรุปแบบแบ่งส่วน ({chunks} ส่วน)"
+  },
+  "progress": {
+    "generatingCommitMessage": "กำลังสร้างข้อความคอมมิต...",
+    "analyzingChanges": "สร้าง Pull Request - กำลังวิเคราะห์การเปลี่ยนแปลง...",
+    "creatingPR": "กำลังสร้าง {prType} Pull Request...",
+    "processingLargeDiff": "กำลังประมวลผล diff...",
+    "summarizingChunks": "กำลังสรุปการเปลี่ยนแปลง ({current}/{total})..."
+  },
+  "errors": {
+    "gitExtensionNotFound": "ส่วนขยาย Git ไม่พร้อมใช้งาน",
+    "noGitRepository": "ไม่พบรีพอสิทอรี Git"
+  },
+  "apiKey": {
+    "enterKey": "ป้อน API key OpenAI ของคุณ",
+    "placeholder": "sk-...",
+    "invalidFormat": "รูปแบบ API key ไม่ถูกต้อง รูปแบบที่คาดหวัง: sk-...",
+    "keyExists": "มี API key ที่กำหนดค่าไว้แล้ว",
+    "chooseAction": "เลือกการดำเนินการ",
+    "updateKey": "อัปเดต API Key",
+    "validateKey": "ตรวจสอบ API Key",
+    "removeKey": "ลบ API Key",
+    "cancel": "ยกเลิก",
+    "removed": "ลบ API key สำเร็จแล้ว",
+    "validatePrompt": "คุณต้องการตรวจสอบ API key กับ OpenAI หรือไม่?",
+    "validating": "กำลังตรวจสอบ API key...",
+    "validationSuccess": "API key ถูกต้อง",
+    "validationFailed": "การตรวจสอบ API key ล้มเหลว: {reason}",
+    "retryValidation": "ลองตรวจสอบอีกครั้ง",
+    "continueWithoutValidation": "ดำเนินการต่อโดยไม่ตรวจสอบ",
+    "retryPrompt": "คุณต้องการป้อน API key อื่นหรือไม่?",
+    "invalidKeyPrompt": "API key OpenAI ไม่ถูกต้อง คุณต้องการอัปเดตหรือไม่?",
+    "errorPrompt": "เกิดข้อผิดพลาดของ API key OpenAI คุณต้องการอัปเดตหรือไม่?",
+    "setApiKey": "ตั้งค่า API Key"
+  }
+}

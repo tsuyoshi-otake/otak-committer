@@ -1,0 +1,33 @@
+{
+  "extension.description": "ส่วนขยาย VS Code สำหรับการดำเนินการ SCM อัจฉริยะ — สร้างข้อความคอมมิตหลายภาษาด้วยการสนับสนุน AI (รองรับ 25 ภาษา) และฟีเจอร์การจัดการ PR ในอนาคต",
+
+  "command.generateMessage": "สร้างข้อความคอมมิต",
+  "command.generatePR": "สร้าง Pull Request",
+  "command.generateIssue": "สร้าง Issue",
+  "command.openSettings": "เปิดการตั้งค่า otak-committer",
+  "command.changeLanguage": "เปลี่ยนภาษาข้อความคอมมิต",
+  "command.changeMessageStyle": "เปลี่ยนรูปแบบข้อความคอมมิต",
+  "command.setApiKey": "ตั้งค่า API Key ของ OpenAI",
+  "command.diagnoseStorage": "วินิจฉัยที่เก็บ API Key",
+
+  "config.language": "ภาษาสำหรับข้อความคอมมิต",
+  "config.messageStyle": "รูปแบบและความยาวของข้อความคอมมิตที่สร้างขึ้น",
+  "config.messageStyle.simple": "เรียบง่ายและกระชับ (600 ตัวอักษร)",
+  "config.messageStyle.normal": "ความยาวปกติพร้อมบริบท (1200 ตัวอักษร)",
+  "config.messageStyle.detailed": "คำอธิบายละเอียด (2400 ตัวอักษร)",
+  "config.customMessage": "ข้อความกำหนดเองที่จะเพิ่มต่อท้ายพรอมต์ระบบ (เพิ่มหลังข้อความ diff)",
+  "config.useEmoji": "ใช้อีโมจิในข้อความคอมมิตและคำอธิบาย PR",
+  "config.emojiStyle": "รูปแบบอีโมจิที่จะใช้ในข้อความ",
+  "config.emojiStyle.github": "รหัสอีโมจิแบบ GitHub (:smile:)",
+  "config.emojiStyle.unicode": "อักขระอีโมจิ Unicode",
+  "config.reasoningEffort": "ระดับการใช้เหตุผลของ GPT-5.2 (มีผลต่อคุณภาพการตอบสนองและความหน่วง)",
+  "config.reasoningEffort.none": "ไม่ใช้เหตุผล (เร็วที่สุด คุณภาพต่ำสุด)",
+  "config.reasoningEffort.low": "ใช้เหตุผลระดับต่ำ (เร็ว คุณภาพดี) — แนะนำ",
+  "config.reasoningEffort.medium": "ใช้เหตุผลระดับกลาง (สมดุล)",
+  "config.reasoningEffort.high": "ใช้เหตุผลระดับสูง (ช้าที่สุด คุณภาพสูงสุด)",
+  "config.maxInputTokens": "จำนวนโทเคนอินพุตสูงสุดสำหรับการประมวลผล AI (ค่าเริ่มต้น: 200K)",
+  "config.useBulletList": "จัดรูปแบบเนื้อหาข้อความคอมมิตเป็นรายการหัวข้อย่อย",
+  "config.useConventionalCommits": "ใช้รูปแบบ Conventional Commits พร้อมขอบเขต (<ประเภท>(<ขอบเขต>): <หัวข้อ>)",
+  "config.appendCommitTrailer": "เพิ่มส่วนท้าย 'Commit-Message-By: otak-committer' ในข้อความคอมมิตที่สร้างขึ้น",
+  "config.syncApiKeys": "ซิงค์ API key ผ่าน VS Code Settings Sync (เก็บคีย์ในสถานะส่วนขยายที่ซิงค์)"
+}

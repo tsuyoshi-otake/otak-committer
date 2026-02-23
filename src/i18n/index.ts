@@ -2,8 +2,7 @@
  * Internationalization (i18n) module for otak-committer extension
  *
  * Provides multi-language support for the extension UI.
- * Supports English, Japanese, Vietnamese, Korean, Chinese (Simplified/Traditional),
- * French, German, Spanish, and Portuguese.
+ * Supports 25 languages matching commit message language support.
  *
  * @example
  * ```typescript
@@ -17,7 +16,7 @@
  *
  * // Access the singleton instance for more control
  * const manager = TranslationManager.getInstance();
- * manager.setLocale('ja'); // or 'vi', 'ko', 'fr', 'de', 'es', 'pt', 'zh-cn', 'zh-tw', 'en'
+ * manager.setLocale('ja');
  * ```
  */
 

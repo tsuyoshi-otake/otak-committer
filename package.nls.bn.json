@@ -1,0 +1,33 @@
+{
+  "extension.description": "বুদ্ধিমান SCM অপারেশনের জন্য VS Code এক্সটেনশন — AI সমর্থনে বহুভাষিক কমিট বার্তা তৈরি (২৫টি ভাষা সমর্থিত) এবং ভবিষ্যৎ PR পরিচালনা সুবিধা।",
+
+  "command.generateMessage": "কমিট বার্তা তৈরি করুন",
+  "command.generatePR": "Pull Request তৈরি করুন",
+  "command.generateIssue": "Issue তৈরি করুন",
+  "command.openSettings": "otak-committer সেটিংস খুলুন",
+  "command.changeLanguage": "কমিট বার্তার ভাষা পরিবর্তন করুন",
+  "command.changeMessageStyle": "কমিট বার্তার শৈলী পরিবর্তন করুন",
+  "command.setApiKey": "OpenAI API Key সেট করুন",
+  "command.diagnoseStorage": "API Key স্টোরেজ নির্ণয় করুন",
+
+  "config.language": "কমিট বার্তার ভাষা",
+  "config.messageStyle": "তৈরি করা কমিট বার্তার শৈলী এবং দৈর্ঘ্য",
+  "config.messageStyle.simple": "সরল ও সংক্ষিপ্ত (৬০০ অক্ষর)",
+  "config.messageStyle.normal": "কিছু প্রসঙ্গসহ সাধারণ দৈর্ঘ্য (১২০০ অক্ষর)",
+  "config.messageStyle.detailed": "বিস্তারিত ব্যাখ্যা (২৪০০ অক্ষর)",
+  "config.customMessage": "সিস্টেম প্রম্পটে যোগ করার জন্য কাস্টম বার্তা (diff বার্তার পরে যোগ হয়)",
+  "config.useEmoji": "কমিট বার্তা এবং PR বিবরণে ইমোজি ব্যবহার করুন",
+  "config.emojiStyle": "বার্তায় ব্যবহৃত ইমোজির শৈলী",
+  "config.emojiStyle.github": "GitHub শৈলীর ইমোজি কোড (:smile:)",
+  "config.emojiStyle.unicode": "Unicode ইমোজি অক্ষর",
+  "config.reasoningEffort": "GPT-5.2 যুক্তি প্রচেষ্টার স্তর (প্রতিক্রিয়ার গুণমান ও বিলম্বকে প্রভাবিত করে)",
+  "config.reasoningEffort.none": "কোনো যুক্তি নেই (দ্রুততম, সর্বনিম্ন গুণমান)",
+  "config.reasoningEffort.low": "কম যুক্তি (দ্রুত, ভালো গুণমান) — প্রস্তাবিত",
+  "config.reasoningEffort.medium": "মাঝারি যুক্তি (ভারসাম্যপূর্ণ)",
+  "config.reasoningEffort.high": "উচ্চ যুক্তি (ধীরতম, সর্বোচ্চ গুণমান)",
+  "config.maxInputTokens": "AI প্রক্রিয়াকরণের জন্য সর্বোচ্চ ইনপুট টোকেন (ডিফল্ট: 200K)",
+  "config.useBulletList": "কমিট বার্তার মূল অংশ বুলেট তালিকা হিসেবে ফরম্যাট করুন",
+  "config.useConventionalCommits": "স্কোপসহ Conventional Commits ফরম্যাট ব্যবহার করুন (<type>(<scope>): <subject>)",
+  "config.appendCommitTrailer": "তৈরি করা কমিট বার্তায় 'Commit-Message-By: otak-committer' ট্রেলার যোগ করুন",
+  "config.syncApiKeys": "VS Code Settings Sync-এর মাধ্যমে API key সিঙ্ক করুন (সিঙ্ক করা এক্সটেনশন স্টেটে key সংরক্ষণ করে)"
+}
