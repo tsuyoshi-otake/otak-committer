@@ -13,7 +13,11 @@
     "url": "https://github.com/tsuyoshi-otake/otak-committer/issues"
   },
   "homepage": "https://github.com/tsuyoshi-otake/otak-committer#readme",
-  "version": "2.10.0",
+  "version": "2.10.1",
+  "overrides": {
+    "minimatch": ">=10.2.1",
+    "diff": ">=8.0.3"
+  },
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -290,16 +294,16 @@
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
     "@types/vscode": "^1.90.0",
-    "@typescript-eslint/eslint-plugin": "^8.22.0",
-    "@typescript-eslint/parser": "^8.22.0",
-    "@vscode/test-cli": "^0.0.10",
+    "@typescript-eslint/eslint-plugin": "^8.56.1",
+    "@typescript-eslint/parser": "^8.56.1",
+    "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.4.1",
     "esbuild": "^0.25.10",
-    "eslint": "^9.19.0",
+    "eslint": "^10.0.2",
     "eslint-config-prettier": "^10.1.8",
     "fast-check": "^4.3.0",
-    "glob": "^10.3.10",
-    "mocha": "^10.3.0",
+    "glob": "^11.1.0",
+    "mocha": "^11.7.5",
     "prettier": "^3.8.1",
     "typescript": "^5.7.3"
   },
