@@ -35,9 +35,7 @@ export class PRCommand extends BaseCommand {
                 return;
             }
 
-            if (this.shouldBlockForPotentialSecrets(diff)) {
-                return;
-            }
+            this.warnIfPotentialSecrets(diff);
 
             const openai = await this.initializeOpenAI();
             if (!openai) {
@@ -190,11 +188,11 @@ export class PRCommand extends BaseCommand {
         }
     }
 
-    private shouldBlockForPotentialSecrets(diff: PullRequestDiff): boolean {
+    private warnIfPotentialSecrets(diff: PullRequestDiff): void {
         const combined = diff.files.map((f) => f.patch).join('\n');
         const detection = detectPotentialSecrets(combined);
         if (!detection.hasPotentialSecrets) {
-            return false;
+            return;
         }
 
         const patterns = detection.matchedPatternIds.join(', ');
@@ -208,8 +206,6 @@ export class PRCommand extends BaseCommand {
                 patterns,
             }),
         );
-
-        return true;
     }
 
     private async showSuccessNotification(

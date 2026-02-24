@@ -34,7 +34,7 @@
     "updatingContent": "جارٍ تحديث المحتوى...",
     "waitingForModificationInput": "في انتظار إدخال التعديل...",
     "storageFallbackWarning": "otak-committer: تم تخزين مفتاح API في التخزين الاحتياطي. التخزين الآمن غير متاح.",
-    "commitGenerationSecretWarning": "تم العثور على مفاتيح API أو أسرار محتملة في هدف إنشاء رسالة الإيداع ({count} نمط مطابق: {patterns}). تم إلغاء الإنشاء لتجنب إرسال بيانات حساسة إلى الذكاء الاصطناعي."
+    "commitGenerationSecretWarning": "تم العثور على مفاتيح API أو أسرار محتملة في هدف إنشاء رسالة الإيداع ({count} نمط مطابق: {patterns}). سيستمر الإنشاء، لكن قد يحتوي الفرق على بيانات حساسة. يرجى المراجعة بعناية."
   },
   "statusBar": {
     "configuration": "التكوين",

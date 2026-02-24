@@ -34,7 +34,7 @@
     "updatingContent": "מעדכן תוכן...",
     "waitingForModificationInput": "ממתין לקלט שינויים...",
     "storageFallbackWarning": "otak-committer: מפתח API אוחסן באחסון חלופי. אחסון מאובטח אינו זמין.",
-    "commitGenerationSecretWarning": "נמצאו מפתחות API או סודות פוטנציאליים ביעד יצירת הודעת ה-commit ({count} דפוסים תואמים: {patterns}). היצירה בוטלה כדי למנוע שליחת נתונים רגישים ל-AI."
+    "commitGenerationSecretWarning": "נמצאו מפתחות API או סודות פוטנציאליים ביעד יצירת הודעת ה-commit ({count} דפוסים תואמים: {patterns}). היצירה תמשיך, אך ה-diff עשוי להכיל נתונים רגישים. אנא בדקו בקפידה."
   },
   "statusBar": {
     "configuration": "הגדרות",

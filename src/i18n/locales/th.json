@@ -34,7 +34,7 @@
     "updatingContent": "กำลังอัปเดตเนื้อหา...",
     "waitingForModificationInput": "กำลังรอข้อมูลการแก้ไข...",
     "storageFallbackWarning": "otak-committer: API key ถูกเก็บในที่เก็บสำรอง ที่เก็บแบบปลอดภัยไม่พร้อมใช้งาน",
-    "commitGenerationSecretWarning": "พบ API key หรือข้อมูลลับที่อาจเป็นไปได้ในเป้าหมายการสร้างข้อความคอมมิต (ตรงกับรูปแบบ {count} รายการ: {patterns}) การสร้างถูกยกเลิกเพื่อหลีกเลี่ยงการส่งข้อมูลที่ละเอียดอ่อนไปยัง AI"
+    "commitGenerationSecretWarning": "พบ API key หรือข้อมูลลับที่อาจเป็นไปได้ในเป้าหมายการสร้างข้อความคอมมิต (ตรงกับรูปแบบ {count} รายการ: {patterns}) การสร้างจะดำเนินต่อไป แต่ diff อาจมีข้อมูลที่ละเอียดอ่อน กรุณาตรวจสอบอย่างระมัดระวัง"
   },
   "statusBar": {
     "configuration": "การกำหนดค่า",

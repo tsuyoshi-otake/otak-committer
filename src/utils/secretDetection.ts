@@ -46,11 +46,6 @@ const SECRET_PATTERN_DEFINITIONS: readonly SecretPatternDefinition[] = [
     // Cloud providers
     { id: 'aws_access_key_id', source: String.raw`\bAKIA[0-9A-Z]{16}\b` },
     { id: 'aws_session_key_id', source: String.raw`\bASIA[0-9A-Z]{16}\b` },
-    {
-        id: 'aws_secret_access_key_reference',
-        source: String.raw`AWS_SECRET_ACCESS_KEY\s*[=:]`,
-        flags: 'i',
-    },
     { id: 'google_api_key', source: String.raw`\bAIza[0-9A-Za-z_-]{35}\b` },
     { id: 'google_oauth_token', source: String.raw`\bya29\.[0-9A-Za-z_-]+\b` },
     { id: 'google_oauth_client_secret', source: String.raw`\bGOCSPX-[A-Za-z0-9_-]{28}\b` },
@@ -175,109 +170,19 @@ const SECRET_PATTERN_DEFINITIONS: readonly SecretPatternDefinition[] = [
         source: String.raw`libsql:\/\/[^\s]+`,
     },
 
-    // Context-based indicators (variable names + assignment)
-    {
-        id: 'cloudflare_env_secret_reference',
-        source: String.raw`(?:CLOUDFLARE|CF)_(?:API_KEY|API_TOKEN|DNS_API_TOKEN)\s*[=:]`,
-        flags: 'i',
-    },
-    { id: 'vercel_token_reference', source: String.raw`VERCEL_TOKEN\s*[=:]`, flags: 'i' },
-    { id: 'fastly_token_reference', source: String.raw`FASTLY_API_TOKEN\s*[=:]`, flags: 'i' },
-    { id: 'datadog_key_reference', source: String.raw`DD_(?:API|APP)_KEY\s*[=:]`, flags: 'i' },
-    { id: 'sentry_dsn_reference', source: String.raw`SENTRY_DSN\s*[=:].*https://`, flags: 'i' },
-    {
-        id: 'auth0_client_secret_reference',
-        source: String.raw`AUTH0_CLIENT_SECRET\s*[=:]`,
-        flags: 'i',
-    },
-    { id: 'clerk_secret_key_reference', source: String.raw`CLERK_SECRET_KEY\s*[=:]`, flags: 'i' },
-    { id: 'okta_secret_reference', source: String.raw`OKTA_.*(?:TOKEN|SECRET)\s*[=:]`, flags: 'i' },
-    {
-        id: 'line_secret_reference',
-        source: String.raw`LINE_CHANNEL_(?:SECRET|ACCESS_TOKEN)\s*[=:]`,
-        flags: 'i',
-    },
-    {
-        id: 'firebase_secret_reference',
-        source: String.raw`FIREBASE_.*(?:KEY|TOKEN|SECRET)\s*[=:]`,
-        flags: 'i',
-    },
-    {
-        id: 'shopify_secret_reference',
-        source: String.raw`SHOPIFY_.*(?:TOKEN|KEY|SECRET)\s*[=:]`,
-        flags: 'i',
-    },
-    {
-        id: 'postmark_token_reference',
-        source: String.raw`POSTMARK_(?:SERVER|ACCOUNT)_TOKEN\s*[=:]`,
-        flags: 'i',
-    },
-    { id: 'vonage_secret_reference', source: String.raw`VONAGE_API_SECRET\s*[=:]`, flags: 'i' },
-    { id: 'twilio_auth_token_reference', source: String.raw`TWILIO_AUTH_TOKEN\s*[=:]`, flags: 'i' },
-    {
-        id: 'pagerduty_token_reference',
-        source: String.raw`PAGERDUTY_(?:API_KEY|TOKEN)\s*[=:]`,
-        flags: 'i',
-    },
-    {
-        id: 'upstash_token_reference',
-        source: String.raw`UPSTASH_REDIS_REST_TOKEN\s*[=:]`,
-        flags: 'i',
-    },
-    {
-        id: 'algolia_key_reference',
-        source: String.raw`ALGOLIA_(?:ADMIN|SEARCH)_(?:API_)?KEY\s*[=:]`,
-        flags: 'i',
-    },
-    {
-        id: 'azure_client_secret_reference',
-        source: String.raw`AZURE_CLIENT_SECRET\s*[=:]`,
-        flags: 'i',
-    },
-    {
-        id: 'paypay_secret_reference',
-        source: String.raw`PAYPAY_.*(?:SECRET|KEY)\s*[=:]`,
-        flags: 'i',
-    },
-    {
-        id: 'public_env_secret_reference',
-        source: String.raw`(?:VITE|NEXT_PUBLIC|REACT_APP|NUXT_PUBLIC|EXPO_PUBLIC|GATSBY)_[A-Z0-9_]*(?:KEY|SECRET|TOKEN|PASSWORD)\s*=`,
-        flags: 'i',
-    },
-    {
-        id: 'gcp_service_account_reference',
-        source: String.raw`GCP_SERVICE_ACCOUNT\s*[=:]`,
-        flags: 'i',
-    },
+    // Structural indicators (detect specific content patterns, not variable names)
     { id: 'service_account_json_type', source: String.raw`"type"\s*:\s*"service_account"`, flags: 'i' },
-
-    // Additional context-based references for modern services
-    { id: 'nextauth_secret_reference', source: String.raw`NEXTAUTH_SECRET\s*[=:]`, flags: 'i' },
-    {
-        id: 'database_url_reference',
-        source: String.raw`(?:DATABASE_URL|PRISMA_DATABASE_URL|TURSO_CONNECTION_URL)\s*[=:]`,
-        flags: 'i',
-    },
-    { id: 'langchain_api_key_reference', source: String.raw`LANGCHAIN_API_KEY\s*[=:]`, flags: 'i' },
-    {
-        id: 'supabase_key_reference',
-        source: String.raw`SUPABASE_(?:SERVICE_ROLE_KEY|ANON_KEY)\s*[=:]`,
-        flags: 'i',
-    },
-    { id: 'openai_api_key_reference', source: String.raw`OPENAI_API_KEY\s*[=:]`, flags: 'i' },
-    {
-        id: 'anthropic_api_key_reference',
-        source: String.raw`ANTHROPIC_API_KEY\s*[=:]`,
-        flags: 'i',
-    },
 ];
 
 const SECRET_PATTERNS: readonly SecretPattern[] = SECRET_PATTERN_DEFINITIONS.map((definition) => ({
     id: definition.id,
-    regex: new RegExp(definition.source, definition.flags ?? ''),
+    regex: new RegExp(definition.source, (definition.flags ?? '') + 'g'),
 }));
 
 const DEFAULT_MAX_MATCHES = 5;
+
+/** Matches 8+ consecutive identical characters (e.g. "xxxxxxxx", "00000000"). */
+const PLACEHOLDER_REPETITION = /(.)\1{7,}/;
 
 /**
  * Detect potential secrets in a text blob.
@@ -297,12 +202,17 @@ export function detectPotentialSecrets(
     const matchedPatternIds: string[] = [];
 
     for (const pattern of SECRET_PATTERNS) {
-        if (pattern.regex.test(text)) {
-            matchedPatternIds.push(pattern.id);
-
-            if (matchedPatternIds.length >= maxMatches) {
+        pattern.regex.lastIndex = 0;
+        let match: RegExpExecArray | null;
+        while ((match = pattern.regex.exec(text)) !== null) {
+            if (!PLACEHOLDER_REPETITION.test(match[0])) {
+                matchedPatternIds.push(pattern.id);
                 break;
             }
+        }
+
+        if (matchedPatternIds.length >= maxMatches) {
+            break;
         }
     }
 

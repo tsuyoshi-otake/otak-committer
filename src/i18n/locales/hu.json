@@ -34,7 +34,7 @@
     "updatingContent": "Tartalom frissitese...",
     "waitingForModificationInput": "Varakozas a modositasi bemenetre...",
     "storageFallbackWarning": "otak-committer: API kulcs tartalek taroloba mentve. A biztonsagos tarolo nem erheto el.",
-    "commitGenerationSecretWarning": "Potencialis API kulcsok vagy titkok talalhatok a commit uzenet generalasi celban ({count} egyezo minta: {patterns}). A generalas megszakitva az erzekeny adatok AI-nak torteno kuldese elkerulese erdekeben."
+    "commitGenerationSecretWarning": "Potencialis API kulcsok vagy titkok talalhatok a commit uzenet generalasi celban ({count} egyezo minta: {patterns}). A generalas folytatodik, de a diff erzekeny adatokat tartalmazhat. Kerem, ellenorizze gondosan."
   },
   "statusBar": {
     "configuration": "Konfiguraciot",

@@ -49,20 +49,19 @@ export class IssueGeneratorService extends BaseService {
             if (fileAnalyses.length > 0) {
                 const combinedContent = fileAnalyses.map((a) => a.content || '').join('');
 
-                // Block generation if potential secrets are found in file content
+                // Warn if potential secrets are found in file content (non-blocking)
                 const detection = detectPotentialSecrets(combinedContent);
                 if (detection.hasPotentialSecrets) {
                     const patterns = detection.matchedPatternIds.join(', ');
                     this.logger.warning('Potential secrets detected in files for issue generation', {
                         matchedPatternIds: detection.matchedPatternIds,
                     });
-                    await vscode.window.showWarningMessage(
+                    vscode.window.showWarningMessage(
                         t('messages.commitGenerationSecretWarning', {
                             count: detection.matchedPatternIds.length,
                             patterns,
                         }),
                     );
-                    throw new Error('Issue generation blocked: potential secrets detected in selected files');
                 }
 
                 const estimatedTokens = TokenManager.estimateTokens(combinedContent);

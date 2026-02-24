@@ -1,5 +1,23 @@
 # Change Log
 
+## [2.10.0] - 2026-02-24
+
+### Changed
+
+- **Secret detection is now non-blocking (warn-only):**
+  - Commit message, PR, and issue generation now continue even when potential secrets are detected
+  - Warning notification is still displayed to alert users
+  - Map-reduce chunk summarization proceeds with warning instead of returning placeholder text
+  - Updated all 25 locale messages from "canceled" to "will continue" language
+
+### Improved
+
+- **Secret detection accuracy overhaul:**
+  - Removed all context-based variable name patterns (28 patterns like `OPENAI_API_KEY=`, `ANTHROPIC_API_KEY=`, etc.) that caused false positives on placeholder values
+  - Detection now relies solely on value-based patterns (60+ patterns matching actual secret formats like `sk-proj-...`, `AKIA...`, `ghp_...`)
+  - Added placeholder repetition filter: values with 8+ consecutive identical characters (e.g., `sk-proj-xxxxxxxxxxxx`) are excluded
+  - Fixed global regex matching to skip placeholder matches and continue searching for real secrets in the same diff
+
 ## [2.9.0] - 2026-02-23
 
 ### Added

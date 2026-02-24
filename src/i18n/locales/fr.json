@@ -34,7 +34,7 @@
     "updatingContent": "Mise a jour du contenu...",
     "waitingForModificationInput": "En attente d'instructions de modification...",
     "storageFallbackWarning": "otak-committer : la cle API est stockee dans un stockage de secours. Le stockage securise n'est pas disponible.",
-    "commitGenerationSecretWarning": "Des cles API ou secrets potentiels ont ete trouves dans la cible de generation de message de commit ({count} motif(s) detecte(s) : {patterns}). La generation a ete annulee pour eviter d'envoyer des donnees sensibles a l'IA."
+    "commitGenerationSecretWarning": "Des cles API ou secrets potentiels ont ete trouves dans la cible de generation de message de commit ({count} motif(s) detecte(s) : {patterns}). La generation va continuer, mais le diff peut contenir des donnees sensibles. Veuillez verifier attentivement."
   },
   "statusBar": {
     "configuration": "Configuration",

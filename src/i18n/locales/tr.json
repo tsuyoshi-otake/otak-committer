@@ -34,7 +34,7 @@
     "updatingContent": "İçerik güncelleniyor...",
     "waitingForModificationInput": "Değişiklik girişi bekleniyor...",
     "storageFallbackWarning": "otak-committer: API anahtarı yedek depolamaya kaydedildi. Güvenli depolama kullanılamıyor.",
-    "commitGenerationSecretWarning": "Commit mesajı oluşturma hedefinde potansiyel API anahtarları veya gizli bilgiler bulundu ({count} eşleşen kalıp: {patterns}). Hassas verilerin AI'ya gönderilmesini önlemek için oluşturma iptal edildi."
+    "commitGenerationSecretWarning": "Commit mesajı oluşturma hedefinde potansiyel API anahtarları veya gizli bilgiler bulundu ({count} eşleşen kalıp: {patterns}). Oluşturma devam edecek, ancak diff hassas veriler içerebilir. Lütfen dikkatli bir şekilde inceleyin."
   },
   "statusBar": {
     "configuration": "Yapılandırma",

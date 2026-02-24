@@ -34,7 +34,7 @@
     "updatingContent": "Inhalt wird aktualisiert...",
     "waitingForModificationInput": "Warte auf Anderungsanweisungen...",
     "storageFallbackWarning": "otak-committer: API-Schlussel im Fallback-Speicher gespeichert. Sicherer Speicher ist nicht verfugbar.",
-    "commitGenerationSecretWarning": "Mogliche API-Schlussel oder Geheimnisse wurden im Ziel der Commit-Nachrichtengenerierung gefunden ({count} gefundene Muster: {patterns}). Die Generierung wurde abgebrochen, um das Senden sensibler Daten an die KI zu vermeiden."
+    "commitGenerationSecretWarning": "Mogliche API-Schlussel oder Geheimnisse wurden im Ziel der Commit-Nachrichtengenerierung gefunden ({count} gefundene Muster: {patterns}). Die Generierung wird fortgesetzt, aber der Diff kann sensible Daten enthalten. Bitte sorgfaltig prufen."
   },
   "statusBar": {
     "configuration": "Konfiguration",

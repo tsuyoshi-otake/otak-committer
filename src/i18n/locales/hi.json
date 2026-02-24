@@ -34,7 +34,7 @@
     "updatingContent": "सामग्री अपडेट हो रही है...",
     "waitingForModificationInput": "संशोधन इनपुट की प्रतीक्षा हो रही है...",
     "storageFallbackWarning": "otak-committer: API key फ़ॉलबैक स्टोरेज में सहेजी गई। सुरक्षित स्टोरेज उपलब्ध नहीं है।",
-    "commitGenerationSecretWarning": "कमिट संदेश जनरेशन लक्ष्य में संभावित API key या गोपनीय जानकारी पाई गई ({count} मिलान पैटर्न: {patterns})। संवेदनशील डेटा AI को भेजने से बचने के लिए जनरेशन रद्द कर दिया गया।"
+    "commitGenerationSecretWarning": "कमिट संदेश जनरेशन लक्ष्य में संभावित API key या गोपनीय जानकारी पाई गई ({count} मिलान पैटर्न: {patterns})। जनरेशन जारी रहेगा, लेकिन diff में संवेदनशील डेटा हो सकता है। कृपया सावधानी से जांचें।"
   },
   "statusBar": {
     "configuration": "कॉन्फ़िगरेशन",

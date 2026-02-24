@@ -34,7 +34,7 @@
     "updatingContent": "Aktualizacja zawartości...",
     "waitingForModificationInput": "Oczekiwanie na dane do modyfikacji...",
     "storageFallbackWarning": "otak-committer: Klucz API zapisano w zapasowym magazynie. Bezpieczne przechowywanie jest niedostępne.",
-    "commitGenerationSecretWarning": "W celu generowania komunikatu commita wykryto potencjalne klucze API lub dane poufne ({count} dopasowanych wzorców: {patterns}). Generowanie zostało anulowane, aby uniknąć wysyłania wrażliwych danych do AI."
+    "commitGenerationSecretWarning": "W celu generowania komunikatu commita wykryto potencjalne klucze API lub dane poufne ({count} dopasowanych wzorców: {patterns}). Generowanie będzie kontynuowane, ale diff może zawierać wrażliwe dane. Proszę dokładnie sprawdzić."
   },
   "statusBar": {
     "configuration": "Konfiguracja",

@@ -34,7 +34,7 @@
     "updatingContent": "Aktualizace obsahu...",
     "waitingForModificationInput": "Cekani na vstup uprav...",
     "storageFallbackWarning": "otak-committer: API klic ulozen v nahradnim ulozisti. Bezpecne uloziste neni dostupne.",
-    "commitGenerationSecretWarning": "V cili generovani zpravy commitu byly nalezeny potencialni API klice nebo tajna data ({count} nalezenych vzoru: {patterns}). Generovani bylo zruseno, aby se zabranilo odeslani citlivych dat do AI."
+    "commitGenerationSecretWarning": "V cili generovani zpravy commitu byly nalezeny potencialni API klice nebo tajna data ({count} nalezenych vzoru: {patterns}). Generovani bude pokracovat, ale diff muze obsahovat citliva data. Prosim, zkontrolujte peclive."
   },
   "statusBar": {
     "configuration": "Konfigurace",

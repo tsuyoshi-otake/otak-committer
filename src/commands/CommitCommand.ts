@@ -53,9 +53,7 @@ export class CommitCommand extends BaseCommand {
                 return;
             }
 
-            if (await this.shouldBlockForPotentialSecrets(rawDiff)) {
-                return;
-            }
+            await this.warnIfPotentialSecrets(rawDiff);
 
             // Initialize OpenAI service (moved earlier — needed for Tier 3 map-reduce)
             const openai = await this.initializeOpenAI();
@@ -239,14 +237,12 @@ export class CommitCommand extends BaseCommand {
     }
 
     /**
-     * Detect potential secrets in diff before sending content to AI.
-     *
-     * @returns true when commit message generation should be blocked
+     * Warn if potential secrets are detected in diff (non-blocking).
      */
-    private async shouldBlockForPotentialSecrets(diff: string): Promise<boolean> {
+    private async warnIfPotentialSecrets(diff: string): Promise<void> {
         const detection = detectPotentialSecrets(diff);
         if (!detection.hasPotentialSecrets) {
-            return false;
+            return;
         }
 
         const patterns = detection.matchedPatternIds.join(', ');
@@ -255,14 +251,12 @@ export class CommitCommand extends BaseCommand {
             matchedPatternIds: detection.matchedPatternIds,
         });
 
-        await vscode.window.showWarningMessage(
+        vscode.window.showWarningMessage(
             t('messages.commitGenerationSecretWarning', {
                 count: detection.matchedPatternIds.length,
                 patterns,
             }),
         );
-
-        return true;
     }
 
     /**

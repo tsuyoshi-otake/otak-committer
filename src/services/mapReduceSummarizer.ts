@@ -157,15 +157,14 @@ export class MapReduceSummarizer {
         const chunkContent = chunk.map((f) => f.content).join('\n');
         this.logger.debug(`Summarizing chunk ${chunkIndex} (${estimateTokenCount(chunkContent)} tokens, ${chunk.length} files)`);
 
-        // Block chunk summarization if potential secrets are detected
+        // Warn if potential secrets are detected (non-blocking)
         const detection = detectPotentialSecrets(chunkContent);
         if (detection.hasPotentialSecrets) {
             const fileList = chunk.map((f) => f.filePath).join(', ');
             this.logger.warning(
-                `Potential secrets detected in chunk ${chunkIndex}, skipping summarization`,
+                `Potential secrets detected in chunk ${chunkIndex}, proceeding with summarization`,
                 { matchedPatternIds: detection.matchedPatternIds, files: fileList },
             );
-            return `[Skipped: potential secrets detected in ${fileList}]`;
         }
 
         try {

@@ -34,7 +34,7 @@
     "updatingContent": "Aggiornamento contenuto...",
     "waitingForModificationInput": "In attesa dell'input di modifica...",
     "storageFallbackWarning": "otak-committer: Chiave API salvata nell'archiviazione di fallback. L'archiviazione sicura non e disponibile.",
-    "commitGenerationSecretWarning": "Sono state trovate potenziali chiavi API o segreti nel target di generazione del messaggio di commit ({count} pattern trovati: {patterns}). La generazione e stata annullata per evitare l'invio di dati sensibili all'AI."
+    "commitGenerationSecretWarning": "Sono state trovate potenziali chiavi API o segreti nel target di generazione del messaggio di commit ({count} pattern trovati: {patterns}). La generazione continuera, ma il diff potrebbe contenere dati sensibili. Si prega di verificare attentamente."
   },
   "statusBar": {
     "configuration": "Configurazione",
