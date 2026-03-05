@@ -32,6 +32,7 @@ docs/**
 .env.keys
 .env.local
 .env.local.example
+gcm-diagnose.log
 
 # Development docs
 .kiro/**
