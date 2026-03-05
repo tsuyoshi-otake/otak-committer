@@ -42,7 +42,9 @@
     "configuration": "কনফিগারেশন",
     "currentStyle": "বর্তমান শৈলী",
     "setApiKey": "API Key সেট করুন",
-    "openSettings": "সেটিংস খুলুন"
+    "openSettings": "সেটিংস খুলুন",
+    "public": "পাবলিক",
+    "private": "প্রাইভেট"
   },
   "quickPick": {
     "selectCommitLanguage": "কমিট বার্তার ভাষা নির্বাচন করুন",

@@ -7,6 +7,9 @@ node_modules
 # Environment variables (contains sensitive API keys)
 .env.local
 
+# Credential Manager diagnostics (may contain API keys in env dump)
+gcm-diagnose.log
+
 .env.keys
 # Snyk Security Extension - AI Rules (auto-generated)
 .github/instructions/snyk_rules.instructions.md

@@ -42,7 +42,9 @@
     "configuration": "கட்டமைப்பு",
     "currentStyle": "தற்போதைய பாணி",
     "setApiKey": "API Key அமை",
-    "openSettings": "அமைப்புகளைத் திற"
+    "openSettings": "அமைப்புகளைத் திற",
+    "public": "பொது",
+    "private": "தனிப்பட்ட"
   },
   "quickPick": {
     "selectCommitLanguage": "கமிட் செய்தி மொழியைத் தேர்ந்தெடுக்கவும்",

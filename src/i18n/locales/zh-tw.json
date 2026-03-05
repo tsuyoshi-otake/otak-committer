@@ -42,7 +42,9 @@
     "configuration": "設定",
     "currentStyle": "目前風格",
     "setApiKey": "設定 API 金鑰",
-    "openSettings": "開啟設定"
+    "openSettings": "開啟設定",
+    "public": "公開",
+    "private": "私有"
   },
   "quickPick": {
     "selectCommitLanguage": "選擇提交訊息語言",

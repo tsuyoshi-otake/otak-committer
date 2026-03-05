@@ -42,7 +42,9 @@
     "configuration": "Configurazione",
     "currentStyle": "Stile attuale",
     "setApiKey": "Imposta chiave API",
-    "openSettings": "Apri impostazioni"
+    "openSettings": "Apri impostazioni",
+    "public": "Pubblico",
+    "private": "Privato"
   },
   "quickPick": {
     "selectCommitLanguage": "Seleziona la lingua del messaggio di commit",

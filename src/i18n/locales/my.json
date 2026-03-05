@@ -42,7 +42,9 @@
     "configuration": "ပြင်ဆင်သတ်မှတ်ချက်",
     "currentStyle": "လက်ရှိပုံစံ",
     "setApiKey": "API Key သတ်မှတ်ရန်",
-    "openSettings": "ဆက်တင်များ ဖွင့်ရန်"
+    "openSettings": "ဆက်တင်များ ဖွင့်ရန်",
+    "public": "အများသုံး",
+    "private": "ကိုယ်ပိုင်"
   },
   "quickPick": {
     "selectCommitLanguage": "Commit မက်ဆေ့ချ် ဘာသာစကား ရွေးချယ်ပါ",

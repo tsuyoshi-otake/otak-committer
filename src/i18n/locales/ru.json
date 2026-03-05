@@ -42,7 +42,9 @@
     "configuration": "Конфигурация",
     "currentStyle": "Текущий стиль",
     "setApiKey": "Установить API-ключ",
-    "openSettings": "Открыть настройки"
+    "openSettings": "Открыть настройки",
+    "public": "Публичный",
+    "private": "Приватный"
   },
   "quickPick": {
     "selectCommitLanguage": "Выберите язык сообщения коммита",

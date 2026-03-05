@@ -42,7 +42,9 @@
     "configuration": "การกำหนดค่า",
     "currentStyle": "รูปแบบปัจจุบัน",
     "setApiKey": "ตั้งค่า API Key",
-    "openSettings": "เปิดการตั้งค่า"
+    "openSettings": "เปิดการตั้งค่า",
+    "public": "สาธารณะ",
+    "private": "ส่วนตัว"
   },
   "quickPick": {
     "selectCommitLanguage": "เลือกภาษาข้อความคอมมิต",

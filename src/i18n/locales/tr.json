@@ -42,7 +42,9 @@
     "configuration": "Yapılandırma",
     "currentStyle": "Mevcut Stil",
     "setApiKey": "API Anahtarını Ayarla",
-    "openSettings": "Ayarları Aç"
+    "openSettings": "Ayarları Aç",
+    "public": "Herkese Açık",
+    "private": "Özel"
   },
   "quickPick": {
     "selectCommitLanguage": "Commit mesajı dilini seçin",

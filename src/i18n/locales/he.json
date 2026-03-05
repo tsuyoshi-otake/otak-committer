@@ -42,7 +42,9 @@
     "configuration": "הגדרות",
     "currentStyle": "סגנון נוכחי",
     "setApiKey": "הגדרת מפתח API",
-    "openSettings": "פתיחת הגדרות"
+    "openSettings": "פתיחת הגדרות",
+    "public": "ציבורי",
+    "private": "פרטי"
   },
   "quickPick": {
     "selectCommitLanguage": "בחר שפה להודעת commit",

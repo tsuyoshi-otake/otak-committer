@@ -75,7 +75,14 @@ export class StatusBarManager {
         }
 
         // Set status bar text
-        this.statusBarItem.text = `${this.repoIcon} ${languageConfig.label}`;
+        const visibilityLabel = this._isPublicRepo === true
+            ? t('statusBar.public')
+            : this._isPublicRepo === false
+                ? t('statusBar.private')
+                : '';
+        this.statusBarItem.text = visibilityLabel
+            ? `${this.repoIcon} ${visibilityLabel}: ${languageConfig.label}`
+            : `${this.repoIcon} ${languageConfig.label}`;
 
         // Build tooltip
         const tooltip = this.buildTooltip();

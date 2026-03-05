@@ -42,7 +42,9 @@
     "configuration": "التكوين",
     "currentStyle": "النمط الحالي",
     "setApiKey": "تعيين مفتاح API",
-    "openSettings": "فتح الإعدادات"
+    "openSettings": "فتح الإعدادات",
+    "public": "عام",
+    "private": "خاص"
   },
   "quickPick": {
     "selectCommitLanguage": "اختر لغة رسالة الإيداع",

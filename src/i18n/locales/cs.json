@@ -42,7 +42,9 @@
     "configuration": "Konfigurace",
     "currentStyle": "Aktualni styl",
     "setApiKey": "Nastavit API klic",
-    "openSettings": "Otevrit nastaveni"
+    "openSettings": "Otevrit nastaveni",
+    "public": "Veřejný",
+    "private": "Soukromý"
   },
   "quickPick": {
     "selectCommitLanguage": "Vyberte jazyk zpravy commitu",

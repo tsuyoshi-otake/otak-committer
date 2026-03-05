@@ -42,7 +42,9 @@
     "configuration": "Konfiguraciot",
     "currentStyle": "Jelenlegi stilus",
     "setApiKey": "API kulcs beallitasa",
-    "openSettings": "Beallitasok megnyitasa"
+    "openSettings": "Beallitasok megnyitasa",
+    "public": "Nyilvános",
+    "private": "Privát"
   },
   "quickPick": {
     "selectCommitLanguage": "Valassza ki a commit uzenet nyelvet",

@@ -42,7 +42,9 @@
     "configuration": "Konfigurasi",
     "currentStyle": "Gaya Saiki",
     "setApiKey": "Setel API Key",
-    "openSettings": "Bukak Setelan"
+    "openSettings": "Bukak Setelan",
+    "public": "Publik",
+    "private": "Pribadi"
   },
   "quickPick": {
     "selectCommitLanguage": "Pilih basa pesen commit",

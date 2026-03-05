@@ -42,7 +42,9 @@
     "configuration": "구성",
     "currentStyle": "현재 스타일",
     "setApiKey": "API 키 설정",
-    "openSettings": "설정 열기"
+    "openSettings": "설정 열기",
+    "public": "Public",
+    "private": "Private"
   },
   "quickPick": {
     "selectCommitLanguage": "커밋 메시지 언어 선택",

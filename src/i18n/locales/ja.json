@@ -42,7 +42,9 @@
     "configuration": "設定",
     "currentStyle": "現在のスタイル",
     "setApiKey": "APIキーを設定",
-    "openSettings": "設定を開く"
+    "openSettings": "設定を開く",
+    "public": "Public",
+    "private": "Private"
   },
   "quickPick": {
     "selectCommitLanguage": "コミットメッセージの言語を選択",

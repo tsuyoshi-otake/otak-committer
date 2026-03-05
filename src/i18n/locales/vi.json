@@ -42,7 +42,9 @@
     "configuration": "Cau Hinh",
     "currentStyle": "Kieu Hien Tai",
     "setApiKey": "Cai Dat API Key",
-    "openSettings": "Mo Cai Dat"
+    "openSettings": "Mo Cai Dat",
+    "public": "Public",
+    "private": "Private"
   },
   "quickPick": {
     "selectCommitLanguage": "Chon ngon ngu thong diep commit",
