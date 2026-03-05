@@ -13,10 +13,11 @@
     "url": "https://github.com/tsuyoshi-otake/otak-committer/issues"
   },
   "homepage": "https://github.com/tsuyoshi-otake/otak-committer#readme",
-  "version": "2.12.1",
+  "version": "2.12.2",
   "overrides": {
-    "minimatch": ">=10.2.1",
-    "diff": ">=8.0.3"
+    "minimatch": ">=10.2.3",
+    "diff": ">=8.0.3",
+    "serialize-javascript": ">=7.0.3"
   },
   "engines": {
     "vscode": "^1.90.0"
