@@ -35,7 +35,8 @@
     "waitingForModificationInput": "等待修改输入...",
     "storageFallbackWarning": "otak-committer: API 密钥已存储在备用存储中。安全存储不可用。",
     "commitGenerationSecretWarning": "在提交消息生成目标中检测到可能的 API 密钥或敏感信息（{count} 个匹配模式：{patterns}）。生成将继续，但差异中可能包含敏感数据，请仔细检查。",
-    "publicRepoWarning": "您正在向公开仓库提交。您的更改将公开可见，这是您的意图吗？"
+    "publicRepoWarning": "您正在向公开仓库提交。您的更改将公开可见，这是您的意图吗？",
+    "publicRepoOpenWarning": "此工作区是公开仓库。所有内容均已公开。"
   },
   "statusBar": {
     "configuration": "配置",

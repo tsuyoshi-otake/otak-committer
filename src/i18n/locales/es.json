@@ -35,7 +35,8 @@
     "waitingForModificationInput": "Esperando instrucciones de modificacion...",
     "storageFallbackWarning": "otak-committer: la clave API se guardo en almacenamiento de respaldo. El almacenamiento seguro no esta disponible.",
     "commitGenerationSecretWarning": "Se encontraron posibles claves API o secretos en el objetivo de generacion de mensajes de commit ({count} patron(es) coincidente(s): {patterns}). La generacion continuara, pero el diff puede contener datos sensibles. Por favor, revise cuidadosamente.",
-    "publicRepoWarning": "Está a punto de hacer commit en un repositorio PÚBLICO. Sus cambios serán visibles públicamente. ¿Es intencional?"
+    "publicRepoWarning": "Está a punto de hacer commit en un repositorio PÚBLICO. Sus cambios serán visibles públicamente. ¿Es intencional?",
+    "publicRepoOpenWarning": "Este espacio de trabajo es un repositorio PÚBLICO. Todo el contenido es visible públicamente."
   },
   "statusBar": {
     "configuration": "Configuracion",

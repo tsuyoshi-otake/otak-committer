@@ -174,6 +174,21 @@ export class StatusBarManager {
         this._isPublicRepo = !isPrivate;
         this.repoIcon = isPrivate ? '$(lock)' : '$(globe)';
         this.update();
+
+        if (!isPrivate && !this.isPublicRepoWarningSuppressed()) {
+            this.showPublicRepoOpenWarning();
+        }
+    }
+
+    private async showPublicRepoOpenWarning(): Promise<void> {
+        const choice = await vscode.window.showWarningMessage(
+            t('messages.publicRepoOpenWarning'),
+            t('buttons.yes'),
+            t('buttons.dontShowAgain'),
+        );
+        if (choice === t('buttons.dontShowAgain')) {
+            await this.suppressPublicRepoWarning();
+        }
     }
 
     get isPublicRepo(): boolean | null {

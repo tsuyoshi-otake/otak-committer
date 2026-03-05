@@ -35,7 +35,8 @@
     "waitingForModificationInput": "Nunggu input modifikasi...",
     "storageFallbackWarning": "otak-committer: API key disimpen ing panyimpenan cadangan. Panyimpenan aman ora kasedhiya.",
     "commitGenerationSecretWarning": "API key utawa rahasia sing potensial ditemokake ing target generasi pesen commit ({count} pola cocog: {patterns}). Generasi bakal diterusake, nanging diff bisa ngandhut data sensitif. Mangga dipriksa kanthi teliti.",
-    "publicRepoWarning": "Sampeyan arep nggawe commit ing repositori PUBLIK. Owah-owahan sampeyan bakal katon kanggo umum. Apa iki disengaja?"
+    "publicRepoWarning": "Sampeyan arep nggawe commit ing repositori PUBLIK. Owah-owahan sampeyan bakal katon kanggo umum. Apa iki disengaja?",
+    "publicRepoOpenWarning": "Workspace iki repositori PUBLIK. Kabeh isi katon kanggo umum."
   },
   "statusBar": {
     "configuration": "Konfigurasi",

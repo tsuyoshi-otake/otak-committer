@@ -35,7 +35,8 @@
     "waitingForModificationInput": "Cekani na vstup uprav...",
     "storageFallbackWarning": "otak-committer: API klic ulozen v nahradnim ulozisti. Bezpecne uloziste neni dostupne.",
     "commitGenerationSecretWarning": "V cili generovani zpravy commitu byly nalezeny potencialni API klice nebo tajna data ({count} nalezenych vzoru: {patterns}). Generovani bude pokracovat, ale diff muze obsahovat citliva data. Prosim, zkontrolujte peclive.",
-    "publicRepoWarning": "Chystáte se provést commit do VEŘEJNÉHO repozitáře. Vaše změny budou veřejně viditelné. Je to záměr?"
+    "publicRepoWarning": "Chystáte se provést commit do VEŘEJNÉHO repozitáře. Vaše změny budou veřejně viditelné. Je to záměr?",
+    "publicRepoOpenWarning": "Tento pracovní prostor je VEŘEJNÝ repozitář. Veškerý obsah je veřejně viditelný."
   },
   "statusBar": {
     "configuration": "Konfigurace",

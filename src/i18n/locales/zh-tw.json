@@ -35,7 +35,8 @@
     "waitingForModificationInput": "等待修改輸入...",
     "storageFallbackWarning": "otak-committer: API 金鑰已儲存在備用儲存中。安全儲存不可用。",
     "commitGenerationSecretWarning": "在提交訊息產生目標中偵測到可能的 API 金鑰或敏感資訊（{count} 個匹配模式：{patterns}）。產生將繼續，但差異中可能包含敏感資料，請仔細檢查。",
-    "publicRepoWarning": "您正在向公開倉庫提交。您的變更將公開可見，這是您的意圖嗎？"
+    "publicRepoWarning": "您正在向公開倉庫提交。您的變更將公開可見，這是您的意圖嗎？",
+    "publicRepoOpenWarning": "此工作區是公開倉庫。所有內容均已公開。"
   },
   "statusBar": {
     "configuration": "設定",
