@@ -29,10 +29,7 @@ docs/**
 
 # Sensitive files
 .env*
-.env.keys
-.env.local
-.env.local.example
-gcm-diagnose.log
+*.log
 
 # Development docs
 .kiro/**
