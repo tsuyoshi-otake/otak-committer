@@ -34,7 +34,8 @@
     "updatingContent": "Aktualizace obsahu...",
     "waitingForModificationInput": "Cekani na vstup uprav...",
     "storageFallbackWarning": "otak-committer: API klic ulozen v nahradnim ulozisti. Bezpecne uloziste neni dostupne.",
-    "commitGenerationSecretWarning": "V cili generovani zpravy commitu byly nalezeny potencialni API klice nebo tajna data ({count} nalezenych vzoru: {patterns}). Generovani bude pokracovat, ale diff muze obsahovat citliva data. Prosim, zkontrolujte peclive."
+    "commitGenerationSecretWarning": "V cili generovani zpravy commitu byly nalezeny potencialni API klice nebo tajna data ({count} nalezenych vzoru: {patterns}). Generovani bude pokracovat, ale diff muze obsahovat citliva data. Prosim, zkontrolujte peclive.",
+    "publicRepoWarning": "Chystáte se vygenerovat zprávu commitu pro VEŘEJNÝ repozitář. Vaše změny budou veřejně viditelné."
   },
   "statusBar": {
     "configuration": "Konfigurace",
@@ -81,7 +82,8 @@
     "yes": "Ano",
     "no": "Ne",
     "openInBrowser": "Otevrit v prohlizeci",
-    "openIssue": "Otevrit Issue"
+    "openIssue": "Otevrit Issue",
+    "dontShowAgain": "Znovu nezobrazovat"
   },
   "git": {
     "stageAll": "Pridat vse do stage",

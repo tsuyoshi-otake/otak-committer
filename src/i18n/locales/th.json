@@ -34,7 +34,8 @@
     "updatingContent": "กำลังอัปเดตเนื้อหา...",
     "waitingForModificationInput": "กำลังรอข้อมูลการแก้ไข...",
     "storageFallbackWarning": "otak-committer: API key ถูกเก็บในที่เก็บสำรอง ที่เก็บแบบปลอดภัยไม่พร้อมใช้งาน",
-    "commitGenerationSecretWarning": "พบ API key หรือข้อมูลลับที่อาจเป็นไปได้ในเป้าหมายการสร้างข้อความคอมมิต (ตรงกับรูปแบบ {count} รายการ: {patterns}) การสร้างจะดำเนินต่อไป แต่ diff อาจมีข้อมูลที่ละเอียดอ่อน กรุณาตรวจสอบอย่างระมัดระวัง"
+    "commitGenerationSecretWarning": "พบ API key หรือข้อมูลลับที่อาจเป็นไปได้ในเป้าหมายการสร้างข้อความคอมมิต (ตรงกับรูปแบบ {count} รายการ: {patterns}) การสร้างจะดำเนินต่อไป แต่ diff อาจมีข้อมูลที่ละเอียดอ่อน กรุณาตรวจสอบอย่างระมัดระวัง",
+    "publicRepoWarning": "คุณกำลังจะสร้างข้อความ commit สำหรับ repository สาธารณะ การเปลี่ยนแปลงของคุณจะเปิดเผยต่อสาธารณะ"
   },
   "statusBar": {
     "configuration": "การกำหนดค่า",
@@ -81,7 +82,8 @@
     "yes": "ใช่",
     "no": "ไม่",
     "openInBrowser": "เปิดในเบราว์เซอร์",
-    "openIssue": "เปิด Issue"
+    "openIssue": "เปิด Issue",
+    "dontShowAgain": "ไม่ต้องแสดงอีก"
   },
   "git": {
     "stageAll": "จัดเตรียมทั้งหมด",

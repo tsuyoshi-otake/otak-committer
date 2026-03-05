@@ -34,7 +34,8 @@
     "updatingContent": "Atualizando conteudo...",
     "waitingForModificationInput": "Aguardando instrucoes de modificacao...",
     "storageFallbackWarning": "otak-committer: chave de API armazenada em armazenamento de fallback. O armazenamento seguro nao esta disponivel.",
-    "commitGenerationSecretWarning": "Possiveis chaves de API ou segredos foram encontrados no alvo de geracao da mensagem de commit ({count} padrao(oes) encontrado(s): {patterns}). A geracao continuara, mas o diff pode conter dados sensiveis. Por favor, revise cuidadosamente."
+    "commitGenerationSecretWarning": "Possiveis chaves de API ou segredos foram encontrados no alvo de geracao da mensagem de commit ({count} padrao(oes) encontrado(s): {patterns}). A geracao continuara, mas o diff pode conter dados sensiveis. Por favor, revise cuidadosamente.",
+    "publicRepoWarning": "Você está prestes a gerar uma mensagem de commit para um repositório PÚBLICO. Suas alterações serão visíveis publicamente."
   },
   "statusBar": {
     "configuration": "Configuracao",
@@ -81,7 +82,8 @@
     "yes": "Sim",
     "no": "Nao",
     "openInBrowser": "Abrir no navegador",
-    "openIssue": "Abrir issue"
+    "openIssue": "Abrir issue",
+    "dontShowAgain": "Não mostrar novamente"
   },
   "git": {
     "stageAll": "Preparar tudo",

@@ -34,7 +34,8 @@
     "updatingContent": "सामग्री अपडेट हो रही है...",
     "waitingForModificationInput": "संशोधन इनपुट की प्रतीक्षा हो रही है...",
     "storageFallbackWarning": "otak-committer: API key फ़ॉलबैक स्टोरेज में सहेजी गई। सुरक्षित स्टोरेज उपलब्ध नहीं है।",
-    "commitGenerationSecretWarning": "कमिट संदेश जनरेशन लक्ष्य में संभावित API key या गोपनीय जानकारी पाई गई ({count} मिलान पैटर्न: {patterns})। जनरेशन जारी रहेगा, लेकिन diff में संवेदनशील डेटा हो सकता है। कृपया सावधानी से जांचें।"
+    "commitGenerationSecretWarning": "कमिट संदेश जनरेशन लक्ष्य में संभावित API key या गोपनीय जानकारी पाई गई ({count} मिलान पैटर्न: {patterns})। जनरेशन जारी रहेगा, लेकिन diff में संवेदनशील डेटा हो सकता है। कृपया सावधानी से जांचें।",
+    "publicRepoWarning": "आप एक सार्वजनिक रिपॉजिटरी के लिए कमिट संदेश जनरेट करने वाले हैं। आपके बदलाव सार्वजनिक रूप से दिखाई देंगे।"
   },
   "statusBar": {
     "configuration": "कॉन्फ़िगरेशन",
@@ -81,7 +82,8 @@
     "yes": "हाँ",
     "no": "नहीं",
     "openInBrowser": "ब्राउज़र में खोलें",
-    "openIssue": "Issue खोलें"
+    "openIssue": "Issue खोलें",
+    "dontShowAgain": "दोबारा न दिखाएं"
   },
   "git": {
     "stageAll": "सभी स्टेज करें",

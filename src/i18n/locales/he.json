@@ -34,7 +34,8 @@
     "updatingContent": "מעדכן תוכן...",
     "waitingForModificationInput": "ממתין לקלט שינויים...",
     "storageFallbackWarning": "otak-committer: מפתח API אוחסן באחסון חלופי. אחסון מאובטח אינו זמין.",
-    "commitGenerationSecretWarning": "נמצאו מפתחות API או סודות פוטנציאליים ביעד יצירת הודעת ה-commit ({count} דפוסים תואמים: {patterns}). היצירה תמשיך, אך ה-diff עשוי להכיל נתונים רגישים. אנא בדקו בקפידה."
+    "commitGenerationSecretWarning": "נמצאו מפתחות API או סודות פוטנציאליים ביעד יצירת הודעת ה-commit ({count} דפוסים תואמים: {patterns}). היצירה תמשיך, אך ה-diff עשוי להכיל נתונים רגישים. אנא בדקו בקפידה.",
+    "publicRepoWarning": "אתה עומד ליצור הודעת commit עבור מאגר ציבורי. השינויים שלך יהיו גלויים לכולם."
   },
   "statusBar": {
     "configuration": "הגדרות",
@@ -81,7 +82,8 @@
     "yes": "כן",
     "no": "לא",
     "openInBrowser": "פתיחה בדפדפן",
-    "openIssue": "פתיחת Issue"
+    "openIssue": "פתיחת Issue",
+    "dontShowAgain": "אל תציג שוב"
   },
   "git": {
     "stageAll": "הוספת הכל ל-Stage",

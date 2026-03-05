@@ -34,7 +34,8 @@
     "updatingContent": "বিষয়বস্তু আপডেট হচ্ছে...",
     "waitingForModificationInput": "সংশোধন ইনপুটের জন্য অপেক্ষা করা হচ্ছে...",
     "storageFallbackWarning": "otak-committer: API key ফলব্যাক স্টোরেজে সংরক্ষিত। নিরাপদ স্টোরেজ উপলব্ধ নয়।",
-    "commitGenerationSecretWarning": "কমিট বার্তা তৈরির লক্ষ্যে সম্ভাব্য API key বা গোপনীয় তথ্য পাওয়া গেছে ({count}টি মিলিত প্যাটার্ন: {patterns})। তৈরি চলতে থাকবে, তবে diff-এ সংবেদনশীল ডেটা থাকতে পারে। অনুগ্রহ করে সাবধানে পর্যালোচনা করুন।"
+    "commitGenerationSecretWarning": "কমিট বার্তা তৈরির লক্ষ্যে সম্ভাব্য API key বা গোপনীয় তথ্য পাওয়া গেছে ({count}টি মিলিত প্যাটার্ন: {patterns})। তৈরি চলতে থাকবে, তবে diff-এ সংবেদনশীল ডেটা থাকতে পারে। অনুগ্রহ করে সাবধানে পর্যালোচনা করুন।",
+    "publicRepoWarning": "আপনি একটি পাবলিক রিপোজিটরিতে কমিট করতে চলেছেন। আপনার পরিবর্তনগুলি সর্বজনীনভাবে দৃশ্যমান হবে।"
   },
   "statusBar": {
     "configuration": "কনফিগারেশন",
@@ -81,7 +82,8 @@
     "yes": "হ্যাঁ",
     "no": "না",
     "openInBrowser": "ব্রাউজারে খুলুন",
-    "openIssue": "Issue খুলুন"
+    "openIssue": "Issue খুলুন",
+    "dontShowAgain": "আর দেখাবেন না"
   },
   "git": {
     "stageAll": "সব স্টেজ করুন",

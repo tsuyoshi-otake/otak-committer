@@ -52,6 +52,7 @@ Generates clear titles, structured descriptions, and relevant labels.
 - **UI internationalization** — Auto-detect VS Code UI language or pick one manually. Supported UI languages: English, Japanese, Korean, Vietnamese, French, German, Spanish, Portuguese, Simplified Chinese, Traditional Chinese, Italian, Czech, Hungarian, Bulgarian, Turkish, Polish, Russian, Thai, Hindi, Bengali, Javanese, Tamil, Burmese, Arabic, Hebrew.
 - **Multilingual commit messages** — 25 languages: English, Français, Deutsch, Italiano, Español, Português, Čeština, Magyar, Български, Türkçe, Polski, Русский, 日本語, 中文, 繁體中文, 한국어, Tiếng Việt, ไทย, हिन्दी, বাংলা, Basa Jawa, தமிழ், မြန်မာဘာသာ, العربية, עברית.
 - **Message styles** — `simple`, `normal`, or `detailed`.
+- **Repository visibility indicator** — Status bar icon shows whether the current repository is public (`$(globe)`) or private (`$(lock)`). Public repositories trigger a confirmation warning before generating commit messages to prevent accidental exposure.
 - **Deep VS Code integration** — Source Control panel actions, status bar controls, and full UI localization.
 - **Smart PRs and issues** — Context-aware descriptions, template support, and issue linking.
 - **Custom instructions** — Team-specific guidance via `otakCommitter.customMessage`.

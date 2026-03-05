@@ -23,6 +23,21 @@ export function registerAllCommands(
         title: 'Generate Commit Message',
         category: 'otak-committer',
         handler: async () => {
+            if (statusBar.isPublicRepo && !statusBar.isPublicRepoWarningSuppressed()) {
+                const { t } = await import('../i18n/index.js');
+                const choice = await vscode.window.showWarningMessage(
+                    t('messages.publicRepoWarning'),
+                    t('buttons.yes'),
+                    t('buttons.no'),
+                    t('buttons.dontShowAgain'),
+                );
+                if (choice === t('buttons.dontShowAgain')) {
+                    await statusBar.suppressPublicRepoWarning();
+                } else if (choice !== t('buttons.yes')) {
+                    return;
+                }
+            }
+
             const { CommitCommand } = await import('./CommitCommand.js');
             const command = new CommitCommand(context);
             await command.execute();

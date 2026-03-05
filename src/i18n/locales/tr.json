@@ -34,7 +34,8 @@
     "updatingContent": "İçerik güncelleniyor...",
     "waitingForModificationInput": "Değişiklik girişi bekleniyor...",
     "storageFallbackWarning": "otak-committer: API anahtarı yedek depolamaya kaydedildi. Güvenli depolama kullanılamıyor.",
-    "commitGenerationSecretWarning": "Commit mesajı oluşturma hedefinde potansiyel API anahtarları veya gizli bilgiler bulundu ({count} eşleşen kalıp: {patterns}). Oluşturma devam edecek, ancak diff hassas veriler içerebilir. Lütfen dikkatli bir şekilde inceleyin."
+    "commitGenerationSecretWarning": "Commit mesajı oluşturma hedefinde potansiyel API anahtarları veya gizli bilgiler bulundu ({count} eşleşen kalıp: {patterns}). Oluşturma devam edecek, ancak diff hassas veriler içerebilir. Lütfen dikkatli bir şekilde inceleyin.",
+    "publicRepoWarning": "Bir PUBLIC depo için commit mesajı oluşturmak üzeresiniz. Değişiklikleriniz herkese açık olacak."
   },
   "statusBar": {
     "configuration": "Yapılandırma",
@@ -81,7 +82,8 @@
     "yes": "Evet",
     "no": "Hayır",
     "openInBrowser": "Tarayıcıda Aç",
-    "openIssue": "Issue'yu Aç"
+    "openIssue": "Issue'yu Aç",
+    "dontShowAgain": "Bir daha gösterme"
   },
   "git": {
     "stageAll": "Tümünü Hazırla",

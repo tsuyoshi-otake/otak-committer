@@ -34,7 +34,8 @@
     "updatingContent": "Inhalt wird aktualisiert...",
     "waitingForModificationInput": "Warte auf Anderungsanweisungen...",
     "storageFallbackWarning": "otak-committer: API-Schlussel im Fallback-Speicher gespeichert. Sicherer Speicher ist nicht verfugbar.",
-    "commitGenerationSecretWarning": "Mogliche API-Schlussel oder Geheimnisse wurden im Ziel der Commit-Nachrichtengenerierung gefunden ({count} gefundene Muster: {patterns}). Die Generierung wird fortgesetzt, aber der Diff kann sensible Daten enthalten. Bitte sorgfaltig prufen."
+    "commitGenerationSecretWarning": "Mogliche API-Schlussel oder Geheimnisse wurden im Ziel der Commit-Nachrichtengenerierung gefunden ({count} gefundene Muster: {patterns}). Die Generierung wird fortgesetzt, aber der Diff kann sensible Daten enthalten. Bitte sorgfaltig prufen.",
+    "publicRepoWarning": "Sie sind dabei, eine Commit-Nachricht für ein ÖFFENTLICHES Repository zu generieren. Ihre Änderungen werden öffentlich sichtbar sein."
   },
   "statusBar": {
     "configuration": "Konfiguration",
@@ -81,7 +82,8 @@
     "yes": "Ja",
     "no": "Nein",
     "openInBrowser": "Im Browser offnen",
-    "openIssue": "Issue offnen"
+    "openIssue": "Issue offnen",
+    "dontShowAgain": "Nicht mehr anzeigen"
   },
   "git": {
     "stageAll": "Alle stagen",
