@@ -35,7 +35,7 @@
     "waitingForModificationInput": "Oczekiwanie na dane do modyfikacji...",
     "storageFallbackWarning": "otak-committer: Klucz API zapisano w zapasowym magazynie. Bezpieczne przechowywanie jest niedostępne.",
     "commitGenerationSecretWarning": "W celu generowania komunikatu commita wykryto potencjalne klucze API lub dane poufne ({count} dopasowanych wzorców: {patterns}). Generowanie będzie kontynuowane, ale diff może zawierać wrażliwe dane. Proszę dokładnie sprawdzić.",
-    "publicRepoWarning": "Zamierzasz wygenerować wiadomość commita dla PUBLICZNEGO repozytorium. Twoje zmiany będą publicznie widoczne."
+    "publicRepoWarning": "Zamierzasz wykonać commit do PUBLICZNEGO repozytorium. Twoje zmiany będą publicznie widoczne. Czy to zamierzone?"
   },
   "statusBar": {
     "configuration": "Konfiguracja",

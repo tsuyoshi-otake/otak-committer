@@ -35,7 +35,7 @@
     "waitingForModificationInput": "En attente d'instructions de modification...",
     "storageFallbackWarning": "otak-committer : la cle API est stockee dans un stockage de secours. Le stockage securise n'est pas disponible.",
     "commitGenerationSecretWarning": "Des cles API ou secrets potentiels ont ete trouves dans la cible de generation de message de commit ({count} motif(s) detecte(s) : {patterns}). La generation va continuer, mais le diff peut contenir des donnees sensibles. Veuillez verifier attentivement.",
-    "publicRepoWarning": "Vous êtes sur le point de générer un message de commit pour un dépôt PUBLIC. Vos modifications seront visibles publiquement."
+    "publicRepoWarning": "Vous êtes sur le point de committer dans un dépôt PUBLIC. Vos modifications seront visibles publiquement. Est-ce intentionnel ?"
   },
   "statusBar": {
     "configuration": "Configuration",

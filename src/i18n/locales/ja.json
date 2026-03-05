@@ -35,7 +35,7 @@
     "waitingForModificationInput": "修正内容の入力を待っています...",
     "storageFallbackWarning": "otak-committer: APIキーをフォールバックストレージに保存しました。安全なストレージは利用できません。",
     "commitGenerationSecretWarning": "コミットメッセージ生成対象にAPIキーまたは秘密情報の可能性がある文字列を検出しました（{count}件: {patterns}）。差分に機密データが含まれている可能性があります。生成は続行されますが、ご確認ください。",
-    "publicRepoWarning": "パブリックリポジトリにコミットしようとしています。変更内容は公開されます。"
+    "publicRepoWarning": "パブリックリポジトリにコミットしようとしています。変更内容は公開されますが、意図していますか？"
   },
   "statusBar": {
     "configuration": "設定",

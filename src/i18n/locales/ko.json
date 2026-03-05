@@ -35,7 +35,7 @@
     "waitingForModificationInput": "수정 입력 대기 중...",
     "storageFallbackWarning": "otak-committer: API 키가 대체 저장소에 저장되었습니다. 보안 저장소를 사용할 수 없습니다.",
     "commitGenerationSecretWarning": "커밋 메시지 생성 대상에서 API 키 또는 비밀 정보 가능성이 있는 문자열을 감지했습니다 ({count}건: {patterns}). 생성은 계속되지만, diff에 민감한 데이터가 포함되어 있을 수 있습니다. 주의하여 확인해 주세요.",
-    "publicRepoWarning": "PUBLIC 리포지토리에 커밋하려고 합니다. 변경 사항이 공개됩니다."
+    "publicRepoWarning": "PUBLIC 리포지토리에 커밋하려고 합니다. 변경 사항이 공개되는데, 의도한 것입니까?"
   },
   "statusBar": {
     "configuration": "구성",

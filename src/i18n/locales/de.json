@@ -35,7 +35,7 @@
     "waitingForModificationInput": "Warte auf Anderungsanweisungen...",
     "storageFallbackWarning": "otak-committer: API-Schlussel im Fallback-Speicher gespeichert. Sicherer Speicher ist nicht verfugbar.",
     "commitGenerationSecretWarning": "Mogliche API-Schlussel oder Geheimnisse wurden im Ziel der Commit-Nachrichtengenerierung gefunden ({count} gefundene Muster: {patterns}). Die Generierung wird fortgesetzt, aber der Diff kann sensible Daten enthalten. Bitte sorgfaltig prufen.",
-    "publicRepoWarning": "Sie sind dabei, eine Commit-Nachricht für ein ÖFFENTLICHES Repository zu generieren. Ihre Änderungen werden öffentlich sichtbar sein."
+    "publicRepoWarning": "Sie sind dabei, in ein ÖFFENTLICHES Repository zu committen. Ihre Änderungen werden öffentlich sichtbar sein. Ist das beabsichtigt?"
   },
   "statusBar": {
     "configuration": "Konfiguration",
