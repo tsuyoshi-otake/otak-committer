@@ -20,7 +20,7 @@
   "config.emojiStyle": "Az uzenetekben hasznalt emoji stilusa",
   "config.emojiStyle.github": "GitHub stilusu emoji kodok (:smile:)",
   "config.emojiStyle.unicode": "Unicode emoji karakterek",
-  "config.reasoningEffort": "GPT-5.2 gondolkodasi szint (hatassal van a valasz minosegere es lateniciajara)",
+  "config.reasoningEffort": "GPT-5.4 gondolkodasi szint (hatassal van a valasz minosegere es lateniciajara)",
   "config.reasoningEffort.none": "Nincs gondolkodas (leggyorsabb, legalacsonyabb minoseg)",
   "config.reasoningEffort.low": "Alacsony gondolkodas (gyors, jo minoseg) - Ajanlott",
   "config.reasoningEffort.medium": "Kozepes gondolkodas (kiegyensulyozott)",

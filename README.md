@@ -144,7 +144,7 @@ Access via the Command Palette (`Cmd/Ctrl+Shift+P`):
 
 Default: English + Normal style. Change anytime from the status bar.
 
-The extension uses GPT-5.2 for high-quality commit message generation.
+The extension uses GPT-5.4 for high-quality commit message generation.
 
 ## Security & Privacy
 

@@ -20,7 +20,7 @@
   "config.emojiStyle": "Styl emoji pouzivanych ve zpravach",
   "config.emojiStyle.github": "Emoji kody ve stylu GitHub (:smile:)",
   "config.emojiStyle.unicode": "Znaky Unicode emoji",
-  "config.reasoningEffort": "Uroven uvazovani GPT-5.2 (ovlivnuje kvalitu a latenci odpovedi)",
+  "config.reasoningEffort": "Uroven uvazovani GPT-5.4 (ovlivnuje kvalitu a latenci odpovedi)",
   "config.reasoningEffort.none": "Zadne uvazovani (nejrychlejsi, nejnizsi kvalita)",
   "config.reasoningEffort.low": "Nizke uvazovani (rychle, dobra kvalita) - Doporuceno",
   "config.reasoningEffort.medium": "Stredni uvazovani (vyvazene)",

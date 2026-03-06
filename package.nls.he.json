@@ -20,7 +20,7 @@
   "config.emojiStyle": "סגנון אמוג'י לשימוש בהודעות",
   "config.emojiStyle.github": "קודי אמוג'י בסגנון GitHub (:smile:)",
   "config.emojiStyle.unicode": "תווי אמוג'י Unicode",
-  "config.reasoningEffort": "רמת מאמץ החשיבה של GPT-5.2 (משפיעה על איכות התגובה והשהייה)",
+  "config.reasoningEffort": "רמת מאמץ החשיבה של GPT-5.4 (משפיעה על איכות התגובה והשהייה)",
   "config.reasoningEffort.none": "ללא חשיבה (מהיר ביותר, איכות נמוכה ביותר)",
   "config.reasoningEffort.low": "חשיבה נמוכה (מהיר, איכות טובה) - מומלץ",
   "config.reasoningEffort.medium": "חשיבה בינונית (מאוזן)",

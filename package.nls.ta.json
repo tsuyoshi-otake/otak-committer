@@ -20,7 +20,7 @@
   "config.emojiStyle": "செய்திகளில் பயன்படுத்தும் ஈமோஜி பாணி",
   "config.emojiStyle.github": "GitHub பாணி ஈமோஜி குறியீடுகள் (:smile:)",
   "config.emojiStyle.unicode": "Unicode ஈமோஜி எழுத்துகள்",
-  "config.reasoningEffort": "GPT-5.2 பகுத்தறிவு முயற்சி நிலை (பதிலின் தரம் மற்றும் தாமதத்தைப் பாதிக்கும்)",
+  "config.reasoningEffort": "GPT-5.4 பகுத்தறிவு முயற்சி நிலை (பதிலின் தரம் மற்றும் தாமதத்தைப் பாதிக்கும்)",
   "config.reasoningEffort.none": "பகுத்தறிவு இல்லை (விரைவான, குறைந்த தரம்)",
   "config.reasoningEffort.low": "குறைந்த பகுத்தறிவு (விரைவான, நல்ல தரம்) — பரிந்துரைக்கப்படுகிறது",
   "config.reasoningEffort.medium": "நடுத்தர பகுத்தறிவு (சமநிலை)",

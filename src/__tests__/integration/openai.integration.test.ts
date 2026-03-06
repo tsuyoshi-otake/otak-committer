@@ -14,7 +14,7 @@ suite('OpenAI API Integration Tests', () => {
     const isValidApiKey =
         apiKey && apiKey.startsWith('sk-') && apiKey.length > 20 && !apiKey.includes('*');
 
-    test('GPT-5.2 Responses API should work with real API key', async function () {
+    test('GPT-5.4 Responses API should work with real API key', async function () {
         this.timeout(30000); // 30 seconds timeout
 
         if (!isValidApiKey) {

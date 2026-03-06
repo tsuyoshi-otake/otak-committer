@@ -1,5 +1,13 @@
 # Change Log
 
+## [2.13.0] - 2026-03-06
+
+### Changed
+
+- **Upgraded AI model to GPT-5.4:**
+  - Commit/PR/Issue generation now uses `gpt-5.4`
+  - Updated all references, tests, and localization strings from GPT-5.2 to GPT-5.4
+
 ## [2.10.0] - 2026-02-24
 
 ### Changed

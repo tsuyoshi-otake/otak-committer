@@ -18,7 +18,7 @@
   "config.emojiStyle": "Styl emoji używanych w wiadomościach",
   "config.emojiStyle.github": "Kody emoji w stylu GitHub (:smile:)",
   "config.emojiStyle.unicode": "Znaki emoji Unicode",
-  "config.reasoningEffort": "Poziom rozumowania GPT-5.2 (wpływa na jakość odpowiedzi i opóźnienie)",
+  "config.reasoningEffort": "Poziom rozumowania GPT-5.4 (wpływa na jakość odpowiedzi i opóźnienie)",
   "config.reasoningEffort.none": "Bez rozumowania (najszybszy, najniższa jakość)",
   "config.reasoningEffort.low": "Niskie rozumowanie (szybki, dobra jakość) - Zalecane",
   "config.reasoningEffort.medium": "Średnie rozumowanie (zrównoważone)",

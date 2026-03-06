@@ -650,7 +650,7 @@ try {
 | API Key Retrieval | SecretStorage    | Encrypted GlobalState | Prompt User     |
 | Configuration     | Workspace Config | Global Config         | Default Values  |
 | Git Operations    | simple-git       | VS Code Git API       | Manual Input    |
-| OpenAI API        | gpt-5.2          | Error message         | Cached Response |
+| OpenAI API        | gpt-5.4          | Error message         | Cached Response |
 
 ## Storage Architecture
 

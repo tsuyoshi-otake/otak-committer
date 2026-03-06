@@ -20,7 +20,7 @@
   "config.emojiStyle": "รูปแบบอีโมจิที่จะใช้ในข้อความ",
   "config.emojiStyle.github": "รหัสอีโมจิแบบ GitHub (:smile:)",
   "config.emojiStyle.unicode": "อักขระอีโมจิ Unicode",
-  "config.reasoningEffort": "ระดับการใช้เหตุผลของ GPT-5.2 (มีผลต่อคุณภาพการตอบสนองและความหน่วง)",
+  "config.reasoningEffort": "ระดับการใช้เหตุผลของ GPT-5.4 (มีผลต่อคุณภาพการตอบสนองและความหน่วง)",
   "config.reasoningEffort.none": "ไม่ใช้เหตุผล (เร็วที่สุด คุณภาพต่ำสุด)",
   "config.reasoningEffort.low": "ใช้เหตุผลระดับต่ำ (เร็ว คุณภาพดี) — แนะนำ",
   "config.reasoningEffort.medium": "ใช้เหตุผลระดับกลาง (สมดุล)",

@@ -20,7 +20,7 @@
   "config.emojiStyle": "نمط الرموز التعبيرية المستخدمة في الرسائل",
   "config.emojiStyle.github": "أكواد رموز GitHub التعبيرية (:smile:)",
   "config.emojiStyle.unicode": "أحرف رموز Unicode التعبيرية",
-  "config.reasoningEffort": "مستوى جهد الاستدلال GPT-5.2 (يؤثر على جودة الاستجابة والتأخير)",
+  "config.reasoningEffort": "مستوى جهد الاستدلال GPT-5.4 (يؤثر على جودة الاستجابة والتأخير)",
   "config.reasoningEffort.none": "بدون استدلال (الأسرع، أقل جودة)",
   "config.reasoningEffort.low": "استدلال منخفض (سريع، جودة جيدة) - موصى به",
   "config.reasoningEffort.medium": "استدلال متوسط (متوازن)",

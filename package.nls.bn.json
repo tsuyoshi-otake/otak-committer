@@ -20,7 +20,7 @@
   "config.emojiStyle": "বার্তায় ব্যবহৃত ইমোজির শৈলী",
   "config.emojiStyle.github": "GitHub শৈলীর ইমোজি কোড (:smile:)",
   "config.emojiStyle.unicode": "Unicode ইমোজি অক্ষর",
-  "config.reasoningEffort": "GPT-5.2 যুক্তি প্রচেষ্টার স্তর (প্রতিক্রিয়ার গুণমান ও বিলম্বকে প্রভাবিত করে)",
+  "config.reasoningEffort": "GPT-5.4 যুক্তি প্রচেষ্টার স্তর (প্রতিক্রিয়ার গুণমান ও বিলম্বকে প্রভাবিত করে)",
   "config.reasoningEffort.none": "কোনো যুক্তি নেই (দ্রুততম, সর্বনিম্ন গুণমান)",
   "config.reasoningEffort.low": "কম যুক্তি (দ্রুত, ভালো গুণমান) — প্রস্তাবিত",
   "config.reasoningEffort.medium": "মাঝারি যুক্তি (ভারসাম্যপূর্ণ)",

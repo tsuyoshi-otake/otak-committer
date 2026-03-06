@@ -1,7 +1,7 @@
 /**
  * Mock utilities for OpenAI Responses API testing
  *
- * Provides utilities to mock the GPT-5.2 Responses API for unit and property tests
+ * Provides utilities to mock the GPT-5.4 Responses API for unit and property tests
  * without requiring actual API calls.
  */
 
@@ -103,7 +103,7 @@ export class ResponsesAPIMock {
             id: `response_${Date.now()}`,
             object: 'response',
             created: Math.floor(Date.now() / 1000),
-            model: 'gpt-5.2',
+            model: 'gpt-5.4',
             output,
             usage: {
                 input_tokens: usage?.input_tokens ?? 100,
@@ -164,7 +164,7 @@ export class ResponsesAPIMock {
             id: `response_${Date.now()}`,
             object: 'response',
             created: Math.floor(Date.now() / 1000),
-            model: 'gpt-5.2',
+            model: 'gpt-5.4',
             output: 'Default mock response',
             usage: {
                 input_tokens: 100,
@@ -301,7 +301,7 @@ export function getUserFriendlyMessage(
                 ? `OpenAI API rate limit reached. Please try again in ${retryAfter} seconds.`
                 : 'OpenAI API rate limit reached. Please try again later.';
         case ResponsesAPIErrorType.INVALID_MODEL:
-            return 'GPT-5.2 model not accessible. Please check your API key has access to GPT-5.2.';
+            return 'GPT-5.4 model not accessible. Please check your API key has access to GPT-5.4.';
         case ResponsesAPIErrorType.CONTEXT_LENGTH_EXCEEDED:
             return 'Input too large for processing. Content has been truncated.';
         case ResponsesAPIErrorType.NETWORK:

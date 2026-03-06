@@ -18,7 +18,7 @@
   "config.emojiStyle": "Стил на емоджи за използване в съобщенията",
   "config.emojiStyle.github": "Емоджи кодове в стил GitHub (:smile:)",
   "config.emojiStyle.unicode": "Unicode емоджи символи",
-  "config.reasoningEffort": "Ниво на разсъждение на GPT-5.2 (влияе на качеството и забавянето на отговора)",
+  "config.reasoningEffort": "Ниво на разсъждение на GPT-5.4 (влияе на качеството и забавянето на отговора)",
   "config.reasoningEffort.none": "Без разсъждение (най-бързо, най-ниско качество)",
   "config.reasoningEffort.low": "Ниско разсъждение (бързо, добро качество) - Препоръчително",
   "config.reasoningEffort.medium": "Средно разсъждение (балансирано)",

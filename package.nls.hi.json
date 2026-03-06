@@ -20,7 +20,7 @@
   "config.emojiStyle": "संदेशों में उपयोग करने के लिए इमोजी की शैली",
   "config.emojiStyle.github": "GitHub शैली इमोजी कोड (:smile:)",
   "config.emojiStyle.unicode": "Unicode इमोजी अक्षर",
-  "config.reasoningEffort": "GPT-5.2 तर्क प्रयास स्तर (प्रतिक्रिया गुणवत्ता और विलंबता को प्रभावित करता है)",
+  "config.reasoningEffort": "GPT-5.4 तर्क प्रयास स्तर (प्रतिक्रिया गुणवत्ता और विलंबता को प्रभावित करता है)",
   "config.reasoningEffort.none": "कोई तर्क नहीं (सबसे तेज़, सबसे कम गुणवत्ता)",
   "config.reasoningEffort.low": "कम तर्क (तेज़, अच्छी गुणवत्ता) — अनुशंसित",
   "config.reasoningEffort.medium": "मध्यम तर्क (संतुलित)",

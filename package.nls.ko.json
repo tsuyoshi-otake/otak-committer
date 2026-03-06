@@ -20,7 +20,7 @@
   "config.emojiStyle": "메시지에 사용할 이모지 스타일",
   "config.emojiStyle.github": "GitHub 스타일 이모지 코드 (:smile:)",
   "config.emojiStyle.unicode": "유니코드 이모지 문자",
-  "config.reasoningEffort": "GPT-5.2 reasoning effort 수준 (응답 품질과 지연 시간에 영향을 줌)",
+  "config.reasoningEffort": "GPT-5.4 reasoning effort 수준 (응답 품질과 지연 시간에 영향을 줌)",
   "config.reasoningEffort.none": "추론 없음 (가장 빠름, 최저 품질)",
   "config.reasoningEffort.low": "낮음 (빠름, 좋은 품질) - 권장",
   "config.reasoningEffort.medium": "중간 (균형)",

@@ -20,7 +20,7 @@
   "config.emojiStyle": "訊息中使用的表情符號風格",
   "config.emojiStyle.github": "GitHub 風格表情代碼（:smile:）",
   "config.emojiStyle.unicode": "Unicode 表情字元",
-  "config.reasoningEffort": "GPT-5.2 reasoning effort 等級（會影響品質與延遲）",
+  "config.reasoningEffort": "GPT-5.4 reasoning effort 等級（會影響品質與延遲）",
   "config.reasoningEffort.none": "無推理（最快，品質最低）",
   "config.reasoningEffort.low": "低（快，品質好）- 推薦",
   "config.reasoningEffort.medium": "中（平衡）",

@@ -20,7 +20,7 @@
   "config.emojiStyle": "Emoji-Stil fur Nachrichten",
   "config.emojiStyle.github": "GitHub-Emoji-Codes (:smile:)",
   "config.emojiStyle.unicode": "Unicode-Emoji-Zeichen",
-  "config.reasoningEffort": "GPT-5.2-Denkaufwand (beeinflusst Antwortqualitat und Latenz)",
+  "config.reasoningEffort": "GPT-5.4-Denkaufwand (beeinflusst Antwortqualitat und Latenz)",
   "config.reasoningEffort.none": "Kein Denken (am schnellsten, niedrigste Qualitat)",
   "config.reasoningEffort.low": "Geringer Denkaufwand (schnell, gute Qualitat) - Empfohlen",
   "config.reasoningEffort.medium": "Mittlerer Denkaufwand (ausgewogen)",

@@ -18,7 +18,7 @@
   "config.emojiStyle": "Mesajlarda kullanılacak emoji stili",
   "config.emojiStyle.github": "GitHub stili emoji kodları (:smile:)",
   "config.emojiStyle.unicode": "Unicode emoji karakterleri",
-  "config.reasoningEffort": "GPT-5.2 akıl yürütme çaba düzeyi (yanıt kalitesini ve gecikmeyi etkiler)",
+  "config.reasoningEffort": "GPT-5.4 akıl yürütme çaba düzeyi (yanıt kalitesini ve gecikmeyi etkiler)",
   "config.reasoningEffort.none": "Akıl yürütme yok (en hızlı, en düşük kalite)",
   "config.reasoningEffort.low": "Düşük akıl yürütme (hızlı, iyi kalite) - Önerilen",
   "config.reasoningEffort.medium": "Orta akıl yürütme (dengeli)",

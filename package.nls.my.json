@@ -20,7 +20,7 @@
   "config.emojiStyle": "မက်ဆေ့ချ်များတွင် အသုံးပြုမည့် emoji ပုံစံ",
   "config.emojiStyle.github": "GitHub ပုံစံ emoji ကုဒ်များ (:smile:)",
   "config.emojiStyle.unicode": "Unicode emoji စာလုံးများ",
-  "config.reasoningEffort": "GPT-5.2 ကျိုးကြောင်းဆင်ခြင်မှု အဆင့် (တုံ့ပြန်မှု အရည်အသွေးနှင့် ကြာချိန်ကို သက်ရောက်သည်)",
+  "config.reasoningEffort": "GPT-5.4 ကျိုးကြောင်းဆင်ခြင်မှု အဆင့် (တုံ့ပြန်မှု အရည်အသွေးနှင့် ကြာချိန်ကို သက်ရောက်သည်)",
   "config.reasoningEffort.none": "ကျိုးကြောင်းဆင်ခြင်မှု မရှိ (အမြန်ဆုံး၊ အရည်အသွေး အနိမ့်ဆုံး)",
   "config.reasoningEffort.low": "ကျိုးကြောင်းဆင်ခြင်မှု နည်း (မြန်ဆန်၊ အရည်အသွေး ကောင်း) - အကြံပြုထားသည်",
   "config.reasoningEffort.medium": "ကျိုးကြောင်းဆင်ခြင်မှု အလယ်အလတ် (မျှတသော)",

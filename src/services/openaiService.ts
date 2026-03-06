@@ -18,7 +18,7 @@ import { resolveTemperature } from './openai.completion';
 export class OpenAIService extends BaseService {
     protected openai: OpenAI;
     private promptService: PromptService;
-    private static readonly MODEL = 'gpt-5.2';
+    private static readonly MODEL = 'gpt-5.4';
 
     constructor(config?: Partial<ServiceConfig>) {
         super(config);

@@ -20,7 +20,7 @@
   "config.emojiStyle": "メッセージで使用する絵文字の形式",
   "config.emojiStyle.github": "GitHub形式の絵文字コード（:smile:）",
   "config.emojiStyle.unicode": "Unicode絵文字",
-  "config.reasoningEffort": "GPT-5.2 の reasoning effort レベル（品質とレイテンシに影響）",
+  "config.reasoningEffort": "GPT-5.4 の reasoning effort レベル（品質とレイテンシに影響）",
   "config.reasoningEffort.none": "推論なし（最速、品質低）",
   "config.reasoningEffort.low": "低（速い、品質良）- 推奨",
   "config.reasoningEffort.medium": "中（バランス）",

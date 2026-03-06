@@ -20,7 +20,7 @@
   "config.emojiStyle": "Стиль эмодзи в сообщениях",
   "config.emojiStyle.github": "Коды эмодзи в стиле GitHub (:smile:)",
   "config.emojiStyle.unicode": "Символы Unicode-эмодзи",
-  "config.reasoningEffort": "Уровень рассуждения GPT-5.2 (влияет на качество ответа и задержку)",
+  "config.reasoningEffort": "Уровень рассуждения GPT-5.4 (влияет на качество ответа и задержку)",
   "config.reasoningEffort.none": "Без рассуждения (самый быстрый, низшее качество)",
   "config.reasoningEffort.low": "Низкий уровень рассуждения (быстрый, хорошее качество) — Рекомендуется",
   "config.reasoningEffort.medium": "Средний уровень рассуждения (сбалансированный)",

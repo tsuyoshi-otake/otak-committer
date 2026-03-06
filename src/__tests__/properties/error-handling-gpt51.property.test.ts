@@ -1,5 +1,5 @@
 /**
- * Property-Based Tests for GPT-5.2 Error Handling
+ * Property-Based Tests for GPT-5.4 Error Handling
  *
  * Property 6: Error logging completeness
  * Property 7: User-friendly error messages
@@ -14,7 +14,7 @@ import {
     getUserFriendlyMessage,
 } from '../../test/mocks/responsesAPI.mock';
 
-suite('GPT-5.2 Error Handling Property Tests', () => {
+suite('GPT-5.4 Error Handling Property Tests', () => {
     /**
      * Property 6: Error logging completeness
      * *For any* failed Responses API call, the system should log the error with
@@ -46,7 +46,7 @@ suite('GPT-5.2 Error Handling Property Tests', () => {
     });
 
     test('Property 6: 404 with model message should be classified as INVALID_MODEL', () => {
-        const errorType = classifyError(404, 'Model gpt-5.2 not found');
+        const errorType = classifyError(404, 'Model gpt-5.4 not found');
         assert.strictEqual(errorType, ResponsesAPIErrorType.INVALID_MODEL);
     });
 
@@ -133,9 +133,9 @@ suite('GPT-5.2 Error Handling Property Tests', () => {
         assert.ok(messageWithoutRetry.includes('try again'));
     });
 
-    test('Property 7: Invalid model message should mention GPT-5.2', () => {
+    test('Property 7: Invalid model message should mention GPT-5.4', () => {
         const message = getUserFriendlyMessage(ResponsesAPIErrorType.INVALID_MODEL);
-        assert.ok(message.includes('GPT-5.2'));
+        assert.ok(message.includes('GPT-5.4'));
     });
 
     test('Property 7: Authentication message should suggest updating API key', () => {

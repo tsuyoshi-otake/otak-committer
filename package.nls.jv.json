@@ -20,7 +20,7 @@
   "config.emojiStyle": "Gaya emoji sing digunakake ing pesen",
   "config.emojiStyle.github": "Kode emoji gaya GitHub (:smile:)",
   "config.emojiStyle.unicode": "Karakter emoji Unicode",
-  "config.reasoningEffort": "Tingkat upaya penalaran GPT-5.2 (mengaruhi kualitas respons lan latensi)",
+  "config.reasoningEffort": "Tingkat upaya penalaran GPT-5.4 (mengaruhi kualitas respons lan latensi)",
   "config.reasoningEffort.none": "Tanpa penalaran (paling cepet, kualitas paling endhek)",
   "config.reasoningEffort.low": "Penalaran endhek (cepet, kualitas apik) — Disaranake",
   "config.reasoningEffort.medium": "Penalaran sedhengan (seimbang)",

@@ -20,7 +20,7 @@
   "config.emojiStyle": "Kieu emoji su dung trong thong diep",
   "config.emojiStyle.github": "Ma emoji kieu GitHub (:smile:)",
   "config.emojiStyle.unicode": "Ky tu emoji Unicode",
-  "config.reasoningEffort": "Muc reasoning effort cua GPT-5.2 (anh huong chat luong va do tre)",
+  "config.reasoningEffort": "Muc reasoning effort cua GPT-5.4 (anh huong chat luong va do tre)",
   "config.reasoningEffort.none": "Khong reasoning (nhanh nhat, chat luong thap nhat)",
   "config.reasoningEffort.low": "Reasoning thap (nhanh, chat luong tot) - De xuat",
   "config.reasoningEffort.medium": "Reasoning vua (can bang)",
