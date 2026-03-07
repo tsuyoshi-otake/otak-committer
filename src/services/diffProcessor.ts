@@ -74,7 +74,7 @@ export class DiffProcessor {
      * @param tokenBudget - Maximum token budget for the result
      * @returns Processed diff result
      */
-    async process(rawDiff: string, tokenBudget: number): Promise<DiffProcessResult> {
+    async process(rawDiff: string, tokenBudget: number, signal?: AbortSignal): Promise<DiffProcessResult> {
         const safeBudget = Math.floor(tokenBudget * TokenManager.SAFETY_MARGIN);
         const rawTokens = estimateTokenCount(rawDiff);
 
@@ -128,6 +128,7 @@ export class DiffProcessor {
             const mapReduceResult = await summarizer.summarize(
                 assembled.overflowFiles,
                 this.language,
+                signal,
             );
 
             // Combine Tier 2 content with Tier 3 summaries

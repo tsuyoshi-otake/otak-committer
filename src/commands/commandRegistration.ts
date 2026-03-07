@@ -17,12 +17,21 @@ export function registerAllCommands(
     context: vscode.ExtensionContext,
     statusBar: StatusBarManager,
 ): void {
+    // Track active commit generation request for cancellation
+    let activeCommitAbortController: AbortController | undefined;
+
     // Commit message generation
     registry.register({
         id: 'otak-committer.generateMessage',
         title: 'Generate Commit Message',
         category: 'otak-committer',
         handler: async () => {
+            // Cancel previous request if still running
+            if (activeCommitAbortController) {
+                activeCommitAbortController.abort();
+                activeCommitAbortController = undefined;
+            }
+
             if (statusBar.isPublicRepo && !statusBar.isPublicRepoWarningSuppressed()) {
                 const { t } = await import('../i18n/index.js');
                 const choice = await vscode.window.showWarningMessage(
@@ -38,9 +47,19 @@ export function registerAllCommands(
                 }
             }
 
-            const { CommitCommand } = await import('./CommitCommand.js');
-            const command = new CommitCommand(context);
-            await command.execute();
+            const abortController = new AbortController();
+            activeCommitAbortController = abortController;
+
+            try {
+                const { CommitCommand } = await import('./CommitCommand.js');
+                const command = new CommitCommand(context);
+                await command.execute(abortController.signal);
+            } finally {
+                // Only clear if this is still the active controller
+                if (activeCommitAbortController === abortController) {
+                    activeCommitAbortController = undefined;
+                }
+            }
         },
     });
 
