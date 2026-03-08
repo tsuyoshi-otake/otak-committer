@@ -20,6 +20,7 @@ interface OpenAIOpsContext {
     onAuthError: () => Promise<void>;
     showError: (message: string, error?: unknown) => void;
     isAuthenticationError: (error: unknown) => boolean;
+    signal?: AbortSignal;
 }
 
 export async function generateCommitMessageOp(
@@ -47,6 +48,7 @@ export async function generateCommitMessageOp(
             temperature: context.getTemperature(),
             reasoningEffort: context.getReasoningEffort(),
             maxCompletionTokens: 5000,
+            signal: context.signal,
         });
 
         if (typeof message !== 'string' || !message.trim()) {
@@ -57,6 +59,10 @@ export async function generateCommitMessageOp(
         context.logger.info('Commit message generated successfully');
         return message.trimStart();
     } catch (error) {
+        // Re-throw abort errors so they can be handled by the caller
+        if (error instanceof Error && error.name === 'AbortError') {
+            throw error;
+        }
         context.logger.error('Failed to generate commit message', error);
         if (context.isAuthenticationError(error)) {
             await context.onAuthError();
@@ -85,6 +91,7 @@ export async function summarizeChunkOp(
             temperature: context.getTemperature(),
             reasoningEffort: 'low',
             maxCompletionTokens: 2000,
+            signal: context.signal,
         });
 
         if (!summary) {
@@ -95,6 +102,9 @@ export async function summarizeChunkOp(
         context.logger.info('Chunk summarization completed');
         return summary;
     } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') {
+            throw error;
+        }
         context.logger.error('Failed to summarize diff chunk', error);
         if (context.isAuthenticationError(error)) {
             await context.onAuthError();

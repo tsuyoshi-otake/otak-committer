@@ -68,12 +68,13 @@ export class OpenAIService extends BaseService {
         language: string,
         messageStyle: MessageStyle | string,
         template?: TemplateInfo,
+        signal?: AbortSignal,
     ): Promise<string | undefined> {
-        return generateCommitMessageOp(this.getOpsContext(), diff, language, messageStyle, template);
+        return generateCommitMessageOp(this.getOpsContext(signal), diff, language, messageStyle, template);
     }
 
-    async summarizeChunk(chunkContent: string, language: string): Promise<string | undefined> {
-        return summarizeChunkOp(this.getOpsContext(), chunkContent, language);
+    async summarizeChunk(chunkContent: string, language: string, signal?: AbortSignal): Promise<string | undefined> {
+        return summarizeChunkOp(this.getOpsContext(signal), chunkContent, language);
     }
 
     async generatePRContent(
@@ -113,7 +114,7 @@ export class OpenAIService extends BaseService {
         return initializeOpenAIService(config, context, async (cfg) => new OpenAIService(cfg));
     }
 
-    private getOpsContext() {
+    private getOpsContext(signal?: AbortSignal) {
         return {
             openai: this.openai,
             promptService: this.promptService,
@@ -124,6 +125,7 @@ export class OpenAIService extends BaseService {
             onAuthError: () => this.promptToUpdateApiKey(),
             showError: (message: string, error?: unknown) => this.showError(message, error),
             isAuthenticationError: (error: unknown) => this.isAuthenticationError(error),
+            signal,
         };
     }
 }

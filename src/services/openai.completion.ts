@@ -8,6 +8,7 @@ export interface TextCompletionRequest {
     maxCompletionTokens: number;
     reasoningEffort: 'low' | 'medium' | 'high' | undefined;
     temperature?: number;
+    signal?: AbortSignal;
 }
 
 export function resolveTemperature(model: string, requested?: number): number | undefined {
@@ -34,7 +35,7 @@ export async function requestTextCompletion(request: TextCompletionRequest): Pro
             response_format: { type: 'text' },
             store: false,
         },
-        { timeout: REQUEST_TIMEOUT_MS },
+        { timeout: REQUEST_TIMEOUT_MS, ...(request.signal ? { signal: request.signal } : {}) },
     );
 
     return response.choices?.[0]?.message?.content?.trim();

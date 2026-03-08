@@ -22,6 +22,8 @@ import type { DiffProcessResult } from '../services/diffProcessor';
  * ```
  */
 export class CommitCommand extends BaseCommand {
+    private signal?: AbortSignal;
+
     /**
      * Execute the commit message generation command
      *
@@ -34,9 +36,11 @@ export class CommitCommand extends BaseCommand {
      * 6. Generate commit message using AI
      * 7. Sanitize and set the message in source control input
      *
+     * @param signal - Optional AbortSignal to cancel the operation
      * @returns A promise that resolves when the command completes
      */
-    async execute(): Promise<void> {
+    async execute(signal?: AbortSignal): Promise<void> {
+        this.signal = signal;
         try {
             this.logger.info('Starting commit message generation');
 
@@ -83,6 +87,11 @@ export class CommitCommand extends BaseCommand {
             this.logger.info('Successfully generated and set commit message');
             await this.showSuccessNotification();
         } catch (error) {
+            // Silently ignore abort errors (triggered by user pressing the button again)
+            if (error instanceof Error && error.name === 'AbortError') {
+                this.logger.info('Commit message generation cancelled by new request');
+                return;
+            }
             this.handleErrorSilently(error, 'generating commit message');
         }
     }
@@ -131,7 +140,7 @@ export class CommitCommand extends BaseCommand {
 
         const result = await this.withProgress<DiffProcessResult>(
             t('progress.processingLargeDiff'),
-            async () => processor.process(rawDiff, tokenBudget),
+            async () => processor.process(rawDiff, tokenBudget, this.signal),
         );
 
         // Log the tier used
@@ -200,6 +209,7 @@ export class CommitCommand extends BaseCommand {
                     language,
                     messageStyle,
                     template,
+                    this.signal,
                 );
 
                 if (!generatedMessage) {

@@ -103,6 +103,7 @@ export class MapReduceSummarizer {
     async summarize(
         overflowFiles: ParsedFileDiff[],
         language: string,
+        signal?: AbortSignal,
     ): Promise<MapReduceResult> {
         const chunkSize = TokenManager.MAP_REDUCE_CHUNK_SIZE;
         const chunks = groupIntoChunks(overflowFiles, chunkSize);
@@ -120,7 +121,7 @@ export class MapReduceSummarizer {
                 this.progressCallback?.(
                     `${chunkIndex + 1}/${chunks.length}`,
                 );
-                return this.summarizeChunk(chunk, language, chunkIndex);
+                return this.summarizeChunk(chunk, language, chunkIndex, signal);
             });
 
             const batchResults = await Promise.all(batchPromises);
@@ -153,6 +154,7 @@ export class MapReduceSummarizer {
         chunk: ParsedFileDiff[],
         language: string,
         chunkIndex: number,
+        signal?: AbortSignal,
     ): Promise<string | undefined> {
         const chunkContent = chunk.map((f) => f.content).join('\n');
         this.logger.debug(`Summarizing chunk ${chunkIndex} (${estimateTokenCount(chunkContent)} tokens, ${chunk.length} files)`);
@@ -168,7 +170,7 @@ export class MapReduceSummarizer {
         }
 
         try {
-            return await this.openaiService.summarizeChunk(chunkContent, language);
+            return await this.openaiService.summarizeChunk(chunkContent, language, signal);
         } catch (error) {
             this.logger.error(`Failed to summarize chunk ${chunkIndex}`, error);
             return undefined;
