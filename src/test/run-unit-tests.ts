@@ -39,6 +39,10 @@ async function runUnitTests() {
         const prIntegrationTests = await glob('__tests__/integration/pr*.test.js', {
             cwd: testsRoot,
         });
+        const commitMessageIntegrationTests = await glob(
+            '__tests__/integration/commitMessage*.test.js',
+            { cwd: testsRoot },
+        );
         const issueIntegrationTests = await glob('__tests__/integration/issue*.test.js', {
             cwd: testsRoot,
         });
@@ -111,6 +115,7 @@ async function runUnitTests() {
             ...i18nIntegrationTests,
             ...bulletListIntegrationTests,
             ...prIntegrationTests,
+            ...commitMessageIntegrationTests,
             ...issueIntegrationTests,
             ...filteredRobustnessServiceTests,
             ...filteredRobustnessUtilTests,
@@ -127,6 +132,7 @@ async function runUnitTests() {
         console.log(`  - i18n integration tests: ${i18nIntegrationTests.length}`);
         console.log(`  - Bullet list integration tests: ${bulletListIntegrationTests.length}`);
         console.log(`  - PR integration tests: ${prIntegrationTests.length}`);
+        console.log(`  - Commit message integration tests: ${commitMessageIntegrationTests.length}`);
         console.log(`  - Issue integration tests: ${issueIntegrationTests.length}`);
         console.log(
             `  - Robustness tests: ${filteredRobustnessServiceTests.length + filteredRobustnessUtilTests.length + filteredRobustnessCommandTests.length}`,

@@ -1,7 +1,7 @@
 /**
  * Integration test for PR (Pull Request) generation
  *
- * Verifies that the PR title and body prompts produce correctly
+ * Verifies that the PR structured output produces correctly
  * structured content when sent to the OpenAI API.
  *
  * Requires: OPENAI_API_KEY environment variable
@@ -97,35 +97,37 @@ ${f.patch}`,
 }
 
 /**
- * Build a PR title prompt identical to PromptService.createPRPrompt title
- * without vscode.workspace.getConfiguration dependency.
+ * JSON schema for structured PR output
  */
-function buildPRTitlePrompt(
-    diffSummary: string,
-    language: string,
-    useEmoji: boolean,
-): string {
-    return `Generate a Pull Request title in ${language}.
-
-Requirements:
-1. Title should be concise and accurately represent the changes
-2. Include a prefix (e.g., "Feature:", "Fix:", "Improvement:", etc.) ${useEmoji ? 'with appropriate emoji prefix' : 'without emoji'}
-3. Output ONLY the title text itself. Do not include labels like "Title:" or wrap in quotes.
-
-Git diff: ${diffSummary}`;
-}
+const PR_CONTENT_SCHEMA = {
+    type: 'object',
+    properties: {
+        title: { type: 'string', description: 'Pull request title with prefix' },
+        body: { type: 'string', description: 'Pull request body in markdown' },
+    },
+    required: ['title', 'body'],
+    additionalProperties: false,
+} as const;
 
 /**
- * Build a PR body prompt identical to PromptService.createPRPrompt body
+ * Build a combined PR prompt identical to PromptService.createPRPrompt
  * without vscode.workspace.getConfiguration dependency.
  */
-function buildPRBodyPrompt(
+function buildPRPrompt(
     diffSummary: string,
     language: string,
     useEmoji: boolean,
 ): string {
     const emojiInstruction = useEmoji ? '' : 'DO NOT use any emojis in the content. ';
-    return `Generate a detailed Pull Request description in ${language} for the following changes.
+    return `Generate a Pull Request title and body in ${language} for the following changes.
+
+Title requirements:
+1. Concise and accurately represents the changes
+2. Include a prefix (e.g., "Feature:", "Fix:", "Improvement:", etc.) ${useEmoji ? 'with appropriate emoji prefix' : 'without emoji'}
+3. Just the title text, no labels like "Title:" and no quotes
+
+Body requirements:
+Generate a detailed description with the following sections:
 
 # Overview
 - Brief explanation of implemented features or fixes
@@ -147,10 +149,8 @@ function buildPRBodyPrompt(
 - Impact on existing features
 - Required configuration or environment variables
 
-Git diff:
-${diffSummary}
-
-Note: Please ensure all content is written in ${language}. ${emojiInstruction}`;
+${emojiInstruction}Git diff:
+${diffSummary}`;
 }
 
 suite('PR Generation Integration Tests', () => {
@@ -160,7 +160,7 @@ suite('PR Generation Integration Tests', () => {
 
     const diffSummary = generateDiffSummary(SAMPLE_PR_DIFF);
 
-    test('PR title should contain a prefix keyword', async function () {
+    test('Structured output should return valid PR title and body', async function () {
         this.timeout(60000);
 
         if (!isValidApiKey) {
@@ -172,42 +172,62 @@ suite('PR Generation Integration Tests', () => {
         }
 
         const openai = new OpenAI({ apiKey });
-        const prompt = buildPRTitlePrompt(diffSummary, 'english', false);
+        const prompt = buildPRPrompt(diffSummary, 'english', false);
 
         try {
             const response = await openai.chat.completions.create({
-                model: 'gpt-4o-mini',
+                model: 'gpt-5.4',
                 messages: [
-                    { role: 'system', content: SYSTEM_PROMPT },
+                    { role: 'developer', content: SYSTEM_PROMPT },
                     { role: 'user', content: prompt },
                 ],
-                max_tokens: 100,
-                temperature: 0,
+                reasoning_effort: 'low',
+                response_format: {
+                    type: 'json_schema',
+                    json_schema: {
+                        name: 'pr_content',
+                        strict: true,
+                        schema: PR_CONTENT_SCHEMA,
+                    },
+                },
             });
 
-            const title = response.choices[0]?.message?.content?.trim();
-            console.log('=== PR title response ===');
-            console.log(title);
-            console.log('=========================');
+            const content = response.choices[0]?.message?.content?.trim();
+            assert.ok(content, 'Should return content');
 
-            assert.ok(title, 'Should return a PR title');
+            const result = JSON.parse(content) as { title: string; body: string };
 
-            // Title should start with a prefix keyword (no "Title:" label)
+            console.log('=== PR structured output ===');
+            console.log('Title:', result.title);
+            console.log('Body:', result.body.substring(0, 200) + '...');
+            console.log('============================');
+
+            assert.ok(result.title, 'Should return a PR title');
+            assert.ok(result.body, 'Should return a PR body');
+
+            // Title should start with a prefix keyword
             const prefixPattern =
                 /^(Feature|Fix|Improvement|Refactor|Chore|Docs|feat|fix|chore|docs|test|perf|style|refactor)\b/i;
-            const cleanTitle = title.replace(/^["']|["']$/g, '');
+            const cleanTitle = result.title.replace(/^["']|["']$/g, '');
             assert.ok(
                 prefixPattern.test(cleanTitle),
-                `PR title should start with a prefix keyword, got: "${title}"`,
+                `PR title should start with a prefix keyword, got: "${result.title}"`,
             );
 
-            // Verify no "Title:" label was included
+            // Body should be substantial
+            assert.ok(result.body.length > 100, `PR body should be substantial, got ${result.body.length} chars`);
+
+            // Body should contain expected markdown sections
+            const expectedSections = ['Overview', 'Key Review Points', 'Change Details', 'Additional Notes'];
+            const foundSections = expectedSections.filter((section) =>
+                new RegExp(`#.*${section}`, 'i').test(result.body),
+            );
             assert.ok(
-                !title.startsWith('Title:') && !title.startsWith('タイトル:'),
-                `PR title should not include a "Title:" label, got: "${title}"`,
+                foundSections.length >= 2,
+                `Expected at least 2 of 4 sections, found ${foundSections.length}: ${foundSections.join(', ')}`,
             );
 
-            console.log('✓ PR title prefix integration test passed');
+            console.log('✓ PR structured output integration test passed');
         } catch (error: unknown) {
             if (error instanceof OpenAI.APIError && error.status === 401) {
                 console.log('Skipping: Invalid API key (401)');
@@ -218,7 +238,7 @@ suite('PR Generation Integration Tests', () => {
         }
     });
 
-    test('PR body should contain expected markdown sections', async function () {
+    test('Structured output without emoji should not contain emojis', async function () {
         this.timeout(60000);
 
         if (!isValidApiKey) {
@@ -227,81 +247,40 @@ suite('PR Generation Integration Tests', () => {
         }
 
         const openai = new OpenAI({ apiKey });
-        const prompt = buildPRBodyPrompt(diffSummary, 'english', false);
+        const prompt = buildPRPrompt(diffSummary, 'english', false);
 
         try {
             const response = await openai.chat.completions.create({
-                model: 'gpt-4o-mini',
+                model: 'gpt-5.4',
                 messages: [
-                    { role: 'system', content: SYSTEM_PROMPT },
+                    { role: 'developer', content: SYSTEM_PROMPT },
                     { role: 'user', content: prompt },
                 ],
-                max_tokens: 2000,
-                temperature: 0,
+                reasoning_effort: 'low',
+                response_format: {
+                    type: 'json_schema',
+                    json_schema: {
+                        name: 'pr_content',
+                        strict: true,
+                        schema: PR_CONTENT_SCHEMA,
+                    },
+                },
             });
 
-            const body = response.choices[0]?.message?.content?.trim();
-            console.log('=== PR body response ===');
-            console.log(body);
-            console.log('========================');
+            const content = response.choices[0]?.message?.content?.trim();
+            assert.ok(content, 'Should return content');
 
-            assert.ok(body, 'Should return a PR body');
-            assert.ok(body.length > 100, `PR body should be substantial, got ${body.length} chars`);
-
-            const expectedSections = ['Overview', 'Key Review Points', 'Change Details', 'Additional Notes'];
-            const foundSections = expectedSections.filter((section) =>
-                new RegExp(`#.*${section}`, 'i').test(body),
-            );
-            console.log(`Found sections: ${foundSections.join(', ')}`);
-
-            assert.ok(
-                foundSections.length >= 2,
-                `Expected at least 2 of 4 sections, found ${foundSections.length}: ${foundSections.join(', ')}`,
-            );
-
-            console.log('✓ PR body sections integration test passed');
-        } catch (error: unknown) {
-            if (error instanceof OpenAI.APIError && error.status === 401) {
-                this.skip();
-                return;
-            }
-            throw error;
-        }
-    });
-
-    test('PR body without emoji should not contain emojis', async function () {
-        this.timeout(60000);
-
-        if (!isValidApiKey) {
-            this.skip();
-            return;
-        }
-
-        const openai = new OpenAI({ apiKey });
-        const prompt = buildPRBodyPrompt(diffSummary, 'english', false);
-
-        try {
-            const response = await openai.chat.completions.create({
-                model: 'gpt-4o-mini',
-                messages: [
-                    { role: 'system', content: SYSTEM_PROMPT },
-                    { role: 'user', content: prompt },
-                ],
-                max_tokens: 2000,
-                temperature: 0,
-            });
-
-            const body = response.choices[0]?.message?.content?.trim();
-            assert.ok(body, 'Should return a PR body');
+            const result = JSON.parse(content) as { title: string; body: string };
+            assert.ok(result.body, 'Should return a PR body');
 
             const emojiPattern =
                 /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u;
             assert.ok(
-                !emojiPattern.test(body),
+                !emojiPattern.test(result.body),
                 'PR body should not contain emojis when useEmoji=false',
             );
 
-            console.log('✓ PR body no-emoji integration test passed');
+            console.log('✓ PR structured output no-emoji integration test passed');
         } catch (error: unknown) {
             if (error instanceof OpenAI.APIError && error.status === 401) {
                 this.skip();
@@ -311,7 +290,7 @@ suite('PR Generation Integration Tests', () => {
         }
     });
 
-    test('PR title and body in Japanese should contain Japanese characters', async function () {
+    test('Structured output in Japanese should contain Japanese characters', async function () {
         this.timeout(60000);
 
         if (!isValidApiKey) {
@@ -320,107 +299,47 @@ suite('PR Generation Integration Tests', () => {
         }
 
         const openai = new OpenAI({ apiKey });
-        const titlePrompt = buildPRTitlePrompt(diffSummary, 'japanese', false);
-        const bodyPrompt = buildPRBodyPrompt(diffSummary, 'japanese', false);
+        const prompt = buildPRPrompt(diffSummary, 'japanese', false);
 
         try {
-            const [titleResponse, bodyResponse] = await Promise.all([
-                openai.chat.completions.create({
-                    model: 'gpt-4o-mini',
-                    messages: [
-                        { role: 'system', content: SYSTEM_PROMPT },
-                        { role: 'user', content: titlePrompt },
-                    ],
-                    max_tokens: 100,
-                    temperature: 0,
-                }),
-                openai.chat.completions.create({
-                    model: 'gpt-4o-mini',
-                    messages: [
-                        { role: 'system', content: SYSTEM_PROMPT },
-                        { role: 'user', content: bodyPrompt },
-                    ],
-                    max_tokens: 2000,
-                    temperature: 0,
-                }),
-            ]);
+            const response = await openai.chat.completions.create({
+                model: 'gpt-5.4',
+                messages: [
+                    { role: 'developer', content: SYSTEM_PROMPT },
+                    { role: 'user', content: prompt },
+                ],
+                reasoning_effort: 'low',
+                response_format: {
+                    type: 'json_schema',
+                    json_schema: {
+                        name: 'pr_content',
+                        strict: true,
+                        schema: PR_CONTENT_SCHEMA,
+                    },
+                },
+            });
 
-            const title = titleResponse.choices[0]?.message?.content?.trim();
-            const body = bodyResponse.choices[0]?.message?.content?.trim();
+            const content = response.choices[0]?.message?.content?.trim();
+            assert.ok(content, 'Should return content');
 
-            console.log('=== Japanese PR title ===');
-            console.log(title);
-            console.log('=== Japanese PR body ===');
-            console.log(body?.substring(0, 200) + '...');
-            console.log('========================');
+            const result = JSON.parse(content) as { title: string; body: string };
 
-            assert.ok(title, 'Should return a Japanese PR title');
-            assert.ok(body, 'Should return a Japanese PR body');
-            assert.ok(body.length > 50, 'Japanese PR body should be substantial');
+            console.log('=== Japanese PR structured output ===');
+            console.log('Title:', result.title);
+            console.log('Body:', result.body.substring(0, 200) + '...');
+            console.log('=====================================');
+
+            assert.ok(result.title, 'Should return a Japanese PR title');
+            assert.ok(result.body, 'Should return a Japanese PR body');
+            assert.ok(result.body.length > 50, 'Japanese PR body should be substantial');
 
             const japanesePattern = /[\u3000-\u9FFF\uF900-\uFAFF]/;
             assert.ok(
-                japanesePattern.test(body),
+                japanesePattern.test(result.body),
                 'PR body should contain Japanese characters',
             );
 
-            console.log('✓ Japanese PR generation integration test passed');
-        } catch (error: unknown) {
-            if (error instanceof OpenAI.APIError && error.status === 401) {
-                this.skip();
-                return;
-            }
-            throw error;
-        }
-    });
-
-    test('PR title and body generated in parallel should both succeed', async function () {
-        this.timeout(60000);
-
-        if (!isValidApiKey) {
-            this.skip();
-            return;
-        }
-
-        const openai = new OpenAI({ apiKey });
-        const titlePrompt = buildPRTitlePrompt(diffSummary, 'english', false);
-        const bodyPrompt = buildPRBodyPrompt(diffSummary, 'english', false);
-
-        try {
-            const [titleResponse, bodyResponse] = await Promise.all([
-                openai.chat.completions.create({
-                    model: 'gpt-4o-mini',
-                    messages: [
-                        { role: 'system', content: SYSTEM_PROMPT },
-                        { role: 'user', content: titlePrompt },
-                    ],
-                    max_tokens: 100,
-                    temperature: 0,
-                }),
-                openai.chat.completions.create({
-                    model: 'gpt-4o-mini',
-                    messages: [
-                        { role: 'system', content: SYSTEM_PROMPT },
-                        { role: 'user', content: bodyPrompt },
-                    ],
-                    max_tokens: 2000,
-                    temperature: 0,
-                }),
-            ]);
-
-            const title = titleResponse.choices[0]?.message?.content?.trim();
-            const body = bodyResponse.choices[0]?.message?.content?.trim();
-
-            assert.ok(
-                typeof title === 'string' && title.length > 0,
-                'Parallel PR title should be a non-empty string',
-            );
-            assert.ok(
-                typeof body === 'string' && body.length > 0,
-                'Parallel PR body should be a non-empty string',
-            );
-
-            console.log(`✓ Parallel PR generation: title=${title.length} chars, body=${body.length} chars`);
+            console.log('✓ Japanese PR structured output integration test passed');
         } catch (error: unknown) {
             if (error instanceof OpenAI.APIError && error.status === 401) {
                 this.skip();

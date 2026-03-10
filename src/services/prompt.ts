@@ -220,7 +220,7 @@ ${file.patch}`,
         diff: PullRequestDiff,
         language: string,
         template?: TemplateInfo,
-    ): Promise<{ title: string; body: string }> {
+    ): Promise<string> {
         const diffSummary = await this.generateDiffSummary(diff);
         const useEmoji =
             vscode.workspace.getConfiguration('otakCommitter').get<boolean>('useEmoji') || false;
@@ -232,28 +232,19 @@ ${file.patch}`,
             ? `Additional requirements: ${customMessage}\n\n`
             : '';
 
-        const titlePrompt = `Generate a Pull Request title in ${language}.
-
-Requirements:
-1. Title should be concise and accurately represent the changes
+        const titleInstruction = `Title requirements:
+1. Concise and accurately represents the changes
 2. Include a prefix (e.g., "Feature:", "Fix:", "Improvement:", etc.) ${useEmoji ? 'with appropriate emoji prefix' : 'without emoji'}
-3. Output ONLY the title text itself. Do not include labels like "Title:" or wrap in quotes.
+3. Just the title text, no labels like "Title:" and no quotes`;
 
-${customInstruction}Git diff: ${diffSummary}`;
-
-        const bodyPrompt = template
-            ? `Based on the following template and Git diff, generate a pull request:
-
-NOTE: Generate the content in ${language}.
+        const bodyInstruction = template
+            ? `Body requirements:
+Follow the template format strictly.
 
 Template:
-${PromptService.sanitizeTemplateContent(template.content)}
-
-Git diff:
-${diffSummary}
-
-Please follow the template format strictly and ensure all content is in ${language}. ${emojiInstruction}${customInstruction}`
-            : `Generate a detailed Pull Request description in ${language} for the following changes.
+${PromptService.sanitizeTemplateContent(template.content)}`
+            : `Body requirements:
+Generate a detailed description with the following sections:
 
 # Overview
 - Brief explanation of implemented features or fixes
@@ -273,17 +264,16 @@ Please follow the template format strictly and ensure all content is in ${langua
 # Additional Notes
 - Deployment considerations
 - Impact on existing features
-- Required configuration or environment variables
+- Required configuration or environment variables`;
 
-Git diff:
-${diffSummary}
+        return `Generate a Pull Request title and body in ${language} for the following changes.
 
-Note: Please ensure all content is written in ${language}. ${emojiInstruction}${customInstruction}`;
+${titleInstruction}
 
-        return {
-            title: titlePrompt,
-            body: bodyPrompt,
-        };
+${bodyInstruction}
+
+${emojiInstruction}${customInstruction}Git diff:
+${diffSummary}`;
     }
 
     /**

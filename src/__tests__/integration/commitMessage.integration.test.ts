@@ -1,8 +1,8 @@
 /**
- * Integration test for useBulletList feature
+ * Integration test for Commit Message generation
  *
- * Verifies that the bullet list instruction in the prompt
- * produces commit messages with "- " prefixed lines in the body.
+ * Verifies that the commit message prompt produces correctly
+ * structured content when sent to the OpenAI API with gpt-5.4.
  *
  * Requires: OPENAI_API_KEY environment variable
  * Run with: OPENAI_API_KEY=sk-... npm run test:unit
@@ -19,8 +19,18 @@ import {
 } from '../../utils/conventionalCommits';
 
 /**
- * Character limits by style (mirrors MESSAGE_LENGTH_LIMITS in prompt.ts
- * without importing vscode-dependent module)
+ * System prompt matching src/languages/english.ts (PromptType.System)
+ * without importing vscode-dependent module.
+ */
+const SYSTEM_PROMPT = `You are an experienced software engineer assisting with project commit messages and PR creation.
+Your output has the following characteristics:
+
+- Clear and concise English
+- Technically accurate expressions
+- Appropriate summarization of changes`;
+
+/**
+ * Character limits by style (mirrors MESSAGE_LENGTH_LIMITS in prompt.ts)
  */
 const CHAR_LIMITS: Record<string, number> = {
     simple: 600,
@@ -30,7 +40,7 @@ const CHAR_LIMITS: Record<string, number> = {
 
 /**
  * Build a commit prompt identical to PromptService.createCommitPrompt
- * but without vscode.workspace.getConfiguration dependency.
+ * without vscode.workspace.getConfiguration dependency.
  */
 function buildCommitPrompt(
     diff: string,
@@ -74,51 +84,36 @@ ${options.useBulletList ? 'Format the body as follows: first write a brief summa
 DO NOT use any emojis in the content.`;
 }
 
-const SAMPLE_DIFF = `diff --git a/src/services/prompt.ts b/src/services/prompt.ts
---- a/src/services/prompt.ts
-+++ b/src/services/prompt.ts
-@@ -17,9 +17,9 @@
- export const MESSAGE_LENGTH_LIMITS = {
--    [MessageStyle.Simple]: 200,
--    ['normal']: 400,
--    [MessageStyle.Detailed]: 800,
-+    [MessageStyle.Simple]: 600,
-+    ['normal']: 1200,
-+    [MessageStyle.Detailed]: 2400,
- } as const;
-diff --git a/src/types/messageStyle.ts b/src/types/messageStyle.ts
---- a/src/types/messageStyle.ts
-+++ b/src/types/messageStyle.ts
-@@ -18,7 +18,7 @@
-     simple: {
-         tokens: {
--            commit: 100,
--            pr: 400,
-+            commit: 300,
-+            pr: 1200,
-         },
-     normal: {
-         tokens: {
--            commit: 200,
--            pr: 800,
-+            commit: 600,
-+            pr: 2400,
-         },`;
+const SAMPLE_DIFF = `diff --git a/src/services/auth.ts b/src/services/auth.ts
+--- a/src/services/auth.ts
++++ b/src/services/auth.ts
+@@ -10,6 +10,26 @@
+ export class AuthService {
++    private tokenCache: Map<string, string> = new Map();
++
++    async validateToken(token: string): Promise<boolean> {
++        if (this.tokenCache.has(token)) {
++            return true;
++        }
++        const isValid = await this.checkTokenWithServer(token);
++        if (isValid) {
++            this.tokenCache.set(token, Date.now().toString());
++        }
++        return isValid;
++    }
++
++    clearCache(): void {
++        this.tokenCache.clear();
++    }
+ }`;
 
-const SYSTEM_PROMPT = `You are an experienced software engineer assisting with project commit messages and PR creation.
-Your output has the following characteristics:
-
-- Clear and concise English
-- Technically accurate expressions
-- Appropriate summarization of changes`;
-
-suite('Bullet List Integration Tests', () => {
+suite('Commit Message Integration Tests', () => {
     const apiKey = process.env.OPENAI_API_KEY;
     const isValidApiKey =
         apiKey && apiKey.startsWith('sk-') && apiKey.length > 20 && !apiKey.includes('*');
 
-    test('useBulletList=true should produce bullet list body', async function () {
-        this.timeout(60000);
+    test('gpt-5.4 should generate a valid conventional commit message', async function () {
+        this.timeout(120000);
 
         if (!isValidApiKey) {
             console.log(
@@ -150,39 +145,35 @@ suite('Bullet List Integration Tests', () => {
             });
 
             const message = response.choices[0]?.message?.content?.trim();
-            console.log('=== useBulletList=true response ===');
+            console.log('=== Commit message (english, normal) ===');
             console.log(message);
-            console.log('===================================');
+            console.log('=========================================');
 
             assert.ok(message, 'Should return a commit message');
 
-            // The body (lines after the first line) should contain:
-            // 1. A prose summary (non-bullet lines)
-            // 2. Bullet points after the summary
-            const lines = message.split('\n').filter((l) => l.trim().length > 0);
-            const bodyLines = lines.slice(1); // skip subject line
-
-            const bulletLines = bodyLines.filter((l) => l.trim().startsWith('- '));
-            const proseLines = bodyLines.filter((l) => !l.trim().startsWith('- '));
-            console.log(
-                `Body lines: ${bodyLines.length}, Prose lines: ${proseLines.length}, Bullet lines: ${bulletLines.length}`,
-            );
-
+            // First line should match conventional commits pattern
+            const firstLine = message.split('\n')[0];
+            const conventionalPattern = /^(fix|feat|docs|style|refactor|perf|test|chore)(\(.+\))?:\s*.+/;
             assert.ok(
-                proseLines.length >= 1,
-                `Expected at least 1 prose summary line before bullets, got ${proseLines.length}. Body:\n${bodyLines.join('\n')}`,
+                conventionalPattern.test(firstLine),
+                `First line should match Conventional Commits format, got: "${firstLine}"`,
             );
+
+            // Should have a body
+            const lines = message.split('\n').filter((l) => l.trim().length > 0);
+            assert.ok(lines.length > 1, `Should have body lines, got ${lines.length} total lines`);
+
+            // Body should contain bullet points
+            const bodyLines = lines.slice(1);
+            const bulletLines = bodyLines.filter((l) => l.trim().startsWith('- '));
             assert.ok(
                 bulletLines.length >= 1,
-                `Expected at least 1 bullet line in body, got ${bulletLines.length}. Body:\n${bodyLines.join('\n')}`,
+                `Expected at least 1 bullet line, got ${bulletLines.length}`,
             );
 
-            console.log('✓ useBulletList=true integration test passed');
+            console.log(`✓ Commit message test passed (${lines.length} lines, ${bulletLines.length} bullets)`);
         } catch (error: unknown) {
-            if (
-                error instanceof OpenAI.APIError &&
-                error.status === 401
-            ) {
+            if (error instanceof OpenAI.APIError && error.status === 401) {
                 console.log('Skipping: Invalid API key (401)');
                 this.skip();
                 return;
@@ -191,8 +182,8 @@ suite('Bullet List Integration Tests', () => {
         }
     });
 
-    test('useBulletList=false should NOT require bullet list body', async function () {
-        this.timeout(60000);
+    test('gpt-5.4 should generate a simple style commit message', async function () {
+        this.timeout(120000);
 
         if (!isValidApiKey) {
             this.skip();
@@ -202,7 +193,7 @@ suite('Bullet List Integration Tests', () => {
         const openai = new OpenAI({ apiKey });
         const prompt = buildCommitPrompt(SAMPLE_DIFF, {
             language: 'english',
-            messageStyle: 'normal',
+            messageStyle: 'simple',
             useBulletList: false,
             useConventionalCommits: true,
         });
@@ -221,24 +212,19 @@ suite('Bullet List Integration Tests', () => {
             });
 
             const message = response.choices[0]?.message?.content?.trim();
-            console.log('=== useBulletList=false response ===');
+            console.log('=== Commit message (english, simple) ===');
             console.log(message);
-            console.log('====================================');
+            console.log('=========================================');
 
             assert.ok(message, 'Should return a commit message');
-
-            // Verify the prompt does NOT contain bullet list instruction
             assert.ok(
-                !prompt.includes('bullet list'),
-                'Prompt should not contain bullet list instruction when disabled',
+                message.length <= 600,
+                `Simple message should be under 600 chars, got ${message.length}`,
             );
 
-            console.log('✓ useBulletList=false integration test passed');
+            console.log(`✓ Simple commit message test passed (${message.length} chars)`);
         } catch (error: unknown) {
-            if (
-                error instanceof OpenAI.APIError &&
-                error.status === 401
-            ) {
+            if (error instanceof OpenAI.APIError && error.status === 401) {
                 this.skip();
                 return;
             }
@@ -246,8 +232,8 @@ suite('Bullet List Integration Tests', () => {
         }
     });
 
-    test('Conventional Commits format should be used when enabled', async function () {
-        this.timeout(60000);
+    test('gpt-5.4 should generate a Japanese commit message', async function () {
+        this.timeout(120000);
 
         if (!isValidApiKey) {
             this.skip();
@@ -256,7 +242,7 @@ suite('Bullet List Integration Tests', () => {
 
         const openai = new OpenAI({ apiKey });
         const prompt = buildCommitPrompt(SAMPLE_DIFF, {
-            language: 'english',
+            language: 'japanese',
             messageStyle: 'normal',
             useBulletList: true,
             useConventionalCommits: true,
@@ -276,9 +262,20 @@ suite('Bullet List Integration Tests', () => {
             });
 
             const message = response.choices[0]?.message?.content?.trim();
+            console.log('=== Commit message (japanese, normal) ===');
+            console.log(message);
+            console.log('==========================================');
+
             assert.ok(message, 'Should return a commit message');
 
-            // First line should match conventional commits pattern: type(scope): subject or type: subject
+            // Body should contain Japanese characters
+            const japanesePattern = /[\u3000-\u9FFF\uF900-\uFAFF]/;
+            assert.ok(
+                japanesePattern.test(message),
+                'Commit message should contain Japanese characters',
+            );
+
+            // First line should still have conventional commit prefix
             const firstLine = message.split('\n')[0];
             const conventionalPattern = /^(fix|feat|docs|style|refactor|perf|test|chore)(\(.+\))?:\s*.+/;
             assert.ok(
@@ -286,12 +283,9 @@ suite('Bullet List Integration Tests', () => {
                 `First line should match Conventional Commits format, got: "${firstLine}"`,
             );
 
-            console.log('✓ Conventional Commits format integration test passed');
+            console.log('✓ Japanese commit message test passed');
         } catch (error: unknown) {
-            if (
-                error instanceof OpenAI.APIError &&
-                error.status === 401
-            ) {
+            if (error instanceof OpenAI.APIError && error.status === 401) {
                 this.skip();
                 return;
             }

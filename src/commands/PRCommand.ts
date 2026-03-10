@@ -130,7 +130,7 @@ export class PRCommand extends BaseCommand {
         });
 
         if (!prContent) {
-            this.logger.error('Failed to generate PR content');
+            this.logger.warning('PR content generation returned empty');
             vscode.window.showErrorMessage(t('messages.failedToGeneratePR'));
             return undefined;
         }
