@@ -44,6 +44,13 @@ Kiro-style Spec Driven Development implementation on AI-DLC (AI Development Life
 - Keep steering current and verify alignment with `/kiro:spec-status`
 - Follow the user's instructions precisely, and within that scope act autonomously: gather the necessary context and complete the requested work end-to-end in this run, asking questions only when essential information is missing or the instructions are critically ambiguous.
 
+## API Integration Notes
+
+- PR generation uses **structured output** (`response_format: json_schema`) for reliable title/body extraction
+- Commit message generation uses **text completion** with `max_completion_tokens: 5000`
+- Model: `gpt-5.4` (reasoning model) — uses `developer` role, `reasoning_effort`, no `temperature`
+- Integration tests require `OPENAI_API_KEY` in `.env.local`
+
 ## Steering Configuration
 
 - Load entire `.kiro/steering/` as project memory

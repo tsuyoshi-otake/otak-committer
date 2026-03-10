@@ -1,5 +1,24 @@
 # Change Log
 
+## [2.14.0] - 2026-03-10
+
+### Fixed
+
+- **PR content generation failure with gpt-5.4:**
+  - Replaced two parallel text API calls with a single structured output (JSON Schema) call
+  - Removed `maxCompletionTokens: 100` limit that caused empty responses with reasoning models
+  - Fixed double error notification when PR generation failed
+
+### Changed
+
+- **PR generation now uses structured output:**
+  - Uses `response_format: { type: 'json_schema' }` for reliable title/body extraction
+  - Single API call instead of two parallel calls for better stability
+  - No token limit on PR generation to accommodate reasoning model overhead
+- **Integration tests upgraded to gpt-5.4:**
+  - PR, commit message, and bullet list tests now use `gpt-5.4` with `developer` role
+  - Added commit message integration test suite (`commitMessage.integration.test.ts`)
+
 ## [2.13.0] - 2026-03-06
 
 ### Changed

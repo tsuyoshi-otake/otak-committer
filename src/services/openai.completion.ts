@@ -11,6 +11,18 @@ export interface TextCompletionRequest {
     signal?: AbortSignal;
 }
 
+export interface StructuredCompletionRequest {
+    openai: OpenAI;
+    model: string;
+    systemPrompt: string;
+    userPrompt: string;
+    reasoningEffort: 'low' | 'medium' | 'high' | undefined;
+    temperature?: number;
+    signal?: AbortSignal;
+    schemaName: string;
+    schema: Record<string, unknown>;
+}
+
 export function resolveTemperature(model: string, requested?: number): number | undefined {
     if (model.startsWith('gpt-5')) {
         return undefined;
@@ -39,4 +51,34 @@ export async function requestTextCompletion(request: TextCompletionRequest): Pro
     );
 
     return response.choices?.[0]?.message?.content?.trim();
+}
+
+export async function requestStructuredCompletion<T>(request: StructuredCompletionRequest): Promise<T | undefined> {
+    const response = await request.openai.chat.completions.create(
+        {
+            model: request.model,
+            messages: [
+                { role: 'developer', content: request.systemPrompt },
+                { role: 'user', content: request.userPrompt },
+            ],
+            ...(request.temperature !== undefined ? { temperature: request.temperature } : {}),
+            reasoning_effort: request.reasoningEffort,
+            response_format: {
+                type: 'json_schema',
+                json_schema: {
+                    name: request.schemaName,
+                    strict: true,
+                    schema: request.schema,
+                },
+            },
+            store: false,
+        },
+        { timeout: REQUEST_TIMEOUT_MS, ...(request.signal ? { signal: request.signal } : {}) },
+    );
+
+    const content = response.choices?.[0]?.message?.content?.trim();
+    if (!content) {
+        return undefined;
+    }
+    return JSON.parse(content) as T;
 }

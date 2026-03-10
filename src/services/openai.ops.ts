@@ -8,7 +8,7 @@ import { formatMarkdown, cleanMarkdown } from '../utils';
 import { getPrompt } from '../languages/prompts';
 import type { SupportedLanguage } from '../languages';
 import { PromptType } from '../types/enums/PromptType';
-import { requestTextCompletion } from './openai.completion';
+import { requestTextCompletion, requestStructuredCompletion } from './openai.completion';
 
 interface OpenAIOpsContext {
     openai: OpenAI;
@@ -113,6 +113,16 @@ export async function summarizeChunkOp(
     }
 }
 
+const PR_CONTENT_SCHEMA = {
+    type: 'object',
+    properties: {
+        title: { type: 'string', description: 'Pull request title with prefix' },
+        body: { type: 'string', description: 'Pull request body in markdown' },
+    },
+    required: ['title', 'body'],
+    additionalProperties: false,
+} as const;
+
 export async function generatePRContentOp(
     context: OpenAIOpsContext,
     diff: PullRequestDiff,
@@ -120,41 +130,32 @@ export async function generatePRContentOp(
     template?: TemplateInfo,
 ): Promise<{ title: string; body: string } | undefined> {
     try {
-        context.logger.info('Generating PR content', { language });
+        context.logger.info('Generating PR content with structured output', { language });
 
-        const prompts = await context.promptService.createPRPrompt(diff, language, template);
+        const userPrompt = await context.promptService.createPRPrompt(diff, language, template);
         const systemPrompt = getPrompt(language as SupportedLanguage, PromptType.System);
         const temperature = context.getTemperature();
 
-        const [title, body] = await Promise.all([
-            requestTextCompletion({
-                openai: context.openai,
-                model: context.model,
-                systemPrompt,
-                userPrompt: prompts.title,
-                temperature,
-                reasoningEffort: context.getReasoningEffort(),
-                maxCompletionTokens: 100,
-            }),
-            requestTextCompletion({
-                openai: context.openai,
-                model: context.model,
-                systemPrompt,
-                userPrompt: prompts.body,
-                temperature,
-                reasoningEffort: context.getReasoningEffort(),
-                maxCompletionTokens: 2000,
-            }),
-        ]);
+        const result = await requestStructuredCompletion<{ title: string; body: string }>({
+            openai: context.openai,
+            model: context.model,
+            systemPrompt,
+            userPrompt,
+            temperature,
+            reasoningEffort: context.getReasoningEffort(),
+            schemaName: 'pr_content',
+            schema: PR_CONTENT_SCHEMA,
+        });
 
-        if (typeof title !== 'string' || !title || typeof body !== 'string' || !body) {
-            throw new Error('Failed to generate PR content');
+        if (!result || !result.title || !result.body) {
+            context.logger.warning('Empty PR content returned from API');
+            return undefined;
         }
 
         context.logger.info('PR content generated successfully');
         return {
-            title: cleanMarkdown(title),
-            body: formatMarkdown(body),
+            title: cleanMarkdown(result.title),
+            body: formatMarkdown(result.body),
         };
     } catch (error) {
         context.logger.error('Failed to generate PR content', error);
