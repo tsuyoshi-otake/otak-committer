@@ -1,5 +1,14 @@
 # Change Log
 
+## [2.15.0] - 2026-03-18
+
+### Added
+
+- **Fallback model support (gpt-5.4-mini):**
+  - When gpt-5.4 API requests fail with rate limit (429) or server errors (500/502/503), automatically retries with gpt-5.4-mini
+  - Applies to all API operations: commit message, chunk summarization, PR content, and chat completion
+  - Temperature is recalculated for the fallback model
+
 ## [2.14.0] - 2026-03-10
 
 ### Fixed

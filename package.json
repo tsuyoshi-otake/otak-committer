@@ -13,7 +13,7 @@
     "url": "https://github.com/tsuyoshi-otake/otak-committer/issues"
   },
   "homepage": "https://github.com/tsuyoshi-otake/otak-committer#readme",
-  "version": "2.14.0",
+  "version": "2.15.0",
   "overrides": {
     "minimatch": ">=10.2.3",
     "diff": ">=8.0.3",

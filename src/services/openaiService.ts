@@ -19,6 +19,7 @@ export class OpenAIService extends BaseService {
     protected openai: OpenAI;
     private promptService: PromptService;
     private static readonly MODEL = 'gpt-5.4';
+    private static readonly FALLBACK_MODEL = 'gpt-5.4-mini';
 
     constructor(config?: Partial<ServiceConfig>) {
         super(config);
@@ -120,6 +121,7 @@ export class OpenAIService extends BaseService {
             promptService: this.promptService,
             logger: this.logger,
             model: OpenAIService.MODEL,
+            fallbackModel: OpenAIService.FALLBACK_MODEL,
             getTemperature: (requested?: number) => this.getTemperature(requested),
             getReasoningEffort: () => this.getReasoningEffort(),
             onAuthError: () => this.promptToUpdateApiKey(),
