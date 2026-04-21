@@ -1,5 +1,24 @@
 # Change Log
 
+## [2.16.0] - 2026-04-21
+
+### Added
+
+- **Git worktree-aware repository resolution:**
+  - Added repository context resolution based on `git rev-parse --show-toplevel`, `--absolute-git-dir`, and `--git-common-dir`
+  - Commit generation, GitHub integration, and repository visibility checks now target the current workspace/worktree instead of assuming the first Git repository in the window
+  - Multi-root workspaces now select the deepest matching Git repository for the active workspace path
+
+### Fixed
+
+- **Git worktree compatibility:**
+  - Template lookup and tracked file resolution now use the actual worktree root
+  - `index.lock` guidance now points to the real worktree git directory (for example `.git/worktrees/<name>/index.lock`)
+
+### Documentation
+
+- Updated README to document Git worktree support and repository selection behavior in multi-root workspaces
+
 ## [2.15.0] - 2026-03-18
 
 ### Added

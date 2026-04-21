@@ -4,33 +4,26 @@ import { HttpsProxyAgent } from 'https-proxy-agent';
 import { t } from '../i18n';
 import { GitHubAPI } from '../types';
 import { Logger } from '../infrastructure/logging/Logger';
-
-export interface GitExtensionAPI {
-    repositories: Array<{
-        state: { HEAD?: { name?: string } };
-        getConfig(key: string): Promise<string | undefined>;
-    }>;
-}
+import {
+    getRepositoryForCurrentWorkspace,
+    GitApiRepository,
+    GitExtensionAPI,
+} from './git.repository';
 
 export interface GitHubInitializationResult {
     octokit: GitHubAPI;
-    gitApi: GitExtensionAPI;
+    repository: GitApiRepository;
     owner: string;
     repo: string;
 }
 
-async function detectRepositoryInfo(gitApi: GitExtensionAPI, logger: Logger): Promise<{
+async function detectRepositoryInfo(repository: GitApiRepository, logger: Logger): Promise<{
     owner: string;
     repo: string;
 }> {
     logger.debug('Detecting repository information');
-    const repo = gitApi.repositories[0];
-    if (!repo) {
-        logger.error('No Git repository found');
-        throw new Error('No Git repository found');
-    }
 
-    const remoteUrl = await repo.getConfig('remote.origin.url');
+    const remoteUrl = await repository.getConfig('remote.origin.url');
     if (!remoteUrl) {
         logger.error('No remote origin URL found');
         throw new Error('No remote origin URL found');
@@ -101,7 +94,12 @@ export async function initializeGitHubState(logger: Logger): Promise<GitHubIniti
         throw new Error('Git extension not found');
     }
     const gitApi = gitExtension.getAPI(1) as GitExtensionAPI;
-    const { owner, repo } = await detectRepositoryInfo(gitApi, logger);
+    const repository = getRepositoryForCurrentWorkspace(gitApi);
+    if (!repository) {
+        logger.error('No Git repository found');
+        throw new Error('No Git repository found');
+    }
+    const { owner, repo } = await detectRepositoryInfo(repository, logger);
 
-    return { octokit, gitApi, owner, repo };
+    return { octokit, repository, owner, repo };
 }

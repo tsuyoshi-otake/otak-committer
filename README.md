@@ -7,7 +7,7 @@
 
 ---
 
-Generate commit messages, PRs, and issues without leaving VS Code. Multilingual, template-aware, and team-friendly.
+Generate commit messages, PRs, and issues without leaving VS Code. Multilingual, template-aware, worktree-aware, and team-friendly.
 
 ![Commit Message](images/generate-commit-message.png)
 
@@ -21,6 +21,7 @@ Generate commit messages, PRs, and issues without leaving VS Code. Multilingual,
 4. Commit.
 
 Uses your repo's commit templates (`.gitmessage`, `.github/commit_template`, etc.) and adapts to your conventions.
+Works in standard Git repositories and linked Git worktrees.
 
 ### Pull Requests
 
@@ -52,6 +53,7 @@ Generates clear titles, structured descriptions, and relevant labels.
 - **UI internationalization** — Auto-detect VS Code UI language or pick one manually. Supported UI languages: English, Japanese, Korean, Vietnamese, French, German, Spanish, Portuguese, Simplified Chinese, Traditional Chinese, Italian, Czech, Hungarian, Bulgarian, Turkish, Polish, Russian, Thai, Hindi, Bengali, Javanese, Tamil, Burmese, Arabic, Hebrew.
 - **Multilingual commit messages** — 25 languages: English, Français, Deutsch, Italiano, Español, Português, Čeština, Magyar, Български, Türkçe, Polski, Русский, 日本語, 中文, 繁體中文, 한국어, Tiếng Việt, ไทย, हिन्दी, বাংলা, Basa Jawa, தமிழ், မြန်မာဘာသာ, العربية, עברית.
 - **Message styles** — `simple`, `normal`, or `detailed`.
+- **Git worktree support** — Resolves the current repository from the active workspace, including linked worktrees and multi-root setups, instead of assuming the first Git repository in the window.
 - **Repository visibility indicator** — Status bar icon shows whether the current repository is public (`$(globe)`) or private (`$(lock)`). Public repositories trigger a warning when the workspace is opened and a confirmation prompt before generating commit messages to prevent accidental exposure.
 - **Deep VS Code integration** — Source Control panel actions, status bar controls, and full UI localization.
 - **Smart PRs and issues** — Context-aware descriptions, template support, and issue linking.
@@ -61,6 +63,7 @@ Generates clear titles, structured descriptions, and relevant labels.
 
 ### Commit Message Flow
 
+- Resolves the current Git repository/worktree before reading diffs, templates, and branch state.
 - Analyzes staged diffs locally.
 - Handles large diffs with a 3-tier hybrid strategy:
   - **Tier 1**: Diffs within the token limit are sent as-is.
@@ -84,6 +87,7 @@ Generates clear titles, structured descriptions, and relevant labels.
 ### GitHub Authentication
 
 Uses VS Code's built-in GitHub authentication. Sign in and out through the Accounts icon in the Activity Bar.
+When multiple repositories are open, PR and issue operations target the repository that matches the active workspace/worktree.
 
 ## Configuration
 
@@ -187,6 +191,7 @@ The extension uses GPT-5.4 for high-quality commit message generation.
 
 - **No output or empty results**: Ensure you have staged changes and an OpenAI API key configured.
 - **PR/issue creation fails**: Verify GitHub auth is signed in via the Accounts icon in the Activity Bar.
+- **Wrong repository selected in a multi-root window**: Focus a file from the target workspace/worktree and rerun the command so the extension resolves the correct Git repository.
 - **Wrong UI language**: Run `Configure Display Language` in VS Code and reload the window. Unsupported locales fall back to English.
 
 ## Related Extensions

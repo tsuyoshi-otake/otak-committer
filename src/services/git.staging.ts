@@ -35,7 +35,12 @@ export async function promptForStaging(
     return true;
 }
 
-async function stageFile(git: SimpleGit, file: string, logger: Logger): Promise<void> {
+async function stageFile(
+    git: SimpleGit,
+    file: string,
+    logger: Logger,
+    indexLockErrorMessage: string,
+): Promise<void> {
     try {
         await git.add(file);
     } catch (error) {
@@ -44,7 +49,7 @@ async function stageFile(git: SimpleGit, file: string, logger: Logger): Promise<
         }
         if (error.message.includes('index.lock')) {
             logger.error('Git index.lock error detected', error);
-            vscode.window.showErrorMessage(t('git.busyIndexLock'));
+            vscode.window.showErrorMessage(indexLockErrorMessage);
             throw error;
         }
         if (error.message.includes('did not match any files')) {
@@ -66,6 +71,7 @@ export async function stageFiles(
     logger: Logger,
     isWindowsReservedNameFn: (filePath: string) => boolean,
     indexLockRetryDelayMs: number,
+    indexLockErrorMessage: string,
 ): Promise<void> {
     try {
         await git.add(['-A']);
@@ -78,7 +84,7 @@ export async function stageFiles(
                 return;
             } catch (retryError) {
                 logger.error('Git index.lock error persists after retry', retryError);
-                vscode.window.showErrorMessage(t('git.busyIndexLock'));
+                vscode.window.showErrorMessage(indexLockErrorMessage);
                 throw retryError;
             }
         }
@@ -91,7 +97,7 @@ export async function stageFiles(
         }
 
         for (const file of addableFiles) {
-            await stageFile(git, file, logger);
+            await stageFile(git, file, logger, indexLockErrorMessage);
         }
     }
 }

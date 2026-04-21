@@ -13,7 +13,8 @@ import { getBranchDiffDetails, isNoCommitsBetweenBranchesError } from './github.
 import { createIssue, getIssue, getIssues } from './github.issues';
 import { createPullRequest } from './github.pulls';
 import { getBranches } from './github.branches';
-import { GitExtensionAPI, initializeGitHubState } from './github.init';
+import { initializeGitHubState } from './github.init';
+import { GitApiRepository } from './git.repository';
 
 export class GitHubService extends BaseService implements BranchManager {
     private static readonly GITHUB_PAGE_SIZE = 100;
@@ -21,7 +22,7 @@ export class GitHubService extends BaseService implements BranchManager {
     private owner = '';
     private repo = '';
     private initialized = false;
-    private gitApi!: GitExtensionAPI;
+    private repository!: GitApiRepository;
 
     private async ensureInitialized(): Promise<void> {
         if (this.initialized) {
@@ -31,7 +32,7 @@ export class GitHubService extends BaseService implements BranchManager {
         try {
             const initializedState = await initializeGitHubState(this.logger);
             this.octokit = initializedState.octokit;
-            this.gitApi = initializedState.gitApi;
+            this.repository = initializedState.repository;
             this.owner = initializedState.owner;
             this.repo = initializedState.repo;
             this.initialized = true;
@@ -48,12 +49,7 @@ export class GitHubService extends BaseService implements BranchManager {
 
     async getCurrentBranch(): Promise<string | undefined> {
         await this.ensureInitialized();
-        const repo = this.gitApi.repositories[0];
-        if (!repo) {
-            this.logger.warning('No repository found when getting current branch');
-            return undefined;
-        }
-        const branchName = repo.state.HEAD?.name;
+        const branchName = this.repository.state.HEAD?.name;
         this.logger.debug(`Current branch: ${branchName}`);
         return branchName;
     }

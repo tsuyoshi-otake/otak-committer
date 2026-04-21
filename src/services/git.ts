@@ -8,6 +8,13 @@ import { ErrorHandler } from '../infrastructure/error';
 import { isWindowsReservedName } from '../utils/diffUtils';
 import { collectDiff, truncateDiffByTokenLimit } from './git.diff';
 import { findTemplates } from './git.templates';
+import { t } from '../i18n';
+import {
+    buildIndexLockErrorMessage,
+    GitRepositoryContext,
+    resolveGitRepositoryContext,
+    resolveWorkspacePath,
+} from './git.repository';
 
 interface StatusResult {
     current: string;
@@ -21,23 +28,54 @@ interface StatusResult {
 
 export class GitService extends BaseService {
     protected git: SimpleGit;
-    private workspaceRoot: string;
+    private workspacePath: string;
+    private repositoryContextPromise?: Promise<GitRepositoryContext>;
     private static readonly INDEX_LOCK_RETRY_DELAY_MS = 1000;
 
-    constructor(workspaceRoot: string, config?: Partial<ServiceConfig>) {
+    constructor(workspacePath: string, config?: Partial<ServiceConfig>) {
         super(config);
-        this.workspaceRoot = workspaceRoot;
-        this.git = simpleGit(workspaceRoot);
+        this.workspacePath = workspacePath;
+        this.git = simpleGit(workspacePath);
+    }
+
+    private async getRepositoryContext(): Promise<GitRepositoryContext> {
+        if (!this.repositoryContextPromise) {
+            this.repositoryContextPromise = (async () => {
+                const repositoryContext = await resolveGitRepositoryContext(
+                    this.git,
+                    this.workspacePath,
+                );
+
+                if (cleanPath(repositoryContext.rootPath) !== cleanPath(this.workspacePath)) {
+                    this.logger.debug(
+                        `Reinitializing git client at repository root: ${repositoryContext.rootPath}`,
+                    );
+                    this.git = simpleGit(repositoryContext.rootPath);
+                }
+
+                if (repositoryContext.isWorktree) {
+                    this.logger.info(
+                        `Git worktree detected: ${repositoryContext.rootPath} (git dir: ${repositoryContext.gitDir})`,
+                    );
+                }
+
+                return repositoryContext;
+            })();
+        }
+
+        return this.repositoryContextPromise;
     }
 
     private async collectDiff(globalState?: vscode.Memento): Promise<string | undefined> {
         try {
+            const repositoryContext = await this.getRepositoryContext();
             return await collectDiff(
                 this.git,
                 this.logger,
                 globalState,
                 isWindowsReservedName,
                 GitService.INDEX_LOCK_RETRY_DELAY_MS,
+                buildIndexLockErrorMessage(t('git.busyIndexLock'), repositoryContext.gitDir),
             );
         } catch (error) {
             this.logger.error('Failed to get git diff', error);
@@ -59,12 +97,13 @@ export class GitService extends BaseService {
 
     async getTrackedFiles(): Promise<string[]> {
         try {
+            const repositoryContext = await this.getRepositoryContext();
             this.logger.debug('Getting tracked files');
             const result = await this.git.raw(['ls-files']);
             const files = result
                 .split('\n')
                 .filter((file) => file.trim() !== '')
-                .map((file) => cleanPath(path.join(this.workspaceRoot, file.trim())))
+                .map((file) => cleanPath(path.join(repositoryContext.rootPath, file.trim())))
                 .filter(isSourceFile);
             this.logger.info(`Found ${files.length} tracked source files`);
             return files;
@@ -76,6 +115,7 @@ export class GitService extends BaseService {
 
     async getStatus(): Promise<StatusResult> {
         try {
+            await this.getRepositoryContext();
             this.logger.debug('Getting git status');
             const status = await this.git.status();
             this.logger.info(`Git status retrieved: ${status.files.length} files changed`);
@@ -95,17 +135,19 @@ export class GitService extends BaseService {
     }
 
     async findTemplates(): Promise<{ commit?: TemplateInfo; pr?: TemplateInfo }> {
-        return findTemplates(this.workspaceRoot, this.logger);
+        const repositoryContext = await this.getRepositoryContext();
+        return findTemplates(repositoryContext.rootPath, this.logger);
     }
 
     async checkIsRepo(): Promise<boolean> {
         try {
             this.logger.debug('Checking if directory is a git repository');
-            await this.git.checkIsRepo();
+            await this.getRepositoryContext();
             this.logger.info('Git repository confirmed');
             return true;
         } catch (error) {
             this.logger.warning('Not a git repository', error);
+            this.repositoryContextPromise = undefined;
             return false;
         }
     }
@@ -113,13 +155,12 @@ export class GitService extends BaseService {
 
 export class GitServiceFactory extends BaseServiceFactory<GitService> {
     async create(config?: Partial<ServiceConfig>): Promise<GitService> {
-        const workspaceFolders = vscode.workspace.workspaceFolders;
-        if (!workspaceFolders || workspaceFolders.length === 0) {
+        const workspacePath = resolveWorkspacePath();
+        if (!workspacePath) {
             throw new Error('No workspace folder found');
         }
 
-        const workspaceRoot = workspaceFolders[0].uri.fsPath;
-        const service = new GitService(workspaceRoot, config);
+        const service = new GitService(workspacePath, config);
 
         if (!(await service.checkIsRepo())) {
             throw new Error('No Git repository found in the current workspace');

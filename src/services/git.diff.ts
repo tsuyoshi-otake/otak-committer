@@ -11,6 +11,7 @@ export async function collectDiff(
     globalState: vscode.Memento | undefined,
     isWindowsReservedNameFn: (filePath: string) => boolean,
     indexLockRetryDelayMs: number,
+    indexLockErrorMessage: string,
 ): Promise<string | undefined> {
     logger.debug('Getting git diff');
     const status = await git.status();
@@ -41,6 +42,7 @@ export async function collectDiff(
             logger,
             isWindowsReservedNameFn,
             indexLockRetryDelayMs,
+            indexLockErrorMessage,
         );
         diff = await git.diff(['--cached']);
     }

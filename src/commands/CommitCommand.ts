@@ -7,6 +7,7 @@ import { TemplateInfo } from '../types';
 import { detectPotentialSecrets, sanitizeCommitMessage } from '../utils';
 import { t } from '../i18n/index.js';
 import type { DiffProcessResult } from '../services/diffProcessor';
+import { getRepositoryForCurrentWorkspace } from '../services/git.repository';
 
 /**
  * Command for generating commit messages using AI
@@ -286,11 +287,15 @@ export class CommitCommand extends BaseCommand {
 
         // Get Git API
         const gitApi = gitExtension.exports.getAPI(1);
-        const repository = gitApi.repositories[0];
+        const repository = getRepositoryForCurrentWorkspace(gitApi);
 
         if (!repository) {
             this.logger.error('No Git repository found');
             throw new Error('No Git repository found');
+        }
+        if (!repository.inputBox) {
+            this.logger.error('Git repository input box is not available');
+            throw new Error('Git repository input box is not available');
         }
 
         // Set the message in the input box

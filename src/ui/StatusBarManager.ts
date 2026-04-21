@@ -4,6 +4,7 @@ import { LANGUAGE_CONFIGS } from '../languages/index.js';
 import { MessageStyle } from '../types/enums/MessageStyle.js';
 import { Logger } from '../infrastructure/logging/Logger.js';
 import { t } from '../i18n/index.js';
+import { getRepositoryForCurrentWorkspace } from '../services/git.repository.js';
 
 /**
  * Manages the status bar item for language and configuration display
@@ -128,7 +129,7 @@ export class StatusBarManager {
         }
 
         const gitApi = gitExtension.getAPI(1);
-        const repo = gitApi?.repositories?.[0];
+        const repo = gitApi ? getRepositoryForCurrentWorkspace(gitApi) : undefined;
         if (!repo) {
             this.logger.debug('No Git repository found for visibility detection');
             return;
