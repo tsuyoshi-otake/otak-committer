@@ -1,5 +1,12 @@
 # Change Log
 
+## [2.16.1] - 2026-04-22
+
+### Fixed
+
+- **Git initialization error now reports the actual cause:**
+  - `No Git repository found in the current workspace` was a dead-end message; it now includes the resolved workspace path and the raw git error (for example `fatal: not a git repository (or any of the parent directories): .git`) so worktree/multi-root misrouting can be diagnosed without digging through logs
+
 ## [2.16.0] - 2026-04-21
 
 ### Added

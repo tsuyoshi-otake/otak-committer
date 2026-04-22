@@ -139,15 +139,23 @@ export class GitService extends BaseService {
         return findTemplates(repositoryContext.rootPath, this.logger);
     }
 
-    async checkIsRepo(): Promise<boolean> {
+    async ensureRepositoryInitialized(): Promise<void> {
         try {
             this.logger.debug('Checking if directory is a git repository');
             await this.getRepositoryContext();
             this.logger.info('Git repository confirmed');
-            return true;
         } catch (error) {
             this.logger.warning('Not a git repository', error);
             this.repositoryContextPromise = undefined;
+            throw error;
+        }
+    }
+
+    async checkIsRepo(): Promise<boolean> {
+        try {
+            await this.ensureRepositoryInitialized();
+            return true;
+        } catch {
             return false;
         }
     }
@@ -162,8 +170,14 @@ export class GitServiceFactory extends BaseServiceFactory<GitService> {
 
         const service = new GitService(workspacePath, config);
 
-        if (!(await service.checkIsRepo())) {
-            throw new Error('No Git repository found in the current workspace');
+        try {
+            await service.ensureRepositoryInitialized();
+        } catch (error) {
+            const rawReason = error instanceof Error ? error.message : String(error);
+            const reason = rawReason.replace(/\s+/g, ' ').trim() || 'unknown error';
+            throw new Error(
+                `No Git repository found at "${workspacePath}" (${reason})`,
+            );
         }
 
         return service;
