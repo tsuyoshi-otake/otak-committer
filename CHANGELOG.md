@@ -1,5 +1,14 @@
 # Change Log
 
+## [2.16.2] - 2026-04-22
+
+### Fixed
+
+- **Follow the SCM-selected repository when the workspace root is a bare repo:**
+  - The `bare + worktrees` layout (for example `smile-chat/.bare` plus sibling `smile-chat-main` / `smile-chat-develop` worktrees) previously failed with `fatal: this operation must be run in a work tree` because `GitServiceFactory` initialised simple-git against the bare directory opened in VS Code
+  - `GitServiceFactory` now activates the built-in `vscode.git` extension and, if any repository has `ui.selected === true` (the one highlighted in the Source Control view), uses that worktree's `rootUri` as the workspace path
+  - Falls back to the deepest path match and then to the first workspace folder, so ordinary single-repo and multi-root setups behave as before
+
 ## [2.16.1] - 2026-04-22
 
 ### Fixed

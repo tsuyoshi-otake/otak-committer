@@ -13,7 +13,7 @@ import {
     buildIndexLockErrorMessage,
     GitRepositoryContext,
     resolveGitRepositoryContext,
-    resolveWorkspacePath,
+    resolveRepositoryWorkspacePath,
 } from './git.repository';
 
 interface StatusResult {
@@ -163,7 +163,7 @@ export class GitService extends BaseService {
 
 export class GitServiceFactory extends BaseServiceFactory<GitService> {
     async create(config?: Partial<ServiceConfig>): Promise<GitService> {
-        const workspacePath = resolveWorkspacePath();
+        const workspacePath = await resolveRepositoryWorkspacePath();
         if (!workspacePath) {
             throw new Error('No workspace folder found');
         }

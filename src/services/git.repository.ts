@@ -21,11 +21,18 @@ export interface GitApiRepository {
     rootUri?: RootUriLike;
     inputBox?: { value: string };
     state: { HEAD?: { name?: string } };
+    ui?: { selected: boolean };
     getConfig(key: string): Promise<string | undefined>;
 }
 
 export interface GitExtensionAPI {
     repositories: GitApiRepository[];
+}
+
+interface VSCodeExtensionLike {
+    isActive: boolean;
+    exports?: unknown;
+    activate(): Promise<unknown>;
 }
 
 function normalizeForComparison(targetPath: string): string {
@@ -104,6 +111,13 @@ export function selectRepositoryForPath(
         return undefined;
     }
 
+    const selectedRepository = repositories.find(
+        (repository) => repository.ui?.selected === true,
+    );
+    if (selectedRepository) {
+        return selectedRepository;
+    }
+
     if (!targetPath) {
         return repositories[0];
     }
@@ -135,6 +149,41 @@ export function getRepositoryForCurrentWorkspace(
     gitApi: GitExtensionAPI,
 ): GitApiRepository | undefined {
     return selectRepositoryForPath(gitApi.repositories, resolveWorkspacePath());
+}
+
+async function loadGitExtensionApi(): Promise<GitExtensionAPI | undefined> {
+    let vscodeModule: typeof import('vscode');
+    try {
+        vscodeModule = require('vscode') as typeof import('vscode');
+    } catch {
+        return undefined;
+    }
+
+    const gitExtension = vscodeModule.extensions?.getExtension?.('vscode.git') as
+        | VSCodeExtensionLike
+        | undefined;
+    if (!gitExtension) {
+        return undefined;
+    }
+
+    try {
+        const exported = (await gitExtension.activate()) as
+            | { getAPI?: (version: number) => GitExtensionAPI }
+            | undefined;
+        return exported?.getAPI?.(1);
+    } catch {
+        return undefined;
+    }
+}
+
+export async function resolveRepositoryWorkspacePath(): Promise<string | undefined> {
+    const workspacePath = resolveWorkspacePath();
+    const gitApi = await loadGitExtensionApi();
+    const repository = gitApi
+        ? selectRepositoryForPath(gitApi.repositories ?? [], workspacePath)
+        : undefined;
+
+    return repository?.rootUri?.fsPath ?? workspacePath;
 }
 
 export function buildIndexLockErrorMessage(baseMessage: string, gitDir: string): string {

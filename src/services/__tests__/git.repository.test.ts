@@ -31,6 +31,59 @@ suite('Git Repository Helper Tests', () => {
         );
     });
 
+    test('should prefer the repository marked as selected in the SCM view', () => {
+        const repositories = [
+            {
+                rootUri: { fsPath: 'C:/repo/smile-chat-main' },
+                state: {},
+                getConfig: async () => undefined,
+            },
+            {
+                rootUri: { fsPath: 'C:/repo/smile-chat-develop' },
+                state: {},
+                ui: { selected: true },
+                getConfig: async () => undefined,
+            },
+        ];
+
+        const selectedRepository = selectRepositoryForPath(
+            repositories,
+            'C:/repo',
+        );
+
+        assert.strictEqual(
+            selectedRepository?.rootUri?.fsPath,
+            'C:/repo/smile-chat-develop',
+        );
+    });
+
+    test('should still fall back to path matching when no repository is marked selected', () => {
+        const repositories = [
+            {
+                rootUri: { fsPath: 'C:/repo/main' },
+                state: {},
+                ui: { selected: false },
+                getConfig: async () => undefined,
+            },
+            {
+                rootUri: { fsPath: 'C:/repo/feature' },
+                state: {},
+                ui: { selected: false },
+                getConfig: async () => undefined,
+            },
+        ];
+
+        const selectedRepository = selectRepositoryForPath(
+            repositories,
+            'C:/repo/feature/src/app.ts',
+        );
+
+        assert.strictEqual(
+            selectedRepository?.rootUri?.fsPath,
+            'C:/repo/feature',
+        );
+    });
+
     test('should prefer the deepest repository that contains the workspace path', () => {
         const repositories = [
             {
