@@ -7,7 +7,7 @@
 
 ---
 
-Generate commit messages, PRs, and issues without leaving VS Code. Multilingual, template-aware, worktree-aware, and team-friendly.
+Generate commit messages, PRs, and issues without leaving VS Code. The extension understands multiple languages, follows your templates, supports Git worktrees, and fits team workflows.
 
 ![Commit Message](images/generate-commit-message.png)
 
@@ -20,20 +20,20 @@ Generate commit messages, PRs, and issues without leaving VS Code. Multilingual,
 3. Review and edit the result.
 4. Commit.
 
-Uses your repo's commit templates (`.gitmessage`, `.github/commit_template`, etc.) and adapts to your conventions.
-Works in standard Git repositories and linked Git worktrees.
+It uses your repo's commit templates (`.gitmessage`, `.github/commit_template`, etc.) and adapts to your conventions.
+It works with standard Git repositories and linked Git worktrees.
 
 ### Pull Requests
 
 ![Generate Pull Request Button](images/generate-pull-request.png)
 
 1. Click "Generate Pull Request" in Source Control.
-2. Select an issue to link (optional).
-3. Choose base and target branches.
+2. Select an issue to link, if needed.
+3. Choose the base and compare branches.
 4. Review the generated description.
 5. Submit as draft or ready for review.
 
-Automatically uses PR templates, links issues, and applies labels/milestones when available. Requires GitHub sign-in via VS Code.
+Automatically uses PR templates and links issues when available. Requires GitHub sign-in via VS Code.
 
 ### Issues
 
@@ -44,17 +44,17 @@ Automatically uses PR templates, links issues, and applies labels/milestones whe
 3. Select relevant files for context (optional).
 4. Describe your issue.
 5. Review the AI-enhanced description.
-6. Create or modify before submitting.
+6. Edit if needed, then create the issue.
 
-Generates clear titles, structured descriptions, and relevant labels.
+Generates clear titles and structured descriptions.
 
 ## Features
 
-- **UI internationalization** — Auto-detect VS Code UI language or pick one manually. Supported UI languages: English, Japanese, Korean, Vietnamese, French, German, Spanish, Portuguese, Simplified Chinese, Traditional Chinese, Italian, Czech, Hungarian, Bulgarian, Turkish, Polish, Russian, Thai, Hindi, Bengali, Javanese, Tamil, Burmese, Arabic, Hebrew.
-- **Multilingual commit messages** — 25 languages: English, Français, Deutsch, Italiano, Español, Português, Čeština, Magyar, Български, Türkçe, Polski, Русский, 日本語, 中文, 繁體中文, 한국어, Tiếng Việt, ไทย, हिन्दी, বাংলা, Basa Jawa, தமிழ், မြန်မာဘာသာ, العربية, עברית.
+- **UI internationalization** — Automatically detects your VS Code display language, or lets you choose one manually. Supported UI languages: English, Japanese, Korean, Vietnamese, French, German, Spanish, Portuguese, Simplified Chinese, Traditional Chinese, Italian, Czech, Hungarian, Bulgarian, Turkish, Polish, Russian, Thai, Hindi, Bengali, Javanese, Tamil, Burmese, Arabic, Hebrew.
+- **Multilingual commit messages** — Generates commit messages in 25 languages: English, Français, Deutsch, Italiano, Español, Português, Čeština, Magyar, Български, Türkçe, Polski, Русский, 日本語, 中文, 繁體中文, 한국어, Tiếng Việt, ไทย, हिन्दी, বাংলা, Basa Jawa, தமிழ், မြန်မာဘာသာ, العربية, עברית.
 - **Message styles** — `simple`, `normal`, or `detailed`.
 - **Git worktree support** — Resolves the current repository from the active workspace, including linked worktrees and multi-root setups, instead of assuming the first Git repository in the window.
-- **Repository visibility indicator** — Status bar icon shows whether the current repository is public (`$(globe)`) or private (`$(lock)`). Public repositories trigger a warning when the workspace is opened and a confirmation prompt before generating commit messages to prevent accidental exposure.
+- **Repository visibility indicator** — The status bar shows whether the current repository is public (`$(globe)`) or private (`$(lock)`). Public repositories trigger a warning when the workspace is opened and a confirmation prompt before generating commit messages to help prevent accidental exposure.
 - **Deep VS Code integration** — Source Control panel actions, status bar controls, and full UI localization.
 - **Smart PRs and issues** — Context-aware descriptions, template support, and issue linking.
 - **Custom instructions** — Team-specific guidance via `otakCommitter.customMessage`.
@@ -63,20 +63,20 @@ Generates clear titles, structured descriptions, and relevant labels.
 
 ### Commit Message Flow
 
-- Resolves the current Git repository/worktree before reading diffs, templates, and branch state.
+- Resolves the current Git repository or worktree before reading diffs, templates, and branch state.
 - Analyzes staged diffs locally.
-- Handles large diffs with a 3-tier hybrid strategy:
+- Handles large diffs with a three-tier strategy:
   - **Tier 1**: Diffs within the token limit are sent as-is.
-  - **Tier 2**: Oversized diffs are parsed per file. Lock files (package-lock.json, yarn.lock, etc.) are excluded, source code is prioritized, and a change summary of all files is always included.
-  - **Tier 3**: If Tier 2 still exceeds the budget, remaining files are chunked and summarized via parallel API calls, then combined for commit message generation.
+  - **Tier 2**: Oversized diffs are split by file. Lock files (package-lock.json, yarn.lock, etc.) are excluded, source code is prioritized, and a change summary for all files is always included.
+  - **Tier 3**: If Tier 2 still exceeds the budget, the remaining files are split into chunks, summarized through parallel API calls, and then combined for commit message generation.
 - Applies your commit template and style.
-- Generates output in your selected language and detail level.
+- Generates the result in your selected language and detail level.
 
 ### Pull Request Flow
 
-- Builds a description from your changes.
+- Generates a description from your changes.
 - Honors your PR template.
-- Links issues and applies labels/milestones when available.
+- Links selected issues when available.
 
 ### Issue Flow
 
@@ -86,8 +86,8 @@ Generates clear titles, structured descriptions, and relevant labels.
 
 ### GitHub Authentication
 
-Uses VS Code's built-in GitHub authentication. Sign in and out through the Accounts icon in the Activity Bar.
-When multiple repositories are open, PR and issue operations target the repository that matches the active workspace/worktree.
+Uses VS Code's built-in GitHub authentication. Sign in or out through the Accounts icon in the Activity Bar.
+When multiple repositories are open, PR and issue operations target the repository that matches the active workspace or worktree.
 
 ## Configuration
 
@@ -110,7 +110,7 @@ When multiple repositories are open, PR and issue operations target the reposito
 - **`otakCommitter.appendCommitTrailer`**: Append `Commit-Message-By: otak-committer` trailer (default: `true`)
 - **`otakCommitter.syncApiKeys`**: Sync API keys via VS Code Settings Sync (default: `false`)
 
-### Custom Instructions Examples
+### Custom Instruction Examples
 
 ```text
 // Examples:
@@ -146,16 +146,16 @@ Access via the Command Palette (`Cmd/Ctrl+Shift+P`):
 3. Run `otak-committer: Set OpenAI API Key`.
 4. (Optional) Sign in to GitHub via the Accounts icon in the Activity Bar for PR/issue features.
 
-Default: English + Normal style. Change anytime from the status bar.
+By default, the extension uses English and the Normal style. You can change these anytime from the status bar.
 
-The extension uses GPT-5.4 for high-quality commit message generation.
+The extension currently uses GPT-5.4 for high-quality commit message generation.
 
 ## Security & Privacy
 
 ### API Key Protection
 
 - **Secure Storage (default)**: API keys are stored using VS Code SecretStorage.
-- **Settings Sync (optional)**: If `otakCommitter.syncApiKeys` is enabled, a copy of your API keys is stored in synced extension state for cross-device usage.
+- **Settings Sync (optional)**: If `otakCommitter.syncApiKeys` is enabled, a copy of your API keys is stored in synced extension state for use across devices.
 - **Encrypted Backups**: Redundant storage uses AES-256-GCM encryption with PBKDF2 (600,000 iterations) and machine-specific keys.
 - **Automatic Migration**: Legacy API keys in settings are migrated to secure storage and deleted.
 - **No `settings.json` secrets**: Keys never appear in `settings.json`.
@@ -164,7 +164,7 @@ The extension uses GPT-5.4 for high-quality commit message generation.
 ### Data Handling
 
 - Git diff analysis happens locally.
-- **Secret detection**: Before any API call, diffs and file content are scanned for potential secrets (API keys, tokens, passwords, private keys, connection strings, environment variable references, etc.). If secrets are detected, generation is blocked entirely. This applies to commit messages, PR descriptions, issue generation, and map-reduce summarization.
+- **Secret detection**: Before generation, diffs and selected file content are scanned for potential secrets (API keys, tokens, passwords, private keys, connection strings, environment variable references, etc.). The extension warns you when it detects a possible secret in commit, PR, or issue inputs; map-reduce chunks are also checked and logged.
 - **Log redaction**: Logger automatically redacts sensitive field values, known secret formats, URL-embedded credentials, and secrets in error stack traces.
 - Only necessary diff context is sent to OpenAI for generation.
 - Large diffs are intelligently prioritized: lock files and generated files are excluded or summarized to minimize data sent to the API.
@@ -190,8 +190,8 @@ The extension uses GPT-5.4 for high-quality commit message generation.
 ## Troubleshooting
 
 - **No output or empty results**: Ensure you have staged changes and an OpenAI API key configured.
-- **PR/issue creation fails**: Verify GitHub auth is signed in via the Accounts icon in the Activity Bar.
-- **Wrong repository selected in a multi-root window**: Focus a file from the target workspace/worktree and rerun the command so the extension resolves the correct Git repository.
+- **PR/issue creation fails**: Make sure you are signed in to GitHub via the Accounts icon in the Activity Bar.
+- **Wrong repository selected in a multi-root window**: Focus a file in the target workspace or worktree and run the command again so the extension resolves the correct Git repository.
 - **Wrong UI language**: Run `Configure Display Language` in VS Code and reload the window. Unsupported locales fall back to English.
 
 ## Related Extensions

@@ -76,11 +76,12 @@ export class StatusBarManager {
         }
 
         // Set status bar text
-        const visibilityLabel = this._isPublicRepo === true
-            ? t('statusBar.public')
-            : this._isPublicRepo === false
-                ? t('statusBar.private')
-                : '';
+        const visibilityLabel =
+            this._isPublicRepo === true
+                ? t('statusBar.public')
+                : this._isPublicRepo === false
+                  ? t('statusBar.private')
+                  : '';
         this.statusBarItem.text = visibilityLabel
             ? `${this.repoIcon} ${visibilityLabel}: ${languageConfig.label}`
             : `${this.repoIcon} ${languageConfig.label}`;
@@ -105,7 +106,9 @@ export class StatusBarManager {
      */
     private buildTooltip(): vscode.MarkdownString {
         const tooltip = new vscode.MarkdownString();
-        tooltip.isTrusted = true;
+        tooltip.isTrusted = {
+            enabledCommands: ['otak-committer.setApiKey', 'otak-committer.openSettings'],
+        };
         tooltip.supportThemeIcons = true;
 
         const messageStyle = this.config.get('messageStyle') || MessageStyle.Normal;
@@ -135,24 +138,27 @@ export class StatusBarManager {
             return;
         }
 
-        repo.getConfig('remote.origin.url').then((remoteUrl: string | undefined) => {
-            if (!remoteUrl) {
-                this.logger.debug('No remote origin URL found');
-                return;
-            }
+        repo.getConfig('remote.origin.url').then(
+            (remoteUrl: string | undefined) => {
+                if (!remoteUrl) {
+                    this.logger.debug('No remote origin URL found');
+                    return;
+                }
 
-            const match = remoteUrl.match(/github\.com[:/]([^/]+)\/([^.]+)(?:\.git)?$/);
-            if (!match) {
-                this.logger.debug('Remote URL is not a GitHub repository');
-                return;
-            }
+                const match = remoteUrl.match(/github\.com[:/]([^/]+)\/([^.]+)(?:\.git)?$/);
+                if (!match) {
+                    this.logger.debug('Remote URL is not a GitHub repository');
+                    return;
+                }
 
-            const [, owner, repoName] = match;
-            this._repoFullName = `${owner}/${repoName}`;
-            this.checkGitHubRepoVisibility(owner, repoName);
-        }, (error: unknown) => {
-            this.logger.debug(`Failed to get remote URL: ${error}`);
-        });
+                const [, owner, repoName] = match;
+                this._repoFullName = `${owner}/${repoName}`;
+                this.checkGitHubRepoVisibility(owner, repoName);
+            },
+            (error: unknown) => {
+                this.logger.debug(`Failed to get remote URL: ${error}`);
+            },
+        );
     }
 
     private checkGitHubRepoVisibility(owner: string, repoName: string): void {
@@ -160,22 +166,27 @@ export class StatusBarManager {
 
         fetch(url, {
             headers: { 'User-Agent': 'otak-committer' },
-        }).then((response) => {
-            if (response.ok) {
-                return response.json() as Promise<{ private: boolean }>;
-            }
-            // 404 or other error means private or inaccessible
-            this.applyVisibilityStyle(true);
-            this.logger.debug(`Repository ${owner}/${repoName} detected as private`);
-            return null;
-        }).then((data: { private: boolean } | null) => {
-            if (data) {
-                this.applyVisibilityStyle(data.private);
-                this.logger.debug(`Repository ${owner}/${repoName} visibility: ${data.private ? 'private' : 'public'}`);
-            }
-        }).catch((error) => {
-            this.logger.debug(`Failed to check repo visibility: ${error}`);
-        });
+        })
+            .then((response) => {
+                if (response.ok) {
+                    return response.json() as Promise<{ private: boolean }>;
+                }
+                // 404 or other error means private or inaccessible
+                this.applyVisibilityStyle(true);
+                this.logger.debug(`Repository ${owner}/${repoName} detected as private`);
+                return null;
+            })
+            .then((data: { private: boolean } | null) => {
+                if (data) {
+                    this.applyVisibilityStyle(data.private);
+                    this.logger.debug(
+                        `Repository ${owner}/${repoName} visibility: ${data.private ? 'private' : 'public'}`,
+                    );
+                }
+            })
+            .catch((error) => {
+                this.logger.debug(`Failed to check repo visibility: ${error}`);
+            });
     }
 
     private applyVisibilityStyle(isPrivate: boolean): void {
@@ -211,8 +222,10 @@ export class StatusBarManager {
         if (!this._repoFullName) {
             return false;
         }
-        const suppressed: string[] =
-            this.context.globalState.get('publicRepoWarningSuppressed', []);
+        const suppressed: string[] = this.context.globalState.get(
+            'publicRepoWarningSuppressed',
+            [],
+        );
         return suppressed.includes(this._repoFullName);
     }
 
@@ -220,8 +233,10 @@ export class StatusBarManager {
         if (!this._repoFullName) {
             return;
         }
-        const suppressed: string[] =
-            this.context.globalState.get('publicRepoWarningSuppressed', []);
+        const suppressed: string[] = this.context.globalState.get(
+            'publicRepoWarningSuppressed',
+            [],
+        );
         if (!suppressed.includes(this._repoFullName)) {
             suppressed.push(this._repoFullName);
             await this.context.globalState.update('publicRepoWarningSuppressed', suppressed);

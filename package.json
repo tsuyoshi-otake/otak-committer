@@ -13,7 +13,7 @@
     "url": "https://github.com/tsuyoshi-otake/otak-committer/issues"
   },
   "homepage": "https://github.com/tsuyoshi-otake/otak-committer#readme",
-  "version": "2.16.2",
+  "version": "2.16.3",
   "overrides": {
     "minimatch": ">=10.2.3",
     "diff": ">=8.0.3",
@@ -312,6 +312,6 @@
     "@octokit/rest": "^21.1.1",
     "https-proxy-agent": "^7.0.2",
     "openai": "^4.85.4",
-    "simple-git": "^3.27.0"
+    "simple-git": "^3.36.0"
   }
 }
