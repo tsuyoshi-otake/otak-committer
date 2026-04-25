@@ -35,12 +35,23 @@ const DEFAULT_OPTIONS: Required<SanitizationOptions> = {
  * **Property 5: Shell metacharacter safety**
  */
 export function escapeShellMetacharacters(text: string): string {
-    return (
-        text
+    let escaped = text;
+
+    while (escaped.includes('$(') || escaped.includes('${')) {
+        const next = escaped
             // Neutralize command substitution $(...) by replacing $ with safe character
             .replace(/\$\(/g, '(dollar)(')
-            // Neutralize variable expansion ${...}
-            .replace(/\$\{/g, '(dollar){')
+            // Neutralize variable expansion ${...}. Re-run because "$$(" can otherwise
+            // leave a new "$(" across the boundary of the replacement.
+            .replace(/\$\{/g, '(dollar){');
+        if (next === escaped) {
+            break;
+        }
+        escaped = next;
+    }
+
+    return (
+        escaped
             // Convert backticks to single quotes for code references (including empty backticks)
             .replace(/`([^`]*)`/g, "'$1'")
             // Remove any remaining lone backticks

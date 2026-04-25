@@ -17,6 +17,29 @@ function cleanGitPath(targetPath: string): string {
     return targetPath.replace(/\\/g, '/');
 }
 
+function isWindowsAbsolutePath(targetPath: string): boolean {
+    return /^[A-Za-z]:[\\/]/.test(targetPath) || /^[/\\]{2}[^/\\]+[/\\][^/\\]+/.test(targetPath);
+}
+
+function resolveGitPath(targetPath: string): string {
+    if (isWindowsAbsolutePath(targetPath)) {
+        return cleanGitPath(path.win32.resolve(targetPath));
+    }
+    return cleanGitPath(path.resolve(targetPath));
+}
+
+function resolveGitPathFrom(workspacePath: string, targetPath: string): string {
+    if (isWindowsAbsolutePath(targetPath) || path.isAbsolute(targetPath)) {
+        return resolveGitPath(targetPath);
+    }
+
+    if (isWindowsAbsolutePath(workspacePath)) {
+        return cleanGitPath(path.win32.resolve(workspacePath, targetPath));
+    }
+
+    return cleanGitPath(path.resolve(workspacePath, targetPath));
+}
+
 export interface GitApiRepository {
     rootUri?: RootUriLike;
     inputBox?: { value: string };
@@ -36,7 +59,7 @@ interface VSCodeExtensionLike {
 }
 
 function normalizeForComparison(targetPath: string): string {
-    const normalized = cleanGitPath(path.resolve(targetPath));
+    const normalized = resolveGitPath(targetPath);
     return normalized.endsWith('/') ? normalized.slice(0, -1) : normalized;
 }
 
@@ -45,8 +68,7 @@ function isPathWithin(parentPath: string, childPath: string): boolean {
     const normalizedChild = normalizeForComparison(childPath);
 
     return (
-        normalizedChild === normalizedParent ||
-        normalizedChild.startsWith(`${normalizedParent}/`)
+        normalizedChild === normalizedParent || normalizedChild.startsWith(`${normalizedParent}/`)
     );
 }
 
@@ -60,10 +82,7 @@ async function revParsePath(
         return cleanGitPath(absolutePath.trim());
     } catch {
         const rawPath = (await git.raw(['rev-parse', ...args])).trim();
-        const resolvedPath = path.isAbsolute(rawPath)
-            ? rawPath
-            : path.resolve(workspacePath, rawPath);
-        return cleanGitPath(resolvedPath);
+        return resolveGitPathFrom(workspacePath, rawPath);
     }
 }
 
@@ -111,9 +130,7 @@ export function selectRepositoryForPath(
         return undefined;
     }
 
-    const selectedRepository = repositories.find(
-        (repository) => repository.ui?.selected === true,
-    );
+    const selectedRepository = repositories.find((repository) => repository.ui?.selected === true);
     if (selectedRepository) {
         return selectedRepository;
     }
@@ -123,8 +140,9 @@ export function selectRepositoryForPath(
     }
 
     const containingRepositories = repositories
-        .filter((repository): repository is GitApiRepository & { rootUri: RootUriLike } =>
-            !!repository.rootUri,
+        .filter(
+            (repository): repository is GitApiRepository & { rootUri: RootUriLike } =>
+                !!repository.rootUri,
         )
         .filter((repository) => isPathWithin(repository.rootUri.fsPath, targetPath))
         .sort(
