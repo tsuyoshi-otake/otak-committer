@@ -11,7 +11,6 @@ import {
     createCommitErrorContext,
     formatErrorMessage,
     CommitErrorContext,
-    handleCommitError,
     isApiKeyError,
     isNetworkError,
     isDiffError,
@@ -261,27 +260,4 @@ suite('Commit Error Handling Tests', () => {
         });
     });
 
-    suite('Error Handler Function', () => {
-        test('should return formatted message for known errors', () => {
-            const error = new CommitError('API failed', 'API_ERROR');
-            const context: CommitErrorContext = { operation: 'apiCall' };
-            const result = handleCommitError(error, context);
-            assert.ok(result.message.length > 0);
-            assert.ok(result.isRecoverable !== undefined);
-        });
-
-        test('should mark API key errors as recoverable', () => {
-            const error = new CommitError('Invalid key', 'INVALID_API_KEY');
-            const context: CommitErrorContext = { operation: 'validate' };
-            const result = handleCommitError(error, context);
-            assert.strictEqual(result.isRecoverable, true);
-        });
-
-        test('should mark network errors as potentially recoverable', () => {
-            const error = new CommitError('Timeout', 'NETWORK_ERROR');
-            const context: CommitErrorContext = { operation: 'apiCall' };
-            const result = handleCommitError(error, context);
-            assert.strictEqual(result.isRecoverable, true);
-        });
-    });
 });

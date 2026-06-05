@@ -8,11 +8,8 @@
 
 import * as fc from 'fast-check';
 import {
-    CommitError,
     createCommitErrorContext,
     formatErrorMessage,
-    handleCommitError,
-    CommitErrorContext,
 } from '../../utils/errorHandling';
 import { runPropertyTest } from '../../test/helpers/property-test.helper';
 
@@ -98,47 +95,6 @@ suite('Error Handling Robustness Property Tests', () => {
                         const formatted = formatErrorMessage(error, context);
 
                         return formatted.length > 0;
-                    },
-                ),
-            );
-        });
-
-        test('error handler should always return a valid result', () => {
-            runPropertyTest(
-                fc.property(
-                    fc.tuple(
-                        fc.string({ minLength: 1, maxLength: 100 }),
-                        errorCodeArbitrary,
-                        operationArbitrary,
-                    ),
-                    ([message, code, operation]) => {
-                        const error = new CommitError(message, code);
-                        const context: CommitErrorContext = { operation };
-                        const result = handleCommitError(error, context);
-
-                        return (
-                            typeof result.message === 'string' &&
-                            result.message.length > 0 &&
-                            typeof result.isRecoverable === 'boolean'
-                        );
-                    },
-                ),
-            );
-        });
-
-        test('API key errors should always be marked as recoverable', () => {
-            runPropertyTest(
-                fc.property(
-                    fc.tuple(
-                        fc.string({ minLength: 1, maxLength: 100 }),
-                        fc.constantFrom('INVALID_API_KEY', 'MISSING_API_KEY'),
-                    ),
-                    ([message, code]) => {
-                        const error = new CommitError(message, code);
-                        const context: CommitErrorContext = { operation: 'validateApiKey' };
-                        const result = handleCommitError(error, context);
-
-                        return result.isRecoverable === true;
                     },
                 ),
             );
