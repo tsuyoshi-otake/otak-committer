@@ -29,7 +29,7 @@ async function renderIssuePreview(
     const previewFile = await showMarkdownPreview(previewContent, 'issue');
 
     if (!previewFile) {
-        throw new Error('Failed to show preview');
+        throw new Error(t('messages.failedToShowPreview'));
     }
 
     return previewFile;

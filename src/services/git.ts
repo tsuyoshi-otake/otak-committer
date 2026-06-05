@@ -165,7 +165,7 @@ export class GitServiceFactory extends BaseServiceFactory<GitService> {
     async create(config?: Partial<ServiceConfig>): Promise<GitService> {
         const workspacePath = await resolveRepositoryWorkspacePath();
         if (!workspacePath) {
-            throw new Error('No workspace folder found');
+            throw new Error(t('errors.noWorkspaceFolder'));
         }
 
         const service = new GitService(workspacePath, config);
@@ -174,10 +174,8 @@ export class GitServiceFactory extends BaseServiceFactory<GitService> {
             await service.ensureRepositoryInitialized();
         } catch (error) {
             const rawReason = error instanceof Error ? error.message : String(error);
-            const reason = rawReason.replace(/\s+/g, ' ').trim() || 'unknown error';
-            throw new Error(
-                `No Git repository found at "${workspacePath}" (${reason})`,
-            );
+            const reason = rawReason.replace(/\s+/g, ' ').trim() || t('errors.unknownError');
+            throw new Error(t('errors.noGitRepositoryAtPath', { path: workspacePath, reason }));
         }
 
         return service;
@@ -189,7 +187,7 @@ export class GitServiceFactory extends BaseServiceFactory<GitService> {
             return await factory.create(config);
         } catch (error) {
             ErrorHandler.handle(error, {
-                operation: 'Initialize Git service',
+                operation: t('operations.initializingGitService'),
                 component: 'GitServiceFactory',
             });
             return undefined;

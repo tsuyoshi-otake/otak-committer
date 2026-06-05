@@ -17,7 +17,7 @@ export class IssueGeneratorServiceFactory extends BaseServiceFactory<IssueGenera
         const github = await GitHubServiceFactory.initialize();
         if (!github) {
             vscode.window.showErrorMessage(t('messages.authRequired'));
-            throw new Error('GitHub authentication is required');
+            throw new Error(t('messages.authRequired'));
         }
 
         const [openai, git] = await Promise.all([
@@ -26,7 +26,7 @@ export class IssueGeneratorServiceFactory extends BaseServiceFactory<IssueGenera
         ]);
 
         if (!openai || !git) {
-            throw new Error('Failed to initialize required services');
+            throw new Error(t('errors.failedToInitializeRequiredServices'));
         }
 
         return new IssueGeneratorService(openai, github, git, config);
@@ -38,15 +38,13 @@ export class IssueGeneratorServiceFactory extends BaseServiceFactory<IssueGenera
     ): Promise<IssueGeneratorService | undefined> {
         try {
             if (!context) {
-                throw new Error(
-                    'Extension context is required for Issue Generator service initialization',
-                );
+                throw new Error(t('errors.extensionContextRequiredForIssueGenerator'));
             }
             const factory = new IssueGeneratorServiceFactory(context);
             return await factory.create(config);
         } catch (error) {
             ErrorHandler.handle(error, {
-                operation: 'Initialize Issue Generator service',
+                operation: t('operations.initializingIssueGeneratorService'),
                 component: 'IssueGeneratorServiceFactory',
             });
             return undefined;

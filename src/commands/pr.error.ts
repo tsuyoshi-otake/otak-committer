@@ -24,9 +24,13 @@ export function handleCreatePRError(error: unknown): never | void {
 
     if (isGitHubApiError(error)) {
         const messages = error.response.errors.map((e: { message: string }) => e.message).join(', ');
-        throw new ServiceError(`Failed to create PR: ${messages}`, 'github', {
-            originalError: error,
-        });
+        throw new ServiceError(
+            t('errors.failedToCreatePRWithDetail', { detail: messages }),
+            'github',
+            {
+                originalError: error,
+            },
+        );
     }
 
     throw error;

@@ -60,7 +60,7 @@ export class PRCommand extends BaseCommand {
             await this.createPR(github, branches, prContent, issueNumber, prType.value);
             this.logger.info('Successfully created PR');
         } catch (error) {
-            this.handleErrorSilently(error, 'generating pull request');
+            this.handleErrorSilently(error, t('operations.generatingPullRequest'));
         } finally {
             await this.cleanupPreview();
         }
@@ -112,7 +112,9 @@ export class PRCommand extends BaseCommand {
             return diff;
         } catch (error) {
             this.logger.error('Failed to get branch diff', error);
-            throw new ServiceError('Failed to get branch diff', 'github', { originalError: error });
+            throw new ServiceError(t('errors.failedToGetBranchDiff'), 'github', {
+                originalError: error,
+            });
         }
     }
 
@@ -180,7 +182,7 @@ export class PRCommand extends BaseCommand {
             );
 
             if (!result?.number) {
-                throw new Error('PR creation failed: No PR details received');
+                throw new Error(t('errors.prCreationNoDetails'));
             }
             await this.showSuccessNotification(result, isDraft);
         } catch (error: unknown) {
@@ -201,7 +203,7 @@ export class PRCommand extends BaseCommand {
         });
 
         vscode.window.showWarningMessage(
-            t('messages.commitGenerationSecretWarning', {
+            t('messages.secretDetectionWarning', {
                 count: detection.matchedPatternIds.length,
                 patterns,
             }),

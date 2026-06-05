@@ -16,6 +16,7 @@ import {
     isNetworkError,
     isDiffError,
     isEmptyDiffError,
+    isUserAbortError,
 } from '../../utils/errorHandling';
 
 suite('Commit Error Handling Tests', () => {
@@ -180,6 +181,28 @@ suite('Commit Error Handling Tests', () => {
                     formatted.includes('empty') ||
                     formatted.includes('No'),
             );
+        });
+    });
+
+    suite('User Abort Errors', () => {
+        test('should identify DOM-style AbortError', () => {
+            const error = new Error('The operation was aborted');
+            error.name = 'AbortError';
+
+            assert.strictEqual(isUserAbortError(error), true);
+        });
+
+        test('should identify OpenAI SDK APIUserAbortError', () => {
+            class APIUserAbortError extends Error {}
+            const error = new APIUserAbortError('Request was aborted.');
+
+            assert.strictEqual(isUserAbortError(error), true);
+        });
+
+        test('should not identify ordinary errors as user aborts', () => {
+            const error = new Error('Request failed');
+
+            assert.strictEqual(isUserAbortError(error), false);
         });
     });
 

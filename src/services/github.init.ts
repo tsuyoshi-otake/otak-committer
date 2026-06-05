@@ -26,13 +26,13 @@ async function detectRepositoryInfo(repository: GitApiRepository, logger: Logger
     const remoteUrl = await repository.getConfig('remote.origin.url');
     if (!remoteUrl) {
         logger.error('No remote origin URL found');
-        throw new Error('No remote origin URL found');
+        throw new Error(t('errors.noRemoteOriginUrl'));
     }
 
     const match = remoteUrl.match(/github\.com[:/]([^/]+)\/([^.]+)(?:\.git)?$/);
     if (!match) {
         logger.error(`Unable to parse GitHub repository from URL: ${remoteUrl}`);
-        throw new Error('Unable to parse GitHub repository information from remote URL');
+        throw new Error(t('errors.unableToParseGitHubRepository'));
     }
 
     const [, owner, repoName] = match;
@@ -57,7 +57,7 @@ export async function initializeGitHubState(logger: Logger): Promise<GitHubIniti
 
         if (choice !== t('buttons.yes')) {
             logger.warning('User declined GitHub authentication');
-            throw new Error('GitHub authentication is required.');
+            throw new Error(t('messages.authRequired'));
         }
 
         authSession = await authentication.getSession('github', ['repo'], {
@@ -65,7 +65,7 @@ export async function initializeGitHubState(logger: Logger): Promise<GitHubIniti
         });
         if (!authSession) {
             logger.error('GitHub authentication failed');
-            throw new Error('GitHub authentication failed.');
+            throw new Error(t('errors.githubAuthenticationFailed'));
         }
     }
 
@@ -91,13 +91,13 @@ export async function initializeGitHubState(logger: Logger): Promise<GitHubIniti
     const gitExtension = vscode.extensions.getExtension('vscode.git')?.exports;
     if (!gitExtension) {
         logger.error('Git extension not found');
-        throw new Error('Git extension not found');
+        throw new Error(t('errors.gitExtensionNotFound'));
     }
     const gitApi = gitExtension.getAPI(1) as GitExtensionAPI;
     const repository = getRepositoryForCurrentWorkspace(gitApi);
     if (!repository) {
         logger.error('No Git repository found');
-        throw new Error('No Git repository found');
+        throw new Error(t('errors.noGitRepository'));
     }
     const { owner, repo } = await detectRepositoryInfo(repository, logger);
 

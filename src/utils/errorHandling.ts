@@ -34,6 +34,34 @@ export interface ErrorHandlerResult {
 }
 
 /**
+ * Check whether an error represents a user-initiated abort/cancellation.
+ *
+ * The OpenAI SDK throws APIUserAbortError with message "Request was aborted."
+ * rather than a DOM AbortError, so check both forms.
+ */
+export function isUserAbortError(error: unknown): boolean {
+    if (typeof error !== 'object' || error === null) {
+        return false;
+    }
+
+    const candidate = error as {
+        name?: unknown;
+        message?: unknown;
+        constructor?: { name?: string };
+    };
+    const name = typeof candidate.name === 'string' ? candidate.name : '';
+    const message = typeof candidate.message === 'string' ? candidate.message : '';
+    const constructorName = candidate.constructor?.name ?? '';
+
+    return (
+        name === 'AbortError' ||
+        constructorName === 'APIUserAbortError' ||
+        message === 'Request was aborted.' ||
+        message === 'Request was aborted'
+    );
+}
+
+/**
  * Error codes for commit operations
  */
 export type CommitErrorCode =

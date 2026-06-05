@@ -322,7 +322,7 @@ export async function initializeOpenAIService<T>(
         }
 
         ErrorHandler.handle(error, {
-            operation: 'Initialize OpenAI service',
+            operation: t('operations.initializingOpenAIService'),
             component: 'OpenAIServiceFactory',
         });
         return undefined;

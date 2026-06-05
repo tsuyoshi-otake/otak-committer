@@ -15,6 +15,7 @@ import { createPullRequest } from './github.pulls';
 import { getBranches } from './github.branches';
 import { initializeGitHubState } from './github.init';
 import { GitApiRepository } from './git.repository';
+import { t } from '../i18n';
 
 export class GitHubService extends BaseService implements BranchManager {
     private static readonly GITHUB_PAGE_SIZE = 100;
@@ -40,7 +41,7 @@ export class GitHubService extends BaseService implements BranchManager {
         } catch (error) {
             this.logger.error('Failed to initialize GitHub service', error);
             ErrorHandler.handle(error, {
-                operation: 'Initialize GitHub service',
+                operation: t('operations.initializingGitHubService'),
                 component: 'GitHubService',
             });
             throw error;
@@ -61,7 +62,7 @@ export class GitHubService extends BaseService implements BranchManager {
 
     async getBranchDiffDetails(base: string, compare: string): Promise<PullRequestDiff> {
         await this.ensureInitialized();
-        this.validateState(!!this.octokit, 'GitHub client not initialized');
+        this.validateState(!!this.octokit, t('errors.githubClientNotInitialized'));
 
         try {
             return await getBranchDiffDetails(
@@ -80,7 +81,7 @@ export class GitHubService extends BaseService implements BranchManager {
 
     async getIssue(number: number): Promise<IssueInfo> {
         await this.ensureInitialized();
-        this.validateState(!!this.octokit, 'GitHub client not initialized');
+        this.validateState(!!this.octokit, t('errors.githubClientNotInitialized'));
 
         try {
             return await getIssue(this.octokit, this.owner, this.repo, number, this.logger);
@@ -92,7 +93,7 @@ export class GitHubService extends BaseService implements BranchManager {
 
     async createPullRequest(params: PullRequestParams): Promise<CreatePullRequestResponse> {
         await this.ensureInitialized();
-        this.validateState(!!this.octokit, 'GitHub client not initialized');
+        this.validateState(!!this.octokit, t('errors.githubClientNotInitialized'));
 
         try {
             return await createPullRequest(this.octokit, this.owner, this.repo, params, this.logger);
@@ -108,7 +109,7 @@ export class GitHubService extends BaseService implements BranchManager {
 
     async createIssue(params: IssueParams): Promise<{ number: number; html_url: string }> {
         await this.ensureInitialized();
-        this.validateState(!!this.octokit, 'GitHub client not initialized');
+        this.validateState(!!this.octokit, t('errors.githubClientNotInitialized'));
 
         try {
             return await createIssue(this.octokit, this.owner, this.repo, params, this.logger);
@@ -120,7 +121,7 @@ export class GitHubService extends BaseService implements BranchManager {
 
     async getBranches(): Promise<string[]> {
         await this.ensureInitialized();
-        this.validateState(!!this.octokit, 'GitHub client not initialized');
+        this.validateState(!!this.octokit, t('errors.githubClientNotInitialized'));
 
         try {
             return await getBranches(
@@ -138,7 +139,7 @@ export class GitHubService extends BaseService implements BranchManager {
 
     async getIssues(): Promise<IssueInfo[]> {
         await this.ensureInitialized();
-        this.validateState(!!this.octokit, 'GitHub client not initialized');
+        this.validateState(!!this.octokit, t('errors.githubClientNotInitialized'));
 
         try {
             return await getIssues(
@@ -166,7 +167,7 @@ export class GitHubServiceFactory extends BaseServiceFactory<GitHubService> {
             return await factory.create();
         } catch (error) {
             ErrorHandler.handle(error, {
-                operation: 'Initialize GitHub service',
+                operation: t('operations.initializingGitHubService'),
                 component: 'GitHubServiceFactory',
             });
             return undefined;

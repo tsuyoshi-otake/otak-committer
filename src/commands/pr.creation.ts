@@ -19,7 +19,7 @@ export async function createPRWithDraftFallback(
     try {
         const pr = await github.createPullRequest(params);
         if (!pr?.number) {
-            throw new Error('Failed to create PR: Invalid response from GitHub');
+            throw new Error(t('errors.failedToCreatePRInvalidResponse'));
         }
         logger.info(`PR #${pr.number} created successfully`);
         return pr;
@@ -37,7 +37,7 @@ export async function createPRWithDraftFallback(
 
         const regularPr = await github.createPullRequest({ ...params, draft: false });
         if (!regularPr?.number) {
-            throw new Error('Failed to create regular PR: Invalid response from GitHub');
+            throw new Error(t('errors.failedToCreateRegularPRInvalidResponse'));
         }
         logger.info(`Regular PR #${regularPr.number} created successfully`);
         return regularPr;

@@ -2,6 +2,7 @@ import { ServiceConfig } from '../types';
 import { getServiceConfig } from '../utils';
 import { Logger } from '../infrastructure/logging';
 import { ErrorHandler } from '../infrastructure/error';
+import { t } from '../i18n';
 
 /**
  * Abstract base class for all services
@@ -40,7 +41,7 @@ export abstract class BaseService {
      */
     protected handleErrorAndRethrow(error: unknown): never {
         ErrorHandler.handle(error, {
-            operation: 'Service operation',
+            operation: t('operations.serviceOperation'),
             component: this.constructor.name,
         });
         throw error;

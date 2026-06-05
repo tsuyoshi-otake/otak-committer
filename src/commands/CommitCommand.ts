@@ -8,6 +8,7 @@ import { detectPotentialSecrets, sanitizeCommitMessage } from '../utils';
 import { t } from '../i18n/index.js';
 import type { DiffProcessResult } from '../services/diffProcessor';
 import { getRepositoryForCurrentWorkspace } from '../services/git.repository';
+import { isUserAbortError } from '../utils/errorHandling';
 
 /**
  * Command for generating commit messages using AI
@@ -89,11 +90,11 @@ export class CommitCommand extends BaseCommand {
             await this.showSuccessNotification();
         } catch (error) {
             // Silently ignore abort errors (triggered by user pressing the button again)
-            if (error instanceof Error && error.name === 'AbortError') {
+            if (isUserAbortError(error)) {
                 this.logger.info('Commit message generation cancelled by new request');
                 return;
             }
-            this.handleErrorSilently(error, 'generating commit message');
+            this.handleErrorSilently(error, t('operations.generatingCommitMessage'));
         }
     }
 
@@ -263,7 +264,7 @@ export class CommitCommand extends BaseCommand {
         });
 
         vscode.window.showWarningMessage(
-            t('messages.commitGenerationSecretWarning', {
+            t('messages.secretDetectionWarning', {
                 count: detection.matchedPatternIds.length,
                 patterns,
             }),
@@ -282,7 +283,7 @@ export class CommitCommand extends BaseCommand {
         const gitExtension = vscode.extensions.getExtension('vscode.git');
         if (!gitExtension) {
             this.logger.error('Git extension not found');
-            throw new Error('Git extension is not available');
+            throw new Error(t('errors.gitExtensionNotFound'));
         }
 
         // Get Git API
@@ -291,11 +292,11 @@ export class CommitCommand extends BaseCommand {
 
         if (!repository) {
             this.logger.error('No Git repository found');
-            throw new Error('No Git repository found');
+            throw new Error(t('errors.noGitRepository'));
         }
         if (!repository.inputBox) {
             this.logger.error('Git repository input box is not available');
-            throw new Error('Git repository input box is not available');
+            throw new Error(t('errors.gitInputBoxUnavailable'));
         }
 
         // Set the message in the input box

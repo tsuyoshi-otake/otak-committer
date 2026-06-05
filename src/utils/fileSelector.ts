@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import { t } from '../i18n/index.js';
 
 interface FileQuickPickItem extends vscode.QuickPickItem {
     fullPath: string;
@@ -9,7 +10,7 @@ export async function selectFiles(files: string[]): Promise<string[] | undefined
     // Get workspace root
     const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
     if (!workspaceRoot) {
-        throw new Error('No workspace folder found');
+        throw new Error(t('errors.noWorkspaceFolder'));
     }
 
     const items: FileQuickPickItem[] = files.map((fullPath) => ({

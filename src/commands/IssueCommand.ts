@@ -40,7 +40,7 @@ export class IssueCommand extends BaseCommand {
             await this.generateAndCreateIssue(service, issueType, description, selectedFiles);
             this.logger.info('Successfully completed issue generation');
         } catch (error) {
-            this.handleErrorSilently(error, 'generating issue');
+            this.handleErrorSilently(error, t('operations.generatingIssue'));
         } finally {
             await this.cleanupPreview();
         }
@@ -63,7 +63,7 @@ export class IssueCommand extends BaseCommand {
             return true;
         } catch (error) {
             this.logger.error('Error during GitHub authentication', error);
-            throw new ServiceError('Failed to authenticate with GitHub', 'github', {
+            throw new ServiceError(t('errors.failedToAuthenticateGitHub'), 'github', {
                 originalError: error,
             });
         }
@@ -81,9 +81,13 @@ export class IssueCommand extends BaseCommand {
             return service;
         } catch (error) {
             this.logger.error('Error initializing issue generator service', error);
-            throw new ServiceError('Failed to initialize issue generator service', 'issue-generator', {
-                originalError: error,
-            });
+            throw new ServiceError(
+                t('errors.failedToInitializeIssueGeneratorService'),
+                'issue-generator',
+                {
+                    originalError: error,
+                },
+            );
         }
     }
 

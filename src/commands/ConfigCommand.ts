@@ -111,7 +111,7 @@ export class ConfigCommand extends BaseCommand {
                 this.logger.debug('Language change cancelled by user');
             }
         } catch (error) {
-            this.handleErrorSilently(error, 'changing language');
+            this.handleErrorSilently(error, t('operations.changingLanguage'));
         }
     }
 
@@ -175,7 +175,7 @@ export class ConfigCommand extends BaseCommand {
                 this.logger.debug('Message style change cancelled by user');
             }
         } catch (error) {
-            this.handleErrorSilently(error, 'changing message style');
+            this.handleErrorSilently(error, t('operations.changingMessageStyle'));
         }
     }
 }

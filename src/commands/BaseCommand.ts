@@ -6,6 +6,7 @@ import { ErrorHandler, ErrorContext } from '../infrastructure/error/ErrorHandler
 import { OpenAIService } from '../services/openai';
 import { ServiceError } from '../types/errors';
 import { closePreviewTabs, cleanupPreviewFiles } from '../utils/preview';
+import { t } from '../i18n';
 
 /**
  * Abstract base class for all commands in the extension
@@ -149,7 +150,7 @@ export abstract class BaseCommand {
             return openai;
         } catch (error) {
             this.logger.error('Error initializing OpenAI service', error);
-            throw new ServiceError('Failed to initialize OpenAI service', 'openai', {
+            throw new ServiceError(t('messages.openAIInitFailed'), 'openai', {
                 originalError: error,
             });
         }
@@ -183,14 +184,14 @@ export abstract class BaseCommand {
 
             if (scheme !== 'https' && scheme !== 'http') {
                 this.logger.warning(`Blocked non-http(s) URL: ${url}`);
-                vscode.window.showErrorMessage('Cannot open non-http(s) URL.');
+                vscode.window.showErrorMessage(t('errors.invalidExternalUrl'));
                 return;
             }
 
             await vscode.env.openExternal(uri);
         } catch (error) {
             this.logger.warning('Failed to open external URL', error);
-            vscode.window.showErrorMessage('Failed to open link.');
+            vscode.window.showErrorMessage(t('errors.failedToOpenLink'));
         }
     }
 }

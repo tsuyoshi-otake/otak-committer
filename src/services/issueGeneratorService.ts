@@ -57,7 +57,7 @@ export class IssueGeneratorService extends BaseService {
                         matchedPatternIds: detection.matchedPatternIds,
                     });
                     vscode.window.showWarningMessage(
-                        t('messages.commitGenerationSecretWarning', {
+                        t('messages.secretDetectionWarning', {
                             count: detection.matchedPatternIds.length,
                             patterns,
                         }),
@@ -101,14 +101,15 @@ export class IssueGeneratorService extends BaseService {
 
             if (!body) {
                 this.logger.error('Failed to generate issue body content');
-                throw new Error('Failed to generate content');
+                throw new Error(t('errors.failedToGenerateContent'));
             }
 
             this.logger.info('Issue preview generated successfully');
             return { title, body };
         } catch (error) {
             this.logger.error('Failed to generate preview', error);
-            throw new Error(`Failed to generate preview: ${error}`);
+            const detail = error instanceof Error ? error.message : String(error);
+            throw new Error(t('errors.failedToGeneratePreviewWithDetail', { detail }));
         }
     }
 
@@ -130,7 +131,7 @@ export class IssueGeneratorService extends BaseService {
             return issue.html_url;
         } catch (error) {
             this.logger.error('Failed to create issue', error);
-            this.showError('Failed to create issue', error);
+            this.showError(t('errors.failedToCreateIssue'), error);
             return undefined;
         }
     }

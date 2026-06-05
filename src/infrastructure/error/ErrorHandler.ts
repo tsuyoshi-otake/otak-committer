@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { Logger } from '../logging/Logger';
 import { BaseError, ErrorSeverity } from '../../types/errors/BaseError';
+import { isUserAbortError } from '../../utils/errorHandling';
 
 export { ErrorSeverity };
 
@@ -29,6 +30,11 @@ export class ErrorHandler {
      * @param context Context information about where and why the error occurred
      */
     static handle(error: unknown, context: ErrorContext | string): void {
+        if (isUserAbortError(error)) {
+            this.logger.info('Operation cancelled by user');
+            return;
+        }
+
         const ctx =
             typeof context === 'string' ? { operation: context, component: 'unknown' } : context;
 

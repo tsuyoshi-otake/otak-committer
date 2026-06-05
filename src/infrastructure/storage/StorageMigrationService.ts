@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { ConfigStorageProvider } from './ConfigStorageProvider';
 import { ServiceProvider } from '../../types/enums/ServiceProvider';
 import { Logger } from '../logging/Logger';
+import { t } from '../../i18n';
 
 /**
  * Handles migration of data from legacy Configuration storage to SecretStorage
@@ -45,9 +46,7 @@ export class StorageMigrationService {
 
             this.logger.info('[StorageManager] Legacy data migration completed');
 
-            vscode.window.showInformationMessage(
-                'otak-committer: API keys have been migrated to secure storage.',
-            );
+            vscode.window.showInformationMessage(t('messages.storageMigrationComplete'));
         } catch (error) {
             this.logger.error('[StorageManager] Migration failed', error);
         }
@@ -79,7 +78,7 @@ export class StorageMigrationService {
                     `[StorageManager] Keeping ${service} API key in legacy storage as fallback`,
                 );
                 vscode.window.showWarningMessage(
-                    `otak-committer: Failed to migrate ${service} API key to secure storage. Using fallback storage.`,
+                    t('messages.storageMigrationFallbackWarning', { service }),
                 );
             }
         } catch (error) {

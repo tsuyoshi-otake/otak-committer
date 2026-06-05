@@ -9,6 +9,8 @@ import { getPrompt } from '../languages/prompts';
 import type { SupportedLanguage } from '../languages';
 import { PromptType } from '../types/enums/PromptType';
 import { requestTextCompletion, requestStructuredCompletion } from './openai.completion';
+import { t } from '../i18n/index.js';
+import { isUserAbortError } from '../utils/errorHandling';
 
 interface OpenAIOpsContext {
     openai: OpenAI;
@@ -61,8 +63,8 @@ export async function generateCommitMessageOp(
         context.logger.info('Commit message generated successfully');
         return message.trimStart();
     } catch (error) {
-        // Re-throw abort errors so they can be handled by the caller
-        if (error instanceof Error && error.name === 'AbortError') {
+        // Re-throw abort errors so they can be handled by the caller.
+        if (isUserAbortError(error)) {
             throw error;
         }
         context.logger.error('Failed to generate commit message', error);
@@ -70,7 +72,7 @@ export async function generateCommitMessageOp(
             await context.onAuthError();
             return undefined;
         }
-        context.showError('Failed to generate commit message', error);
+        context.showError(t('errors.failedToGenerateCommitMessage'), error);
         return undefined;
     }
 }
@@ -105,7 +107,7 @@ export async function summarizeChunkOp(
         context.logger.info('Chunk summarization completed');
         return summary;
     } catch (error) {
-        if (error instanceof Error && error.name === 'AbortError') {
+        if (isUserAbortError(error)) {
             throw error;
         }
         context.logger.error('Failed to summarize diff chunk', error);
@@ -162,12 +164,15 @@ export async function generatePRContentOp(
             body: formatMarkdown(result.body),
         };
     } catch (error) {
+        if (isUserAbortError(error)) {
+            throw error;
+        }
         context.logger.error('Failed to generate PR content', error);
         if (context.isAuthenticationError(error)) {
             await context.onAuthError();
             return undefined;
         }
-        context.showError('Failed to generate PR content', error);
+        context.showError(t('errors.failedToGeneratePRContent'), error);
         return undefined;
     }
 }
@@ -200,12 +205,15 @@ export async function createChatCompletionOp(
         context.logger.info('Chat completion created successfully');
         return response;
     } catch (error) {
+        if (isUserAbortError(error)) {
+            throw error;
+        }
         context.logger.error('Failed to create chat completion', error);
         if (context.isAuthenticationError(error)) {
             await context.onAuthError();
             return undefined;
         }
-        context.showError('Failed to create chat completion', error);
+        context.showError(t('errors.failedToCreateChatCompletion'), error);
         return undefined;
     }
 }
