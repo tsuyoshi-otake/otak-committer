@@ -13,13 +13,11 @@ import {
     generatePRContentOp,
     summarizeChunkOp,
 } from './openai.ops';
-import { resolveTemperature } from './openai.completion';
 
 export class OpenAIService extends BaseService {
     protected openai: OpenAI;
     private promptService: PromptService;
     private static readonly MODEL = 'gpt-5.4';
-    private static readonly FALLBACK_MODEL = 'gpt-5.4-mini';
 
     constructor(config?: Partial<ServiceConfig>) {
         super(config);
@@ -60,10 +58,6 @@ export class OpenAIService extends BaseService {
         return effort === 'none' ? undefined : effort;
     }
 
-    private getTemperature(requested?: number): number | undefined {
-        return resolveTemperature(OpenAIService.MODEL, requested);
-    }
-
     async generateCommitMessage(
         diff: string,
         language: string,
@@ -71,10 +65,20 @@ export class OpenAIService extends BaseService {
         template?: TemplateInfo,
         signal?: AbortSignal,
     ): Promise<string | undefined> {
-        return generateCommitMessageOp(this.getOpsContext(signal), diff, language, messageStyle, template);
+        return generateCommitMessageOp(
+            this.getOpsContext(signal),
+            diff,
+            language,
+            messageStyle,
+            template,
+        );
     }
 
-    async summarizeChunk(chunkContent: string, language: string, signal?: AbortSignal): Promise<string | undefined> {
+    async summarizeChunk(
+        chunkContent: string,
+        language: string,
+        signal?: AbortSignal,
+    ): Promise<string | undefined> {
         return summarizeChunkOp(this.getOpsContext(signal), chunkContent, language);
     }
 
@@ -89,8 +93,6 @@ export class OpenAIService extends BaseService {
     async createChatCompletion(params: {
         prompt: string;
         maxTokens?: number;
-        temperature?: number;
-        model?: string;
     }): Promise<string | undefined> {
         const language = this.config.language || 'english';
         return createChatCompletionOp(this.getOpsContext(), params, language);
@@ -121,8 +123,6 @@ export class OpenAIService extends BaseService {
             promptService: this.promptService,
             logger: this.logger,
             model: OpenAIService.MODEL,
-            fallbackModel: OpenAIService.FALLBACK_MODEL,
-            getTemperature: (requested?: number) => this.getTemperature(requested),
             getReasoningEffort: () => this.getReasoningEffort(),
             onAuthError: () => this.promptToUpdateApiKey(),
             showError: (message: string, error?: unknown) => this.showError(message, error),

@@ -36,7 +36,6 @@ suite('OpenAI API Integration Tests', () => {
                     { role: 'user', content: 'Say "API test successful" and nothing else.' },
                 ],
                 max_tokens: 50,
-                temperature: 0,
             });
 
             const content = response.choices[0]?.message?.content;

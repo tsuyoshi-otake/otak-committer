@@ -7,9 +7,7 @@ export interface TextCompletionRequest {
     userPrompt: string;
     maxCompletionTokens: number;
     reasoningEffort: 'low' | 'medium' | 'high' | undefined;
-    temperature?: number;
     signal?: AbortSignal;
-    fallbackModel?: string;
 }
 
 export interface StructuredCompletionRequest {
@@ -18,135 +16,80 @@ export interface StructuredCompletionRequest {
     systemPrompt: string;
     userPrompt: string;
     reasoningEffort: 'low' | 'medium' | 'high' | undefined;
-    temperature?: number;
     signal?: AbortSignal;
     schemaName: string;
     schema: Record<string, unknown>;
-    fallbackModel?: string;
 }
 
-export function resolveTemperature(model: string, requested?: number): number | undefined {
-    if (model.startsWith('gpt-5')) {
-        return undefined;
-    }
-    return requested ?? 0.1;
+interface CompletionRequestBase {
+    model: string;
+    systemPrompt: string;
+    userPrompt: string;
+    reasoningEffort: 'low' | 'medium' | 'high' | undefined;
+    signal?: AbortSignal;
 }
 
 /** Request timeout for OpenAI API calls (2 minutes) */
 const REQUEST_TIMEOUT_MS = 120000;
 
-function isFallbackEligible(error: unknown): boolean {
-    if (typeof error !== 'object' || error === null || !('status' in error)) {
-        return false;
-    }
-    const status = (error as { status: number }).status;
-    return status === 429 || status === 500 || status === 502 || status === 503;
+function createCompletionParams(request: CompletionRequestBase) {
+    return {
+        model: request.model,
+        messages: [
+            { role: 'developer' as const, content: request.systemPrompt },
+            { role: 'user' as const, content: request.userPrompt },
+        ],
+        reasoning_effort: request.reasoningEffort,
+        store: false,
+    };
 }
 
-export async function requestTextCompletion(request: TextCompletionRequest): Promise<string | undefined> {
-    try {
-        const response = await request.openai.chat.completions.create(
-            {
-                model: request.model,
-                messages: [
-                    { role: 'developer', content: request.systemPrompt },
-                    { role: 'user', content: request.userPrompt },
-                ],
-                ...(request.temperature !== undefined ? { temperature: request.temperature } : {}),
-                reasoning_effort: request.reasoningEffort,
-                max_completion_tokens: request.maxCompletionTokens,
-                response_format: { type: 'text' },
-                store: false,
-            },
-            { timeout: REQUEST_TIMEOUT_MS, ...(request.signal ? { signal: request.signal } : {}) },
-        );
-
-        return response.choices?.[0]?.message?.content?.trim();
-    } catch (error) {
-        if (!request.fallbackModel || !isFallbackEligible(error)) {
-            throw error;
-        }
-        const fallbackTemperature = resolveTemperature(request.fallbackModel, request.temperature);
-        const response = await request.openai.chat.completions.create(
-            {
-                model: request.fallbackModel,
-                messages: [
-                    { role: 'developer', content: request.systemPrompt },
-                    { role: 'user', content: request.userPrompt },
-                ],
-                ...(fallbackTemperature !== undefined ? { temperature: fallbackTemperature } : {}),
-                reasoning_effort: request.reasoningEffort,
-                max_completion_tokens: request.maxCompletionTokens,
-                response_format: { type: 'text' },
-                store: false,
-            },
-            { timeout: REQUEST_TIMEOUT_MS, ...(request.signal ? { signal: request.signal } : {}) },
-        );
-
-        return response.choices?.[0]?.message?.content?.trim();
-    }
+function createRequestOptions(signal?: AbortSignal) {
+    return { timeout: REQUEST_TIMEOUT_MS, ...(signal ? { signal } : {}) };
 }
 
-export async function requestStructuredCompletion<T>(request: StructuredCompletionRequest): Promise<T | undefined> {
-    try {
-        const response = await request.openai.chat.completions.create(
-            {
-                model: request.model,
-                messages: [
-                    { role: 'developer', content: request.systemPrompt },
-                    { role: 'user', content: request.userPrompt },
-                ],
-                ...(request.temperature !== undefined ? { temperature: request.temperature } : {}),
-                reasoning_effort: request.reasoningEffort,
-                response_format: {
-                    type: 'json_schema',
-                    json_schema: {
-                        name: request.schemaName,
-                        strict: true,
-                        schema: request.schema,
-                    },
-                },
-                store: false,
-            },
-            { timeout: REQUEST_TIMEOUT_MS, ...(request.signal ? { signal: request.signal } : {}) },
-        );
+function getCompletionContent(response: {
+    choices?: Array<{ message?: { content?: string | null } }>;
+}): string | undefined {
+    return response.choices?.[0]?.message?.content?.trim();
+}
 
-        const content = response.choices?.[0]?.message?.content?.trim();
-        if (!content) {
-            return undefined;
-        }
-        return JSON.parse(content) as T;
-    } catch (error) {
-        if (!request.fallbackModel || !isFallbackEligible(error)) {
-            throw error;
-        }
-        const fallbackTemperature = resolveTemperature(request.fallbackModel, request.temperature);
-        const response = await request.openai.chat.completions.create(
-            {
-                model: request.fallbackModel,
-                messages: [
-                    { role: 'developer', content: request.systemPrompt },
-                    { role: 'user', content: request.userPrompt },
-                ],
-                ...(fallbackTemperature !== undefined ? { temperature: fallbackTemperature } : {}),
-                reasoning_effort: request.reasoningEffort,
-                response_format: {
-                    type: 'json_schema',
-                    json_schema: {
-                        name: request.schemaName,
-                        strict: true,
-                        schema: request.schema,
-                    },
-                },
-                store: false,
-            },
-            { timeout: REQUEST_TIMEOUT_MS, ...(request.signal ? { signal: request.signal } : {}) },
-        );
+export async function requestTextCompletion(
+    request: TextCompletionRequest,
+): Promise<string | undefined> {
+    const response = await request.openai.chat.completions.create(
+        {
+            ...createCompletionParams(request),
+            max_completion_tokens: request.maxCompletionTokens,
+            response_format: { type: 'text' },
+        },
+        createRequestOptions(request.signal),
+    );
 
-        const content = response.choices?.[0]?.message?.content?.trim();
-        if (!content) {
-            return undefined;
-        }
-        return JSON.parse(content) as T;
+    return getCompletionContent(response);
+}
+
+export async function requestStructuredCompletion<T>(
+    request: StructuredCompletionRequest,
+): Promise<T | undefined> {
+    const response = await request.openai.chat.completions.create(
+        {
+            ...createCompletionParams(request),
+            response_format: {
+                type: 'json_schema',
+                json_schema: {
+                    name: request.schemaName,
+                    strict: true,
+                    schema: request.schema,
+                },
+            },
+        },
+        createRequestOptions(request.signal),
+    );
+
+    const content = getCompletionContent(response);
+    if (!content) {
+        return undefined;
     }
+    return JSON.parse(content) as T;
 }

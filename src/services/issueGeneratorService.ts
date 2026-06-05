@@ -59,7 +59,9 @@ export class IssueGeneratorService extends BaseService {
                         'Potential secrets detected in files for issue generation',
                     ))
                 ) {
-                    throw new Error('Issue generation cancelled because potential secrets were detected');
+                    throw new Error(
+                        'Issue generation cancelled because potential secrets were detected',
+                    );
                 }
 
                 const estimatedTokens = TokenManager.estimateTokens(combinedContent);
@@ -86,7 +88,6 @@ export class IssueGeneratorService extends BaseService {
                         customMessage,
                     ),
                     maxTokens: 1000,
-                    temperature: 0.1,
                 }),
                 generateTitle(
                     this.openai,
@@ -111,7 +112,10 @@ export class IssueGeneratorService extends BaseService {
         }
     }
 
-    async createIssue(content: GeneratedIssueContent, type: IssueType): Promise<string | undefined> {
+    async createIssue(
+        content: GeneratedIssueContent,
+        type: IssueType,
+    ): Promise<string | undefined> {
         try {
             this.logger.info(`Creating issue: ${content.title}`);
             const useEmoji = this.config.useEmoji || false;

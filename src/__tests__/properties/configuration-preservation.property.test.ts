@@ -12,7 +12,7 @@ import { runPropertyTest, arbitraries } from '../../test/helpers/property-test.h
 suite('Configuration Preservation Property Tests', () => {
     /**
      * Property 8: Configuration preservation
-     * *For any* existing user configuration (temperature, language, emoji, custom messages),
+     * *For any* existing user configuration (language, emoji, custom messages),
      * the system should apply these settings to Responses API calls after migration
      * Validates: Requirements 5.2, 5.3, 5.4, 5.5
      */
@@ -55,15 +55,6 @@ suite('Configuration Preservation Property Tests', () => {
         );
     });
 
-    test('Property 8: Temperature configuration should be preserved', () => {
-        runPropertyTest(
-            fc.property(fc.float({ min: 0, max: 2, noNaN: true }), (temperature) => {
-                const config = { temperature };
-                return Math.abs(config.temperature - temperature) < 0.001;
-            }),
-        );
-    });
-
     test('Property 8: Reasoning effort should default to "low" when not configured', () => {
         const defaultReasoningEffort = 'low';
         assert.strictEqual(defaultReasoningEffort, 'low');
@@ -81,14 +72,12 @@ suite('Configuration Preservation Property Tests', () => {
                 arbitraries.messageStyle(),
                 fc.boolean(),
                 fc.string({ minLength: 0, maxLength: 100 }),
-                fc.float({ min: 0, max: 1, noNaN: true }),
-                (language, messageStyle, useEmoji, customMessage, temperature) => {
+                (language, messageStyle, useEmoji, customMessage) => {
                     const originalConfig = {
                         language,
                         messageStyle,
                         useEmoji,
                         customMessage,
-                        temperature,
                     };
 
                     // Simulate migration
@@ -104,8 +93,7 @@ suite('Configuration Preservation Property Tests', () => {
                         migratedConfig.language === language &&
                         migratedConfig.messageStyle === messageStyle &&
                         migratedConfig.useEmoji === useEmoji &&
-                        migratedConfig.customMessage === customMessage &&
-                        Math.abs(migratedConfig.temperature - temperature) < 0.001
+                        migratedConfig.customMessage === customMessage
                     );
                 },
             ),

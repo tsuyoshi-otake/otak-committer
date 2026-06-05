@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { sanitizeForLogging, sanitizeLogMessage } from './logSanitizer';
 
 /**
  * Log levels for the Logger
@@ -78,130 +79,6 @@ export class Logger {
         this.log(LogLevel.Error, message, error);
     }
 
-    /**
-     * Core logging method that handles message formatting and output
-     * @param level The log level
-     * @param message The message to log
-     * @param args Additional arguments to log
-     */
-    /**
-     * JSON replacer that redacts sensitive fields from log output
-     */
-    /** Patterns that match common secret formats in string values */
-    private static readonly SECRET_VALUE_PATTERNS = [
-        /sk-(?:proj-|svcacct-|admin-|or-|ant-)?[A-Za-z0-9_-]{20,}/,
-        /(?:ghp_|gho_|ghu_|ghs_)[A-Za-z0-9_]{36,}/,
-        /(?:AKIA|ASIA)[0-9A-Z]{16}/,
-        /(?:xoxb-|xoxp-|xoxs-|xapp-)[0-9A-Za-z-]{10,}/,
-        /(?:glpat-|glrt-)[0-9A-Za-z_-]{20}/,
-        /Bearer\s+[A-Za-z0-9._-]{20,}/i,
-    ];
-
-    /** Redact secret values embedded in URLs (e.g. user:password@host) */
-    private static redactUrlCredentials(value: string): string {
-        return value
-            .replace(/(:\/\/)([^/\s:@]+):([^@\s/]+)@/g, '$1$2:[REDACTED]@')
-            .replace(/(:\/\/)([^/\s:@]+)@/g, '$1[REDACTED]@');
-    }
-
-    private static sanitizeString(value: string): string {
-        let sanitized =
-            value.includes('://') && value.includes('@')
-                ? Logger.redactUrlCredentials(value)
-                : value;
-
-        for (const pattern of Logger.SECRET_VALUE_PATTERNS) {
-            sanitized = sanitized.replace(
-                new RegExp(pattern.source, pattern.flags + 'g'),
-                '[REDACTED]',
-            );
-        }
-
-        return sanitized;
-    }
-
-    private static sensitiveFieldReplacer(_key: string, value: unknown): unknown {
-        // Key-name based redaction
-        if (typeof _key === 'string') {
-            const lower = _key.toLowerCase();
-            if (
-                lower.includes('apikey') ||
-                lower.includes('api_key') ||
-                lower.includes('token') ||
-                lower.includes('secret') ||
-                lower.includes('password') ||
-                lower.includes('authorization') ||
-                lower.includes('credential') ||
-                lower.includes('bearer')
-            ) {
-                return typeof value === 'string' ? '[REDACTED]' : value;
-            }
-        }
-        // Value-based redaction for known secret formats
-        if (typeof value === 'string') {
-            for (const pattern of Logger.SECRET_VALUE_PATTERNS) {
-                if (pattern.test(value)) {
-                    return '[REDACTED]';
-                }
-            }
-            // Redact credentials embedded in URLs
-            if (value.includes('://') && value.includes('@')) {
-                return Logger.redactUrlCredentials(value);
-            }
-        }
-        return value;
-    }
-
-    private static errorToLogObject(error: Error): Record<string, unknown> {
-        const obj: Record<string, unknown> = {
-            name: error.name,
-            message: Logger.sanitizeString(error.message),
-        };
-
-        // Redact any secrets that may appear in stack traces
-        if (error.stack) {
-            obj.stack = Logger.sanitizeString(error.stack);
-        }
-
-        const cause = (error as Error & { cause?: unknown }).cause;
-        if (cause instanceof Error) {
-            obj.cause = Logger.errorToLogObject(cause);
-        } else if (cause !== undefined) {
-            obj.cause = cause;
-        }
-
-        return obj;
-    }
-
-    private static sanitizeLogArg(arg: unknown): unknown {
-        if (arg instanceof Error) {
-            return Logger.errorToLogObject(arg);
-        }
-        if (typeof arg === 'string') {
-            return Logger.sanitizeString(arg);
-        }
-        return arg;
-    }
-
-    private static sanitizeForLogging(arg: unknown): unknown {
-        const sanitized = Logger.sanitizeLogArg(arg);
-        if (
-            sanitized === null ||
-            sanitized === undefined ||
-            typeof sanitized === 'string' ||
-            typeof sanitized === 'number' ||
-            typeof sanitized === 'boolean'
-        ) {
-            return sanitized;
-        }
-
-        try {
-            return JSON.parse(JSON.stringify(sanitized, Logger.sensitiveFieldReplacer));
-        } catch {
-            return '[Unserializable log argument]';
-        }
-    }
-
     log(level: LogLevel, message: string, ...args: unknown[]): void {
         if (level < this.logLevel) {
             return;
@@ -209,18 +86,18 @@ export class Logger {
 
         const timestamp = new Date().toISOString();
         const levelStr = LogLevel[level].toUpperCase();
-        const formattedMessage = `[${timestamp}] [${levelStr}] ${Logger.sanitizeString(message)}`;
+        const formattedMessage = `[${timestamp}] [${levelStr}] ${sanitizeLogMessage(message)}`;
 
         this.outputChannel.appendLine(formattedMessage);
 
         if (args.length > 0) {
-            const sanitized = args.map(Logger.sanitizeForLogging);
+            const sanitized = args.map(sanitizeForLogging);
             this.outputChannel.appendLine(JSON.stringify(sanitized, null, 2));
         }
 
         // Also log to console for development (with same sanitization)
         if (args.length > 0) {
-            const sanitized = args.map(Logger.sanitizeForLogging);
+            const sanitized = args.map(sanitizeForLogging);
             console.log(formattedMessage, ...sanitized);
         } else {
             console.log(formattedMessage);

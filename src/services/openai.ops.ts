@@ -17,8 +17,6 @@ interface OpenAIOpsContext {
     promptService: PromptService;
     logger: Logger;
     model: string;
-    fallbackModel?: string;
-    getTemperature: (requested?: number) => number | undefined;
     getReasoningEffort: () => 'low' | 'medium' | 'high' | undefined;
     onAuthError: () => Promise<void>;
     showError: (message: string, error?: unknown) => void;
@@ -48,11 +46,9 @@ export async function generateCommitMessageOp(
             model: context.model,
             systemPrompt,
             userPrompt,
-            temperature: context.getTemperature(),
             reasoningEffort: context.getReasoningEffort(),
             maxCompletionTokens: 5000,
             signal: context.signal,
-            fallbackModel: context.fallbackModel,
         });
 
         if (typeof message !== 'string' || !message.trim()) {
@@ -92,11 +88,9 @@ export async function summarizeChunkOp(
             model: context.model,
             systemPrompt,
             userPrompt: prompt,
-            temperature: context.getTemperature(),
             reasoningEffort: 'low',
             maxCompletionTokens: 2000,
             signal: context.signal,
-            fallbackModel: context.fallbackModel,
         });
 
         if (!summary) {
@@ -139,18 +133,15 @@ export async function generatePRContentOp(
 
         const userPrompt = await context.promptService.createPRPrompt(diff, language, template);
         const systemPrompt = getPrompt(language as SupportedLanguage, PromptType.System);
-        const temperature = context.getTemperature();
 
         const result = await requestStructuredCompletion<{ title: string; body: string }>({
             openai: context.openai,
             model: context.model,
             systemPrompt,
             userPrompt,
-            temperature,
             reasoningEffort: context.getReasoningEffort(),
             schemaName: 'pr_content',
             schema: PR_CONTENT_SCHEMA,
-            fallbackModel: context.fallbackModel,
         });
 
         if (!result || !result.title || !result.body) {
@@ -182,8 +173,6 @@ export async function createChatCompletionOp(
     params: {
         prompt: string;
         maxTokens?: number;
-        temperature?: number;
-        model?: string;
     },
     language: string,
 ): Promise<string | undefined> {
@@ -196,10 +185,8 @@ export async function createChatCompletionOp(
             model: context.model,
             systemPrompt,
             userPrompt: params.prompt,
-            temperature: context.getTemperature(params.temperature),
             reasoningEffort: context.getReasoningEffort(),
             maxCompletionTokens: params.maxTokens ?? 1000,
-            fallbackModel: context.fallbackModel,
         });
 
         context.logger.info('Chat completion created successfully');

@@ -12,7 +12,6 @@ export interface ResponsesAPIRequest {
     model: string;
     input: string;
     max_output_tokens: number;
-    temperature?: number;
     reasoning?: {
         effort: 'none' | 'low' | 'medium' | 'high';
     };

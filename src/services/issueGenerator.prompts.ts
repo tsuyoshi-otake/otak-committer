@@ -46,7 +46,6 @@ export async function generateTitle(
 
         const title = await openai.createChatCompletion({
             prompt: `Create a concise title (maximum ${MAX_TITLE_TOKENS} characters) in ${language} for this ${type} based on the following description:\n\n${description}\n\nRequirements:\n- Must be in ${language}\n- Maximum ${MAX_TITLE_TOKENS} characters\n- Clear and descriptive\n- No technical jargon unless necessary`,
-            temperature: 0.1,
             maxTokens: MAX_TITLE_TOKENS,
         });
 

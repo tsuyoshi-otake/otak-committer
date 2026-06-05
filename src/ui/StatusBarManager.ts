@@ -1,10 +1,14 @@
 import * as vscode from 'vscode';
 import { ConfigManager } from '../infrastructure/config/ConfigManager.js';
-import { LANGUAGE_CONFIGS } from '../languages/index.js';
-import { MessageStyle } from '../types/enums/MessageStyle.js';
 import { Logger } from '../infrastructure/logging/Logger.js';
 import { t } from '../i18n/index.js';
-import { getRepositoryForCurrentWorkspace } from '../services/git.repository.js';
+import {
+    isPublicRepoWarningSuppressed as isWarningSuppressed,
+    showPublicRepoOpenWarning,
+    suppressPublicRepoWarning as suppressWarning,
+} from './publicRepoWarning.js';
+import { buildStatusBarText, buildStatusBarTooltip, getLanguageLabel } from './statusBar.view.js';
+import { detectRepositoryVisibility } from './statusBar.visibility.js';
 
 /**
  * Manages the status bar item for language and configuration display
@@ -54,7 +58,7 @@ export class StatusBarManager {
         this.logger.debug('Initializing status bar');
         this.update();
         this.statusBarItem.show();
-        this.detectRepoVisibility();
+        void this.detectRepoVisibility();
         this.logger.debug('Status bar initialized');
     }
 
@@ -68,27 +72,19 @@ export class StatusBarManager {
         this.logger.debug('Updating status bar');
 
         const language = this.config.get('language') || 'english';
-        const languageConfig = LANGUAGE_CONFIGS[language as keyof typeof LANGUAGE_CONFIGS];
+        const languageLabel = getLanguageLabel(language);
 
-        if (!languageConfig) {
+        if (!languageLabel) {
             this.logger.warning(`Unknown language configuration: ${language}`);
             return;
         }
 
-        // Set status bar text
-        const visibilityLabel =
-            this._isPublicRepo === true
-                ? t('statusBar.public')
-                : this._isPublicRepo === false
-                  ? t('statusBar.private')
-                  : '';
-        this.statusBarItem.text = visibilityLabel
-            ? `${this.repoIcon} ${visibilityLabel}: ${languageConfig.label}`
-            : `${this.repoIcon} ${languageConfig.label}`;
-
-        // Build tooltip
-        const tooltip = this.buildTooltip();
-        this.statusBarItem.tooltip = tooltip;
+        this.statusBarItem.text = buildStatusBarText(
+            this.repoIcon,
+            this._isPublicRepo,
+            languageLabel,
+        );
+        this.statusBarItem.tooltip = buildStatusBarTooltip(this.config);
 
         // Set command
         this.statusBarItem.command = {
@@ -99,114 +95,23 @@ export class StatusBarManager {
         this.logger.debug('Status bar updated successfully');
     }
 
-    /**
-     * Build the tooltip markdown for the status bar
-     *
-     * @returns A markdown string with configuration information and command links
-     */
-    private buildTooltip(): vscode.MarkdownString {
-        const tooltip = new vscode.MarkdownString();
-        tooltip.isTrusted = {
-            enabledCommands: ['otak-committer.setApiKey', 'otak-committer.openSettings'],
-        };
-        tooltip.supportThemeIcons = true;
-
-        const messageStyle = this.config.get('messageStyle') || MessageStyle.Normal;
-
-        tooltip.appendMarkdown(`${t('statusBar.configuration')}\n\n`);
-        tooltip.appendMarkdown(`${t('statusBar.currentStyle')}: ${messageStyle}\n\n`);
-        tooltip.appendMarkdown(`---\n\n`);
-        tooltip.appendMarkdown(
-            `$(key) [${t('statusBar.setApiKey')}](command:otak-committer.setApiKey) &nbsp;&nbsp; ` +
-                `$(gear) [${t('statusBar.openSettings')}](command:otak-committer.openSettings)`,
-        );
-
-        return tooltip;
-    }
-
-    private detectRepoVisibility(): void {
-        const gitExtension = vscode.extensions.getExtension('vscode.git')?.exports;
-        if (!gitExtension) {
-            this.logger.debug('Git extension not available for repo visibility detection');
+    private async detectRepoVisibility(): Promise<void> {
+        const visibility = await detectRepositoryVisibility(this.logger);
+        if (!visibility) {
             return;
         }
 
-        const gitApi = gitExtension.getAPI(1);
-        const repo = gitApi ? getRepositoryForCurrentWorkspace(gitApi) : undefined;
-        if (!repo) {
-            this.logger.debug('No Git repository found for visibility detection');
-            return;
-        }
-
-        repo.getConfig('remote.origin.url').then(
-            (remoteUrl: string | undefined) => {
-                if (!remoteUrl) {
-                    this.logger.debug('No remote origin URL found');
-                    return;
-                }
-
-                const match = remoteUrl.match(/github\.com[:/]([^/]+)\/([^.]+)(?:\.git)?$/);
-                if (!match) {
-                    this.logger.debug('Remote URL is not a GitHub repository');
-                    return;
-                }
-
-                const [, owner, repoName] = match;
-                this._repoFullName = `${owner}/${repoName}`;
-                this.checkGitHubRepoVisibility(owner, repoName);
-            },
-            (error: unknown) => {
-                this.logger.debug(`Failed to get remote URL: ${error}`);
-            },
-        );
+        this._repoFullName = visibility.fullName;
+        await this.applyVisibilityStyle(visibility.isPrivate);
     }
 
-    private checkGitHubRepoVisibility(owner: string, repoName: string): void {
-        const url = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repoName)}`;
-
-        fetch(url, {
-            headers: { 'User-Agent': 'otak-committer' },
-        })
-            .then((response) => {
-                if (response.ok) {
-                    return response.json() as Promise<{ private: boolean }>;
-                }
-                // 404 or other error means private or inaccessible
-                this.applyVisibilityStyle(true);
-                this.logger.debug(`Repository ${owner}/${repoName} detected as private`);
-                return null;
-            })
-            .then((data: { private: boolean } | null) => {
-                if (data) {
-                    this.applyVisibilityStyle(data.private);
-                    this.logger.debug(
-                        `Repository ${owner}/${repoName} visibility: ${data.private ? 'private' : 'public'}`,
-                    );
-                }
-            })
-            .catch((error) => {
-                this.logger.debug(`Failed to check repo visibility: ${error}`);
-            });
-    }
-
-    private applyVisibilityStyle(isPrivate: boolean): void {
+    private async applyVisibilityStyle(isPrivate: boolean): Promise<void> {
         this._isPublicRepo = !isPrivate;
         this.repoIcon = isPrivate ? '$(lock)' : '$(globe)';
         this.update();
 
         if (!isPrivate && !this.isPublicRepoWarningSuppressed()) {
-            this.showPublicRepoOpenWarning();
-        }
-    }
-
-    private async showPublicRepoOpenWarning(): Promise<void> {
-        const choice = await vscode.window.showWarningMessage(
-            t('messages.publicRepoOpenWarning'),
-            t('buttons.yes'),
-            t('buttons.dontShowAgain'),
-        );
-        if (choice === t('buttons.dontShowAgain')) {
-            await this.suppressPublicRepoWarning();
+            await showPublicRepoOpenWarning(this.context.globalState, this._repoFullName);
         }
     }
 
@@ -219,28 +124,11 @@ export class StatusBarManager {
     }
 
     isPublicRepoWarningSuppressed(): boolean {
-        if (!this._repoFullName) {
-            return false;
-        }
-        const suppressed: string[] = this.context.globalState.get(
-            'publicRepoWarningSuppressed',
-            [],
-        );
-        return suppressed.includes(this._repoFullName);
+        return isWarningSuppressed(this.context.globalState, this._repoFullName);
     }
 
     async suppressPublicRepoWarning(): Promise<void> {
-        if (!this._repoFullName) {
-            return;
-        }
-        const suppressed: string[] = this.context.globalState.get(
-            'publicRepoWarningSuppressed',
-            [],
-        );
-        if (!suppressed.includes(this._repoFullName)) {
-            suppressed.push(this._repoFullName);
-            await this.context.globalState.update('publicRepoWarningSuppressed', suppressed);
-        }
+        await suppressWarning(this.context.globalState, this._repoFullName);
     }
 
     /**

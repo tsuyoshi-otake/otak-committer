@@ -59,11 +59,7 @@ const FEATURE_DESCRIPTION =
  * Build an issue title prompt identical to IssueGeneratorService.generateTitle
  * without vscode dependency.
  */
-function buildIssueTitlePrompt(
-    type: string,
-    description: string,
-    language: string,
-): string {
+function buildIssueTitlePrompt(type: string, description: string, language: string): string {
     const MAX_TITLE_TOKENS = 50;
     return `Create a concise title (maximum ${MAX_TITLE_TOKENS} characters) in ${language} for this ${type} based on the following description:\n\n${description}\n\nRequirements:\n- Must be in ${language}\n- Maximum ${MAX_TITLE_TOKENS} characters\n- Clear and descriptive\n- No technical jargon unless necessary`;
 }
@@ -110,7 +106,6 @@ suite('Issue Generation Integration Tests', () => {
                     { role: 'user', content: prompt },
                 ],
                 max_tokens: 100,
-                temperature: 0,
             });
 
             const title = response.choices[0]?.message?.content?.trim();
@@ -154,7 +149,6 @@ suite('Issue Generation Integration Tests', () => {
                     { role: 'user', content: prompt },
                 ],
                 max_tokens: 1000,
-                temperature: 0,
             });
 
             const body = response.choices[0]?.message?.content?.trim();
@@ -163,7 +157,10 @@ suite('Issue Generation Integration Tests', () => {
             console.log('======================');
 
             assert.ok(body, 'Should return an issue body');
-            assert.ok(body.length > 100, `Issue body should be substantial, got ${body.length} chars`);
+            assert.ok(
+                body.length > 100,
+                `Issue body should be substantial, got ${body.length} chars`,
+            );
 
             const expectedSections = [
                 'Background',
@@ -172,9 +169,8 @@ suite('Issue Generation Integration Tests', () => {
                 'Steps to Reproduce',
                 'Additional Context',
             ];
-            const foundSections = expectedSections.filter(
-                (section) =>
-                    new RegExp(`(#|\\*\\*).*${section}`, 'i').test(body),
+            const foundSections = expectedSections.filter((section) =>
+                new RegExp(`(#|\\*\\*).*${section}`, 'i').test(body),
             );
             console.log(`Found sections: ${foundSections.join(', ')}`);
 
@@ -212,7 +208,6 @@ suite('Issue Generation Integration Tests', () => {
                     { role: 'user', content: prompt },
                 ],
                 max_tokens: 100,
-                temperature: 0,
             });
 
             const title = response.choices[0]?.message?.content?.trim();
@@ -255,7 +250,6 @@ suite('Issue Generation Integration Tests', () => {
                     { role: 'user', content: prompt },
                 ],
                 max_tokens: 1000,
-                temperature: 0,
             });
 
             const body = response.choices[0]?.message?.content?.trim();
@@ -297,7 +291,6 @@ suite('Issue Generation Integration Tests', () => {
                     { role: 'user', content: prompt },
                 ],
                 max_tokens: 1000,
-                temperature: 0,
             });
 
             const body = response.choices[0]?.message?.content?.trim();
@@ -359,7 +352,6 @@ suite('Issue Generation Integration Tests', () => {
                         { role: 'user', content: titlePrompt },
                     ],
                     max_tokens: 100,
-                    temperature: 0,
                 }),
                 openai.chat.completions.create({
                     model: 'gpt-4o-mini',
@@ -371,7 +363,6 @@ suite('Issue Generation Integration Tests', () => {
                         },
                     ],
                     max_tokens: 1000,
-                    temperature: 0,
                 }),
             ]);
 
@@ -388,10 +379,7 @@ suite('Issue Generation Integration Tests', () => {
             assert.ok(body, 'Should return a Japanese issue body');
 
             const japanesePattern = /[\u3000-\u9FFF\uF900-\uFAFF]/;
-            assert.ok(
-                japanesePattern.test(body),
-                'Issue body should contain Japanese characters',
-            );
+            assert.ok(japanesePattern.test(body), 'Issue body should contain Japanese characters');
 
             console.log('✓ Japanese issue generation integration test passed');
         } catch (error: unknown) {
