@@ -5,11 +5,7 @@ import { SyncedStateProvider } from './SyncedStateProvider';
 import { ServiceProvider } from '../../types/enums/ServiceProvider';
 import { Logger } from '../logging/Logger';
 
-export const ALWAYS_STAGE_ALL_KEY = 'otak-committer.alwaysStageAll';
-
-export function isApiKeySyncEnabled(): boolean {
-    return false;
-}
+const ALWAYS_STAGE_ALL_KEY = 'otak-committer.alwaysStageAll';
 
 function setKeysForSync(
     context: vscode.ExtensionContext,

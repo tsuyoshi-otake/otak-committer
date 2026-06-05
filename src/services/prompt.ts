@@ -10,8 +10,6 @@ import { createCommitPromptContent } from './commitPrompt';
 import { createPRPromptContent, generateDiffSummaryContent } from './prPrompt';
 import { createSummarizationPromptContent } from './summarizationPrompt';
 
-export { MESSAGE_LENGTH_LIMITS, getMessageLengthLimit } from './promptConfig';
-
 /**
  * Service for creating prompts for AI models
  *

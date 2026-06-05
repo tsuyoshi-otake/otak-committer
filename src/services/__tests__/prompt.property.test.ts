@@ -9,7 +9,7 @@
 
 import * as assert from 'assert';
 import { createTaggedPropertyTest } from '../../test/helpers/property-test.helper';
-import { MESSAGE_LENGTH_LIMITS, getMessageLengthLimit } from '../prompt';
+import { MESSAGE_LENGTH_LIMITS, getMessageLengthLimit } from '../promptConfig';
 import { MessageStyle } from '../../types/enums/MessageStyle';
 
 suite('Prompt Service Property Tests', () => {

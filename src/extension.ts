@@ -1,5 +1,8 @@
 import * as vscode from 'vscode';
-import { Logger, ConfigManager, StorageManager, ErrorHandler } from './infrastructure/index.js';
+import { Logger } from './infrastructure/logging/Logger.js';
+import { ConfigManager } from './infrastructure/config/ConfigManager.js';
+import { StorageManager } from './infrastructure/storage/StorageManager.js';
+import { ErrorHandler } from './infrastructure/error/ErrorHandler.js';
 import { CommandRegistry } from './commands/CommandRegistry.js';
 import { registerAllCommands } from './commands/commandRegistration.js';
 import { StatusBarManager } from './ui/StatusBarManager.js';
