@@ -61,6 +61,14 @@ function createMockContext(): vscode.ExtensionContext {
     };
 }
 
+// `SecretStorageProvider.set` deliberately treats an all-whitespace value as a
+// delete (security normalization — see SecretStorageProvider.ts:60). Generators
+// must produce values that survive that normalization, otherwise round-trip
+// properties will fail on shrunken whitespace-only counterexamples (caught by
+// CI on Linux with seed 1356349199 / counterexample [{"key":"     ","value":" "}]).
+const nonBlankString = (opts: { minLength: number; maxLength: number }) =>
+    fc.string(opts).filter((s) => s.trim().length > 0);
+
 suite('Storage Property Tests', () => {
     /**
      * **Feature: extension-architecture-refactoring, Property 3: Unified Storage Abstraction**
@@ -74,7 +82,7 @@ suite('Storage Property Tests', () => {
             fc.asyncProperty(
                 fc.record({
                     service: fc.constantFrom('openai' as const, 'github' as const),
-                    apiKey: fc.string({ minLength: 10, maxLength: 100 }),
+                    apiKey: nonBlankString({ minLength: 10, maxLength: 100 }),
                 }),
                 async ({ service, apiKey }) => {
                     const mockContext = createMockContext();
@@ -102,7 +110,7 @@ suite('Storage Property Tests', () => {
             fc.asyncProperty(
                 fc.record({
                     service: fc.constantFrom('openai' as const, 'github' as const),
-                    apiKey: fc.string({ minLength: 10, maxLength: 100 }),
+                    apiKey: nonBlankString({ minLength: 10, maxLength: 100 }),
                 }),
                 async ({ service, apiKey }) => {
                     const mockContext = createMockContext();
@@ -131,7 +139,7 @@ suite('Storage Property Tests', () => {
             fc.asyncProperty(
                 fc.record({
                     service: fc.constantFrom('openai' as const, 'github' as const),
-                    apiKey: fc.string({ minLength: 10, maxLength: 100 }),
+                    apiKey: nonBlankString({ minLength: 10, maxLength: 100 }),
                 }),
                 async ({ service, apiKey }) => {
                     const mockContext = createMockContext();
@@ -160,8 +168,8 @@ suite('Storage Property Tests', () => {
         await fc.assert(
             fc.asyncProperty(
                 fc.record({
-                    key: fc.string({ minLength: 5, maxLength: 50 }),
-                    value: fc.string({ minLength: 1, maxLength: 100 }),
+                    key: nonBlankString({ minLength: 5, maxLength: 50 }),
+                    value: nonBlankString({ minLength: 1, maxLength: 100 }),
                 }),
                 async ({ key, value }) => {
                     const mockContext = createMockContext();
