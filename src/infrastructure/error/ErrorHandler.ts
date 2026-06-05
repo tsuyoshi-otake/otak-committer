@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { Logger } from '../logging/Logger';
 import { BaseError, ErrorSeverity } from '../../types/errors/BaseError';
-import { isUserAbortError } from '../../utils/errorHandling';
+import { isUserAbortError } from '../../utils/errorGuards';
 
 export { ErrorSeverity };
 

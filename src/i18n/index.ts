@@ -21,5 +21,6 @@
  */
 
 export { LocaleDetector, SupportedLocale, Locale } from './LocaleDetector';
-export { TranslationManager, TranslationParams, t } from './TranslationManager';
+export { TranslationManager, t } from './TranslationManager';
+export type { TranslationParams } from './translationTypes';
 export { LanguagePreferenceManager } from './LanguagePreferenceManager';

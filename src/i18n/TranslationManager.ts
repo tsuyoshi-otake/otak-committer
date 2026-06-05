@@ -43,50 +43,17 @@
  */
 
 import { SupportedLocale, LocaleDetector } from './LocaleDetector';
-import en from './locales/en.json';
-import ja from './locales/ja.json';
-import vi from './locales/vi.json';
-import ko from './locales/ko.json';
-import fr from './locales/fr.json';
-import de from './locales/de.json';
-import es from './locales/es.json';
-import pt from './locales/pt.json';
-import zhCN from './locales/zh-cn.json';
-import zhTW from './locales/zh-tw.json';
-import it from './locales/it.json';
-import cs from './locales/cs.json';
-import hu from './locales/hu.json';
-import bg from './locales/bg.json';
-import tr from './locales/tr.json';
-import pl from './locales/pl.json';
-import ru from './locales/ru.json';
-import th from './locales/th.json';
-import hi from './locales/hi.json';
-import bn from './locales/bn.json';
-import jv from './locales/jv.json';
-import ta from './locales/ta.json';
-import my from './locales/my.json';
-import ar from './locales/ar.json';
-import he from './locales/he.json';
+import { getNestedTranslation, interpolateTranslation } from './translationLookup';
+import { translations } from './translations';
+import { TranslationParams } from './translationTypes';
 
-/**
- * Translation dictionary type
- */
-type TranslationDictionary = {
-    [key: string]: string | TranslationDictionary;
-};
-
-/**
- * Translation parameters type
- */
-export type TranslationParams = Record<string, string | number>;
+export type { TranslationParams } from './translationTypes';
 
 /**
  * Manages translations and provides the translation API
  */
 export class TranslationManager {
     private locale: SupportedLocale;
-    private translations: Record<SupportedLocale, TranslationDictionary>;
 
     private static instance: TranslationManager | null = null;
 
@@ -96,33 +63,6 @@ export class TranslationManager {
      * Automatically detects the current locale from VS Code settings
      */
     constructor() {
-        this.translations = {
-            en: en as TranslationDictionary,
-            ja: ja as TranslationDictionary,
-            vi: vi as TranslationDictionary,
-            ko: ko as TranslationDictionary,
-            fr: fr as TranslationDictionary,
-            de: de as TranslationDictionary,
-            es: es as TranslationDictionary,
-            pt: pt as TranslationDictionary,
-            'zh-cn': zhCN as TranslationDictionary,
-            'zh-tw': zhTW as TranslationDictionary,
-            it: it as TranslationDictionary,
-            cs: cs as TranslationDictionary,
-            hu: hu as TranslationDictionary,
-            bg: bg as TranslationDictionary,
-            tr: tr as TranslationDictionary,
-            pl: pl as TranslationDictionary,
-            ru: ru as TranslationDictionary,
-            th: th as TranslationDictionary,
-            hi: hi as TranslationDictionary,
-            bn: bn as TranslationDictionary,
-            jv: jv as TranslationDictionary,
-            ta: ta as TranslationDictionary,
-            my: my as TranslationDictionary,
-            ar: ar as TranslationDictionary,
-            he: he as TranslationDictionary,
-        };
         this.locale = LocaleDetector.getLocale();
     }
 
@@ -178,11 +118,11 @@ export class TranslationManager {
      */
     t(key: string, params?: TranslationParams): string {
         // Try to get translation in current locale
-        let translation = this.getNestedValue(this.translations[this.locale], key);
+        let translation = getNestedTranslation(translations[this.locale], key);
 
         // Fallback to English if not found in current locale
         if (translation === undefined && this.locale !== 'en') {
-            translation = this.getNestedValue(this.translations.en, key);
+            translation = getNestedTranslation(translations.en, key);
         }
 
         // Fallback to key itself if not found in any translation
@@ -213,33 +153,7 @@ export class TranslationManager {
      * ```
      */
     interpolate(str: string, params: TranslationParams): string {
-        return str.replace(/\{(\w+)\}/g, (match, key) => {
-            if (params.hasOwnProperty(key)) {
-                return String(params[key]);
-            }
-            return match; // Keep original placeholder if param not found
-        });
-    }
-
-    /**
-     * Get nested value from a translation dictionary using dot-separated key
-     *
-     * @param obj - Translation dictionary
-     * @param key - Dot-separated key (e.g., 'messages.apiKeySaved')
-     * @returns The translation string or undefined if not found
-     */
-    private getNestedValue(obj: TranslationDictionary, key: string): string | undefined {
-        const parts = key.split('.');
-        let current: TranslationDictionary | string = obj;
-
-        for (const part of parts) {
-            if (current === undefined || current === null || typeof current === 'string') {
-                return undefined;
-            }
-            current = current[part];
-        }
-
-        return typeof current === 'string' ? current : undefined;
+        return interpolateTranslation(str, params);
     }
 }
 

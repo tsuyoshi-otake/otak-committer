@@ -1,39 +1,16 @@
-import * as vscode from 'vscode';
 import { MessageStyle } from '../types/messageStyle';
 import { PullRequestDiff } from '../types/github';
 import { TemplateInfo } from '../types';
-import { COMMIT_PREFIXES, CommitPrefix } from '../constants/commitGuide';
 import {
-    extractFilePathsFromDiff,
-    generateScopeHint,
-    getConventionalCommitsFormat,
-    getTraditionalFormat,
-} from '../utils/conventionalCommits';
+    getPromptGenerationOptions,
+    sanitizeConfigInput,
+    sanitizeTemplateContent,
+} from './promptConfig';
+import { createCommitPromptContent } from './commitPrompt';
+import { createPRPromptContent, generateDiffSummaryContent } from './prPrompt';
+import { createSummarizationPromptContent } from './summarizationPrompt';
 
-/**
- * Message length limits by style (in characters)
- * Updated to provide longer commit messages for better context
- */
-export const MESSAGE_LENGTH_LIMITS = {
-    [MessageStyle.Simple]: 600,
-    [MessageStyle.Normal]: 1200,
-    [MessageStyle.Detailed]: 2400,
-} as const;
-
-/**
- * Get the character limit for a given message style
- * @param style - The message style
- * @returns The character limit
- */
-export function getMessageLengthLimit(style: MessageStyle | string): number {
-    if (style === MessageStyle.Simple) {
-        return MESSAGE_LENGTH_LIMITS[MessageStyle.Simple];
-    }
-    if (style === MessageStyle.Detailed) {
-        return MESSAGE_LENGTH_LIMITS[MessageStyle.Detailed];
-    }
-    return MESSAGE_LENGTH_LIMITS[MessageStyle.Normal];
-}
+export { MESSAGE_LENGTH_LIMITS, getMessageLengthLimit } from './promptConfig';
 
 /**
  * Service for creating prompts for AI models
@@ -48,30 +25,18 @@ export function getMessageLengthLimit(style: MessageStyle | string): number {
  * ```
  */
 export class PromptService {
-    /** Maximum allowed length for customMessage configuration value */
-    private static readonly MAX_CUSTOM_MESSAGE_LENGTH = 500;
-
-    /** Maximum allowed length for template content included in prompts */
-    private static readonly MAX_TEMPLATE_CONTENT_LENGTH = 10000;
-
     /**
      * Sanitize user-provided configuration input to limit prompt injection risk
      */
     static sanitizeConfigInput(input: string): string {
-        if (!input) {
-            return '';
-        }
-        return input.slice(0, PromptService.MAX_CUSTOM_MESSAGE_LENGTH).trim();
+        return sanitizeConfigInput(input);
     }
 
     /**
      * Sanitize template content before including in prompts
      */
     static sanitizeTemplateContent(content: string): string {
-        if (!content) {
-            return '';
-        }
-        return content.slice(0, PromptService.MAX_TEMPLATE_CONTENT_LENGTH).trim();
+        return sanitizeTemplateContent(content);
     }
 
     /**
@@ -101,73 +66,13 @@ export class PromptService {
         messageStyle: MessageStyle | string,
         template?: TemplateInfo,
     ): Promise<string> {
-        const config = vscode.workspace.getConfiguration('otakCommitter');
-        const useEmoji = config.get<boolean>('useEmoji') || false;
-        const rawCustomMessage = config.get<string>('customMessage') || '';
-        const useConventionalCommits = config.get<boolean>('useConventionalCommits') ?? true;
-        const useBulletList = config.get<boolean>('useBulletList') ?? true;
-
-        const emojiInstruction = useEmoji
-            ? 'Feel free to use emojis for emphasis and key points.'
-            : 'DO NOT use any emojis in the content.';
-        const customMessage = PromptService.sanitizeConfigInput(rawCustomMessage);
-        const customInstruction = customMessage
-            ? `\nAdditional requirements: ${customMessage}`
-            : '';
-
-        // テンプレートがある場合はそれを基に生成 (Templates override Conventional Commits format)
-        if (template) {
-            const sanitizedTemplate = PromptService.sanitizeTemplateContent(template.content);
-            return `Based on the following template and Git diff, generate a commit message:
-
-Template:
-${sanitizedTemplate}
-
-Git diff:
-${diff}
-
-Please follow the template format strictly without any leading newlines.`;
-        }
-
-        // テンプレートがない場合はPrefixを使用
-        const prefixDescriptions = COMMIT_PREFIXES.map((prefix) => {
-            const desc =
-                prefix.description[language as keyof CommitPrefix['description']] ||
-                prefix.description.english;
-            return `${prefix.prefix}: ${desc}`;
-        }).join('\n');
-
-        // Get the character limit for the message style
-        const charLimit = getMessageLengthLimit(messageStyle);
-
-        // Extract file paths and generate scope hint
-        const filePaths = extractFilePathsFromDiff(diff);
-        const scopeHint = generateScopeHint(filePaths);
-
-        // Determine format instruction based on configuration
-        const formatInstruction = useConventionalCommits
-            ? getConventionalCommitsFormat(scopeHint)
-            : getTraditionalFormat(scopeHint);
-
-        return `Generate a commit message in ${language} for the following Git diff.
-Use one of these prefixes:
-
-${prefixDescriptions}
-
-The commit message should follow this format without any leading newlines:
-${formatInstruction}
-
-<body>
-
-The total commit message should be under ${charLimit} characters.
-The style should be: ${messageStyle}
-
-Git diff:
-${diff}
-
-Please provide a clear and ${messageStyle} commit message following the format above.
-${useBulletList ? 'Format the body as follows: first write a brief summary of the changes in up to 3 lines of prose, then leave a blank line, then list the specific changes as a bullet list (use "- " prefix for each item). Each bullet point should describe one logical change.' : ''}
-${emojiInstruction}${customInstruction}`;
+        return createCommitPromptContent(
+            diff,
+            language,
+            messageStyle,
+            template,
+            getPromptGenerationOptions(),
+        );
     }
 
     /**
@@ -185,17 +90,7 @@ ${emojiInstruction}${customInstruction}`;
      * ```
      */
     async generateDiffSummary(diff: PullRequestDiff): Promise<string> {
-        return `Changed files:
-${diff.files.map((file) => `- ${file.filename} (additions: ${file.additions}, deletions: ${file.deletions})`).join('\n')}
-
-Detailed changes:
-${diff.files
-    .map(
-        (file) => `
-[${file.filename}]
-${file.patch}`,
-    )
-    .join('\n')}`;
+        return generateDiffSummaryContent(diff);
     }
 
     /**
@@ -222,58 +117,7 @@ ${file.patch}`,
         template?: TemplateInfo,
     ): Promise<string> {
         const diffSummary = await this.generateDiffSummary(diff);
-        const useEmoji =
-            vscode.workspace.getConfiguration('otakCommitter').get<boolean>('useEmoji') || false;
-        const rawCustomMessage =
-            vscode.workspace.getConfiguration('otakCommitter').get<string>('customMessage') || '';
-        const emojiInstruction = useEmoji ? '' : 'DO NOT use any emojis in the content. ';
-        const customMessage = PromptService.sanitizeConfigInput(rawCustomMessage);
-        const customInstruction = customMessage
-            ? `Additional requirements: ${customMessage}\n\n`
-            : '';
-
-        const titleInstruction = `Title requirements:
-1. Concise and accurately represents the changes
-2. Include a prefix (e.g., "Feature:", "Fix:", "Improvement:", etc.) ${useEmoji ? 'with appropriate emoji prefix' : 'without emoji'}
-3. Just the title text, no labels like "Title:" and no quotes`;
-
-        const bodyInstruction = template
-            ? `Body requirements:
-Follow the template format strictly.
-
-Template:
-${PromptService.sanitizeTemplateContent(template.content)}`
-            : `Body requirements:
-Generate a detailed description with the following sections:
-
-# Overview
-- Brief explanation of implemented features or fixes
-- Purpose and background of changes
-- Technical approach taken
-
-# Key Review Points
-- Areas that need special attention from reviewers
-- Important design decisions
-- Performance and maintainability considerations
-
-# Change Details
-- Main changes implemented
-- Affected components and functionality
-- Dependency changes (if any)
-
-# Additional Notes
-- Deployment considerations
-- Impact on existing features
-- Required configuration or environment variables`;
-
-        return `Generate a Pull Request title and body in ${language} for the following changes.
-
-${titleInstruction}
-
-${bodyInstruction}
-
-${emojiInstruction}${customInstruction}Git diff:
-${diffSummary}`;
+        return createPRPromptContent(diffSummary, language, template, getPromptGenerationOptions());
     }
 
     /**
@@ -284,14 +128,6 @@ ${diffSummary}`;
      * @returns The summarization prompt string
      */
     createSummarizationPrompt(chunkDiff: string, language: string): string {
-        return `Summarize the following code changes concisely in ${language}. Focus on:
-- What was changed (files, functions, components)
-- Why it was likely changed (bug fix, feature, refactor)
-- Key technical details
-
-Changes:
-${chunkDiff}
-
-Provide a concise technical summary.`;
+        return createSummarizationPromptContent(chunkDiff, language);
     }
 }

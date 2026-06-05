@@ -5,7 +5,7 @@ import { MessageStyle } from '../types/enums/MessageStyle';
 import { TemplateInfo } from '../types';
 import { detectPotentialSecrets, sanitizeCommitMessage } from '../utils';
 import { t } from '../i18n/index.js';
-import { isUserAbortError } from '../utils/errorHandling';
+import { isUserAbortError } from '../utils/errorGuards';
 import { confirmProceedWithPotentialSecrets } from '../services/secretConfirmation';
 import { showTimedNotification } from './commandNotifications';
 import { processCommitDiff } from './commit.diffProcessing';

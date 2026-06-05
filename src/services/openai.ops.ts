@@ -10,7 +10,7 @@ import type { SupportedLanguage } from '../languages';
 import { PromptType } from '../types/enums/PromptType';
 import { requestTextCompletion, requestStructuredCompletion } from './openai.completion';
 import { t } from '../i18n/index.js';
-import { isUserAbortError } from '../utils/errorHandling';
+import { isUserAbortError } from '../utils/errorGuards';
 
 interface OpenAIOpsContext {
     openai: OpenAI;
