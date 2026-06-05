@@ -26,6 +26,5 @@
   "config.maxInputTokens": "Maksymalna liczba tokenów wejściowych do przetwarzania AI (domyślnie: 200K)",
   "config.useBulletList": "Formatuj treść komunikatu commita jako listę punktowaną",
   "config.useConventionalCommits": "Używaj formatu Conventional Commits z zakresem (<typ>(<zakres>): <temat>)",
-  "config.appendCommitTrailer": "Dołącz 'Commit-Message-By: otak-committer' na końcu generowanych komunikatów commitów",
-  "config.syncApiKeys": "Synchronizuj klucze API za pomocą VS Code Settings Sync (przechowuje klucze w zsynchronizowanym stanie rozszerzenia)"
+  "config.appendCommitTrailer": "Dołącz 'Commit-Message-By: otak-committer' na końcu generowanych komunikatów commitów"
 }

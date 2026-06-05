@@ -108,7 +108,6 @@ When multiple repositories are open, PR and issue operations target the reposito
 - **`otakCommitter.useBulletList`**: Format commit message body as a bullet list (default: `true`)
 - **`otakCommitter.useConventionalCommits`**: Use Conventional Commits format (default: `true`)
 - **`otakCommitter.appendCommitTrailer`**: Append `Commit-Message-By: otak-committer` trailer (default: `true`)
-- **`otakCommitter.syncApiKeys`**: Sync API keys via VS Code Settings Sync (default: `false`)
 
 ### Custom Instruction Examples
 
@@ -154,17 +153,17 @@ The extension currently uses GPT-5.4 for high-quality commit message generation.
 
 ### API Key Protection
 
-- **Secure Storage (default)**: API keys are stored using VS Code SecretStorage.
-- **Settings Sync (optional)**: If `otakCommitter.syncApiKeys` is enabled, a copy of your API keys is stored in synced extension state for use across devices.
-- **Encrypted Backups**: Redundant storage uses AES-256-GCM encryption with PBKDF2 (600,000 iterations) and machine-specific keys.
-- **Automatic Migration**: Legacy API keys in settings are migrated to secure storage and deleted.
+- **Secure Storage only**: API keys are stored using VS Code SecretStorage.
+- **No Settings Sync for API keys**: API keys are not stored in synced extension state.
+- **No GlobalState backups**: API keys are not backed up to extension global state.
+- **Automatic Migration**: Legacy API keys in settings are migrated to secure storage and deleted after the secure write succeeds. If secure storage is unavailable, legacy keys are preserved for retry but not used.
 - **No `settings.json` secrets**: Keys never appear in `settings.json`.
 - **Diagnostic Tools**: Built-in diagnostics verify storage health.
 
 ### Data Handling
 
 - Git diff analysis happens locally.
-- **Secret detection**: Before generation, diffs and selected file content are scanned for potential secrets (API keys, tokens, passwords, private keys, connection strings, environment variable references, etc.). The extension warns you when it detects a possible secret in commit, PR, or issue inputs; map-reduce chunks are also checked and logged.
+- **Secret detection**: Before generation, diffs and selected file content are scanned for potential secrets (API keys, tokens, passwords, private keys, connection strings, environment variable references, etc.). The extension asks for confirmation before sending commit, PR, or issue inputs that may contain secrets to the external AI service; map-reduce chunks are also checked and logged.
 - **Log redaction**: Logger automatically redacts sensitive field values, known secret formats, URL-embedded credentials, and secrets in error stack traces.
 - Only necessary diff context is sent to OpenAI for generation.
 - Large diffs are intelligently prioritized: lock files and generated files are excluded or summarized to minimize data sent to the API.

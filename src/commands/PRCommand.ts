@@ -12,6 +12,7 @@ import { selectIssue, selectPRType } from './pr.input';
 import { showPRPreview } from './pr.preview';
 import { createPRWithDraftFallback } from './pr.creation';
 import { handleCreatePRError } from './pr.error';
+import { confirmProceedWithPotentialSecrets } from '../services/secretConfirmation';
 
 export class PRCommand extends BaseCommand {
     async execute(): Promise<void> {
@@ -35,7 +36,9 @@ export class PRCommand extends BaseCommand {
                 return;
             }
 
-            this.warnIfPotentialSecrets(diff);
+            if (!(await this.confirmIfPotentialSecrets(diff))) {
+                return;
+            }
 
             const openai = await this.initializeOpenAI();
             if (!openai) {
@@ -145,7 +148,7 @@ export class PRCommand extends BaseCommand {
     ): Promise<boolean> {
         this.logger.debug('Showing PR preview');
 
-        this.previewFile = await showPRPreview(prContent, issueNumber);
+        this.previewFile = await showPRPreview(prContent, issueNumber, this.context.globalStorageUri);
         if (!this.previewFile) {
             this.logger.error('Failed to show preview');
             vscode.window.showErrorMessage(t('messages.failedToShowPreview'));
@@ -190,23 +193,13 @@ export class PRCommand extends BaseCommand {
         }
     }
 
-    private warnIfPotentialSecrets(diff: PullRequestDiff): void {
+    private async confirmIfPotentialSecrets(diff: PullRequestDiff): Promise<boolean> {
         const combined = diff.files.map((f) => f.patch).join('\n');
         const detection = detectPotentialSecrets(combined);
-        if (!detection.hasPotentialSecrets) {
-            return;
-        }
-
-        const patterns = detection.matchedPatternIds.join(', ');
-        this.logger.warning('Potential secrets detected in PR diff', {
-            matchedPatternIds: detection.matchedPatternIds,
-        });
-
-        vscode.window.showWarningMessage(
-            t('messages.secretDetectionWarning', {
-                count: detection.matchedPatternIds.length,
-                patterns,
-            }),
+        return confirmProceedWithPotentialSecrets(
+            detection,
+            this.logger,
+            'Potential secrets detected in PR diff',
         );
     }
 

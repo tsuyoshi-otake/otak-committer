@@ -1,4 +1,3 @@
-import * as vscode from 'vscode';
 import { ConfigStorageProvider } from './ConfigStorageProvider';
 import { SecretStorageProvider } from './SecretStorageProvider';
 import { SyncedStateProvider } from './SyncedStateProvider';
@@ -6,8 +5,6 @@ import { StorageMigrationService } from './StorageMigrationService';
 import { StorageError } from '../../types/errors';
 import { ServiceProvider } from '../../types/enums/ServiceProvider';
 import { Logger } from '../logging/Logger';
-import { t } from '../../i18n';
-import { isApiKeySyncEnabled } from './storageSync';
 
 interface ApiKeyStorageContext {
     secretStorage: SecretStorageProvider;
@@ -21,28 +18,13 @@ export async function getApiKey(
     context: ApiKeyStorageContext,
     service: ServiceProvider,
 ): Promise<string | undefined> {
-    const { secretStorage, syncedState, configStorage, logger } = context;
+    const { secretStorage, configStorage, logger } = context;
 
     try {
         const key = `${service}.apiKey`;
         const value = await secretStorage.get(key);
         if (value && value.trim() !== '') {
             return value;
-        }
-
-        if (isApiKeySyncEnabled()) {
-            const syncedValue = syncedState.getApiKey(service);
-            if (syncedValue && syncedValue.trim() !== '') {
-                try {
-                    await secretStorage.set(key, syncedValue);
-                } catch (restoreError) {
-                    logger.error(
-                        `[StorageManager] Failed to restore ${service} API key from Settings Sync`,
-                        restoreError,
-                    );
-                }
-                return syncedValue;
-            }
         }
 
         const legacyKey = StorageMigrationService.getLegacyConfigKey(service);
@@ -54,40 +36,16 @@ export async function getApiKey(
                 await setApiKey(context, service, legacyValue);
                 await configStorage.delete(legacyKey);
                 logger.info(`Successfully migrated ${service} API key`);
+                return legacyValue;
             } catch (migrationError) {
                 logger.error(`Failed to migrate ${service} key`, migrationError);
+                return undefined;
             }
-
-            return legacyValue;
         }
 
         return undefined;
     } catch (error) {
         logger.error(`Error retrieving API key for ${service}`, error);
-
-        if (isApiKeySyncEnabled()) {
-            try {
-                const syncedValue = syncedState.getApiKey(service);
-                if (syncedValue && syncedValue.trim() !== '') {
-                    logger.info(`Falling back to Settings Sync for ${service}`);
-                    return syncedValue;
-                }
-            } catch (syncFallbackError) {
-                logger.error('Settings Sync fallback retrieval also failed', syncFallbackError);
-            }
-        }
-
-        try {
-            const legacyKey = StorageMigrationService.getLegacyConfigKey(service);
-            const legacyValue = await configStorage.get(legacyKey);
-            if (legacyValue && legacyValue.trim() !== '') {
-                logger.info(`Falling back to legacy storage for ${service}`);
-                return legacyValue;
-            }
-        } catch (fallbackError) {
-            logger.error('Fallback retrieval also failed', fallbackError);
-        }
-
         return undefined;
     }
 }
@@ -97,23 +55,13 @@ export async function setApiKey(
     service: ServiceProvider,
     value: string,
 ): Promise<void> {
-    const { secretStorage, syncedState, configStorage, logger, registerKeysForSync } = context;
+    const { secretStorage, configStorage, logger, registerKeysForSync } = context;
 
     try {
         const key = `${service}.apiKey`;
         await secretStorage.set(key, value);
 
-        if (isApiKeySyncEnabled()) {
-            try {
-                registerKeysForSync();
-                await syncedState.setApiKey(service, value);
-            } catch (syncError) {
-                logger.error(
-                    `[StorageManager] Failed to store ${service} API key in Settings Sync state`,
-                    syncError,
-                );
-            }
-        }
+        registerKeysForSync();
 
         try {
             const legacyKey = StorageMigrationService.getLegacyConfigKey(service);
@@ -124,30 +72,10 @@ export async function setApiKey(
     } catch (error) {
         logger.error(`Error storing API key for ${service}`, error);
 
-        if (isApiKeySyncEnabled()) {
-            try {
-                registerKeysForSync();
-                await syncedState.setApiKey(service, value);
-            } catch (syncError) {
-                logger.error(
-                    `[StorageManager] Failed to store ${service} API key in Settings Sync state`,
-                    syncError,
-                );
-            }
-        }
-
-        try {
-            const legacyKey = StorageMigrationService.getLegacyConfigKey(service);
-            await configStorage.set(legacyKey, value);
-            logger.info(`Stored ${service} API key in legacy storage as fallback`);
-            vscode.window.showWarningMessage(t('messages.storageFallbackWarning'));
-        } catch (fallbackError) {
-            logger.error('Fallback storage also failed', fallbackError);
-            throw new StorageError(
-                `Failed to store API key for service: ${service}. All storage mechanisms failed.`,
-                { service, originalError: error, fallbackError },
-            );
-        }
+        throw new StorageError(`Failed to store API key for service: ${service}`, {
+            service,
+            originalError: error,
+        });
     }
 }
 
@@ -200,15 +128,11 @@ export async function hasApiKey(
     context: ApiKeyStorageContext,
     service: ServiceProvider,
 ): Promise<boolean> {
-    const { secretStorage, syncedState, configStorage, logger } = context;
+    const { secretStorage, configStorage, logger } = context;
     try {
         const key = `${service}.apiKey`;
         const hasInSecret = await secretStorage.has(key);
         if (hasInSecret) {
-            return true;
-        }
-
-        if (isApiKeySyncEnabled() && syncedState.hasApiKey(service)) {
             return true;
         }
 

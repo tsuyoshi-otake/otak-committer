@@ -1,6 +1,5 @@
 {
   "extension.description": "用于智能 SCM 操作的 VS Code 扩展：基于 AI 的多语言（支持 25 种语言）提交消息生成，以及未来的 PR 管理功能。",
-
   "command.generateMessage": "生成提交消息",
   "command.generatePR": "生成 Pull Request",
   "command.generateIssue": "生成 Issue",
@@ -9,7 +8,6 @@
   "command.changeMessageStyle": "更改提交消息风格",
   "command.setApiKey": "设置 OpenAI API 密钥",
   "command.diagnoseStorage": "诊断 API 密钥存储",
-
   "config.language": "提交消息语言",
   "config.messageStyle": "生成的提交消息的风格和长度",
   "config.messageStyle.simple": "简单精炼（600 字符）",
@@ -28,6 +26,5 @@
   "config.maxInputTokens": "AI 处理的最大输入 token 数（默认：200K）",
   "config.useBulletList": "提交消息正文使用项目符号列表格式",
   "config.useConventionalCommits": "使用带 scope 的 Conventional Commits 格式（<type>(<scope>): <subject>）",
-  "config.appendCommitTrailer": "在生成的提交消息末尾追加 'Commit-Message-By: otak-committer' 标记",
-  "config.syncApiKeys": "通过 VS Code 设置同步同步 API 密钥（将密钥存储在同步的扩展状态中）"
+  "config.appendCommitTrailer": "在生成的提交消息末尾追加 'Commit-Message-By: otak-committer' 标记"
 }

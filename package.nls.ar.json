@@ -1,6 +1,5 @@
 {
   "extension.description": "إضافة VS Code لعمليات SCM الذكية - إنشاء رسائل إيداع متعددة اللغات بدعم الذكاء الاصطناعي (دعم 25 لغة) وميزات إدارة PR المستقبلية.",
-
   "command.generateMessage": "إنشاء رسالة Commit",
   "command.generatePR": "إنشاء Pull Request",
   "command.generateIssue": "إنشاء Issue",
@@ -9,7 +8,6 @@
   "command.changeMessageStyle": "تغيير نمط رسالة الإيداع",
   "command.setApiKey": "تعيين مفتاح OpenAI API",
   "command.diagnoseStorage": "تشخيص تخزين مفتاح API",
-
   "config.language": "لغة رسائل الإيداع",
   "config.messageStyle": "نمط وطول رسائل الإيداع المُنشأة",
   "config.messageStyle.simple": "بسيط ومختصر (600 حرف)",
@@ -28,6 +26,5 @@
   "config.maxInputTokens": "الحد الأقصى لرموز الإدخال لمعالجة الذكاء الاصطناعي (الافتراضي: 200K)",
   "config.useBulletList": "تنسيق نص رسالة الإيداع كقائمة نقطية",
   "config.useConventionalCommits": "استخدام تنسيق Conventional Commits مع النطاق (<type>(<scope>): <subject>)",
-  "config.appendCommitTrailer": "إلحاق تذييل 'Commit-Message-By: otak-committer' برسائل الإيداع المُنشأة",
-  "config.syncApiKeys": "مزامنة مفاتيح API عبر VS Code Settings Sync (تخزين المفاتيح في حالة الإضافة المُزامنة)"
+  "config.appendCommitTrailer": "إلحاق تذييل 'Commit-Message-By: otak-committer' برسائل الإيداع المُنشأة"
 }

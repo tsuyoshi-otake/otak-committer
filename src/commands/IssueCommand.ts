@@ -111,6 +111,7 @@ export class IssueCommand extends BaseCommand {
                     selectedFiles,
                     progress,
                     logger: this.logger,
+                    previewStorageUri: this.context.globalStorageUri,
                     onPreviewRendered: (previewFile) => {
                         this.previewFile = previewFile;
                     },

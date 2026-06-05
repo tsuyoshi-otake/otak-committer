@@ -3,11 +3,11 @@ import * as vscode from 'vscode';
 import { StorageManager } from '../StorageManager';
 
 /**
- * Unit tests for StorageManager fallback mechanisms
+ * Unit tests for StorageManager failure handling
  *
- * Tests the fallback and graceful degradation features
+ * Tests graceful degradation when storage operations fail
  */
-suite('StorageManager Fallback Mechanisms', () => {
+suite('StorageManager Failure Handling', () => {
     let mockContext: vscode.ExtensionContext;
     let storedSecrets: Map<string, string>;
     let globalStateData: Map<string, any>;

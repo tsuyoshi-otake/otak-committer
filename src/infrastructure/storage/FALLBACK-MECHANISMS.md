@@ -1,197 +1,111 @@
-# Storage Fallback Mechanisms
+# Storage Failure Handling
 
-This document describes the fallback and graceful degradation mechanisms implemented in the StorageManager.
+This document describes how `StorageManager` handles storage failures.
 
 ## Overview
 
-The StorageManager implements a multi-layered fallback strategy to ensure the extension continues to function even when storage operations fail. This provides resilience against various failure scenarios including:
+API keys are sensitive and must only be stored in VS Code `SecretStorage`.
+The extension no longer keeps encrypted API-key backups in `globalState`, no
+longer stores API keys in Settings Sync, and no longer writes API keys to
+Configuration as a runtime fallback.
 
-- SecretStorage API failures
-- Configuration API failures
-- GlobalState corruption
-- Encryption/decryption errors
-- Network or filesystem issues
+The only accepted fallback behavior for API-key reads is a safe default:
+return `undefined` and prompt the user to configure storage or enter the key
+again.
 
-## Fallback Chain
+## API Key Retrieval (`getApiKey`)
 
-### API Key Retrieval (`getApiKey`)
+When retrieving an API key, the system attempts the following:
 
-When retrieving an API key, the system attempts the following in order:
+1. Read from `SecretStorage`.
+2. Delete any old `otak-committer.backup.*` value from `globalState`.
+3. If a legacy Configuration value exists and `SecretStorage` is available,
+   migrate it to `SecretStorage`, delete the legacy value, and return it.
+4. If `SecretStorage` is unavailable or migration fails, return `undefined`.
 
-1. **Primary**: SecretStorage (encrypted, secure)
-2. **Automatic Fallback**: Encrypted GlobalState backup (handled by SecretStorageProvider)
-3. **Legacy Fallback**: Configuration storage (for migration scenarios)
-4. **Graceful Degradation**: Returns `undefined` instead of throwing
+Legacy Configuration values are not returned unless they have been migrated to
+`SecretStorage` successfully.
 
-```typescript
-// Example usage
-const apiKey = await storage.getApiKey('openai');
-if (!apiKey) {
-  // Prompt user to configure API key
-  vscode.window.showWarningMessage('Please configure your OpenAI API key');
-}
-```
+## API Key Storage (`setApiKey`)
 
-### API Key Storage (`setApiKey`)
+When storing an API key, the system:
 
-When storing an API key, the system attempts:
+1. Stores the value in `SecretStorage`.
+2. Deletes any old `otak-committer.backup.*` value from `globalState`.
+3. Registers only non-sensitive keys for Settings Sync.
+4. Deletes the legacy Configuration value after the secure write succeeds.
+5. Throws `StorageError` if `SecretStorage` cannot store the key.
 
-1. **Primary**: Store in SecretStorage
-2. **Automatic Backup**: Store encrypted copy in GlobalState (handled by SecretStorageProvider)
-3. **Fallback**: If both fail, attempt to store in legacy Configuration
-4. **User Notification**: Show warning if fallback storage is used
-5. **Error**: Throw only if all storage mechanisms fail
+API keys are not written to Configuration, Settings Sync, or `globalState` as a
+fallback.
 
-```typescript
-// Example usage
-try {
-  await storage.setApiKey('openai', 'sk-...');
-} catch (error) {
-  // All storage mechanisms failed
-  vscode.window.showErrorMessage('Failed to store API key');
-}
-```
+## API Key Deletion (`deleteApiKey`)
 
-### API Key Deletion (`deleteApiKey`)
+When deleting an API key, the system attempts cleanup from every historical
+location:
 
-When deleting an API key, the system:
+1. `SecretStorage`
+2. Legacy Settings Sync-backed `globalState`
+3. Legacy Configuration
+4. Legacy `otak-committer.backup.*` `globalState` values
 
-1. Attempts to delete from SecretStorage (and its backup)
-2. Attempts to delete from legacy Configuration
-3. Succeeds if deletion works in at least one location
-4. Only throws if deletion fails in all locations
+Deletion succeeds if at least one cleanup path succeeds. It throws only when all
+known cleanup paths fail.
 
-### API Key Existence Check (`hasApiKey`)
+## API Key Existence Check (`hasApiKey`)
 
-When checking if an API key exists:
+`hasApiKey` checks `SecretStorage` first. It may also detect a legacy
+Configuration value so the extension can guide migration or setup, but `getApiKey`
+will only return that value after a successful secure migration.
 
-1. Checks SecretStorage (and its backup)
-2. Checks legacy Configuration
-3. Returns `true` if found in any location
-4. Returns `false` on error (graceful degradation)
+## Migration
 
-## Storage Health Monitoring
+Legacy migration moves API keys from Configuration to `SecretStorage`.
 
-### Health Check (`checkStorageHealth`)
+1. Read the legacy Configuration key.
+2. Store it in `SecretStorage`.
+3. Delete the legacy Configuration key.
+4. Mark migration complete only after all existing legacy keys are migrated.
+5. If migration fails, leave the legacy value in place for a later retry.
 
-Tests all storage mechanisms to ensure they are functioning:
+The extension warns the user when migration cannot complete. It does not use the
+legacy key until secure storage is available.
 
-```typescript
-const health = await storage.checkStorageHealth();
-console.log('SecretStorage:', health.secretStorage);
-console.log('Configuration:', health.configStorage);
-console.log('GlobalState:', health.globalState);
-console.log('Encryption:', health.encryption);
-```
+## Non-Sensitive Storage
 
-Returns:
+Non-sensitive preferences can still use Configuration or `globalState`.
+Settings Sync registration is limited to non-sensitive keys such as
+`otak-committer.alwaysStageAll`.
 
-- `secretStorage`: Can read/write to SecretStorage
-- `configStorage`: Can read/write to Configuration
-- `globalState`: Can read/write to GlobalState
-- `encryption`: Encryption/decryption is working
+## Diagnostics
 
-### Diagnostics (`getStorageDiagnostics`)
+`checkStorageHealth` verifies:
 
-Provides detailed information about storage state:
+- `secretStorage`: can read/write to `SecretStorage`
+- `configStorage`: can read/write to Configuration
+- `globalState`: can read/write to `globalState`
+- `encryption`: legacy encryption utility availability for diagnostics
 
-```typescript
-const diagnostics = await storage.getStorageDiagnostics();
-console.log('Migration completed:', diagnostics.migrationCompleted);
-console.log('OpenAI key locations:', diagnostics.openaiKeyLocations);
-console.log('GitHub key locations:', diagnostics.githubKeyLocations);
-console.log('Storage health:', diagnostics.storageHealth);
-```
+`getStorageDiagnostics` reports where keys appear, including historical
+locations, so users can identify stale data that should be cleaned up.
 
-## Error Handling Strategy
+## Testing
 
-### Non-Critical Operations
+Storage tests verify:
 
-For operations where failure should not break the extension:
-
-- `getApiKey`: Returns `undefined`
-- `hasApiKey`: Returns `false`
-- `deleteSecret`: Logs error but doesn't throw
-- `deleteConfig`: Logs error but doesn't throw
-
-### Critical Operations
-
-For operations where failure indicates a serious problem:
-
-- `setApiKey`: Throws only if all storage mechanisms fail
-- `setSecret`: Throws if storage fails
-- `setConfig`: Throws if storage fails
-
-## Migration Fallback
-
-The migration process includes fallback mechanisms:
-
-1. Attempts to migrate from legacy Configuration to SecretStorage
-2. If migration fails, leaves data in legacy storage
-3. Shows warning to user about fallback storage
-4. Extension continues to function using legacy storage
-5. Migration will be retried on next activation
-
-## Best Practices
-
-### For Extension Developers
-
-1. **Always check return values**: `getApiKey` may return `undefined`
-2. **Handle errors gracefully**: Wrap critical operations in try-catch
-3. **Provide user feedback**: Show appropriate messages when storage fails
-4. **Use health checks**: Monitor storage health in diagnostics
-
-### Example: Robust API Key Retrieval
-
-```typescript
-async function getOpenAIKey(storage: StorageManager): Promise<string | undefined> {
-  try {
-    // Try to get the API key
-    let apiKey = await storage.getApiKey('openai');
-
-    if (!apiKey) {
-      // Check storage health
-      const health = await storage.checkStorageHealth();
-
-      if (!health.secretStorage) {
-        vscode.window.showWarningMessage(
-          'Secure storage is unavailable. Please check your VS Code installation.',
-        );
-      } else {
-        // Storage is healthy but key is not configured
-        vscode.window.showInformationMessage('Please configure your OpenAI API key.');
-      }
-    }
-
-    return apiKey;
-  } catch (error) {
-    console.error('Failed to retrieve API key:', error);
-    vscode.window.showErrorMessage('Failed to access storage');
-    return undefined;
-  }
-}
-```
-
-## Testing Fallback Mechanisms
-
-The fallback mechanisms are tested in `StorageManager.fallback.test.ts`:
-
-- Tests graceful degradation when storage fails
-- Tests fallback chain for API key operations
-- Tests health check functionality
-- Tests diagnostic information
-- Tests error handling for all operations
+- API keys are stored and retrieved from `SecretStorage`.
+- API keys are not backed up to `globalState`.
+- API keys are not written to Configuration as a fallback.
+- Legacy values are returned only after successful secure migration.
+- Legacy values are preserved for retry when migration fails.
+- Old Settings Sync and `globalState` backup entries are cleaned up.
 
 ## Security Considerations
 
-1. **Encryption**: All backups in GlobalState are encrypted
-2. **Legacy Storage**: Plain-text Configuration is only used as last resort
-3. **Migration**: Legacy data is cleaned up after successful migration
-4. **Fallback Warning**: Users are notified when fallback storage is used
-
-## Performance Considerations
-
-1. **Parallel Operations**: Primary and backup storage operations run in parallel
-2. **Caching**: No caching to ensure data consistency
-3. **Lazy Evaluation**: Health checks only run when explicitly requested
-4. **Error Recovery**: Failed operations don't block subsequent operations
+1. `SecretStorage` is the only runtime storage for API keys.
+2. Settings Sync must not contain API keys.
+3. `globalState` must not contain API-key backups.
+4. Plaintext Configuration values are legacy data only and are deleted after
+   successful migration.
+5. Failed migration must not silently expose legacy API keys to external AI
+   service calls.

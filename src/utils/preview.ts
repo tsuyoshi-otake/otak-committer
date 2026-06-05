@@ -3,11 +3,19 @@ import * as os from 'os';
 import * as path from 'path';
 import * as crypto from 'crypto';
 
-const PREVIEW_DIR = path.join(os.tmpdir(), 'otak-committer');
+const PREVIEW_DIR_NAME = 'preview';
+const FALLBACK_PREVIEW_DIR = path.join(os.tmpdir(), 'otak-committer');
 
-export async function cleanupPreviewFiles() {
+function getPreviewDirectoryUri(storageUri?: vscode.Uri): vscode.Uri {
+    if (storageUri) {
+        return vscode.Uri.joinPath(storageUri, PREVIEW_DIR_NAME);
+    }
+    return vscode.Uri.file(FALLBACK_PREVIEW_DIR);
+}
+
+export async function cleanupPreviewFiles(storageUri?: vscode.Uri) {
     try {
-        await vscode.workspace.fs.delete(vscode.Uri.file(PREVIEW_DIR), { recursive: true });
+        await vscode.workspace.fs.delete(getPreviewDirectoryUri(storageUri), { recursive: true });
     } catch {
         // Ignore errors - directory may not exist
     }
@@ -34,12 +42,14 @@ export async function closePreviewTabs() {
 export async function showMarkdownPreview(
     content: string,
     prefix: string = 'temp',
+    storageUri?: vscode.Uri,
 ): Promise<{ uri: vscode.Uri; document: vscode.TextDocument } | undefined> {
     try {
-        await cleanupPreviewFiles();
-        await vscode.workspace.fs.createDirectory(vscode.Uri.file(PREVIEW_DIR));
+        const previewDir = getPreviewDirectoryUri(storageUri);
+        await cleanupPreviewFiles(storageUri);
+        await vscode.workspace.fs.createDirectory(previewDir);
 
-        const tempUri = vscode.Uri.file(path.join(PREVIEW_DIR, generateRandomFileName(prefix)));
+        const tempUri = vscode.Uri.joinPath(previewDir, generateRandomFileName(prefix));
         await closePreviewTabs();
 
         const encoder = new TextEncoder();

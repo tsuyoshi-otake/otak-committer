@@ -9,6 +9,7 @@ import { t } from '../i18n/index.js';
 import type { DiffProcessResult } from '../services/diffProcessor';
 import { getRepositoryForCurrentWorkspace } from '../services/git.repository';
 import { isUserAbortError } from '../utils/errorHandling';
+import { confirmProceedWithPotentialSecrets } from '../services/secretConfirmation';
 
 /**
  * Command for generating commit messages using AI
@@ -59,7 +60,9 @@ export class CommitCommand extends BaseCommand {
                 return;
             }
 
-            await this.warnIfPotentialSecrets(rawDiff);
+            if (!(await this.confirmIfPotentialSecrets(rawDiff))) {
+                return;
+            }
 
             // Initialize OpenAI service (moved earlier — needed for Tier 3 map-reduce)
             const openai = await this.initializeOpenAI();
@@ -249,25 +252,15 @@ export class CommitCommand extends BaseCommand {
     }
 
     /**
-     * Warn if potential secrets are detected in diff (non-blocking).
+     * Confirm before sending diffs that may contain secrets to an external model.
      */
-    private async warnIfPotentialSecrets(diff: string): Promise<void> {
+    private async confirmIfPotentialSecrets(diff: string): Promise<boolean> {
         const detection = detectPotentialSecrets(diff);
-        if (!detection.hasPotentialSecrets) {
-            return;
-        }
-
-        const patterns = detection.matchedPatternIds.join(', ');
-
-        this.logger.warning('Potential secrets detected in commit generation target', {
-            matchedPatternIds: detection.matchedPatternIds,
-        });
-
-        vscode.window.showWarningMessage(
-            t('messages.secretDetectionWarning', {
-                count: detection.matchedPatternIds.length,
-                patterns,
-            }),
+        return confirmProceedWithPotentialSecrets(
+            detection,
+            this.logger,
+            'Potential secrets detected in commit generation target',
+            'messages.commitGenerationSecretWarning',
         );
     }
 

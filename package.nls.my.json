@@ -1,6 +1,5 @@
 {
   "extension.description": "VS Code extension - AI ဖြင့် ဘာသာစကားမျိုးစုံ commit မက်ဆေ့ချ် ဖန်တီးခြင်း (ဘာသာစကား ၂၅ မျိုး ပံ့ပိုးထားသည်) နှင့် အနာဂတ် PR စီမံခန့်ခွဲမှု အင်္ဂါရပ်များပါဝင်သော ထိရောက်သည့် SCM လုပ်ဆောင်ချက်များ။",
-
   "command.generateMessage": "Commit မက်ဆေ့ချ် ဖန်တီးရန်",
   "command.generatePR": "Pull Request ဖန်တီးရန်",
   "command.generateIssue": "Issue ဖန်တီးရန်",
@@ -9,7 +8,6 @@
   "command.changeMessageStyle": "Commit မက်ဆေ့ချ် ပုံစံ ပြောင်းရန်",
   "command.setApiKey": "OpenAI API Key သတ်မှတ်ရန်",
   "command.diagnoseStorage": "API Key သိုလှောင်မှု စစ်ဆေးရန်",
-
   "config.language": "Commit မက်ဆေ့ချ်များအတွက် ဘာသာစကား",
   "config.messageStyle": "ဖန်တီးထားသော commit မက်ဆေ့ချ်များ၏ ပုံစံနှင့် အရှည်",
   "config.messageStyle.simple": "ရိုးရှင်းတိုတောင်း (စာလုံး ၆၀၀)",
@@ -28,6 +26,5 @@
   "config.maxInputTokens": "AI လုပ်ဆောင်ခြင်းအတွက် အမြင့်ဆုံး input tokens (မူလ: 200K)",
   "config.useBulletList": "Commit မက်ဆေ့ချ် body ကို bullet list ပုံစံဖြင့် ဖော်မတ်ရန်",
   "config.useConventionalCommits": "Conventional Commits ပုံစံ scope ဖြင့် အသုံးပြုရန် (<type>(<scope>): <subject>)",
-  "config.appendCommitTrailer": "ဖန်တီးထားသော commit မက်ဆေ့ချ်များတွင် 'Commit-Message-By: otak-committer' trailer ထည့်သွင်းရန်",
-  "config.syncApiKeys": "VS Code Settings Sync မှတစ်ဆင့် API key များ ညှိကိုက်ရန် (ညှိကိုက်ထားသော extension state တွင် key များ သိမ်းဆည်းသည်)"
+  "config.appendCommitTrailer": "ဖန်တီးထားသော commit မက်ဆေ့ချ်များတွင် 'Commit-Message-By: otak-committer' trailer ထည့်သွင်းရန်"
 }

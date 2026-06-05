@@ -1,6 +1,5 @@
 {
   "extension.description": "תוסף VS Code לפעולות SCM חכמות - יצירת הודעות commit רב-לשוניות עם תמיכת AI (תמיכה ב-25 שפות) ותכונות ניהול PR עתידיות.",
-
   "command.generateMessage": "יצירת הודעת Commit",
   "command.generatePR": "יצירת Pull Request",
   "command.generateIssue": "יצירת Issue",
@@ -9,7 +8,6 @@
   "command.changeMessageStyle": "שינוי סגנון הודעת Commit",
   "command.setApiKey": "הגדרת מפתח OpenAI API",
   "command.diagnoseStorage": "אבחון אחסון מפתח API",
-
   "config.language": "שפה להודעות commit",
   "config.messageStyle": "סגנון ואורך הודעות commit שנוצרו",
   "config.messageStyle.simple": "פשוט ותמציתי (600 תווים)",
@@ -28,6 +26,5 @@
   "config.maxInputTokens": "מספר מרבי של טוקנים לעיבוד AI (ברירת מחדל: 200K)",
   "config.useBulletList": "עיצוב גוף הודעת commit כרשימת תבליטים",
   "config.useConventionalCommits": "שימוש בפורמט Conventional Commits עם scope (<type>(<scope>): <subject>)",
-  "config.appendCommitTrailer": "הוספת סיומת 'Commit-Message-By: otak-committer' להודעות commit שנוצרו",
-  "config.syncApiKeys": "סנכרון מפתחות API דרך VS Code Settings Sync (שמירת מפתחות במצב תוסף מסונכרן)"
+  "config.appendCommitTrailer": "הוספת סיומת 'Commit-Message-By: otak-committer' להודעות commit שנוצרו"
 }

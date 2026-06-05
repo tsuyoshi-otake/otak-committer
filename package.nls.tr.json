@@ -26,6 +26,5 @@
   "config.maxInputTokens": "AI işleme için maksimum giriş token sayısı (varsayılan: 200K)",
   "config.useBulletList": "Commit mesajı gövdesini madde işaretli liste olarak biçimlendir",
   "config.useConventionalCommits": "Kapsam ile Conventional Commits biçimini kullan (<tür>(<kapsam>): <konu>)",
-  "config.appendCommitTrailer": "Oluşturulan commit mesajlarına 'Commit-Message-By: otak-committer' son bilgisini ekle",
-  "config.syncApiKeys": "API anahtarlarını VS Code Settings Sync ile senkronize et (anahtarları senkronize edilen eklenti durumunda depolar)"
+  "config.appendCommitTrailer": "Oluşturulan commit mesajlarına 'Commit-Message-By: otak-committer' son bilgisini ekle"
 }

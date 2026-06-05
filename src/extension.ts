@@ -38,10 +38,6 @@ class ExtensionApp {
                 if (e.affectsConfiguration('otakCommitter')) {
                     this.statusBarManager.update();
                 }
-
-                if (e.affectsConfiguration('otakCommitter.syncApiKeys')) {
-                    void this.storage.configureSettingsSync();
-                }
             }),
         );
 

@@ -1,12 +1,12 @@
 /**
- * Property-based tests for operation fallback behavior
+ * Property-based tests for operation failure behavior
  *
- * **Feature: extension-architecture-refactoring, Property 8: Operation Fallback Behavior**
+ * **Feature: extension-architecture-refactoring, Property 8: Operation Failure Behavior**
  * **Validates: Requirements 4.2**
  *
  * Property: For any operation O that can fail, if O fails, the system should provide
- * a fallback behavior (default value, cached value, or graceful degradation) rather
- * than crashing or leaving the system in an inconsistent state.
+ * a safe default or graceful degradation rather than crashing or exposing sensitive
+ * data from insecure fallback storage.
  */
 
 import * as assert from 'assert';
@@ -65,9 +65,9 @@ function createFailingMockContext(): vscode.ExtensionContext {
     };
 }
 
-suite('Operation Fallback Behavior Properties', () => {
+suite('Operation Failure Behavior Properties', () => {
     /**
-     * Property 8: Operation Fallback Behavior - Storage Operations
+     * Property 8: Operation Failure Behavior - Storage Operations
      *
      * For any storage operation that fails, the system should return undefined
      * or a default value rather than throwing an exception that crashes the extension.
@@ -79,11 +79,11 @@ suite('Operation Fallback Behavior Properties', () => {
      * 4. The system remains in a consistent state after failures
      */
     test(
-        'Property 8: Storage operations provide fallback on failure',
+        'Property 8: Storage operations provide safe defaults on failure',
         createTaggedPropertyTest(
             'extension-architecture-refactoring',
             8,
-            'Operation Fallback Behavior',
+            'Operation Failure Behavior',
             () => {
                 runPropertyTest(
                     fc.asyncProperty(
@@ -110,7 +110,7 @@ suite('Operation Fallback Behavior Properties', () => {
                                 'getApiKey should not throw when storage fails',
                             );
 
-                            // Verify fallback behavior: returns undefined
+                            // Verify safe default: returns undefined
                             assert.strictEqual(
                                 result,
                                 undefined,
@@ -126,12 +126,12 @@ suite('Operation Fallback Behavior Properties', () => {
     );
 
     /**
-     * Property 8: Generic secret operations provide fallback on failure
+     * Property 8: Generic secret operations provide safe defaults on failure
      *
      * Tests that generic secret operations (getSecret) also provide graceful
      * degradation when storage fails.
      */
-    test('Property 8: Generic secret operations provide fallback on failure', () => {
+    test('Property 8: Generic secret operations provide safe defaults on failure', () => {
         runPropertyTest(
             fc.asyncProperty(fc.string({ minLength: 5, maxLength: 50 }), async (key) => {
                 const failingContext = createFailingMockContext();
@@ -166,12 +166,12 @@ suite('Operation Fallback Behavior Properties', () => {
     });
 
     /**
-     * Property 8: Configuration operations provide fallback on failure
+     * Property 8: Configuration operations provide safe defaults on failure
      *
      * Tests that configuration operations provide graceful degradation
      * when configuration access fails.
      */
-    test('Property 8: Configuration operations provide fallback on failure', () => {
+    test('Property 8: Configuration operations provide safe defaults on failure', () => {
         runPropertyTest(
             fc.asyncProperty(fc.string({ minLength: 5, maxLength: 50 }), async (key) => {
                 const failingContext = createFailingMockContext();
@@ -206,12 +206,12 @@ suite('Operation Fallback Behavior Properties', () => {
     });
 
     /**
-     * Property 8: hasApiKey provides fallback on failure
+     * Property 8: hasApiKey provides a safe default on failure
      *
      * Tests that hasApiKey returns false (safe default) when storage fails
      * rather than throwing an exception.
      */
-    test('Property 8: hasApiKey provides fallback on failure', () => {
+    test('Property 8: hasApiKey provides a safe default on failure', () => {
         runPropertyTest(
             fc.asyncProperty(
                 fc.constantFrom('openai' as const, 'github' as const),
@@ -251,12 +251,12 @@ suite('Operation Fallback Behavior Properties', () => {
     });
 
     /**
-     * Property 8: Delete operations provide fallback on failure
+     * Property 8: Delete operations degrade gracefully on failure
      *
      * Tests that delete operations don't throw exceptions when storage fails.
      * Deletion failures are non-critical and should be handled gracefully.
      */
-    test('Property 8: Delete operations provide fallback on failure', () => {
+    test('Property 8: Delete operations degrade gracefully on failure', () => {
         runPropertyTest(
             fc.asyncProperty(
                 fc.constantFrom('openai' as const, 'github' as const),
@@ -287,12 +287,12 @@ suite('Operation Fallback Behavior Properties', () => {
     });
 
     /**
-     * Property 8: Partial storage failure provides fallback
+     * Property 8: Partial storage failure hides insecure legacy data
      *
-     * Tests that when some storage mechanisms fail but others succeed,
-     * the system uses the working storage as a fallback.
+     * Tests that when SecretStorage fails, legacy API keys are not returned from
+     * plaintext configuration storage.
      */
-    test('Property 8: Partial storage failure uses working storage as fallback', () => {
+    test('Property 8: Partial storage failure does not use insecure fallback', () => {
         runPropertyTest(
             fc.asyncProperty(
                 fc.record({
@@ -300,7 +300,7 @@ suite('Operation Fallback Behavior Properties', () => {
                     apiKey: fc.string({ minLength: 10, maxLength: 100 }),
                 }),
                 async ({ service, apiKey }) => {
-                    // Create a context where SecretStorage fails but Configuration works
+                    // Create a context where SecretStorage fails but Configuration works.
                     const configStore = new Map<string, any>();
                     const partiallyFailingContext: vscode.ExtensionContext = {
                         secrets: {
@@ -376,7 +376,7 @@ suite('Operation Fallback Behavior Properties', () => {
 
                     const storage = new StorageManager(partiallyFailingContext);
 
-                    // Property: Should fall back to legacy storage when primary fails
+                    // Property: Should not fall back to legacy storage when SecretStorage fails.
                     let didThrow = false;
                     let result: string | undefined;
 
@@ -393,14 +393,13 @@ suite('Operation Fallback Behavior Properties', () => {
                     assert.strictEqual(
                         didThrow,
                         false,
-                        'getApiKey should not throw when primary storage fails but fallback exists',
+                        'getApiKey should not throw when SecretStorage fails',
                     );
 
-                    // Verify fallback behavior: returns value from legacy storage
                     assert.strictEqual(
                         result,
-                        apiKey,
-                        'getApiKey should return value from fallback storage',
+                        undefined,
+                        'getApiKey should not return value from insecure fallback storage',
                     );
 
                     return true;
@@ -411,10 +410,10 @@ suite('Operation Fallback Behavior Properties', () => {
     /**
      * Property 8: Migration failures don't prevent extension from loading
      *
-     * Tests that when migration fails, the extension continues to function
-     * using legacy storage as a fallback.
+     * Tests that when migration fails, the extension continues to function without
+     * returning legacy API keys from insecure storage.
      */
-    test('Property 8: Migration failures provide fallback to legacy storage', () => {
+    test('Property 8: Migration failures do not expose legacy storage', () => {
         runPropertyTest(
             fc.asyncProperty(
                 fc.record({
@@ -475,7 +474,7 @@ suite('Operation Fallback Behavior Properties', () => {
                         'migrateFromLegacy should not throw when migration fails',
                     );
 
-                    // Property: After failed migration, data should still be accessible
+                    // Property: After failed migration, data should not be exposed.
                     let result: string | undefined;
                     try {
                         result = await storage.getApiKey(service);
@@ -486,11 +485,10 @@ suite('Operation Fallback Behavior Properties', () => {
                         (vscode.workspace as any).getConfiguration = originalGet;
                     }
 
-                    // Verify fallback: legacy data is still accessible
                     assert.strictEqual(
                         result,
-                        apiKey,
-                        'After failed migration, data should still be accessible from legacy storage',
+                        undefined,
+                        'After failed migration, data should not be accessible from legacy storage',
                     );
 
                     return true;

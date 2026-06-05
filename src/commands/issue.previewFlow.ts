@@ -15,6 +15,7 @@ interface RunIssuePreviewLoopInput {
     selectedFiles: string[];
     progress: vscode.Progress<{ message?: string }>;
     logger: Logger;
+    previewStorageUri?: vscode.Uri;
     onPreviewRendered: (previewFile: PreviewFile | undefined) => void;
 }
 
@@ -22,11 +23,12 @@ async function renderIssuePreview(
     issueType: IssueType,
     preview: GeneratedIssueContent,
     logger: Logger,
+    storageUri?: vscode.Uri,
 ): Promise<PreviewFile | undefined> {
     logger.debug('Showing issue preview');
 
     const previewContent = `# Preview of ${issueType.label}\n\nTitle: ${preview.title}\n\n${preview.body}`;
-    const previewFile = await showMarkdownPreview(previewContent, 'issue');
+    const previewFile = await showMarkdownPreview(previewContent, 'issue', storageUri);
 
     if (!previewFile) {
         throw new Error(t('messages.failedToShowPreview'));
@@ -78,7 +80,16 @@ async function promptModificationInstructions(
 export async function runIssuePreviewLoop(
     input: RunIssuePreviewLoopInput,
 ): Promise<GeneratedIssueContent | undefined> {
-    const { service, issueType, description, selectedFiles, progress, logger, onPreviewRendered } = input;
+    const {
+        service,
+        issueType,
+        description,
+        selectedFiles,
+        progress,
+        logger,
+        previewStorageUri,
+        onPreviewRendered,
+    } = input;
 
     progress.report({ message: t('messages.analyzingRepository') });
     let preview = await service.generatePreview({
@@ -88,7 +99,7 @@ export async function runIssuePreviewLoop(
     });
 
     while (true) {
-        const previewFile = await renderIssuePreview(issueType, preview, logger);
+        const previewFile = await renderIssuePreview(issueType, preview, logger, previewStorageUri);
         onPreviewRendered(previewFile);
 
         const action = await promptIssueAction();

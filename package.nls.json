@@ -28,6 +28,5 @@
   "config.maxInputTokens": "Maximum input tokens for AI processing (default: 200K)",
   "config.useBulletList": "Format commit message body as a bullet list",
   "config.useConventionalCommits": "Use Conventional Commits format with scope (<type>(<scope>): <subject>)",
-  "config.appendCommitTrailer": "Append 'Commit-Message-By: otak-committer' trailer to generated commit messages",
-  "config.syncApiKeys": "Sync API keys via VS Code Settings Sync (stores keys in synced extension state)"
+  "config.appendCommitTrailer": "Append 'Commit-Message-By: otak-committer' trailer to generated commit messages"
 }

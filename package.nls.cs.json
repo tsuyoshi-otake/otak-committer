@@ -1,6 +1,5 @@
 {
   "extension.description": "Rozsireni VS Code pro inteligentni operace SCM - Vicejazycne generovani zprav commitu s podporou AI (25 jazyku) a budouci funkce spravay PR.",
-
   "command.generateMessage": "Vygenerovat zpravu commitu",
   "command.generatePR": "Vygenerovat Pull Request",
   "command.generateIssue": "Vygenerovat Issue",
@@ -9,7 +8,6 @@
   "command.changeMessageStyle": "Zmenit styl zpravy commitu",
   "command.setApiKey": "Nastavit API klic OpenAI",
   "command.diagnoseStorage": "Diagnostikovat uloziste API klice",
-
   "config.language": "Jazyk pro zpravy commitu",
   "config.messageStyle": "Styl a delka generovanych zprav commitu",
   "config.messageStyle.simple": "Jednoduchy a strucny (600 znaku)",
@@ -28,6 +26,5 @@
   "config.maxInputTokens": "Maximalni vstupni tokeny pro zpracovani AI (vychozi: 200K)",
   "config.useBulletList": "Formatovat telo zpravy commitu jako odrazkovy seznam",
   "config.useConventionalCommits": "Pouzit format Conventional Commits se scope (<type>(<scope>): <subject>)",
-  "config.appendCommitTrailer": "Pripojit trailer 'Commit-Message-By: otak-committer' ke generovanym zpravam commitu",
-  "config.syncApiKeys": "Synchronizovat API klice pres VS Code Settings Sync (uklada klice v synchronizovanem stavu rozsireni)"
+  "config.appendCommitTrailer": "Pripojit trailer 'Commit-Message-By: otak-committer' ke generovanym zpravam commitu"
 }

@@ -1,6 +1,5 @@
 {
   "extension.description": "ส่วนขยาย VS Code สำหรับการดำเนินการ SCM อัจฉริยะ — สร้างข้อความคอมมิตหลายภาษาด้วยการสนับสนุน AI (รองรับ 25 ภาษา) และฟีเจอร์การจัดการ PR ในอนาคต",
-
   "command.generateMessage": "สร้างข้อความคอมมิต",
   "command.generatePR": "สร้าง Pull Request",
   "command.generateIssue": "สร้าง Issue",
@@ -9,7 +8,6 @@
   "command.changeMessageStyle": "เปลี่ยนรูปแบบข้อความคอมมิต",
   "command.setApiKey": "ตั้งค่า API Key ของ OpenAI",
   "command.diagnoseStorage": "วินิจฉัยที่เก็บ API Key",
-
   "config.language": "ภาษาสำหรับข้อความคอมมิต",
   "config.messageStyle": "รูปแบบและความยาวของข้อความคอมมิตที่สร้างขึ้น",
   "config.messageStyle.simple": "เรียบง่ายและกระชับ (600 ตัวอักษร)",
@@ -28,6 +26,5 @@
   "config.maxInputTokens": "จำนวนโทเคนอินพุตสูงสุดสำหรับการประมวลผล AI (ค่าเริ่มต้น: 200K)",
   "config.useBulletList": "จัดรูปแบบเนื้อหาข้อความคอมมิตเป็นรายการหัวข้อย่อย",
   "config.useConventionalCommits": "ใช้รูปแบบ Conventional Commits พร้อมขอบเขต (<ประเภท>(<ขอบเขต>): <หัวข้อ>)",
-  "config.appendCommitTrailer": "เพิ่มส่วนท้าย 'Commit-Message-By: otak-committer' ในข้อความคอมมิตที่สร้างขึ้น",
-  "config.syncApiKeys": "ซิงค์ API key ผ่าน VS Code Settings Sync (เก็บคีย์ในสถานะส่วนขยายที่ซิงค์)"
+  "config.appendCommitTrailer": "เพิ่มส่วนท้าย 'Commit-Message-By: otak-committer' ในข้อความคอมมิตที่สร้างขึ้น"
 }

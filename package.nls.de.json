@@ -1,6 +1,5 @@
 {
   "extension.description": "VS Code-Erweiterung fur intelligente SCM-Operationen - mehrsprachige Commit-Nachrichtengenerierung mit KI-Unterstutzung (25 unterstutzte Sprachen) und zukunftige PR-Management-Funktionen.",
-
   "command.generateMessage": "Commit-Nachricht generieren",
   "command.generatePR": "Pull Request generieren",
   "command.generateIssue": "Issue generieren",
@@ -9,7 +8,6 @@
   "command.changeMessageStyle": "Stil der Commit-Nachricht andern",
   "command.setApiKey": "OpenAI-API-Schlussel festlegen",
   "command.diagnoseStorage": "API-Schlussel-Speicher diagnostizieren",
-
   "config.language": "Sprache fur Commit-Nachrichten",
   "config.messageStyle": "Stil und Lange der generierten Commit-Nachrichten",
   "config.messageStyle.simple": "Einfach und pragnant (600 Zeichen)",
@@ -28,6 +26,5 @@
   "config.maxInputTokens": "Maximale Eingabe-Tokens fur KI-Verarbeitung (Standard: 200K)",
   "config.useBulletList": "Commit-Nachrichtentext als Aufzahlung formatieren",
   "config.useConventionalCommits": "Conventional-Commits-Format mit Scope verwenden (<type>(<scope>): <subject>)",
-  "config.appendCommitTrailer": "Den Trailer 'Commit-Message-By: otak-committer' an generierte Commit-Nachrichten anhangen",
-  "config.syncApiKeys": "API-Schlussel uber VS Code Settings Sync synchronisieren (speichert Schlussel im synchronisierten Erweiterungsstatus)"
+  "config.appendCommitTrailer": "Den Trailer 'Commit-Message-By: otak-committer' an generierte Commit-Nachrichten anhangen"
 }

@@ -122,18 +122,24 @@ suite('StorageManager', () => {
             );
         });
 
-        test('should store encrypted backup in GlobalState', async () => {
+        test('should not store API key backup in GlobalState', async () => {
             const manager = new StorageManager(testContext);
-            const testKey = 'sk-test-key-with-backup';
+            const testKey = 'sk-test-key-without-backup';
 
             await manager.setApiKey('openai', testKey);
 
-            // Check that backup exists in GlobalState
             const backupKey = 'otak-committer.backup.openai.apiKey';
-            const encryptedBackup = globalStateData.get(backupKey);
 
-            assert.ok(encryptedBackup, 'Encrypted backup should exist in GlobalState');
-            assert.notStrictEqual(encryptedBackup, testKey, 'Backup should be encrypted');
+            assert.strictEqual(
+                globalStateData.has(backupKey),
+                false,
+                'API key backup should not exist in GlobalState',
+            );
+            assert.strictEqual(
+                Array.from(globalStateData.values()).includes(testKey),
+                false,
+                'API key should not be stored in GlobalState',
+            );
         });
 
         test('should delete API key from all storage locations', async () => {
@@ -394,12 +400,17 @@ suite('StorageManager', () => {
             const manager = new StorageManager(failingMigrationContext);
             configData.set('otakCommitter.openaiApiKey', 'sk-legacy-key');
 
-            // Should still return the legacy key even if migration fails
+            // Should not return the legacy key if it cannot be migrated to SecretStorage.
             const retrieved = await manager.getApiKey('openai');
             assert.strictEqual(
                 retrieved,
+                undefined,
+                'Should not return legacy key when migration fails',
+            );
+            assert.strictEqual(
+                configData.get('otakCommitter.openaiApiKey'),
                 'sk-legacy-key',
-                'Should return legacy key when migration fails',
+                'Legacy key should remain until secure storage is available',
             );
         });
 
@@ -451,7 +462,6 @@ suite('StorageManager', () => {
             await manager.migrateFromLegacy();
 
             // New key should NOT be in SecretStorage (migration skipped)
-            // But hasApiKey will still return true because it falls back to legacy storage
             const inSecretStorage = await migrationContext.secrets.get('github.apiKey');
             assert.strictEqual(
                 inSecretStorage,
@@ -459,17 +469,17 @@ suite('StorageManager', () => {
                 'New legacy key should not be migrated to SecretStorage',
             );
 
-            // Key should still be accessible from legacy storage via hasApiKey fallback
+            // hasApiKey still detects legacy keys so the UI can prompt for migration/setup.
             const hasGithubKey = await manager.hasApiKey('github');
             assert.strictEqual(
                 hasGithubKey,
                 true,
-                'Key should still be accessible from legacy storage',
+                'Legacy key should still be detected',
             );
         });
     });
 
-    suite('Fallback Mechanisms', () => {
+    suite('Storage Failure Handling', () => {
         let testContext: vscode.ExtensionContext;
         let storedSecrets: Map<string, string>;
         let globalStateData: Map<string, any>;
@@ -503,9 +513,9 @@ suite('StorageManager', () => {
             } as any;
         });
 
-        test('should retrieve from encrypted backup when SecretStorage fails', async () => {
+        test('should not retrieve from legacy backup when SecretStorage content is missing', async () => {
             const manager = new StorageManager(testContext);
-            const testKey = 'sk-backup-test-key';
+            const testKey = 'sk-no-backup-test-key';
 
             // Store the key first
             await manager.setApiKey('openai', testKey);
@@ -513,14 +523,13 @@ suite('StorageManager', () => {
             // Simulate SecretStorage failure by clearing it
             storedSecrets.clear();
 
-            // Should still retrieve from encrypted backup
             const retrieved = await manager.getApiKey('openai');
-            assert.strictEqual(retrieved, testKey, 'Should retrieve from encrypted backup');
+            assert.strictEqual(retrieved, undefined, 'Should not retrieve from legacy backup');
         });
 
-        test('should restore to SecretStorage when retrieving from backup', async () => {
+        test('should not restore to SecretStorage from legacy backup', async () => {
             const manager = new StorageManager(testContext);
-            const testKey = 'sk-restore-test-key';
+            const testKey = 'sk-no-restore-test-key';
 
             // Store the key
             await manager.setApiKey('openai', testKey);
@@ -528,13 +537,12 @@ suite('StorageManager', () => {
             // Clear SecretStorage to simulate failure
             storedSecrets.clear();
 
-            // Retrieve from backup (should restore to SecretStorage)
             await manager.getApiKey('openai');
 
-            // Verify it was restored
-            assert.ok(
+            assert.strictEqual(
                 storedSecrets.has('openai.apiKey'),
-                'Key should be restored to SecretStorage',
+                false,
+                'Key should not be restored from legacy backup',
             );
         });
 
@@ -563,7 +571,7 @@ suite('StorageManager', () => {
             );
         });
 
-        test('should use legacy storage as last resort fallback', async () => {
+        test('should not use legacy storage when SecretStorage is unavailable', async () => {
             const configData = new Map<string, any>();
             configData.set('otakCommitter.openaiApiKey', 'sk-legacy-fallback-key');
 
@@ -603,12 +611,12 @@ suite('StorageManager', () => {
 
             assert.strictEqual(
                 retrieved,
-                'sk-legacy-fallback-key',
-                'Should fall back to legacy storage',
+                undefined,
+                'Should not expose legacy key when SecretStorage is unavailable',
             );
         });
 
-        test('should attempt fallback storage when primary storage fails', async () => {
+        test('should reject and not write plaintext fallback when SecretStorage fails', async () => {
             const configData = new Map<string, any>();
 
             (vscode.workspace as any).getConfiguration = (section?: string) => {
@@ -646,16 +654,16 @@ suite('StorageManager', () => {
 
             const manager = new StorageManager(failingContext);
 
-            // Should not throw - should fall back to configuration
-            await assert.doesNotReject(async () => {
-                await manager.setApiKey('openai', 'sk-fallback-key');
-            });
+            await assert.rejects(
+                async () => await manager.setApiKey('openai', 'sk-fallback-key'),
+                /Failed to store API key/,
+                'Should reject when SecretStorage cannot store the key',
+            );
 
-            // Verify it was stored in fallback location
             assert.strictEqual(
                 configData.get('otakCommitter.openaiApiKey'),
-                'sk-fallback-key',
-                'Should store in fallback configuration',
+                undefined,
+                'Should not store API key in fallback configuration',
             );
         });
 
@@ -780,7 +788,7 @@ suite('StorageManager', () => {
                 },
                 globalState: {
                     get: () => undefined,
-                    // GlobalState update must also fail to prevent backup fallback
+                    // GlobalState update must also fail so every deletion path fails.
                     update: async () => {
                         throw new Error('GlobalState update failed');
                     },

@@ -3,14 +3,12 @@ import { ServiceProvider } from '../../types/enums/ServiceProvider';
 import { Logger } from '../logging/Logger';
 
 /**
- * Provides Settings Sync-backed storage using `globalState` + `setKeysForSync`.
+ * Provides cleanup access for legacy Settings Sync-backed API key storage.
  *
  * Notes:
- * - Values stored here are part of VS Code Settings Sync (extension state) when the
- *   corresponding keys are registered via `setKeysForSync`.
- * - This is intended for opt-in syncing of API keys across devices.
- * - Unlike SecretStorage, this storage is not guaranteed to be encrypted at rest
- *   by the OS keychain, so treat it as less secure.
+ * - API keys must not be stored in Settings Sync because extension state is not
+ *   protected by VS Code SecretStorage.
+ * - This class remains to remove values written by older extension versions.
  */
 export class SyncedStateProvider {
     private static readonly PREFIX = 'otak-committer.sync.';
@@ -40,20 +38,13 @@ export class SyncedStateProvider {
     }
 
     /**
-     * Stores the API key in synced extension state.
-     *
-     * This stores the trimmed value and deletes the key when it is empty.
+     * Refuses to store API keys in synced extension state.
      */
-    async setApiKey(service: ServiceProvider, value: string): Promise<void> {
-        const trimmed = value.trim();
-        if (!trimmed) {
-            await this.deleteApiKey(service);
-            return;
-        }
-
-        const storageKey = SyncedStateProvider.getApiKeyKey(service);
-        await this.context.globalState.update(storageKey, trimmed);
-        this.logger.debug(`[SyncedStateProvider] Stored API key in synced state for ${service}`);
+    async setApiKey(service: ServiceProvider, _value: string): Promise<void> {
+        await this.deleteApiKey(service);
+        this.logger.warning(
+            `[SyncedStateProvider] Refused to store API key in synced state for ${service}`,
+        );
     }
 
     /**

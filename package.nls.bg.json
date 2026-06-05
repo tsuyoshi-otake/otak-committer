@@ -26,6 +26,5 @@
   "config.maxInputTokens": "Максимален брой входни токени за AI обработка (по подразбиране: 200K)",
   "config.useBulletList": "Форматиране на тялото на съобщението за комит като списък с точки",
   "config.useConventionalCommits": "Използване на формат Conventional Commits с обхват (<тип>(<обхват>): <тема>)",
-  "config.appendCommitTrailer": "Добавяне на 'Commit-Message-By: otak-committer' в края на генерираните съобщения за комит",
-  "config.syncApiKeys": "Синхронизиране на API ключовете чрез VS Code Settings Sync (съхранява ключовете в синхронизираното състояние на разширението)"
+  "config.appendCommitTrailer": "Добавяне на 'Commit-Message-By: otak-committer' в края на генерираните съобщения за комит"
 }

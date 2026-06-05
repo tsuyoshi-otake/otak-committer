@@ -1,6 +1,5 @@
 {
   "extension.description": "புத்திசாலி SCM செயல்பாடுகளுக்கான VS Code நீட்டிப்பு — AI ஆதரவுடன் பல மொழி கமிட் செய்தி உருவாக்கம் (25 மொழிகள் ஆதரிக்கப்படுகின்றன) மற்றும் எதிர்கால PR மேலாண்மை அம்சங்கள்.",
-
   "command.generateMessage": "கமிட் செய்தியை உருவாக்கு",
   "command.generatePR": "Pull Request உருவாக்கு",
   "command.generateIssue": "Issue உருவாக்கு",
@@ -9,7 +8,6 @@
   "command.changeMessageStyle": "கமிட் செய்தி பாணியை மாற்று",
   "command.setApiKey": "OpenAI API Key அமை",
   "command.diagnoseStorage": "API Key சேமிப்பகத்தைக் கண்டறி",
-
   "config.language": "கமிட் செய்திகளுக்கான மொழி",
   "config.messageStyle": "உருவாக்கப்பட்ட கமிட் செய்திகளின் பாணி மற்றும் நீளம்",
   "config.messageStyle.simple": "எளிமையான மற்றும் சுருக்கமான (600 எழுத்துகள்)",
@@ -28,6 +26,5 @@
   "config.maxInputTokens": "AI செயலாக்கத்திற்கான அதிகபட்ச உள்ளீட்டு டோக்கன்கள் (இயல்புநிலை: 200K)",
   "config.useBulletList": "கமிட் செய்தியின் உடலைப் புல்லட் பட்டியலாக வடிவமைக்க",
   "config.useConventionalCommits": "ஸ்கோப்புடன் Conventional Commits வடிவத்தைப் பயன்படுத்து (<type>(<scope>): <subject>)",
-  "config.appendCommitTrailer": "உருவாக்கப்பட்ட கமிட் செய்திகளுக்கு 'Commit-Message-By: otak-committer' டிரெய்லர் சேர்",
-  "config.syncApiKeys": "VS Code Settings Sync மூலம் API key-களை ஒத்திசை (ஒத்திசைக்கப்பட்ட நீட்டிப்பு நிலையில் key-களைச் சேமிக்கும்)"
+  "config.appendCommitTrailer": "உருவாக்கப்பட்ட கமிட் செய்திகளுக்கு 'Commit-Message-By: otak-committer' டிரெய்லர் சேர்"
 }

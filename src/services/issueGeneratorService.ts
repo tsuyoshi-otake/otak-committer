@@ -9,6 +9,7 @@ import { TokenManager } from './tokenManager';
 import { detectPotentialSecrets } from '../utils';
 import { t } from '../i18n/index.js';
 import { analyzeFiles, formatAnalysisResult } from './issueGenerator.analysis';
+import { confirmProceedWithPotentialSecrets } from './secretConfirmation';
 import {
     buildIssueBodyPrompt,
     generateTitle,
@@ -49,19 +50,16 @@ export class IssueGeneratorService extends BaseService {
             if (fileAnalyses.length > 0) {
                 const combinedContent = fileAnalyses.map((a) => a.content || '').join('');
 
-                // Warn if potential secrets are found in file content (non-blocking)
+                // Confirm before sending file content that may contain secrets to an external model.
                 const detection = detectPotentialSecrets(combinedContent);
-                if (detection.hasPotentialSecrets) {
-                    const patterns = detection.matchedPatternIds.join(', ');
-                    this.logger.warning('Potential secrets detected in files for issue generation', {
-                        matchedPatternIds: detection.matchedPatternIds,
-                    });
-                    vscode.window.showWarningMessage(
-                        t('messages.secretDetectionWarning', {
-                            count: detection.matchedPatternIds.length,
-                            patterns,
-                        }),
-                    );
+                if (
+                    !(await confirmProceedWithPotentialSecrets(
+                        detection,
+                        this.logger,
+                        'Potential secrets detected in files for issue generation',
+                    ))
+                ) {
+                    throw new Error('Issue generation cancelled because potential secrets were detected');
                 }
 
                 const estimatedTokens = TokenManager.estimateTokens(combinedContent);

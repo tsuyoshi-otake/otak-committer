@@ -1,6 +1,5 @@
 {
   "extension.description": "Estensione VS Code per operazioni SCM intelligenti - Generazione multilingue di messaggi di commit con supporto AI (25 lingue supportate) e future funzionalita di gestione PR.",
-
   "command.generateMessage": "Genera messaggio di commit",
   "command.generatePR": "Genera Pull Request",
   "command.generateIssue": "Genera Issue",
@@ -9,7 +8,6 @@
   "command.changeMessageStyle": "Cambia stile messaggio di commit",
   "command.setApiKey": "Imposta chiave API OpenAI",
   "command.diagnoseStorage": "Diagnostica archiviazione chiave API",
-
   "config.language": "Lingua per i messaggi di commit",
   "config.messageStyle": "Stile e lunghezza dei messaggi di commit generati",
   "config.messageStyle.simple": "Semplice e conciso (600 caratteri)",
@@ -28,6 +26,5 @@
   "config.maxInputTokens": "Token di input massimi per l'elaborazione AI (predefinito: 200K)",
   "config.useBulletList": "Formatta il corpo del messaggio di commit come elenco puntato",
   "config.useConventionalCommits": "Usa formato Conventional Commits con scope (<type>(<scope>): <subject>)",
-  "config.appendCommitTrailer": "Aggiungi trailer 'Commit-Message-By: otak-committer' ai messaggi di commit generati",
-  "config.syncApiKeys": "Sincronizza chiavi API tramite VS Code Settings Sync (archivia le chiavi nello stato sincronizzato dell'estensione)"
+  "config.appendCommitTrailer": "Aggiungi trailer 'Commit-Message-By: otak-committer' ai messaggi di commit generati"
 }

@@ -1,6 +1,5 @@
 {
   "extension.description": "Расширение VS Code для интеллектуальных операций SCM — многоязычная генерация сообщений коммитов с поддержкой ИИ (поддерживается 25 языков) и будущие функции управления PR.",
-
   "command.generateMessage": "Сгенерировать сообщение коммита",
   "command.generatePR": "Сгенерировать Pull Request",
   "command.generateIssue": "Создать Issue",
@@ -9,7 +8,6 @@
   "command.changeMessageStyle": "Изменить стиль сообщения коммита",
   "command.setApiKey": "Установить API-ключ OpenAI",
   "command.diagnoseStorage": "Диагностика хранилища API-ключей",
-
   "config.language": "Язык сообщений коммитов",
   "config.messageStyle": "Стиль и длина генерируемых сообщений коммитов",
   "config.messageStyle.simple": "Простой и краткий (600 символов)",
@@ -28,6 +26,5 @@
   "config.maxInputTokens": "Максимальное количество входных токенов для обработки ИИ (по умолчанию: 200K)",
   "config.useBulletList": "Форматировать тело сообщения коммита как маркированный список",
   "config.useConventionalCommits": "Использовать формат Conventional Commits с областью (<тип>(<область>): <тема>)",
-  "config.appendCommitTrailer": "Добавлять трейлер 'Commit-Message-By: otak-committer' к сгенерированным сообщениям коммитов",
-  "config.syncApiKeys": "Синхронизировать API-ключи через VS Code Settings Sync (ключи хранятся в синхронизируемом состоянии расширения)"
+  "config.appendCommitTrailer": "Добавлять трейлер 'Commit-Message-By: otak-committer' к сгенерированным сообщениям коммитов"
 }

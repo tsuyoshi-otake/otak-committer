@@ -1,6 +1,5 @@
 {
   "extension.description": "बुद्धिमान SCM संचालन के लिए VS Code एक्सटेंशन — AI समर्थन के साथ बहुभाषी कमिट संदेश जनरेशन (25 भाषाएँ समर्थित) और भविष्य की PR प्रबंधन सुविधाएँ।",
-
   "command.generateMessage": "कमिट संदेश जनरेट करें",
   "command.generatePR": "Pull Request जनरेट करें",
   "command.generateIssue": "Issue बनाएँ",
@@ -9,7 +8,6 @@
   "command.changeMessageStyle": "कमिट संदेश शैली बदलें",
   "command.setApiKey": "OpenAI API Key सेट करें",
   "command.diagnoseStorage": "API Key स्टोरेज का निदान करें",
-
   "config.language": "कमिट संदेशों के लिए भाषा",
   "config.messageStyle": "जनरेट किए गए कमिट संदेशों की शैली और लंबाई",
   "config.messageStyle.simple": "सरल और संक्षिप्त (600 अक्षर)",
@@ -28,6 +26,5 @@
   "config.maxInputTokens": "AI प्रोसेसिंग के लिए अधिकतम इनपुट टोकन (डिफ़ॉल्ट: 200K)",
   "config.useBulletList": "कमिट संदेश बॉडी को बुलेट सूची के रूप में प्रारूपित करें",
   "config.useConventionalCommits": "स्कोप के साथ Conventional Commits प्रारूप का उपयोग करें (<प्रकार>(<स्कोप>): <विषय>)",
-  "config.appendCommitTrailer": "जनरेट किए गए कमिट संदेशों में 'Commit-Message-By: otak-committer' ट्रेलर जोड़ें",
-  "config.syncApiKeys": "VS Code Settings Sync के माध्यम से API key सिंक करें (सिंक किए गए एक्सटेंशन स्टेट में key संग्रहीत करता है)"
+  "config.appendCommitTrailer": "जनरेट किए गए कमिट संदेशों में 'Commit-Message-By: otak-committer' ट्रेलर जोड़ें"
 }

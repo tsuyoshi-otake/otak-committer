@@ -1,11 +1,11 @@
 /**
- * Property-based tests for migration fallback resilience
+ * Property-based tests for migration failure resilience
  *
- * **Feature: extension-architecture-refactoring, Property 5: Migration Fallback Resilience**
+ * **Feature: extension-architecture-refactoring, Property 5: Migration Failure Resilience**
  * **Validates: Requirements 3.3**
  *
- * Property: For any migration operation that fails, the system should fall back to using
- * the legacy data format and continue functioning without crashing.
+ * Property: For any migration operation that fails, the system should preserve legacy
+ * data for a later retry without exposing API keys from insecure storage.
  */
 
 import * as fc from 'fast-check';
@@ -123,7 +123,7 @@ function mockGetConfiguration(configStore: Map<string, any>) {
     };
 }
 
-suite('Migration Fallback Resilience Property Tests', () => {
+suite('Migration Failure Resilience Property Tests', () => {
     let originalGetConfiguration: typeof vscode.workspace.getConfiguration;
     let originalShowWarningMessage: typeof vscode.window.showWarningMessage;
     let originalShowInformationMessage: typeof vscode.window.showInformationMessage;
@@ -160,15 +160,15 @@ suite('Migration Fallback Resilience Property Tests', () => {
     });
 
     /**
-     * **Feature: extension-architecture-refactoring, Property 5: Migration Fallback Resilience**
+     * **Feature: extension-architecture-refactoring, Property 5: Migration Failure Resilience**
      *
-     * This test verifies that when SecretStorage fails but GlobalState backup works,
-     * the system successfully migrates data to the backup storage:
+     * This test verifies that when SecretStorage fails, migration preserves legacy
+     * data for retry but does not expose it through getApiKey:
      * 1. Does not crash
-     * 2. Data is retrievable (from backup)
-     * 3. Migration completes successfully via backup mechanism
+     * 2. Data is not retrievable from insecure legacy storage
+     * 3. Legacy data remains available for a later secure migration
      */
-    test('Property 5: Migration continues functioning when SecretStorage fails', async () => {
+    test('Property 5: Migration preserves legacy data when SecretStorage fails', async () => {
         await fc.assert(
             fc.asyncProperty(
                 fc.record({
@@ -179,8 +179,7 @@ suite('Migration Fallback Resilience Property Tests', () => {
                         .map((s) => 'key' + s.replace(/\s/g, 'x')),
                 }),
                 async ({ service, apiKey }) => {
-                    // Setup: Create context where SecretStorage fails but GlobalState works
-                    // This tests the backup fallback mechanism in SecretStorageProvider
+                    // Setup: Create context where SecretStorage fails but GlobalState works.
                     const mockContext = createMockContext({
                         secretStorageFails: true,
                         globalStateFails: false,
@@ -201,7 +200,7 @@ suite('Migration Fallback Resilience Property Tests', () => {
 
                         const storage = new StorageManager(mockContext);
 
-                        // Action: Attempt migration (should succeed via backup)
+                        // Action: Attempt migration. It should fail internally without throwing.
                         let migrationError: Error | null = null;
                         try {
                             await storage.migrateFromLegacy();
@@ -215,12 +214,17 @@ suite('Migration Fallback Resilience Property Tests', () => {
                             return false;
                         }
 
-                        // Verification 2: Data should be retrievable (from backup or any fallback)
+                        // Verification 2: Data should not be returned from insecure fallback storage.
                         const retrievedKey = await storage.getApiKey(service);
-                        if (retrievedKey !== apiKey) {
+                        if (retrievedKey !== undefined) {
                             console.error(
-                                `Failed to retrieve key: expected ${apiKey}, got ${retrievedKey}`,
+                                `Unexpectedly retrieved key from insecure storage: ${retrievedKey}`,
                             );
+                            return false;
+                        }
+
+                        if (testConfigStore.get(legacyKey) !== apiKey) {
+                            console.error('Legacy key was not preserved for retry');
                             return false;
                         }
 
@@ -235,12 +239,12 @@ suite('Migration Fallback Resilience Property Tests', () => {
     });
 
     /**
-     * **Feature: extension-architecture-refactoring, Property 5: Migration Fallback Resilience**
+     * **Feature: extension-architecture-refactoring, Property 5: Migration Failure Resilience**
      *
      * This test verifies that when both SecretStorage and GlobalState fail,
-     * the system still functions using legacy Configuration storage without crashing.
+     * the system does not crash and does not return legacy API keys.
      */
-    test('Property 5: System functions with legacy storage when all secure storage fails', async () => {
+    test('Property 5: System hides legacy keys when all secure storage fails', async () => {
         await fc.assert(
             fc.asyncProperty(
                 fc.record({
@@ -284,21 +288,29 @@ suite('Migration Fallback Resilience Property Tests', () => {
                             return false;
                         }
 
-                        // Verification 2: Both keys should still be retrievable from legacy storage
+                        // Verification 2: Both keys should not be retrievable from legacy storage.
                         const retrievedOpenAI = await storage.getApiKey('openai');
                         const retrievedGitHub = await storage.getApiKey('github');
 
-                        if (retrievedOpenAI !== openaiKey) {
+                        if (retrievedOpenAI !== undefined) {
                             console.error(
-                                `Failed to retrieve OpenAI key: expected ${openaiKey}, got ${retrievedOpenAI}`,
+                                `Unexpectedly retrieved OpenAI key: ${retrievedOpenAI}`,
                             );
                             return false;
                         }
 
-                        if (retrievedGitHub !== githubToken) {
+                        if (retrievedGitHub !== undefined) {
                             console.error(
-                                `Failed to retrieve GitHub token: expected ${githubToken}, got ${retrievedGitHub}`,
+                                `Unexpectedly retrieved GitHub token: ${retrievedGitHub}`,
                             );
+                            return false;
+                        }
+
+                        if (
+                            testConfigStore.get('otakCommitter.openaiApiKey') !== openaiKey ||
+                            testConfigStore.get('otakCommitter.githubToken') !== githubToken
+                        ) {
+                            console.error('Legacy keys were not preserved for retry');
                             return false;
                         }
 
@@ -313,7 +325,7 @@ suite('Migration Fallback Resilience Property Tests', () => {
     });
 
     /**
-     * **Feature: extension-architecture-refactoring, Property 5: Migration Fallback Resilience**
+     * **Feature: extension-architecture-refactoring, Property 5: Migration Failure Resilience**
      *
      * This test verifies that multiple keys in legacy storage are handled gracefully,
      * even when migration encounters issues.
@@ -388,7 +400,7 @@ suite('Migration Fallback Resilience Property Tests', () => {
     });
 
     /**
-     * **Feature: extension-architecture-refactoring, Property 5: Migration Fallback Resilience**
+     * **Feature: extension-architecture-refactoring, Property 5: Migration Failure Resilience**
      *
      * This test verifies that migration can be called multiple times safely
      * (idempotent behavior) and data remains accessible.

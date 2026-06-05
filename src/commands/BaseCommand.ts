@@ -164,7 +164,7 @@ export abstract class BaseCommand {
             try {
                 this.logger.debug('Cleaning up preview files');
                 await closePreviewTabs();
-                await cleanupPreviewFiles();
+                await cleanupPreviewFiles(this.context.globalStorageUri);
                 this.previewFile = undefined;
             } catch (error) {
                 this.logger.warning('Error cleaning up preview files', error);
