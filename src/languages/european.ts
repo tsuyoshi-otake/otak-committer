@@ -46,17 +46,3 @@ export const getEuropeanPrompt = (language: EuropeanLanguageCode, type: PromptTy
 
     return promptMap[language]?.(type) || '';
 };
-
-export const europeanLanguages: Record<EuropeanLanguageCode, string> = {
-    en: 'English',
-    fr: 'Français',
-    de: 'Deutsch',
-    it: 'Italiano',
-    es: 'Español',
-    pt: 'Português',
-    ru: 'Русский',
-    pl: 'Polski',
-    cs: 'Čeština',
-    hu: 'Magyar',
-    bg: 'Български',
-};

@@ -46,17 +46,3 @@ export const getAsianPrompt = (language: AsianLanguageCode, type: PromptType): s
 
     return promptMap[language]?.(type) || '';
 };
-
-export const asianLanguages: Record<AsianLanguageCode, string> = {
-    ja: '日本語',
-    zh: '简体中文',
-    'zh-tw': '繁體中文',
-    ko: '한국어',
-    vi: 'Tiếng Việt',
-    th: 'ไทย',
-    hi: 'हिन्दी',
-    bn: 'বাংলা',
-    my: 'မြန်မာစာ',
-    jv: 'Basa Jawa',
-    ta: 'தமிழ்',
-};

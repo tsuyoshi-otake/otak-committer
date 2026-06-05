@@ -26,12 +26,3 @@ export const getMiddleEasternPrompt = (
 
     return promptMap[language]?.(type) || '';
 };
-
-export const middleEasternLanguages: Record<MiddleEasternLanguageCode, string> = {
-    ar: 'العربية',
-    he: 'עברית',
-    tr: 'Türkçe',
-};
-
-// RTL言語のリスト
-export const rtlLanguages: MiddleEasternLanguageCode[] = ['ar', 'he'];
