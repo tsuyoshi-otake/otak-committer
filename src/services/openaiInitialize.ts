@@ -1,145 +1,23 @@
 import * as vscode from 'vscode';
-import OpenAI from 'openai';
 import { ServiceConfig } from '../types';
 import { StorageManager } from '../infrastructure/storage';
 import { Logger } from '../infrastructure/logging';
 import { ErrorHandler } from '../infrastructure/error';
 import { t } from '../i18n';
 import { isApiKeyValidated, markApiKeyValidated } from './openaiKeyValidationCache';
+import {
+    promptForInvalidStoredApiKey,
+    promptForMissingApiKey,
+    promptForValidationFailure,
+    showApiKeyErrorDialog,
+} from './openaiApiKeyDialogs';
+import { validateApiKey, type ValidateApiKeyResult } from './openaiValidation';
 
 const MAX_INITIALIZATION_ATTEMPTS = 3;
 
-/**
- * Show the shared API key error dialog with Set/Diagnose/Settings options.
- * Returns when the user has taken an action or cancelled.
- */
-export async function showApiKeyErrorDialog(): Promise<void> {
-    const setApiKeyLabel = t('apiKey.setApiKey');
-    const diagnoseStorageLabel = t('commands.diagnoseStorage');
-    const openSettingsLabel = t('commands.openSettings');
-    const action = await vscode.window.showErrorMessage(
-        t('apiKey.errorPrompt'),
-        setApiKeyLabel,
-        diagnoseStorageLabel,
-        openSettingsLabel,
-        t('apiKey.cancel'),
-    );
+export { showApiKeyErrorDialog } from './openaiApiKeyDialogs';
 
-    if (action === setApiKeyLabel) {
-        await vscode.commands.executeCommand('otak-committer.setApiKey');
-    } else if (action === diagnoseStorageLabel) {
-        await vscode.commands.executeCommand('otak-committer.diagnoseStorage');
-    } else if (action === openSettingsLabel) {
-        await vscode.commands.executeCommand('otak-committer.openSettings');
-    }
-}
-
-type ValidationKind = 'auth' | 'rate_limit' | 'network' | 'server' | 'unknown';
-type ValidateApiKeyResult =
-    | { ok: true }
-    | {
-          ok: false;
-          kind: ValidationKind;
-          status?: number;
-          reason: string;
-          retryAfterSeconds?: number;
-      };
-
-function redactApiKey(message: string, apiKey: string): string {
-    if (!message || !apiKey) {
-        return message || '';
-    }
-    return message.split(apiKey).join('[REDACTED]');
-}
-
-function getErrorStatus(error: unknown): number | undefined {
-    const status = (error as { status?: unknown } | null | undefined)?.status;
-    if (typeof status === 'number') {
-        return status;
-    }
-
-    const responseStatus = (error as { response?: { status?: unknown } } | null | undefined)
-        ?.response?.status;
-    if (typeof responseStatus === 'number') {
-        return responseStatus;
-    }
-
-    return undefined;
-}
-
-function getErrorMessage(error: unknown): string {
-    const fromBody = (error as { error?: { message?: unknown } } | null | undefined)?.error
-        ?.message;
-    if (typeof fromBody === 'string' && fromBody.trim()) {
-        return fromBody;
-    }
-
-    if (error instanceof Error) {
-        return error.message;
-    }
-
-    return String(error);
-}
-
-/** Maximum retry-after value to accept (1 hour) to prevent abuse via malicious headers */
-const MAX_RETRY_AFTER_SECONDS = 3600;
-
-function getRetryAfterSeconds(error: unknown): number | undefined {
-    const headers =
-        (error as { headers?: Record<string, unknown> } | null | undefined)?.headers ??
-        (error as { response?: { headers?: Record<string, unknown> } } | null | undefined)?.response
-            ?.headers;
-
-    if (!headers) {
-        return undefined;
-    }
-
-    const raw =
-        (headers['retry-after'] as unknown) ??
-        (headers['Retry-After'] as unknown) ??
-        (headers['x-ratelimit-reset'] as unknown) ??
-        (headers['X-RateLimit-Reset'] as unknown);
-
-    if (typeof raw === 'number') {
-        return raw >= 0 && raw <= MAX_RETRY_AFTER_SECONDS ? raw : undefined;
-    }
-
-    if (typeof raw === 'string') {
-        const parsed = Number.parseInt(raw, 10);
-        if (Number.isFinite(parsed) && parsed >= 0 && parsed <= MAX_RETRY_AFTER_SECONDS) {
-            return parsed;
-        }
-    }
-
-    return undefined;
-}
-
-async function validateApiKey(apiKey: string): Promise<ValidateApiKeyResult> {
-    try {
-        const client = new OpenAI({ apiKey });
-        await client.models.list();
-        return { ok: true };
-    } catch (error) {
-        const status = getErrorStatus(error);
-        const reason = redactApiKey(getErrorMessage(error) || 'Unknown error', apiKey);
-        const retryAfterSeconds = getRetryAfterSeconds(error);
-
-        if (status === 401) {
-            return { ok: false, kind: 'auth', status, reason };
-        }
-        if (status === 429) {
-            return { ok: false, kind: 'rate_limit', status, reason, retryAfterSeconds };
-        }
-        if (typeof status === 'number' && status >= 500) {
-            return { ok: false, kind: 'server', status, reason, retryAfterSeconds };
-        }
-        if (status === undefined || status === 0) {
-            return { ok: false, kind: 'network', status, reason };
-        }
-
-        return { ok: false, kind: 'unknown', status, reason, retryAfterSeconds };
-    }
-}
+type ValidationDecision = 'valid' | 'retry' | 'reset-key' | 'stop';
 
 /**
  * Initializes an OpenAI-backed service instance with interactive API key handling.
@@ -187,27 +65,8 @@ export async function initializeOpenAIService<T>(
 
             // If still no API key, offer to configure via the dedicated command.
             if (!apiKey && storage) {
-                const setApiKeyLabel = t('apiKey.setApiKey');
-                const openSettingsLabel = t('commands.openSettings');
-                const action = await vscode.window.showWarningMessage(
-                    t('messages.apiKeyNotConfigured'),
-                    setApiKeyLabel,
-                    openSettingsLabel,
-                    t('apiKey.cancel'),
-                );
-
-                if (action === openSettingsLabel) {
-                    await vscode.commands.executeCommand('otak-committer.openSettings');
-                    return undefined;
-                }
-
-                if (action === setApiKeyLabel) {
-                    await vscode.commands.executeCommand('otak-committer.setApiKey');
-                    apiKey = (await storage.getApiKey('openai'))?.trim();
-                }
-
+                apiKey = await promptForConfiguredApiKey(storage, logger);
                 if (!apiKey) {
-                    logger.warning('OpenAI API key is not configured');
                     return undefined;
                 }
             }
@@ -218,88 +77,21 @@ export async function initializeOpenAIService<T>(
                 return undefined;
             }
 
-            if (!isApiKeyValidated(apiKey)) {
-                const validation = await vscode.window.withProgress(
-                    {
-                        location: vscode.ProgressLocation.Notification,
-                        title: t('apiKey.validating'),
-                        cancellable: false,
-                    },
-                    async () => validateApiKey(apiKey!),
-                );
-
-                if (!validation.ok) {
-                    // Explicit key path: do not prompt or mutate storage.
-                    if (isExplicitKey || !storage) {
-                        logger.warning('OpenAI API key validation failed', validation);
-                        return undefined;
-                    }
-
-                    if (validation.kind === 'auth') {
-                        const updateLabel = t('apiKey.updateKey');
-                        const removeLabel = t('apiKey.removeKey');
-                        const diagnoseLabel = t('commands.diagnoseStorage');
-                        const action = await vscode.window.showErrorMessage(
-                            t('apiKey.invalidKeyPrompt'),
-                            updateLabel,
-                            removeLabel,
-                            diagnoseLabel,
-                            t('apiKey.cancel'),
-                        );
-
-                        if (action === diagnoseLabel) {
-                            await vscode.commands.executeCommand('otak-committer.diagnoseStorage');
-                            return undefined;
-                        }
-
-                        if (action === removeLabel) {
-                            await storage.deleteApiKey('openai');
-                            vscode.window.showInformationMessage(t('apiKey.removed'));
-                            return undefined;
-                        }
-
-                        if (action === updateLabel) {
-                            await vscode.commands.executeCommand('otak-committer.setApiKey');
-                            apiKey = undefined;
-                            continue;
-                        }
-
-                        return undefined;
-                    }
-
-                    const reason =
-                        validation.retryAfterSeconds !== undefined
-                            ? `${validation.reason} (retry after ${validation.retryAfterSeconds}s)`
-                            : validation.reason;
-
-                    const retryLabel = t('apiKey.retryValidation');
-                    const continueLabel = t('apiKey.continueWithoutValidation');
-                    const diagnoseLabel = t('commands.diagnoseStorage');
-                    const action = await vscode.window.showWarningMessage(
-                        t('apiKey.validationFailed', { reason }),
-                        retryLabel,
-                        continueLabel,
-                        diagnoseLabel,
-                        t('apiKey.cancel'),
-                    );
-
-                    if (action === diagnoseLabel) {
-                        await vscode.commands.executeCommand('otak-committer.diagnoseStorage');
-                        continue;
-                    }
-
-                    if (action === retryLabel) {
-                        continue;
-                    }
-
-                    if (action === continueLabel) {
-                        markApiKeyValidated(apiKey);
-                    } else {
-                        return undefined;
-                    }
-                } else {
-                    markApiKeyValidated(apiKey);
-                }
+            const validationDecision = await ensureApiKeyValidated(
+                apiKey,
+                isExplicitKey,
+                storage,
+                logger,
+            );
+            if (validationDecision === 'stop') {
+                return undefined;
+            }
+            if (validationDecision === 'reset-key') {
+                apiKey = undefined;
+                continue;
+            }
+            if (validationDecision === 'retry') {
+                continue;
             }
 
             const service = await createService({ ...config, openaiApiKey: apiKey });
@@ -327,4 +119,112 @@ export async function initializeOpenAIService<T>(
         });
         return undefined;
     }
+}
+
+async function promptForConfiguredApiKey(
+    storage: StorageManager,
+    logger: Logger,
+): Promise<string | undefined> {
+    const action = await promptForMissingApiKey();
+
+    if (action === 'settings') {
+        await vscode.commands.executeCommand('otak-committer.openSettings');
+        return undefined;
+    }
+
+    if (action === 'set') {
+        await vscode.commands.executeCommand('otak-committer.setApiKey');
+        const apiKey = (await storage.getApiKey('openai'))?.trim();
+        if (apiKey) {
+            return apiKey;
+        }
+    }
+
+    logger.warning('OpenAI API key is not configured');
+    return undefined;
+}
+
+async function ensureApiKeyValidated(
+    apiKey: string,
+    isExplicitKey: boolean,
+    storage: StorageManager | undefined,
+    logger: Logger,
+): Promise<ValidationDecision> {
+    if (isApiKeyValidated(apiKey)) {
+        return 'valid';
+    }
+
+    const validation = await vscode.window.withProgress(
+        {
+            location: vscode.ProgressLocation.Notification,
+            title: t('apiKey.validating'),
+            cancellable: false,
+        },
+        async () => validateApiKey(apiKey),
+    );
+
+    if (validation.ok) {
+        markApiKeyValidated(apiKey);
+        return 'valid';
+    }
+
+    if (isExplicitKey || !storage) {
+        logger.warning('OpenAI API key validation failed', validation);
+        return 'stop';
+    }
+
+    return handleStoredKeyValidationFailure(validation, apiKey, storage);
+}
+
+async function handleStoredKeyValidationFailure(
+    validation: ValidateApiKeyResult & { ok: false },
+    apiKey: string,
+    storage: StorageManager,
+): Promise<ValidationDecision> {
+    if (validation.kind === 'auth') {
+        return handleInvalidStoredKey(storage);
+    }
+
+    const action = await promptForValidationFailure(formatValidationReason(validation));
+    if (action === 'diagnose') {
+        await vscode.commands.executeCommand('otak-committer.diagnoseStorage');
+        return 'retry';
+    }
+    if (action === 'retry') {
+        return 'retry';
+    }
+    if (action === 'continue') {
+        markApiKeyValidated(apiKey);
+        return 'valid';
+    }
+    return 'stop';
+}
+
+async function handleInvalidStoredKey(storage: StorageManager): Promise<ValidationDecision> {
+    const action = await promptForInvalidStoredApiKey();
+
+    if (action === 'diagnose') {
+        await vscode.commands.executeCommand('otak-committer.diagnoseStorage');
+        return 'stop';
+    }
+
+    if (action === 'remove') {
+        await storage.deleteApiKey('openai');
+        vscode.window.showInformationMessage(t('apiKey.removed'));
+        return 'stop';
+    }
+
+    if (action === 'update') {
+        await vscode.commands.executeCommand('otak-committer.setApiKey');
+        return 'reset-key';
+    }
+
+    return 'stop';
+}
+
+function formatValidationReason(validation: ValidateApiKeyResult & { ok: false }): string {
+    if (validation.retryAfterSeconds === undefined) {
+        return validation.reason;
+    }
+    return `${validation.reason} (retry after ${validation.retryAfterSeconds}s)`;
 }

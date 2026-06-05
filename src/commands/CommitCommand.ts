@@ -1,4 +1,3 @@
-import * as vscode from 'vscode';
 import { BaseCommand } from './BaseCommand';
 import { GitService, GitServiceFactory } from '../services/git';
 import { OpenAIService } from '../services/openai';
@@ -6,10 +5,11 @@ import { MessageStyle } from '../types/enums/MessageStyle';
 import { TemplateInfo } from '../types';
 import { detectPotentialSecrets, sanitizeCommitMessage } from '../utils';
 import { t } from '../i18n/index.js';
-import type { DiffProcessResult } from '../services/diffProcessor';
-import { getRepositoryForCurrentWorkspace } from '../services/git.repository';
 import { isUserAbortError } from '../utils/errorHandling';
 import { confirmProceedWithPotentialSecrets } from '../services/secretConfirmation';
+import { showTimedNotification } from './commandNotifications';
+import { processCommitDiff } from './commit.diffProcessing';
+import { setCommitMessageInSourceControl } from './commitMessageInput';
 
 /**
  * Command for generating commit messages using AI
@@ -72,13 +72,24 @@ export class CommitCommand extends BaseCommand {
 
             // Process diff through hybrid tier system
             const language = this.config.get('language') || 'english';
-            const diffResult = await this.processDiff(rawDiff, openai, language);
+            const diffResult = await processCommitDiff({
+                rawDiff,
+                openai,
+                language,
+                signal: this.signal,
+                logger: this.logger,
+                withProgress: (title, task) => this.withProgress(title, task),
+            });
 
             // Find commit message templates
             const templates = await this.findTemplates(git);
 
             // Generate commit message using processed diff
-            const message = await this.generateMessage(openai, diffResult.processedDiff, templates.commit);
+            const message = await this.generateMessage(
+                openai,
+                diffResult.processedDiff,
+                templates.commit,
+            );
             if (!message) {
                 return;
             }
@@ -112,63 +123,11 @@ export class CommitCommand extends BaseCommand {
 
         if (!diff) {
             this.logger.info('No changes to commit');
-            await this.showNotification(t('messages.noChangesToCommit'), 3000);
+            await showTimedNotification(t('messages.noChangesToCommit'), 3000);
             return undefined;
         }
 
         return diff;
-    }
-
-    /**
-     * Process diff through the hybrid tier system (Tier 1/2/3)
-     *
-     * @param rawDiff - The raw Git diff string
-     * @param openai - OpenAI service instance (needed for Tier 3 map-reduce)
-     * @param language - The configured language for summarization
-     * @returns The processed diff result with tier information
-     */
-    private async processDiff(
-        rawDiff: string,
-        openai: OpenAIService,
-        language: string,
-    ): Promise<DiffProcessResult> {
-        const { DiffProcessor } = await import('../services/diffProcessor');
-        const { DiffTier } = await import('../services/diffProcessor');
-        const { TokenManager } = await import('../services/tokenManager');
-
-        const tokenBudget = TokenManager.getConfiguredMaxTokens();
-        const processor = new DiffProcessor(
-            openai,
-            language,
-            (msg) => this.logger.info(`Map-reduce progress: ${msg}`),
-        );
-
-        const result = await this.withProgress<DiffProcessResult>(
-            t('progress.processingLargeDiff'),
-            async () => processor.process(rawDiff, tokenBudget, this.signal),
-        );
-
-        // Log the tier used
-        if (result.tier === DiffTier.SmartPrioritized) {
-            const tokenCount = Math.floor(rawDiff.length / 4 / 1000);
-            this.logger.info(
-                t('git.smartDiffApplied', {
-                    tokenCount,
-                    included: result.includedFiles,
-                    total: result.totalFiles,
-                }),
-            );
-        } else if (result.tier === DiffTier.MapReduce) {
-            const tokenCount = Math.floor(rawDiff.length / 4 / 1000);
-            this.logger.info(
-                t('git.mapReduceApplied', {
-                    tokenCount,
-                    chunks: result.excludedFiles,
-                }),
-            );
-        }
-
-        return result;
     }
 
     /**
@@ -233,7 +192,7 @@ export class CommitCommand extends BaseCommand {
 
         if (!message) {
             this.logger.error('Failed to generate commit message: message is empty');
-            await this.showNotification(t('messages.emptyMessageReceived'), 3000);
+            await showTimedNotification(t('messages.emptyMessageReceived'), 3000);
             return undefined;
         }
 
@@ -270,58 +229,13 @@ export class CommitCommand extends BaseCommand {
      * @param message - The commit message to set
      */
     private async setCommitMessage(message: string): Promise<void> {
-        this.logger.debug('Setting generated message to source control input');
-
-        // Get Git extension
-        const gitExtension = vscode.extensions.getExtension('vscode.git');
-        if (!gitExtension) {
-            this.logger.error('Git extension not found');
-            throw new Error(t('errors.gitExtensionNotFound'));
-        }
-
-        // Get Git API
-        const gitApi = gitExtension.exports.getAPI(1);
-        const repository = getRepositoryForCurrentWorkspace(gitApi);
-
-        if (!repository) {
-            this.logger.error('No Git repository found');
-            throw new Error(t('errors.noGitRepository'));
-        }
-        if (!repository.inputBox) {
-            this.logger.error('Git repository input box is not available');
-            throw new Error(t('errors.gitInputBoxUnavailable'));
-        }
-
-        // Set the message in the input box
-        repository.inputBox.value = message;
-        this.logger.debug('Successfully set commit message');
+        await setCommitMessageInSourceControl(message, this.logger);
     }
 
     /**
      * Show a success notification to the user
      */
     private async showSuccessNotification(): Promise<void> {
-        await this.showNotification(t('messages.commitMessageGenerated'), 3000);
-    }
-
-    /**
-     * Show a notification to the user for a specified duration
-     *
-     * @param title - The notification title
-     * @param duration - Duration in milliseconds
-     */
-    private async showNotification(title: string, duration: number): Promise<void> {
-        await vscode.window.withProgress(
-            {
-                location: vscode.ProgressLocation.Notification,
-                title,
-                cancellable: false,
-            },
-            async () => {
-                return new Promise<void>((resolve) => {
-                    setTimeout(resolve, duration);
-                });
-            },
-        );
+        await showTimedNotification(t('messages.commitMessageGenerated'), 3000);
     }
 }
