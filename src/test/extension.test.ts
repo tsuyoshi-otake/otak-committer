@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { SupportedLanguage, LANGUAGE_CONFIGS } from '../languages';
-import { LanguageSettings } from '../types/language';
+import { LanguageSettings } from '../types/interfaces/Config';
 
 suite('Extension Test Suite', () => {
     test('Languages configuration test', () => {

@@ -1,5 +1,5 @@
-import { MessageStyle } from '../types/messageStyle';
-import { PullRequestDiff } from '../types/github';
+import { MessageStyle } from '../types/enums/MessageStyle';
+import { PullRequestDiff } from '../types/interfaces/GitHub';
 import { TemplateInfo } from '../types';
 import {
     getPromptGenerationOptions,

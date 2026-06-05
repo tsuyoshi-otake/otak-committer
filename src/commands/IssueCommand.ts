@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { BaseCommand } from './BaseCommand';
 import { IssueGeneratorServiceFactory, IssueGeneratorService } from '../services/issueGenerator';
 import { ServiceError } from '../types/errors';
-import { IssueType } from '../types/issue';
+import { IssueType } from '../types/interfaces/Issue';
 import { t } from '../i18n/index.js';
 import { promptIssueDescription, selectFilesForAnalysis, selectIssueType } from './issue.input';
 import { runIssuePreviewLoop } from './issue.previewFlow';

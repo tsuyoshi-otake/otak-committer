@@ -3,8 +3,8 @@ import OpenAI from 'openai';
 import { BaseService } from './base';
 import { PromptService } from './prompt';
 import { ServiceConfig, TemplateInfo } from '../types';
-import { MessageStyle } from '../types/messageStyle';
-import { PullRequestDiff } from '../types/github';
+import { MessageStyle } from '../types/enums/MessageStyle';
+import { PullRequestDiff } from '../types/interfaces/GitHub';
 import { invalidateValidatedApiKey } from './openaiKeyValidationCache';
 import { initializeOpenAIService, showApiKeyErrorDialog } from './openaiInitialize';
 import {

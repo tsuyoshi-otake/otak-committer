@@ -1,4 +1,4 @@
-import { GitHubAPI, GitHubApiError, GitHubDiffFile, PullRequestDiff } from '../types';
+import { GitHubAPI, GitHubServiceError, GitHubDiffFile, PullRequestDiff } from '../types';
 import { Logger } from '../infrastructure/logging/Logger';
 import { TokenManager } from './tokenManager';
 
@@ -55,7 +55,7 @@ export async function getBranchDiffDetails(
 
     if (response.status !== 200 || !response.data.files) {
         logger.error(`Failed to get diff: status ${response.status}`);
-        throw new GitHubApiError('Failed to get diff', response.status);
+        throw new GitHubServiceError('Failed to get diff', response.status);
     }
 
     let totalTokens = 0;

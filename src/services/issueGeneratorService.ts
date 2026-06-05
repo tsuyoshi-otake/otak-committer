@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { BaseService } from './base';
 import { ServiceConfig } from '../types';
-import { IssueType, IssueGenerationParams, GeneratedIssueContent } from '../types/issue';
+import { IssueType, IssueGenerationParams, GeneratedIssueContent } from '../types/interfaces/Issue';
 import { OpenAIService } from './openai';
 import { GitService } from './git';
 import { GitHubService } from './github';

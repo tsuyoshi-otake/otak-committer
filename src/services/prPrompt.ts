@@ -1,4 +1,4 @@
-import { PullRequestDiff } from '../types/github';
+import { PullRequestDiff } from '../types/interfaces/GitHub';
 import { TemplateInfo } from '../types';
 import { PromptGenerationOptions, sanitizeTemplateContent } from './promptConfig';
 

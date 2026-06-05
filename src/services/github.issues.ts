@@ -1,6 +1,6 @@
 import {
     GitHubAPI,
-    GitHubApiError,
+    GitHubServiceError,
     GitHubLabel,
     IssueInfo,
     IssueParams,
@@ -24,7 +24,7 @@ export async function getIssue(
 
     if (response.status !== 200) {
         logger.error(`Failed to get issue: status ${response.status}`);
-        throw new GitHubApiError('Failed to get issue', response.status);
+        throw new GitHubServiceError('Failed to get issue', response.status);
     }
 
     logger.info(`Retrieved issue #${number}: ${response.data.title}`);
@@ -57,7 +57,7 @@ export async function createIssue(
 
     if (response.status !== 201) {
         logger.error(`Failed to create issue: status ${response.status}`);
-        throw new GitHubApiError('Failed to create issue', response.status);
+        throw new GitHubServiceError('Failed to create issue', response.status);
     }
 
     logger.info(`Issue #${response.data.number} created successfully`);
@@ -87,7 +87,7 @@ export async function getIssues(
 
     if (response.status !== 200) {
         logger.error(`Failed to get issues: status ${response.status}`);
-        throw new GitHubApiError('Failed to get issues', response.status);
+        throw new GitHubServiceError('Failed to get issues', response.status);
     }
 
     const issues = response.data

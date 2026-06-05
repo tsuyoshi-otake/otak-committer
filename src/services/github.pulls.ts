@@ -1,7 +1,7 @@
 import {
     CreatePullRequestResponse,
     GitHubAPI,
-    GitHubApiError,
+    GitHubServiceError,
     PullRequestParams,
 } from '../types';
 import { Logger } from '../infrastructure/logging/Logger';
@@ -38,7 +38,7 @@ export async function createPullRequest(
 
     if (response.status !== 201) {
         logger.error(`Failed to create pull request: status ${response.status}`);
-        throw new GitHubApiError('Failed to create pull request', response.status);
+        throw new GitHubServiceError('Failed to create pull request', response.status);
     }
 
     logger.info(`Pull request #${response.data.number} created successfully`);

@@ -14,9 +14,3 @@ export * from './errors';
 
 // Legacy ServiceError interface export (for backward compatibility with utils)
 export type { IServiceError as ServiceError } from './interfaces/Common';
-
-// Legacy exports for backward compatibility (deprecated)
-export * from './github';
-export * from './language';
-export * from './messageStyle';
-export * from './issue';

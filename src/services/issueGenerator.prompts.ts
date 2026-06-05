@@ -1,5 +1,5 @@
 import { Logger } from '../infrastructure/logging/Logger';
-import { IssueType } from '../types/issue';
+import { IssueType } from '../types/interfaces/Issue';
 import { OpenAIService } from './openai';
 
 const MAX_TITLE_TOKENS = 50;

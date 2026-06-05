@@ -1,4 +1,4 @@
-import { GitHubAPI, GitHubApiError } from '../types';
+import { GitHubAPI, GitHubServiceError } from '../types';
 import { Logger } from '../infrastructure/logging/Logger';
 
 export async function getBranches(
@@ -18,7 +18,7 @@ export async function getBranches(
 
     if (response.status !== 200) {
         logger.error(`Failed to get branches: status ${response.status}`);
-        throw new GitHubApiError('Failed to get branches', response.status);
+        throw new GitHubServiceError('Failed to get branches', response.status);
     }
 
     const branches = response.data.map((branch) => branch.name);

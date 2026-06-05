@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { MessageStyle } from '../types/messageStyle';
+import { MessageStyle } from '../types/enums/MessageStyle';
 
 /**
  * Message length limits by style (in characters).

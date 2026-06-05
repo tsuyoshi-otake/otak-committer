@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { Logger } from '../infrastructure/logging/Logger';
 import { t } from '../i18n/index.js';
-import { IssueType, GeneratedIssueContent } from '../types/issue';
+import { IssueType, GeneratedIssueContent } from '../types/interfaces/Issue';
 import { IssueGeneratorService } from '../services/issueGenerator';
 import { showMarkdownPreview } from '../utils/preview';
 
