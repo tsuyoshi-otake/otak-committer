@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { ServiceError } from '../types/errors';
 import { t } from '../i18n/index.js';
 
-export function isGitHubApiError(
+function isGitHubApiError(
     error: unknown,
 ): error is { response: { errors: Array<{ message: string }> } } {
     if (typeof error !== 'object' || error === null) {

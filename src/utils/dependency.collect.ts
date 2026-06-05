@@ -39,7 +39,7 @@ export function collectModules(
     }
 }
 
-export function extractImports(filePath: string, sourceRoot: string): string[] {
+function extractImports(filePath: string, sourceRoot: string): string[] {
     const content = fs.readFileSync(filePath, 'utf-8');
     const imports: string[] = [];
 
@@ -66,7 +66,7 @@ export function extractImports(filePath: string, sourceRoot: string): string[] {
     return imports;
 }
 
-export function resolveImportPath(
+function resolveImportPath(
     fromFile: string,
     importPath: string,
     sourceRoot: string,

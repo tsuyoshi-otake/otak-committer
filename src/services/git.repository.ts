@@ -103,7 +103,7 @@ export async function resolveGitRepositoryContext(
     };
 }
 
-export function resolveWorkspacePath(): string | undefined {
+function resolveWorkspacePath(): string | undefined {
     let vscodeModule: typeof import('vscode');
     try {
         vscodeModule = require('vscode') as typeof import('vscode');
