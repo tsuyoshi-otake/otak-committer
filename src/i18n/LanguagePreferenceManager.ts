@@ -27,45 +27,20 @@
  * ```
  */
 
-import { SupportedLocale, LocaleDetector } from './LocaleDetector';
+import { LocaleDetector } from './LocaleDetector';
+import { LOCALE_TO_LANGUAGE_MAP, SupportedLocale, isSupportedLocale } from './supportedLocales';
+
+/**
+ * Re-exported from `supportedLocales.ts` for backward compatibility with
+ * existing consumers that import `LOCALE_TO_LANGUAGE_MAP` from this module.
+ */
+export { LOCALE_TO_LANGUAGE_MAP };
 
 /**
  * Configuration key for commit language preference
  */
 const CONFIG_KEY = 'commitLanguage';
 const CONFIG_SECTION = 'otakCommitter';
-
-/**
- * Maps UI locales to commit message language names
- * Used to integrate with the existing language system in src/languages/
- */
-export const LOCALE_TO_LANGUAGE_MAP: Record<SupportedLocale, string> = {
-    ja: 'japanese',
-    vi: 'vietnamese',
-    ko: 'korean',
-    fr: 'french',
-    de: 'german',
-    es: 'spanish',
-    pt: 'portuguese',
-    'zh-cn': 'chinese',
-    'zh-tw': 'traditionalChinese',
-    it: 'italian',
-    cs: 'czech',
-    hu: 'hungarian',
-    bg: 'bulgarian',
-    tr: 'turkish',
-    pl: 'polish',
-    ru: 'russian',
-    th: 'thai',
-    hi: 'hindi',
-    bn: 'bengali',
-    jv: 'javanese',
-    ta: 'tamil',
-    my: 'burmese',
-    ar: 'arabic',
-    he: 'hebrew',
-    en: 'english',
-};
 
 /**
  * Manages user's language preference for commit message generation
@@ -146,51 +121,14 @@ export class LanguagePreferenceManager {
             const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
             const preference = config.get(CONFIG_KEY) as string | undefined;
 
-            if (preference && this.isValidLocale(preference)) {
-                return preference as SupportedLocale;
+            if (preference && isSupportedLocale(preference)) {
+                return preference;
             }
             return undefined;
         } catch {
             // If vscode is not available (e.g., in tests), use internal storage
             return this.internalPreference;
         }
-    }
-
-    /**
-     * Validate if a string is a valid supported locale
-     *
-     * @param locale - The locale string to validate
-     * @returns True if the locale is valid
-     */
-    private static isValidLocale(locale: string): boolean {
-        const validLocales: SupportedLocale[] = [
-            'ja',
-            'vi',
-            'ko',
-            'fr',
-            'de',
-            'es',
-            'pt',
-            'zh-cn',
-            'zh-tw',
-            'it',
-            'cs',
-            'hu',
-            'bg',
-            'tr',
-            'pl',
-            'ru',
-            'th',
-            'hi',
-            'bn',
-            'jv',
-            'ta',
-            'my',
-            'ar',
-            'he',
-            'en',
-        ];
-        return validLocales.includes(locale as SupportedLocale);
     }
 
     /**

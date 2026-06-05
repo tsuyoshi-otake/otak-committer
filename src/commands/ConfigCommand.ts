@@ -3,7 +3,7 @@ import { BaseCommand } from './BaseCommand.js';
 import { LANGUAGE_CONFIGS } from '../languages/index.js';
 import { SupportedLanguage } from '../types/enums/SupportedLanguage.js';
 import { MessageStyle } from '../types/enums/MessageStyle.js';
-import { t, LanguagePreferenceManager, SupportedLocale } from '../i18n/index.js';
+import { t, LanguagePreferenceManager, LANGUAGE_NAME_TO_LOCALE } from '../i18n/index.js';
 
 /**
  * Command for managing extension configuration
@@ -71,34 +71,7 @@ export class ConfigCommand extends BaseCommand {
                 );
 
                 // Keep the stored "preferred locale" in sync for all supported UI languages.
-                const localeMap: Record<string, SupportedLocale | undefined> = {
-                    japanese: 'ja',
-                    vietnamese: 'vi',
-                    korean: 'ko',
-                    french: 'fr',
-                    german: 'de',
-                    spanish: 'es',
-                    portuguese: 'pt',
-                    chinese: 'zh-cn',
-                    traditionalChinese: 'zh-tw',
-                    italian: 'it',
-                    czech: 'cs',
-                    hungarian: 'hu',
-                    bulgarian: 'bg',
-                    turkish: 'tr',
-                    polish: 'pl',
-                    russian: 'ru',
-                    thai: 'th',
-                    hindi: 'hi',
-                    bengali: 'bn',
-                    javanese: 'jv',
-                    tamil: 'ta',
-                    burmese: 'my',
-                    arabic: 'ar',
-                    hebrew: 'he',
-                    english: 'en',
-                };
-                const locale = localeMap[selected.description as string];
+                const locale = LANGUAGE_NAME_TO_LOCALE[selected.description as string];
                 if (locale) {
                     await LanguagePreferenceManager.setPreferredLanguage(locale);
                 }
