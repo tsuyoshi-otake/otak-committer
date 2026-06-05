@@ -1,5 +1,100 @@
 # Change Log
 
+## [Unreleased]
+
+### Changed
+
+- **Internal cleanup pass:**
+  - Removed unused barrel files (`src/commands/index.ts`, `src/ui/index.ts`, `src/infrastructure/index.ts`, `src/utils/edgeCaseHandling.ts`) and their dead helpers
+  - Deleted deprecated type shim layer (`src/types/{git,github,language,messageStyle,issue}.ts`); consumers now import from `types/enums/*` and `types/interfaces/*`
+  - Renamed `GitHubApiError` to its canonical `GitHubServiceError` across `src/services/github.*.ts`
+  - Dropped legacy locale group aggregators (`asian`, `european`, `middleEastern`) superseded by the locale registry
+  - Trimmed `src/i18n/index.ts` re-exports to only the symbols actually used externally
+  - Removed `isApiKeySyncEnabled()` (returned constant `false`) and the unused `commitErrorHandler`
+  - Demoted `sanitization` helpers (`escapeShellMetacharacters`, `normalizeTypography`, `removeControlCharacters`) to `@internal` test-only exports; deleted `isCommitMessageSafe` and `containsDangerousPatterns`
+  - Relocated dependency-analysis helpers under `src/__tests__/helpers/dependency/`
+
+### Fixed
+
+- **`LOW_PRIORITY_PATTERNS` regex no longer misclassifies top-level build directories:**
+  - The patterns required a slash on **both** sides of `dist`/`build`/`out`/`coverage`/`__snapshots__`, so paths like `dist/index.js` (no leading slash) were treated as HIGH priority and wasted commit-message token budget
+  - Anchored each pattern with `(^|[\\/])` so the directory matches at the path start as well
+
+### Tests
+
+- Backfilled assertions on four previously vacuous tests (architecture Property 14, command-independence property, dependency analyzer, integration command IDs) so log-only outputs are now real regression checks
+- Re-included `dependencyAnalyzer.test.ts` and `constants/__tests__/diffClassification.test.ts` in the `npm run test:unit` allow-list (the latter had never been wired into any runner before)
+- 371 unit tests passing
+
+## [2.16.9] - 2026-06-06
+
+### Changed
+
+- **Consolidated 25-language locale tables into a single registry:**
+  - Added `src/i18n/supportedLocales.ts` as the single source of truth for `SupportedLocale`, prefix matchers, and the locale-to-language / language-to-locale maps
+  - Replaced `LocaleDetector.detectLocale`'s 25-branch `if`-chain with a table-driven prefix lookup (cyclomatic complexity ~24 → 2)
+  - Removed the duplicated `LOCALE_TO_LANGUAGE_MAP` / `isValidLocale` from `LanguagePreferenceManager` and the inline 25-entry `localeMap` from `ConfigCommand.changeLanguage`
+
+## [2.16.8] - 2026-06-06
+
+### Changed
+
+- **Extracted command workflows and split UI/logging helpers:**
+  - Moved commit and PR command orchestration into `commit.workflow.ts` / `pr.workflow.ts`
+  - Split `Logger` into a dedicated `logSanitizer` module
+  - Broke `StatusBarManager` into `view`, `visibility`, and `publicRepoWarning` modules
+  - Restructured `apiKey.flow` validation handling and added unit tests
+
+## [2.16.7] - 2026-06-05
+
+### Changed
+
+- **Split oversized test and i18n files for maintainability:**
+  - Broke `BaseCommand` tests into focused suites: `errorHandling`, `integration`, `withProgress` (+ shared `baseCommandTestHelpers`)
+  - Broke `CommandRegistry` tests into `errorHandling`, `execution`, `integration` (+ shared `commandRegistryTestHelpers`)
+  - Split `TranslationManager` into `translationLookup`, `translationTypes`, and `translations` modules
+
+## [2.16.6] - 2026-06-05
+
+### Changed
+
+- **Split large command and service modules:**
+  - `CommitCommand.ts` split into `commit.diffProcessing.ts`, `commitMessageInput.ts`, and `commandNotifications.ts`
+  - `openaiInitialize.ts` split into `openaiApiKeyDialogs.ts`, `openaiValidation.ts`, and a slimmer `openaiInitialize.ts`
+  - `edgeCaseHandling.ts` split into `edgeCaseDetection.ts`, `edgeCasePrompts.ts`, and `edgeCaseTypes.ts`
+
+## [2.16.5] - 2026-06-05
+
+### Fixed
+
+- **Hardened API key storage:**
+  - Tightened how the OpenAI API key is persisted and loaded so it cannot leak through ancillary code paths
+
+## [2.16.4] - 2026-06-05
+
+### Fixed
+
+- **Localized generation errors and proper abort handling:**
+  - `BaseCommand`, `CommitCommand`, `IssueCommand`, and `PRCommand` now surface localized error messages instead of raw English strings, and treat user-initiated cancellation distinctly from real failures
+  - PR error reporting (`pr.error.ts`) routes aborts through a non-error notification path
+  - Added 42 lines of new error-message keys to all 25 locale JSON files
+  - Added `commit-error-handling.test.ts` to lock the new behaviour
+
+## [2.16.3] - 2026-04-25
+
+### Fixed
+
+- **Strengthened log redaction across the infrastructure layer:**
+  - Sanitize log messages, string arguments, error messages, and stack traces through a shared redaction flow
+  - Improved URL credential masking and added Bearer token detection to the secret pattern set
+  - Safely serialise complex log arguments **after** sanitisation to reduce the risk of leaking sensitive fields
+  - Restricted the trusted status-bar tooltip commands to the extension's API key and settings actions
+
+### Changed
+
+- Upgraded `simple-git` to 3.36.0 and refreshed the lockfile
+- Revised README copy for commit, PR, issue, authentication, and security descriptions
+
 ## [2.16.2] - 2026-04-22
 
 ### Fixed

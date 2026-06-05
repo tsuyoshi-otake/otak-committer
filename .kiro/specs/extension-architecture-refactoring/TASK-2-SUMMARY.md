@@ -1,5 +1,7 @@
 # Task 2: Reorganize Type System - Summary
 
+> **Historical record.** This document reflects the state at task completion. The legacy type shims at `src/types/{git,github,language,messageStyle,issue}.ts` (and `GitHubApiError` which was deleted as part of that renaming) were fully removed in 2.16.9; consumers now import from `types/enums/*` and `types/interfaces/*` directly.
+
 ## Completed: December 7, 2025
 
 ### Overview

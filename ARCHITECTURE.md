@@ -816,15 +816,14 @@ export class MyCommand extends BaseCommand {
 2. **Register Command**:
 
 ```typescript
-// src/commands/index.ts
-export { MyCommand } from './MyCommand';
-
 // src/extension.ts
-import { MyCommand } from './commands';
+import { MyCommand } from './commands/MyCommand.js';
 
 const registry = new CommandRegistry();
 registry.register(new MyCommand(context));
 ```
+
+> The previous `src/commands/index.ts` barrel was removed in 2.16.9; import command classes directly from their source files.
 
 3. **Add to package.json**:
 

@@ -1,5 +1,7 @@
 # Task 19: Architecture Validation Tests - Implementation Summary
 
+> **Historical record.** This document reflects the state at task completion. The dependency analyzer has since been relocated to `src/__tests__/helpers/dependency/dependencyAnalyzer.ts` (and is no longer exported via `src/utils/index.ts`), reflecting that it is a test-only helper rather than runtime code. APIs are unchanged.
+
 ## Completed: Dependency Analyzer Utility
 
 ### What Was Implemented

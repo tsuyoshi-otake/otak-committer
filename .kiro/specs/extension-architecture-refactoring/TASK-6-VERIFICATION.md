@@ -1,5 +1,7 @@
 # Task 6 Implementation Verification
 
+> **Historical record.** This document reflects the state at task completion. Paths and exports may have changed since — notably `src/infrastructure/index.ts` was removed in 2.16.9 (consumers now import from the concrete module paths directly).
+
 ## Task: Implement StorageManager foundation
 
 ### Requirements (3.1)

@@ -420,11 +420,9 @@ suite('Architecture Property Tests', () => {
                     }
                 }
 
-                // Advisory check: the codebase still has many undocumented exports.
-                // Until JSDoc is backfilled across infrastructure/commands/services/types,
-                // this assertion only guarantees the scan completed and produced a structured
-                // result — i.e. catches regressions where the scanner itself silently breaks.
-                // TODO: tighten to assert.strictEqual(violations.length, 0, ...) after backfill.
+                // Well-shapedness check: the scanner must produce a structured result.
+                // Catches regressions where the scan itself silently breaks (e.g. zero
+                // violations because the export regex stopped matching).
                 assert.ok(
                     Array.isArray(violations),
                     'JSDoc scan must complete and return a violations array',
@@ -439,6 +437,25 @@ suite('Architecture Property Tests', () => {
                         'each violation must record the export name',
                     );
                 });
+
+                // Baseline (ratchet-down) check: prevents new undocumented exports
+                // from being added while we incrementally backfill the existing ones.
+                // ONLY ever lower this number — never raise it. When you document
+                // existing exports and the count drops, edit MAX_UNDOCUMENTED_EXPORTS
+                // to the new (lower) value so future regressions are caught immediately.
+                const MAX_UNDOCUMENTED_EXPORTS = 89;
+                assert.ok(
+                    violations.length <= MAX_UNDOCUMENTED_EXPORTS,
+                    `Undocumented public exports increased: found ${violations.length}, ` +
+                        `baseline is ${MAX_UNDOCUMENTED_EXPORTS}. ` +
+                        `Add JSDoc to the new export(s), or — if you've documented existing ones — ` +
+                        `ratchet the baseline DOWN to ${violations.length}. ` +
+                        `First 10 violations: ` +
+                        violations
+                            .slice(0, 10)
+                            .map((v) => `${v.file}:${v.export}`)
+                            .join(', '),
+                );
             },
         ),
     );
