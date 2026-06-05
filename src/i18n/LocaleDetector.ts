@@ -16,11 +16,6 @@ import { LOCALE_PREFIX_MATCHERS, SupportedLocale } from './supportedLocales';
 export type { SupportedLocale } from './supportedLocales';
 
 /**
- * @deprecated Use SupportedLocale instead
- */
-export type Locale = SupportedLocale;
-
-/**
  * Detects the current VS Code display language
  */
 export class LocaleDetector {

@@ -20,13 +20,7 @@
  * ```
  */
 
-export { LocaleDetector, SupportedLocale, Locale } from './LocaleDetector';
+export { LocaleDetector, SupportedLocale } from './LocaleDetector';
 export { TranslationManager, t } from './TranslationManager';
-export type { TranslationParams } from './translationTypes';
 export { LanguagePreferenceManager } from './LanguagePreferenceManager';
-export {
-    LANGUAGE_NAME_TO_LOCALE,
-    LOCALE_TO_LANGUAGE_MAP,
-    SUPPORTED_LOCALES,
-    isSupportedLocale,
-} from './supportedLocales';
+export { LANGUAGE_NAME_TO_LOCALE } from './supportedLocales';
