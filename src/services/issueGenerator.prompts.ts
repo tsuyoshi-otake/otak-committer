@@ -4,6 +4,12 @@ import { OpenAIService } from './openai';
 
 const MAX_TITLE_TOKENS = 50;
 
+/**
+ * Build the catalog of issue types offered to the user, optionally including emoji
+ *
+ * @param useEmoji - When true, prefix each label with an emoji
+ * @returns The list of available issue types
+ */
 export function getAvailableIssueTypes(useEmoji: boolean): IssueType[] {
     return [
         {
@@ -34,6 +40,16 @@ export function getAvailableIssueTypes(useEmoji: boolean): IssueType[] {
     ];
 }
 
+/**
+ * Generate a concise issue title using the AI model, falling back to a truncated description on failure
+ *
+ * @param openai - OpenAI service used to request the title
+ * @param type - Issue type label included in the prompt context
+ * @param description - User-provided description summarizing the issue
+ * @param language - Natural language to write the title in
+ * @param logger - Logger used for diagnostics
+ * @returns The generated title or a truncated fallback
+ */
 export async function generateTitle(
     openai: OpenAIService,
     type: string,
@@ -57,6 +73,15 @@ export async function generateTitle(
     }
 }
 
+/**
+ * Build the prompt used to ask the AI model to generate a GitHub issue body
+ *
+ * @param analysisResult - Formatted repository analysis to include for context
+ * @param description - User-provided description of the issue
+ * @param useEmoji - When true, allow emoji in headers and key points
+ * @param customMessage - Optional additional instructions appended to the prompt
+ * @returns The composed prompt string for issue body generation
+ */
 export function buildIssueBodyPrompt(
     analysisResult: string,
     description: string,

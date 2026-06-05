@@ -2,6 +2,12 @@ import { GitHubAPI, GitHubServiceError, GitHubDiffFile, PullRequestDiff } from '
 import { Logger } from '../infrastructure/logging/Logger';
 import { TokenManager } from './tokenManager';
 
+/**
+ * Check whether an error indicates that there are no commits between two branches
+ *
+ * @param error - The error value thrown by the GitHub API client
+ * @returns true if the error represents the "no commits between" 422 response
+ */
 export function isNoCommitsBetweenBranchesError(error: unknown): boolean {
     if (typeof error !== 'object' || error === null) {
         return false;
@@ -36,6 +42,17 @@ export function isNoCommitsBetweenBranchesError(error: unknown): boolean {
     return message.includes('No commits between') || dataMessage.includes('No commits between');
 }
 
+/**
+ * Retrieve the diff between two branches, truncating it when token limits are exceeded
+ *
+ * @param octokit - The GitHub API client
+ * @param owner - The repository owner
+ * @param repo - The repository name
+ * @param base - The base branch to compare against
+ * @param compare - The compare branch whose changes are inspected
+ * @param logger - The logger used to record progress
+ * @returns The list of changed files and aggregate statistics
+ */
 export async function getBranchDiffDetails(
     octokit: GitHubAPI,
     owner: string,

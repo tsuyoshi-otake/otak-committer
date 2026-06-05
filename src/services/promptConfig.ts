@@ -10,6 +10,9 @@ export const MESSAGE_LENGTH_LIMITS = {
     [MessageStyle.Detailed]: 2400,
 } as const;
 
+/**
+ * User-controlled options that shape the generated commit or PR prompt.
+ */
 export interface PromptGenerationOptions {
     useEmoji: boolean;
     customMessage: string;
@@ -53,6 +56,11 @@ export function sanitizeTemplateContent(content: string): string {
     return content.slice(0, MAX_TEMPLATE_CONTENT_LENGTH).trim();
 }
 
+/**
+ * Read prompt generation options from the extension's VS Code configuration
+ *
+ * @returns The sanitized prompt generation options derived from user settings
+ */
 export function getPromptGenerationOptions(): PromptGenerationOptions {
     const config = vscode.workspace.getConfiguration('otakCommitter');
     const rawCustomMessage = config.get<string>('customMessage') || '';

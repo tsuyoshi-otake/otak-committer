@@ -26,6 +26,10 @@ interface StatusResult {
     }>;
 }
 
+/**
+ * High-level git service that wraps simple-git with VS Code aware diagnostics
+ * and exposes diff, status, and template helpers used by the extension commands.
+ */
 export class GitService extends BaseService {
     protected git: SimpleGit;
     private workspacePath: string;
@@ -161,6 +165,9 @@ export class GitService extends BaseService {
     }
 }
 
+/**
+ * Factory that resolves the active workspace and constructs a ready-to-use GitService.
+ */
 export class GitServiceFactory extends BaseServiceFactory<GitService> {
     async create(config?: Partial<ServiceConfig>): Promise<GitService> {
         const workspacePath = await resolveRepositoryWorkspacePath();

@@ -1,6 +1,16 @@
 import { GitHubAPI, GitHubServiceError } from '../types';
 import { Logger } from '../infrastructure/logging/Logger';
 
+/**
+ * Fetch the list of branch names for a repository
+ *
+ * @param octokit - The GitHub API client
+ * @param owner - The repository owner
+ * @param repo - The repository name
+ * @param pageSize - The maximum number of branches to retrieve per page
+ * @param logger - The logger used to record progress
+ * @returns The branch names for the repository
+ */
 export async function getBranches(
     octokit: GitHubAPI,
     owner: string,

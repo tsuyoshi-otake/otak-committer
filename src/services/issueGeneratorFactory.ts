@@ -8,6 +8,9 @@ import { GitServiceFactory } from './git';
 import { GitHubServiceFactory } from './github';
 import { IssueGeneratorService } from './issueGeneratorService';
 
+/**
+ * Factory that wires together the dependencies needed to construct an IssueGeneratorService.
+ */
 export class IssueGeneratorServiceFactory extends BaseServiceFactory<IssueGeneratorService> {
     constructor(private readonly context: vscode.ExtensionContext) {
         super();

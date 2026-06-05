@@ -4,6 +4,13 @@ import { t } from '../i18n/index.js';
 import { IssueInfo } from '../types';
 import { GitHubService } from '../services/github';
 
+/**
+ * Prompt the user to choose a related issue to link to the new pull request
+ *
+ * @param github - GitHub service used to list open issues
+ * @param logger - Logger for diagnostics
+ * @returns The selected issue number, or undefined if no issue was chosen
+ */
 export async function selectIssue(
     github: GitHubService,
     logger: Logger,
@@ -40,6 +47,12 @@ export async function selectIssue(
     }
 }
 
+/**
+ * Prompt the user to choose between a draft and a regular pull request
+ *
+ * @param logger - Logger for diagnostics
+ * @returns The selected PR type descriptor, or undefined if cancelled
+ */
 export async function selectPRType(
     logger: Logger,
 ): Promise<{ label: string; value: boolean } | undefined> {

@@ -27,11 +27,26 @@ function setKeysForSync(
     }
 }
 
+/**
+ * Register the extension's globalState keys that should participate in Settings Sync
+ *
+ * @param context - The VS Code extension context whose globalState is configured
+ * @param logger - Logger used to record sync registration failures
+ */
 export function registerKeysForSync(context: vscode.ExtensionContext, logger: Logger): void {
     const keys: string[] = [ALWAYS_STAGE_ALL_KEY];
     setKeysForSync(context, logger, keys);
 }
 
+/**
+ * Configure Settings Sync by registering synced keys and clearing any synced API keys
+ *
+ * @param context - The VS Code extension context whose globalState is configured
+ * @param _secretStorage - Reserved for future use
+ * @param syncedState - Provider used to remove API keys from synced state
+ * @param _configStorage - Reserved for future use
+ * @param logger - Logger used to record sync configuration failures
+ */
 export async function configureSettingsSync(
     context: vscode.ExtensionContext,
     _secretStorage: SecretStorageProvider,

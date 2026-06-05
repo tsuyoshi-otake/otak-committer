@@ -29,6 +29,12 @@ interface PRGenerationWorkflowOptions {
     openExternalUrl: (url: string) => Promise<void>;
 }
 
+/**
+ * Run the end-to-end pull request generation workflow
+ *
+ * @param options - Workflow dependencies, configuration, and UI hooks
+ * @returns true if a pull request was successfully created, false otherwise
+ */
 export async function runPRGenerationWorkflow({
     config,
     logger,

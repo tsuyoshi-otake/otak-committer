@@ -26,6 +26,11 @@ interface ValidateCurrentApiKeyInput {
 
 type ValidationFailureDecision = 'retry' | 'done';
 
+/**
+ * Prompt the user for an API key, optionally validate it, and persist it to storage
+ *
+ * @param input - Dependencies required to prompt, validate, and save the API key
+ */
 export async function promptAndSaveApiKey(input: PromptAndSaveApiKeyInput): Promise<void> {
     const { logger, storage, promptForApiKey, validateKeyFormat, validateWithProgress } = input;
 
@@ -61,6 +66,11 @@ export async function promptAndSaveApiKey(input: PromptAndSaveApiKeyInput): Prom
     }
 }
 
+/**
+ * Validate the currently stored API key and guide the user through retries or updates on failure
+ *
+ * @param input - Dependencies required to validate and possibly re-prompt for the API key
+ */
 export async function validateCurrentApiKey(input: ValidateCurrentApiKeyInput): Promise<void> {
     const { storage, promptAndSaveApiKey, validateWithProgress, maxValidationRetries } = input;
     const currentKey = (await storage.getApiKey('openai'))?.trim();

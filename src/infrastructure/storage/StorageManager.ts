@@ -19,6 +19,9 @@ import {
     setApiKey as setApiKeyInternal,
 } from './storageApiKey';
 
+/**
+ * Facade over secret, synced-state, and configuration storage for the extension
+ */
 export class StorageManager {
     private readonly context: vscode.ExtensionContext;
     private secretStorage: SecretStorageProvider;

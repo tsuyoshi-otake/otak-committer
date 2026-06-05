@@ -3,6 +3,13 @@ import { SimpleGit } from 'simple-git';
 import { Logger } from '../infrastructure/logging/Logger';
 import { t } from '../i18n/index.js';
 
+/**
+ * Ask the user whether to stage all changes before generating a diff
+ *
+ * @param globalState - VS Code global state used to persist the always-stage preference
+ * @param logger - Logger used to record the user's choice
+ * @returns true when the user agrees to stage changes, false otherwise
+ */
 export async function promptForStaging(
     globalState: vscode.Memento | undefined,
     logger: Logger,
@@ -64,6 +71,17 @@ async function stageFile(
     }
 }
 
+/**
+ * Stage modified files, skipping Windows reserved filenames and retrying on index.lock errors
+ *
+ * @param git - The simple-git client bound to the repository
+ * @param modifiedFiles - Paths of files reported as modified
+ * @param reservedNameFiles - Subset of modified files using Windows reserved names
+ * @param logger - Logger used for diagnostics
+ * @param isWindowsReservedNameFn - Predicate identifying Windows reserved filenames
+ * @param indexLockRetryDelayMs - Delay before retrying after an index.lock failure
+ * @param indexLockErrorMessage - Message shown when an index.lock error persists
+ */
 export async function stageFiles(
     git: SimpleGit,
     modifiedFiles: string[],
@@ -102,6 +120,14 @@ export async function stageFiles(
     }
 }
 
+/**
+ * Append a note about files with Windows reserved names to a diff
+ *
+ * @param diff - The current diff text
+ * @param reservedNameFiles - Files whose names cannot be staged on Windows
+ * @param logger - Logger used to record the warning
+ * @returns The diff with a trailing summary of reserved-name files appended
+ */
 export function appendReservedFileInfo(
     diff: string,
     reservedNameFiles: string[],

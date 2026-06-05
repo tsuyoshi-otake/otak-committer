@@ -2,6 +2,9 @@ import { BaseCommand } from './BaseCommand';
 import { t } from '../i18n/index.js';
 import { runPRGenerationWorkflow } from './pr.workflow';
 
+/**
+ * Command that drives the AI-assisted GitHub pull request generation flow
+ */
 export class PRCommand extends BaseCommand {
     async execute(): Promise<void> {
         try {

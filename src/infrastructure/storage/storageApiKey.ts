@@ -14,6 +14,13 @@ interface ApiKeyStorageContext {
     registerKeysForSync: () => void;
 }
 
+/**
+ * Retrieve a stored API key, migrating any legacy plaintext value into secret storage
+ *
+ * @param context - Storage providers and logger used to access the key
+ * @param service - The service provider whose API key to fetch
+ * @returns The stored API key, or undefined if none is available
+ */
 export async function getApiKey(
     context: ApiKeyStorageContext,
     service: ServiceProvider,
@@ -50,6 +57,13 @@ export async function getApiKey(
     }
 }
 
+/**
+ * Persist an API key to secret storage and clear any legacy plaintext copy
+ *
+ * @param context - Storage providers and logger used to write the key
+ * @param service - The service provider whose API key to store
+ * @param value - The API key value to persist
+ */
 export async function setApiKey(
     context: ApiKeyStorageContext,
     service: ServiceProvider,
@@ -79,6 +93,12 @@ export async function setApiKey(
     }
 }
 
+/**
+ * Delete an API key from secret storage, settings sync, and legacy configuration
+ *
+ * @param context - Storage providers and logger used to remove the key
+ * @param service - The service provider whose API key to delete
+ */
 export async function deleteApiKey(
     context: ApiKeyStorageContext,
     service: ServiceProvider,
@@ -124,6 +144,13 @@ export async function deleteApiKey(
     }
 }
 
+/**
+ * Check whether an API key is stored for the given service
+ *
+ * @param context - Storage providers and logger used to look up the key
+ * @param service - The service provider whose API key to check
+ * @returns true if a non-empty key exists in either secret or legacy storage
+ */
 export async function hasApiKey(
     context: ApiKeyStorageContext,
     service: ServiceProvider,

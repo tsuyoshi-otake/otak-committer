@@ -7,6 +7,9 @@ import { t } from '../i18n/index.js';
 import { promptIssueDescription, selectFilesForAnalysis, selectIssueType } from './issue.input';
 import { runIssuePreviewLoop } from './issue.previewFlow';
 
+/**
+ * Command that drives the AI-assisted GitHub issue generation flow
+ */
 export class IssueCommand extends BaseCommand {
     async execute(): Promise<void> {
         try {

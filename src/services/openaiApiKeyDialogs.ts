@@ -1,8 +1,17 @@
 import * as vscode from 'vscode';
 import { t } from '../i18n';
 
+/**
+ * User action chosen from the missing-API-key prompt
+ */
 export type MissingApiKeyAction = 'set' | 'settings' | 'cancel';
+/**
+ * User action chosen from the invalid-stored-API-key prompt
+ */
 export type InvalidApiKeyAction = 'update' | 'remove' | 'diagnose' | 'cancel';
+/**
+ * User action chosen from the API-key validation failure prompt
+ */
 export type ValidationFailureAction = 'retry' | 'continue' | 'diagnose' | 'cancel';
 
 /**
@@ -30,6 +39,11 @@ export async function showApiKeyErrorDialog(): Promise<void> {
     }
 }
 
+/**
+ * Prompt the user when no API key is configured
+ *
+ * @returns The action the user chose
+ */
 export async function promptForMissingApiKey(): Promise<MissingApiKeyAction> {
     const setApiKeyLabel = t('apiKey.setApiKey');
     const openSettingsLabel = t('commands.openSettings');
@@ -49,6 +63,11 @@ export async function promptForMissingApiKey(): Promise<MissingApiKeyAction> {
     return 'cancel';
 }
 
+/**
+ * Prompt the user when the stored API key is known to be invalid
+ *
+ * @returns The action the user chose
+ */
 export async function promptForInvalidStoredApiKey(): Promise<InvalidApiKeyAction> {
     const updateLabel = t('apiKey.updateKey');
     const removeLabel = t('apiKey.removeKey');
@@ -73,6 +92,12 @@ export async function promptForInvalidStoredApiKey(): Promise<InvalidApiKeyActio
     return 'cancel';
 }
 
+/**
+ * Prompt the user after an API key validation attempt fails
+ *
+ * @param reason - Human-readable reason for the validation failure
+ * @returns The action the user chose
+ */
 export async function promptForValidationFailure(reason: string): Promise<ValidationFailureAction> {
     const retryLabel = t('apiKey.retryValidation');
     const continueLabel = t('apiKey.continueWithoutValidation');

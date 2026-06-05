@@ -17,6 +17,10 @@ import { initializeGitHubState } from './github.init';
 import { GitApiRepository } from './git.repository';
 import { t } from '../i18n';
 
+/**
+ * Service that wraps GitHub API operations for the current workspace repository,
+ * handling authentication, branch selection, issues, and pull requests.
+ */
 export class GitHubService extends BaseService implements BranchManager {
     private static readonly GITHUB_PAGE_SIZE = 100;
     private octokit?: GitHubAPI;
@@ -156,6 +160,10 @@ export class GitHubService extends BaseService implements BranchManager {
     }
 }
 
+/**
+ * Factory that creates and initializes GitHubService instances,
+ * surfacing initialization errors through the shared error handler.
+ */
 export class GitHubServiceFactory extends BaseServiceFactory<GitHubService> {
     async create(): Promise<GitHubService> {
         return new GitHubService();

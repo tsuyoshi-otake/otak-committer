@@ -7,6 +7,16 @@ import {
 import { Logger } from '../infrastructure/logging/Logger';
 import { getIssue } from './github.issues';
 
+/**
+ * Create a pull request, optionally linking to an existing issue
+ *
+ * @param octokit - The GitHub API client
+ * @param owner - The repository owner
+ * @param repo - The repository name
+ * @param params - The pull request branches, content, and optional issue link
+ * @param logger - The logger used to record progress
+ * @returns The newly created pull request number, HTML URL, and draft flag
+ */
 export async function createPullRequest(
     octokit: GitHubAPI,
     owner: string,

@@ -5,6 +5,13 @@ import { IssueType } from '../types/interfaces/Issue';
 import { IssueGeneratorService } from '../services/issueGenerator';
 import { selectFiles } from '../utils/fileSelector';
 
+/**
+ * Prompt the user to choose an issue type from the available options
+ *
+ * @param service - Issue generator service exposing the available issue types
+ * @param logger - Logger for diagnostics
+ * @returns The selected issue type, or undefined if cancelled
+ */
 export async function selectIssueType(
     service: IssueGeneratorService,
     logger: Logger,
@@ -25,6 +32,13 @@ export async function selectIssueType(
     return issueType;
 }
 
+/**
+ * Prompt the user to pick files from the repository for issue analysis
+ *
+ * @param service - Issue generator service used to list tracked files
+ * @param logger - Logger for diagnostics
+ * @returns The list of selected file paths, or undefined if cancelled
+ */
 export async function selectFilesForAnalysis(
     service: IssueGeneratorService,
     logger: Logger,
@@ -58,6 +72,12 @@ export async function selectFilesForAnalysis(
     return selectedFiles;
 }
 
+/**
+ * Prompt the user to enter a free-form description of the issue to create
+ *
+ * @param logger - Logger for diagnostics
+ * @returns The entered description, or undefined if cancelled
+ */
 export async function promptIssueDescription(logger: Logger): Promise<string | undefined> {
     logger.debug('Prompting user for issue description');
 

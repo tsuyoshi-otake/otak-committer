@@ -5,6 +5,17 @@ import { TokenManager } from './tokenManager';
 import { t } from '../i18n/index.js';
 import { appendReservedFileInfo, promptForStaging, stageFiles } from './git.staging';
 
+/**
+ * Collect the staged git diff, prompting the user to stage changes when needed
+ *
+ * @param git - The simple-git client bound to the repository
+ * @param logger - Logger used for diagnostics
+ * @param globalState - VS Code global state for persisting staging preferences
+ * @param isWindowsReservedNameFn - Predicate identifying Windows reserved filenames
+ * @param indexLockRetryDelayMs - Delay before retrying after an index.lock failure
+ * @param indexLockErrorMessage - Message shown when an index.lock error is detected
+ * @returns The cached diff string, or undefined when there is nothing to commit
+ */
 export async function collectDiff(
     git: SimpleGit,
     logger: Logger,
@@ -58,6 +69,13 @@ export async function collectDiff(
     return diff;
 }
 
+/**
+ * Truncate a diff to fit within the configured token budget
+ *
+ * @param diff - The diff text to evaluate
+ * @param logger - Logger used to record truncation warnings
+ * @returns The original diff, or a truncated copy when it exceeds the limit
+ */
 export function truncateDiffByTokenLimit(diff: string, logger: Logger): string {
     const truncateThresholdTokens = TokenManager.getConfiguredMaxTokens();
     const tokenCount = TokenManager.estimateTokens(diff);

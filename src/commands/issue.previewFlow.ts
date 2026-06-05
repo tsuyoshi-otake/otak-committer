@@ -77,6 +77,12 @@ async function promptModificationInstructions(
     });
 }
 
+/**
+ * Render the generated issue preview and loop until the user creates or cancels
+ *
+ * @param input - Service, inputs, and UI hooks used during the preview loop
+ * @returns The final issue content approved by the user, or undefined if cancelled
+ */
 export async function runIssuePreviewLoop(
     input: RunIssuePreviewLoopInput,
 ): Promise<GeneratedIssueContent | undefined> {

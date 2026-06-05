@@ -1,6 +1,9 @@
 import * as path from 'path';
 import { SimpleGit } from 'simple-git';
 
+/**
+ * Resolved paths describing a git repository, including worktree metadata.
+ */
 export interface GitRepositoryContext {
     workspacePath: string;
     rootPath: string;
@@ -40,6 +43,9 @@ function resolveGitPathFrom(workspacePath: string, targetPath: string): string {
     return cleanGitPath(path.resolve(workspacePath, targetPath));
 }
 
+/**
+ * Subset of the VS Code Git extension repository surface used by this extension.
+ */
 export interface GitApiRepository {
     rootUri?: RootUriLike;
     inputBox?: { value: string };
@@ -48,6 +54,9 @@ export interface GitApiRepository {
     getConfig(key: string): Promise<string | undefined>;
 }
 
+/**
+ * Subset of the VS Code Git extension API exposing the repository list.
+ */
 export interface GitExtensionAPI {
     repositories: GitApiRepository[];
 }
@@ -86,6 +95,13 @@ async function revParsePath(
     }
 }
 
+/**
+ * Resolve the repository context (root, git dir, worktree status) for a workspace
+ *
+ * @param git - The simple-git client bound to the workspace
+ * @param workspacePath - Filesystem path of the workspace being inspected
+ * @returns The resolved GitRepositoryContext describing the repository layout
+ */
 export async function resolveGitRepositoryContext(
     git: SimpleGit,
     workspacePath: string,
@@ -122,6 +138,13 @@ function resolveWorkspacePath(): string | undefined {
     return vscodeModule.workspace.workspaceFolders?.[0]?.uri.fsPath;
 }
 
+/**
+ * Pick the most relevant repository for a given filesystem path
+ *
+ * @param repositories - Candidate repositories from the Git extension API
+ * @param targetPath - Path used to find the closest matching repository
+ * @returns The best-matching repository, or undefined when none are available
+ */
 export function selectRepositoryForPath(
     repositories: GitApiRepository[],
     targetPath: string | undefined,
@@ -163,6 +186,12 @@ export function selectRepositoryForPath(
     );
 }
 
+/**
+ * Get the repository corresponding to the active workspace folder
+ *
+ * @param gitApi - The VS Code Git extension API
+ * @returns The repository matching the current workspace, or undefined when unavailable
+ */
 export function getRepositoryForCurrentWorkspace(
     gitApi: GitExtensionAPI,
 ): GitApiRepository | undefined {
@@ -194,6 +223,11 @@ async function loadGitExtensionApi(): Promise<GitExtensionAPI | undefined> {
     }
 }
 
+/**
+ * Resolve the workspace path that should be used as the repository root
+ *
+ * @returns The repository root path, falling back to the active workspace when needed
+ */
 export async function resolveRepositoryWorkspacePath(): Promise<string | undefined> {
     const workspacePath = resolveWorkspacePath();
     const gitApi = await loadGitExtensionApi();
@@ -204,6 +238,13 @@ export async function resolveRepositoryWorkspacePath(): Promise<string | undefin
     return repository?.rootUri?.fsPath ?? workspacePath;
 }
 
+/**
+ * Build a user-facing error message that includes the actual index.lock path
+ *
+ * @param baseMessage - The localized template message
+ * @param gitDir - Absolute path to the .git directory holding the lock file
+ * @returns The error message with the resolved index.lock path embedded
+ */
 export function buildIndexLockErrorMessage(baseMessage: string, gitDir: string): string {
     const indexLockPath = cleanGitPath(path.join(gitDir, 'index.lock'));
     if (baseMessage.includes('.git/index.lock')) {

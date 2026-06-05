@@ -24,6 +24,16 @@ interface OpenAIOpsContext {
     signal?: AbortSignal;
 }
 
+/**
+ * Generate a commit message from a diff using the configured OpenAI model
+ *
+ * @param context - Shared OpenAI operation context
+ * @param diff - The git diff to summarize as a commit message
+ * @param language - The natural language identifier for the output
+ * @param messageStyle - The commit message style (e.g. simple/normal/detailed)
+ * @param template - Optional template to guide the generated message
+ * @returns The generated commit message, or undefined on failure
+ */
 export async function generateCommitMessageOp(
     context: OpenAIOpsContext,
     diff: string,
@@ -73,6 +83,14 @@ export async function generateCommitMessageOp(
     }
 }
 
+/**
+ * Summarize a single diff chunk as part of the map-reduce flow
+ *
+ * @param context - Shared OpenAI operation context
+ * @param chunkContent - The diff chunk content to summarize
+ * @param language - The natural language identifier for the output
+ * @returns The summary text, or undefined on failure
+ */
 export async function summarizeChunkOp(
     context: OpenAIOpsContext,
     chunkContent: string,
@@ -122,6 +140,15 @@ const PR_CONTENT_SCHEMA = {
     additionalProperties: false,
 } as const;
 
+/**
+ * Generate a pull request title and body via the OpenAI structured-output API
+ *
+ * @param context - Shared OpenAI operation context
+ * @param diff - The pull request diff used as input
+ * @param language - The natural language identifier for the output
+ * @param template - Optional template to guide the generated PR content
+ * @returns The generated title and body, or undefined on failure
+ */
 export async function generatePRContentOp(
     context: OpenAIOpsContext,
     diff: PullRequestDiff,
@@ -168,6 +195,14 @@ export async function generatePRContentOp(
     }
 }
 
+/**
+ * Run a generic chat completion against the configured OpenAI model
+ *
+ * @param context - Shared OpenAI operation context
+ * @param params - Prompt text and optional token limit
+ * @param language - The natural language identifier for the system prompt
+ * @returns The completion text, or undefined on failure
+ */
 export async function createChatCompletionOp(
     context: OpenAIOpsContext,
     params: {

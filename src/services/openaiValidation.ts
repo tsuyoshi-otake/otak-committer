@@ -1,7 +1,13 @@
 import OpenAI from 'openai';
 
+/**
+ * Category of API key validation failure
+ */
 export type ValidationKind = 'auth' | 'rate_limit' | 'network' | 'server' | 'unknown';
 
+/**
+ * Result of an API key validation attempt, either success or a categorized failure
+ */
 export type ValidateApiKeyResult =
     | { ok: true }
     | {
@@ -81,6 +87,12 @@ function getRetryAfterSeconds(error: unknown): number | undefined {
     return undefined;
 }
 
+/**
+ * Validate an OpenAI API key by issuing a lightweight authenticated request
+ *
+ * @param apiKey - The API key to validate
+ * @returns A success result, or a categorized failure with status and reason
+ */
 export async function validateApiKey(apiKey: string): Promise<ValidateApiKeyResult> {
     try {
         const client = new OpenAI({ apiKey });

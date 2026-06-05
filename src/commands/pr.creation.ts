@@ -3,6 +3,15 @@ import { Logger } from '../infrastructure/logging/Logger';
 import { t } from '../i18n/index.js';
 import { GitHubService } from '../services/github';
 
+/**
+ * Create a pull request, retrying as a regular PR if the repository does not allow drafts
+ *
+ * @param github - GitHub service used to call the PR API
+ * @param params - PR creation parameters
+ * @param isDraft - Whether the user requested a draft PR
+ * @param logger - Logger for diagnostics
+ * @returns The created pull request metadata
+ */
 export async function createPRWithDraftFallback(
     github: GitHubService,
     params: {

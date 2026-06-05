@@ -7,6 +7,12 @@ const SECRET_VALUE_PATTERNS = [
     /Bearer\s+[A-Za-z0-9._-]{20,}/i,
 ];
 
+/**
+ * Redact known secret patterns and URL credentials from a log message string
+ *
+ * @param value - The raw string to sanitize
+ * @returns The string with detected secrets replaced by [REDACTED]
+ */
 export function sanitizeLogMessage(value: string): string {
     let sanitized =
         value.includes('://') && value.includes('@') ? redactUrlCredentials(value) : value;
@@ -21,6 +27,12 @@ export function sanitizeLogMessage(value: string): string {
     return sanitized;
 }
 
+/**
+ * Sanitize an arbitrary log argument by redacting secrets in strings, Errors, and object fields
+ *
+ * @param arg - The value to sanitize before passing it to a log sink
+ * @returns A sanitized representation safe to write to logs
+ */
 export function sanitizeForLogging(arg: unknown): unknown {
     const sanitized = sanitizeLogArg(arg);
     if (

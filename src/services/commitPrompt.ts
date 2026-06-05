@@ -12,6 +12,16 @@ import {
     sanitizeTemplateContent,
 } from './promptConfig';
 
+/**
+ * Build the prompt text used to ask the AI model to generate a commit message
+ *
+ * @param diff - The Git diff to summarize as a commit message
+ * @param language - Natural language to write the commit message in
+ * @param messageStyle - Verbosity style controlling the character limit
+ * @param template - Optional template to follow strictly when generating the message
+ * @param options - Additional generation options such as emoji or conventional commits
+ * @returns The composed prompt string to send to the AI model
+ */
 export function createCommitPromptContent(
     diff: string,
     language: string,

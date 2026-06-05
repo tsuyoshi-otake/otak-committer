@@ -1,5 +1,8 @@
 import OpenAI from 'openai';
 
+/**
+ * Parameters for a plain-text OpenAI chat completion request
+ */
 export interface TextCompletionRequest {
     openai: OpenAI;
     model: string;
@@ -10,6 +13,9 @@ export interface TextCompletionRequest {
     signal?: AbortSignal;
 }
 
+/**
+ * Parameters for a JSON-schema-constrained OpenAI chat completion request
+ */
 export interface StructuredCompletionRequest {
     openai: OpenAI;
     model: string;
@@ -54,6 +60,12 @@ function getCompletionContent(response: {
     return response.choices?.[0]?.message?.content?.trim();
 }
 
+/**
+ * Send a text completion request to the OpenAI chat completions API
+ *
+ * @param request - Text completion request parameters
+ * @returns The trimmed response content, or undefined when no content is returned
+ */
 export async function requestTextCompletion(
     request: TextCompletionRequest,
 ): Promise<string | undefined> {
@@ -69,6 +81,12 @@ export async function requestTextCompletion(
     return getCompletionContent(response);
 }
 
+/**
+ * Send a structured (JSON-schema) completion request to the OpenAI chat completions API
+ *
+ * @param request - Structured completion request parameters including the JSON schema
+ * @returns The parsed JSON response typed as T, or undefined when no content is returned
+ */
 export async function requestStructuredCompletion<T>(
     request: StructuredCompletionRequest,
 ): Promise<T | undefined> {

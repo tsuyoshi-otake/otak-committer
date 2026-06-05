@@ -8,6 +8,9 @@ import { t } from '../i18n/index';
 
 export type { ApiKeyAction };
 
+/**
+ * Result of validating an API key against the OpenAI API.
+ */
 export interface ValidationResult {
     isValid: boolean;
     status?: number;
@@ -15,6 +18,9 @@ export interface ValidationResult {
     error?: string;
 }
 
+/**
+ * Coordinates user interaction, validation, and secure storage of the OpenAI API key.
+ */
 export class ApiKeyManager {
     private static readonly MAX_VALIDATION_RETRIES = 3;
     private readonly logger: Logger;

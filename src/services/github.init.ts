@@ -10,6 +10,9 @@ import {
     GitExtensionAPI,
 } from './git.repository';
 
+/**
+ * Resolved state produced when the GitHub service is initialized for a workspace
+ */
 export interface GitHubInitializationResult {
     octokit: GitHubAPI;
     repository: GitApiRepository;
@@ -40,6 +43,12 @@ async function detectRepositoryInfo(repository: GitApiRepository, logger: Logger
     return { owner, repo: repoName };
 }
 
+/**
+ * Authenticate with GitHub and prepare the Octokit client and repository context
+ *
+ * @param logger - The logger used to record progress
+ * @returns The Octokit client, Git repository, and parsed owner/repo for the workspace
+ */
 export async function initializeGitHubState(logger: Logger): Promise<GitHubInitializationResult> {
     logger.info('Initializing GitHub service');
 

@@ -16,6 +16,9 @@ import {
     getAvailableIssueTypes,
 } from './issueGenerator.prompts';
 
+/**
+ * Service that analyzes repository files and uses the AI model to generate and create GitHub issues.
+ */
 export class IssueGeneratorService extends BaseService {
     constructor(
         private readonly openai: OpenAIService,

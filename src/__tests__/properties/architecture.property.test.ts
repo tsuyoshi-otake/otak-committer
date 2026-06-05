@@ -438,18 +438,16 @@ suite('Architecture Property Tests', () => {
                     );
                 });
 
-                // Baseline (ratchet-down) check: prevents new undocumented exports
-                // from being added while we incrementally backfill the existing ones.
-                // ONLY ever lower this number — never raise it. When you document
-                // existing exports and the count drops, edit MAX_UNDOCUMENTED_EXPORTS
-                // to the new (lower) value so future regressions are caught immediately.
-                const MAX_UNDOCUMENTED_EXPORTS = 89;
+                // Baseline (ratchet-down) check: every public export under
+                // infrastructure/, commands/, services/, types/ is documented as of
+                // 2026-06-06. Any new undocumented export fails this test.
+                // ONLY ever lower this number — never raise it. To add a new export,
+                // add its JSDoc in the same change.
+                const MAX_UNDOCUMENTED_EXPORTS = 0;
                 assert.ok(
                     violations.length <= MAX_UNDOCUMENTED_EXPORTS,
-                    `Undocumented public exports increased: found ${violations.length}, ` +
-                        `baseline is ${MAX_UNDOCUMENTED_EXPORTS}. ` +
-                        `Add JSDoc to the new export(s), or — if you've documented existing ones — ` +
-                        `ratchet the baseline DOWN to ${violations.length}. ` +
+                    `Undocumented public exports found: ${violations.length} (baseline ${MAX_UNDOCUMENTED_EXPORTS}). ` +
+                        `Add JSDoc to each new export. ` +
                         `First 10 violations: ` +
                         violations
                             .slice(0, 10)

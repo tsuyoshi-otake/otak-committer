@@ -30,6 +30,13 @@ async function tryReadFirstTemplate(
     return undefined;
 }
 
+/**
+ * Search the workspace for commit and pull request templates in well-known locations
+ *
+ * @param workspaceRoot - Repository root used as the search base
+ * @param logger - Logger used for diagnostics
+ * @returns The discovered commit and PR template descriptors, when present
+ */
 export async function findTemplates(
     workspaceRoot: string,
     logger: Logger,

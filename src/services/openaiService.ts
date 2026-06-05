@@ -14,6 +14,10 @@ import {
     summarizeChunkOp,
 } from './openai.ops';
 
+/**
+ * High-level service that wraps the OpenAI client for commit message,
+ * PR content, summarization, and chat completion operations
+ */
 export class OpenAIService extends BaseService {
     protected openai: OpenAI;
     private promptService: PromptService;

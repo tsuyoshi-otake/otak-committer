@@ -23,6 +23,12 @@ interface CommitGenerationWorkflowOptions {
     withProgress: ProgressRunner;
 }
 
+/**
+ * Run the end-to-end commit message generation workflow
+ *
+ * @param options - Workflow dependencies and configuration
+ * @returns true if a commit message was generated and applied, false otherwise
+ */
 export async function runCommitGenerationWorkflow({
     context,
     config,

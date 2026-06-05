@@ -7,6 +7,16 @@ import {
 } from '../types';
 import { Logger } from '../infrastructure/logging/Logger';
 
+/**
+ * Fetch a single issue by number
+ *
+ * @param octokit - The GitHub API client
+ * @param owner - The repository owner
+ * @param repo - The repository name
+ * @param number - The issue number to retrieve
+ * @param logger - The logger used to record progress
+ * @returns The issue title, body, and label names
+ */
 export async function getIssue(
     octokit: GitHubAPI,
     owner: string,
@@ -38,6 +48,16 @@ export async function getIssue(
     };
 }
 
+/**
+ * Create a new issue in the repository
+ *
+ * @param octokit - The GitHub API client
+ * @param owner - The repository owner
+ * @param repo - The repository name
+ * @param params - The issue title, body, and labels
+ * @param logger - The logger used to record progress
+ * @returns The newly created issue number and HTML URL
+ */
 export async function createIssue(
     octokit: GitHubAPI,
     owner: string,
@@ -67,6 +87,16 @@ export async function createIssue(
     };
 }
 
+/**
+ * List open issues for the repository, excluding pull requests
+ *
+ * @param octokit - The GitHub API client
+ * @param owner - The repository owner
+ * @param repo - The repository name
+ * @param pageSize - The maximum number of issues to retrieve per page
+ * @param logger - The logger used to record progress
+ * @returns The open issues sorted by most recently updated
+ */
 export async function getIssues(
     octokit: GitHubAPI,
     owner: string,

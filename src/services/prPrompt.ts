@@ -2,6 +2,12 @@ import { PullRequestDiff } from '../types/interfaces/GitHub';
 import { TemplateInfo } from '../types';
 import { PromptGenerationOptions, sanitizeTemplateContent } from './promptConfig';
 
+/**
+ * Format a pull request diff into a human-readable change summary
+ *
+ * @param diff - The pull request diff with per-file additions, deletions, and patches
+ * @returns A textual summary describing changed files and detailed patches
+ */
 export function generateDiffSummaryContent(diff: PullRequestDiff): string {
     return `Changed files:
 ${diff.files.map((file) => `- ${file.filename} (additions: ${file.additions}, deletions: ${file.deletions})`).join('\n')}
@@ -16,6 +22,15 @@ ${file.patch}`,
     .join('\n')}`;
 }
 
+/**
+ * Build the prompt used to ask the AI model to generate a pull request title and body
+ *
+ * @param diffSummary - Pre-formatted summary of the pull request changes
+ * @param language - Natural language to write the title and body in
+ * @param template - Optional template to follow strictly for the PR body
+ * @param options - Additional generation options such as emoji or custom instructions
+ * @returns The composed prompt string to send to the AI model
+ */
 export function createPRPromptContent(
     diffSummary: string,
     language: string,

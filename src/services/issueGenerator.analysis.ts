@@ -90,6 +90,14 @@ async function analyzeOneFile(
     }
 }
 
+/**
+ * Read and analyze the given files, truncating content to fit within a token budget
+ *
+ * @param files - Absolute paths of files to analyze
+ * @param maxTokensLimit - Maximum total tokens allowed across all analyzed file contents
+ * @param logger - Logger used for diagnostics and warnings
+ * @returns Per-file analysis records describing the content and detected type
+ */
 export async function analyzeFiles(
     files: string[],
     maxTokensLimit: number,
@@ -133,6 +141,12 @@ export async function analyzeFiles(
     return analyses;
 }
 
+/**
+ * Format a collection of file analyses into a Markdown report grouped by file type
+ *
+ * @param analyses - File analysis records to format
+ * @returns A Markdown string suitable for inclusion in a generated issue body
+ */
 export function formatAnalysisResult(analyses: FileAnalysis[]): string {
     const parts: string[] = ['# Repository Analysis', ''];
     const groupedByType = analyses.reduce(

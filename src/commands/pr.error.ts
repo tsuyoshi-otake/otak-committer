@@ -16,6 +16,11 @@ function isGitHubApiError(
     return Array.isArray(resp.errors);
 }
 
+/**
+ * Translate a PR creation failure into a user-facing message or wrapped error
+ *
+ * @param error - The error raised by the PR creation API call
+ */
 export function handleCreatePRError(error: unknown): never | void {
     if (error instanceof Error && error.message === 'No changes to create a pull request') {
         vscode.window.showErrorMessage(t('messages.noChangesBetweenBranches'));
