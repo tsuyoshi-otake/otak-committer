@@ -55,7 +55,7 @@ export class TokenManager {
 
     /** Output token allocations by content type */
     public static readonly OUTPUT_TOKENS: OutputTokenAllocations = {
-        COMMIT_MESSAGE: 4000, // Increased for Japanese/CJK languages
+        COMMIT_MESSAGE: 5000, // Increased for Japanese/CJK languages
         PR_TITLE: 500, // Increased for Japanese/CJK titles
         PR_BODY: 8000, // Increased for detailed PR bodies
         ISSUE: 12000, // Increased for comprehensive issues

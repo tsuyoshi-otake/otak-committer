@@ -16,6 +16,12 @@
 
 ### Fixed
 
+- **`OUTPUT_TOKENS.COMMIT_MESSAGE` constant now reflects the value actually sent to OpenAI:**
+  - `generateCommitMessageOp` was hard-coding `max_completion_tokens: 5000` while `TokenManager.OUTPUT_TOKENS.COMMIT_MESSAGE` was set to `4000`, so the constant was decorative and any "configuration" via that constant was silently ignored
+  - Bumped the constant to `5000` to match real behaviour and wired `generateCommitMessageOp` to reference it; `summarizeChunkOp` now references `TokenManager.SUMMARIZATION_OUTPUT_TOKENS` instead of duplicating the literal `2000`
+  - Updated `tokenManager.test.ts` and `responses-api.property.test.ts` Property 9 to assert the new value
+  - Drift in `requestStructuredCompletion` (PR generation sends no `max_completion_tokens`) and `issueGeneratorService.ts` (issue body capped at `1000` while `OUTPUT_TOKENS.ISSUE = 12000`) is left untouched — those involve behaviour changes and need product decisions; see `.kiro/specs/responses-api-test-redesign/research.md` for the open questions
+
 - **`LOW_PRIORITY_PATTERNS` regex no longer misclassifies top-level build directories:**
   - The patterns required a slash on **both** sides of `dist`/`build`/`out`/`coverage`/`__snapshots__`, so paths like `dist/index.js` (no leading slash) were treated as HIGH priority and wasted commit-message token budget
   - Anchored each pattern with `(^|[\\/])` so the directory matches at the path start as well

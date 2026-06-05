@@ -96,14 +96,14 @@ suite('Responses API Property Tests', () => {
     /**
      * Property 9: Commit message output allocation
      * *For any* commit message generation request, the system should
-     * allocate 4,000 output tokens (increased for CJK languages)
+     * allocate 5,000 output tokens (increased for CJK languages)
      * Validates: Requirements 6.1
      */
-    test('Property 9: Commit message should allocate 4000 output tokens', () => {
+    test('Property 9: Commit message should allocate 5000 output tokens', () => {
         assert.strictEqual(
             TokenManager.OUTPUT_TOKENS.COMMIT_MESSAGE,
-            4000,
-            'Commit message output tokens should be 4000',
+            5000,
+            'Commit message output tokens should be 5000',
         );
     });
 

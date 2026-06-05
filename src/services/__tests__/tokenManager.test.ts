@@ -97,8 +97,8 @@ suite('TokenManager', () => {
     });
 
     suite('Output Token Allocations', () => {
-        test('COMMIT_MESSAGE should be 4000', () => {
-            assert.strictEqual(TokenManager.OUTPUT_TOKENS.COMMIT_MESSAGE, 4000);
+        test('COMMIT_MESSAGE should be 5000', () => {
+            assert.strictEqual(TokenManager.OUTPUT_TOKENS.COMMIT_MESSAGE, 5000);
         });
 
         test('PR_TITLE should be 500', () => {

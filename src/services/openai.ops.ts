@@ -9,6 +9,7 @@ import { getPrompt } from '../languages/prompts';
 import type { SupportedLanguage } from '../languages';
 import { PromptType } from '../types/enums/PromptType';
 import { requestTextCompletion, requestStructuredCompletion } from './openai.completion';
+import { TokenManager } from './tokenManager';
 import { t } from '../i18n/index.js';
 import { isUserAbortError } from '../utils/errorGuards';
 
@@ -57,7 +58,7 @@ export async function generateCommitMessageOp(
             systemPrompt,
             userPrompt,
             reasoningEffort: context.getReasoningEffort(),
-            maxCompletionTokens: 5000,
+            maxCompletionTokens: TokenManager.OUTPUT_TOKENS.COMMIT_MESSAGE,
             signal: context.signal,
         });
 
@@ -107,7 +108,7 @@ export async function summarizeChunkOp(
             systemPrompt,
             userPrompt: prompt,
             reasoningEffort: 'low',
-            maxCompletionTokens: 2000,
+            maxCompletionTokens: TokenManager.SUMMARIZATION_OUTPUT_TOKENS,
             signal: context.signal,
         });
 
