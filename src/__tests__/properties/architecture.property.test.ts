@@ -12,7 +12,7 @@ import * as assert from 'assert';
 import * as path from 'path';
 import * as fs from 'fs';
 import { createTaggedPropertyTest } from '../../test/helpers/property-test.helper';
-import { analyzeModuleDependencies, validateLayerBoundaries } from '../../utils/dependencyAnalyzer';
+import { analyzeModuleDependencies, validateLayerBoundaries } from '../helpers/dependency/dependencyAnalyzer';
 
 suite('Architecture Property Tests', () => {
     const srcPath = path.resolve(__dirname, '../../../src');

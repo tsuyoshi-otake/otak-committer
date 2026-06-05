@@ -10,7 +10,7 @@
 
 import * as assert from 'assert';
 import * as path from 'path';
-import { analyzeModuleDependencies } from '../../utils/dependencyAnalyzer';
+import { analyzeModuleDependencies } from '../helpers/dependency/dependencyAnalyzer';
 import { createTaggedPropertyTest } from '../../test/helpers/property-test.helper';
 
 suite('Module Dependency Properties', () => {

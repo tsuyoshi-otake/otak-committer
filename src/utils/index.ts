@@ -41,9 +41,6 @@ export function formatMarkdown(text: string): string {
 // Commit message sanitization - Re-export from sanitization module
 export { sanitizeCommitMessage } from './sanitization';
 
-// Dependency Analysis
-export * from './dependencyAnalyzer';
-
 // Robustness utilities
 export * from './diffUtils';
 export * from './sanitization';

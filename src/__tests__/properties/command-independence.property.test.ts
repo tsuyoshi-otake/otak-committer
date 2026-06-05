@@ -12,7 +12,7 @@ import * as assert from 'assert';
 import * as path from 'path';
 import * as fs from 'fs';
 import { createTaggedPropertyTest } from '../../test/helpers/property-test.helper';
-import { analyzeModuleDependencies, getModuleLayer } from '../../utils/dependencyAnalyzer';
+import { analyzeModuleDependencies, getModuleLayer } from '../helpers/dependency/dependencyAnalyzer';
 
 suite('Command Independence Properties', () => {
     /**

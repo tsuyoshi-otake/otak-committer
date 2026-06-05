@@ -9,7 +9,7 @@ import {
     getModuleLayer,
     validateLayerBoundaries,
     getDependencyStatistics,
-} from '../dependencyAnalyzer';
+} from './dependencyAnalyzer';
 
 suite('Dependency Analyzer', () => {
     test('should analyze module dependencies in src directory', () => {

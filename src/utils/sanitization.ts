@@ -8,7 +8,7 @@
 /**
  * Options for sanitization behavior
  */
-export interface SanitizationOptions {
+interface SanitizationOptions {
     /** Preserve Unicode characters (default: true) */
     preserveUnicode?: boolean;
     /** Escape shell metacharacters (default: true) */
@@ -33,6 +33,9 @@ const DEFAULT_OPTIONS: Required<SanitizationOptions> = {
  * @returns Escaped text
  *
  * **Property 5: Shell metacharacter safety**
+ *
+ * @internal Exposed solely so the robustness test suite can exercise this
+ * helper directly; not part of the public sanitization API.
  */
 export function escapeShellMetacharacters(text: string): string {
     let escaped = text;
@@ -66,6 +69,9 @@ export function escapeShellMetacharacters(text: string): string {
  * @returns Normalized text
  *
  * **Property 7: Typography normalization**
+ *
+ * @internal Exposed solely so the robustness test suite can exercise this
+ * helper directly; not part of the public sanitization API.
  */
 export function normalizeTypography(text: string): string {
     return (
@@ -90,6 +96,9 @@ export function normalizeTypography(text: string): string {
  * @returns Cleaned text
  *
  * **Property 8: Control character removal**
+ *
+ * @internal Exposed solely so the robustness test suite can exercise this
+ * helper directly; not part of the public sanitization API.
  */
 export function removeControlCharacters(text: string): string {
     // Remove control characters 0x00-0x08, 0x0B, 0x0C, 0x0E-0x1F, 0x7F
@@ -105,7 +114,7 @@ export function removeControlCharacters(text: string): string {
  *
  * **Property 6: Markdown code block removal**
  */
-export function removeMarkdownCodeBlocks(text: string): string {
+function removeMarkdownCodeBlocks(text: string): string {
     // Remove opening code block with optional language specifier
     let result = text.replace(/^```[a-zA-Z]*\s*\n/gm, '');
 
@@ -185,36 +194,4 @@ export function sanitizeCommitMessage(message: string, options?: SanitizationOpt
     result = result.trim();
 
     return result;
-}
-
-/**
- * Check if a string contains dangerous shell patterns
- *
- * @param text - Text to check
- * @returns true if dangerous patterns are found
- */
-export function containsDangerousPatterns(text: string): boolean {
-    // Use simple indexOf checks instead of regex to avoid ReDoS risk
-    return text.includes('$(') || text.includes('${') || text.includes('`');
-}
-
-/**
- * Validate that a commit message is safe for git
- *
- * @param message - The message to validate
- * @returns true if the message is safe
- */
-export function isCommitMessageSafe(message: string): boolean {
-    // Check for control characters (except newlines and tabs)
-    const hasControlChars = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/.test(message);
-    if (hasControlChars) {
-        return false;
-    }
-
-    // Check for unescaped dangerous patterns
-    if (containsDangerousPatterns(message)) {
-        return false;
-    }
-
-    return true;
 }
