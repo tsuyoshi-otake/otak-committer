@@ -45,6 +45,13 @@
   - Broke `StatusBarManager` into `view`, `visibility`, and `publicRepoWarning` modules
   - Restructured `apiKey.flow` validation handling and added unit tests
 
+### Removed
+
+- **`gpt-5.4-mini` automatic fallback removed:**
+  - The 429/500/502/503 fallback retry path introduced in 2.15.0 was deleted from `openai.completion.ts` and `openai.ops.ts` (no longer wires a `fallbackModel`, no `isFallbackEligible`, no per-op retry branch)
+  - Rate-limit and server errors are now surfaced to the user directly; `requestTextCompletion` / `requestStructuredCompletion` make a single `chat.completions.create` call and rethrow on failure
+  - The new contract is locked down by `src/services/__tests__/completion.test.ts` ("requestTextCompletion should rethrow failures without fallback retry")
+
 ## [2.16.7] - 2026-06-05
 
 ### Changed

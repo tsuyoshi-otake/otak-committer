@@ -14,14 +14,14 @@ suite('Extension Integration Tests', () => {
     suite('Extension Activation', () => {
         test('extension should be present', () => {
             const extension = vscode.extensions.getExtension(
-                'tsuyoshi-otake-system-exe-jp.otak-committer',
+                'odangoo.otak-committer',
             );
             assert.ok(extension, 'Extension otak-committer should be registered');
         });
 
         test('extension should activate without errors', async () => {
             const extension = vscode.extensions.getExtension(
-                'tsuyoshi-otake-system-exe-jp.otak-committer',
+                'odangoo.otak-committer',
             );
             assert.ok(extension, 'Extension otak-committer should be registered');
             await extension.activate();

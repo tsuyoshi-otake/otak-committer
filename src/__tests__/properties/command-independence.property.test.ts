@@ -37,56 +37,47 @@ suite('Command Independence Properties', () => {
                 const srcPath = path.resolve(__dirname, '../../../src');
                 const result = analyzeModuleDependencies(srcPath);
 
-                // Get all command modules
+                // Only top-level Command CLASSES (CommitCommand, PRCommand, IssueCommand,
+                // ConfigCommand, ...). Workflow / helper / input files that live in the
+                // same directory (commit.workflow.ts, pr.creation.ts, issue.input.ts, ...)
+                // are NOT commands — they are command-private helpers extracted for size,
+                // and one workflow legitimately composes its own helpers.
+                const isCommandClassFile = (p: string) =>
+                    /[\\/]commands[\\/][A-Z][A-Za-z]*Command\.ts$/.test(p);
+
                 const commandModules = Array.from(result.modules.entries()).filter(
                     ([modulePath]) => {
                         const normalized = modulePath.replace(/\\/g, '/');
                         return (
-                            normalized.includes('commands/') &&
+                            isCommandClassFile(normalized) &&
                             !normalized.includes('__tests__') &&
-                            !normalized.includes('index.ts')
+                            !normalized.endsWith('BaseCommand.ts')
                         );
                     },
                 );
 
-                console.log(`Analyzing ${commandModules.length} command modules`);
+                console.log(`Analyzing ${commandModules.length} command-class modules`);
 
-                // For each command module, verify it doesn't import other commands
+                // For each command class, verify it doesn't import another Command class.
+                // Importing same-directory helpers (workflow / input / preview / error) is
+                // allowed — those are not commands.
                 const violations: string[] = [];
 
                 for (const [modulePath, module] of commandModules) {
                     const commandName = path.basename(modulePath, '.ts');
 
-                    // Skip CommandRegistry and BaseCommand (they are infrastructure)
-                    if (commandName === 'CommandRegistry' || commandName === 'BaseCommand') {
-                        continue;
-                    }
-
-                    // Skip commandRegistration.ts (it's infrastructure)
-                    if (modulePath.includes('commandRegistration')) {
-                        continue;
-                    }
-
-                    // Check dependencies
                     for (const dep of module.dependencies) {
                         const normalizedDep = dep.replace(/\\/g, '/');
                         const depName = path.basename(normalizedDep, '.ts');
 
-                        // Check if this dependency is another command
                         if (
-                            normalizedDep.includes('commands/') &&
+                            isCommandClassFile(normalizedDep) &&
                             depName !== 'BaseCommand' &&
-                            depName !== 'CommandRegistry' &&
-                            depName !== 'index' &&
+                            depName !== commandName &&
                             !normalizedDep.includes('__tests__')
                         ) {
-                            // Allow importing from the same file
-                            if (depName === commandName) {
-                                continue;
-                            }
-
                             violations.push(
-                                `${commandName} imports ${depName} - commands should not depend on other commands`,
+                                `${commandName} imports ${depName} - Command classes should not depend on other Command classes`,
                             );
                         }
                     }
