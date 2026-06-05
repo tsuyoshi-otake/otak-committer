@@ -7,7 +7,9 @@
  */
 
 import * as fc from 'fast-check';
-import { createEdgeCasePrompt, detectEdgeCase, EdgeCaseType } from '../../utils/edgeCaseHandling';
+import { detectEdgeCase } from '../../utils/edgeCaseDetection';
+import { createEdgeCasePrompt } from '../../utils/edgeCasePrompts';
+import { EdgeCaseType } from '../../utils/edgeCaseTypes';
 import { FileCategories } from '../../utils/diffUtils';
 import { runPropertyTest } from '../../test/helpers/property-test.helper';
 
