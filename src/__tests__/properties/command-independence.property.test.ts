@@ -285,7 +285,12 @@ suite('Command Independence Properties', () => {
             violations.forEach((v) => console.log(`  - ${v}`));
         }
 
-        // This is a warning, not a hard failure
-        // Commands may have static helpers that are acceptable
+        assert.strictEqual(
+            violations.length,
+            0,
+            `Found ${violations.length} potential shared mutable state violation(s). ` +
+                `Commands should not expose static mutable properties:\n` +
+                violations.map((v) => `  - ${v}`).join('\n'),
+        );
     });
 });

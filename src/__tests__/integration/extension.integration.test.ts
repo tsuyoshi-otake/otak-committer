@@ -16,61 +16,86 @@ suite('Extension Integration Tests', () => {
             const extension = vscode.extensions.getExtension(
                 'tsuyoshi-otake-system-exe-jp.otak-committer',
             );
-            // Extension may or may not be present in test environment
-            // This is an informational test
-            console.log(`Extension found: ${!!extension}`);
+            assert.ok(extension, 'Extension otak-committer should be registered');
         });
 
         test('extension should activate without errors', async () => {
             const extension = vscode.extensions.getExtension(
                 'tsuyoshi-otake-system-exe-jp.otak-committer',
             );
-
-            if (!extension) {
-                console.log('Extension not found, skipping activation test');
-                return;
-            }
-
-            try {
-                await extension.activate();
-                assert.ok(extension.isActive, 'Extension should be active after activation');
-            } catch (error) {
-                // Some activation errors are expected in test environment
-                console.log('Activation resulted in:', error);
-            }
+            assert.ok(extension, 'Extension otak-committer should be registered');
+            await extension.activate();
+            assert.strictEqual(
+                extension.isActive,
+                true,
+                'Extension should be active after activation',
+            );
         });
     });
 
     suite('Command Registration', () => {
-        test('generate commit command should be registered', async () => {
+        test('generateMessage command should be registered', async () => {
             const commands = await vscode.commands.getCommands(true);
-            const hasGenerateCommit = commands.includes('otak-committer.generateCommit');
-            console.log(`generateCommit command registered: ${hasGenerateCommit}`);
-            // Don't assert - command may not be registered in test environment
+            assert.ok(
+                commands.includes('otak-committer.generateMessage'),
+                'otak-committer.generateMessage should be registered',
+            );
         });
 
-        test('generate PR command should be registered', async () => {
+        test('generatePR command should be registered', async () => {
             const commands = await vscode.commands.getCommands(true);
-            const hasGeneratePR = commands.includes('otak-committer.generatePR');
-            console.log(`generatePR command registered: ${hasGeneratePR}`);
+            assert.ok(
+                commands.includes('otak-committer.generatePR'),
+                'otak-committer.generatePR should be registered',
+            );
         });
 
-        test('generate issue command should be registered', async () => {
+        test('generateIssue command should be registered', async () => {
             const commands = await vscode.commands.getCommands(true);
-            const hasGenerateIssue = commands.includes('otak-committer.generateIssue');
-            console.log(`generateIssue command registered: ${hasGenerateIssue}`);
+            assert.ok(
+                commands.includes('otak-committer.generateIssue'),
+                'otak-committer.generateIssue should be registered',
+            );
         });
 
-        test('change language command should be registered', async () => {
+        test('openSettings command should be registered', async () => {
             const commands = await vscode.commands.getCommands(true);
-            const hasChangeLanguage = commands.includes('otak-committer.changeLanguage');
-            console.log(`changeLanguage command registered: ${hasChangeLanguage}`);
+            assert.ok(
+                commands.includes('otak-committer.openSettings'),
+                'otak-committer.openSettings should be registered',
+            );
         });
 
-        test('change message style command should be registered', async () => {
+        test('changeLanguage command should be registered', async () => {
             const commands = await vscode.commands.getCommands(true);
-            const hasChangeStyle = commands.includes('otak-committer.changeMessageStyle');
-            console.log(`changeMessageStyle command registered: ${hasChangeStyle}`);
+            assert.ok(
+                commands.includes('otak-committer.changeLanguage'),
+                'otak-committer.changeLanguage should be registered',
+            );
+        });
+
+        test('changeMessageStyle command should be registered', async () => {
+            const commands = await vscode.commands.getCommands(true);
+            assert.ok(
+                commands.includes('otak-committer.changeMessageStyle'),
+                'otak-committer.changeMessageStyle should be registered',
+            );
+        });
+
+        test('setApiKey command should be registered', async () => {
+            const commands = await vscode.commands.getCommands(true);
+            assert.ok(
+                commands.includes('otak-committer.setApiKey'),
+                'otak-committer.setApiKey should be registered',
+            );
+        });
+
+        test('diagnoseStorage command should be registered', async () => {
+            const commands = await vscode.commands.getCommands(true);
+            assert.ok(
+                commands.includes('otak-committer.diagnoseStorage'),
+                'otak-committer.diagnoseStorage should be registered',
+            );
         });
     });
 

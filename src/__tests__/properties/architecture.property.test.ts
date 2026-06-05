@@ -420,9 +420,25 @@ suite('Architecture Property Tests', () => {
                     }
                 }
 
-                // This is a soft check - many exports may lack documentation
-                // We report but don't fail for now
-                console.log(`\nFound ${violations.length} exports without JSDoc documentation`);
+                // Advisory check: the codebase still has many undocumented exports.
+                // Until JSDoc is backfilled across infrastructure/commands/services/types,
+                // this assertion only guarantees the scan completed and produced a structured
+                // result — i.e. catches regressions where the scanner itself silently breaks.
+                // TODO: tighten to assert.strictEqual(violations.length, 0, ...) after backfill.
+                assert.ok(
+                    Array.isArray(violations),
+                    'JSDoc scan must complete and return a violations array',
+                );
+                violations.forEach((v) => {
+                    assert.ok(
+                        typeof v.file === 'string' && v.file.length > 0,
+                        'each violation must record the file it came from',
+                    );
+                    assert.ok(
+                        typeof v.export === 'string' && v.export.length > 0,
+                        'each violation must record the export name',
+                    );
+                });
             },
         ),
     );

@@ -94,6 +94,10 @@ async function runUnitTests() {
             cwd: testsRoot,
         });
 
+        // Pure Node-side helpers and constants tests (no vscode imports)
+        const helperTests = await glob('__tests__/helpers/**/*.test.js', { cwd: testsRoot });
+        const constantsTests = await glob('constants/__tests__/**/*.test.js', { cwd: testsRoot });
+
         // Filter robustness tests to exclude those requiring vscode
         const filteredRobustnessServiceTests = robustnessServiceTests.filter(
             (test) => test.includes('git.robustness') || test.includes('prompt-edge-cases'),
@@ -120,6 +124,8 @@ async function runUnitTests() {
             ...filteredRobustnessServiceTests,
             ...filteredRobustnessUtilTests,
             ...filteredRobustnessCommandTests,
+            ...helperTests,
+            ...constantsTests,
         ];
 
         console.log(`Found ${allTests.length} test file(s):`);
@@ -137,6 +143,8 @@ async function runUnitTests() {
         console.log(
             `  - Robustness tests: ${filteredRobustnessServiceTests.length + filteredRobustnessUtilTests.length + filteredRobustnessCommandTests.length}`,
         );
+        console.log(`  - Helper tests: ${helperTests.length}`);
+        console.log(`  - Constants tests: ${constantsTests.length}`);
 
         // Add files to the test suite
         allTests.forEach((f: string) => {

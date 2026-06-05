@@ -13,7 +13,7 @@ import {
 
 suite('Dependency Analyzer', () => {
     test('should analyze module dependencies in src directory', () => {
-        const srcPath = path.resolve(__dirname, '../../../src');
+        const srcPath = path.resolve(__dirname, '../../../../src');
         const result = analyzeModuleDependencies(srcPath);
 
         // Should find modules
@@ -26,7 +26,7 @@ suite('Dependency Analyzer', () => {
     });
 
     test('should detect no circular dependencies in current codebase', () => {
-        const srcPath = path.resolve(__dirname, '../../../src');
+        const srcPath = path.resolve(__dirname, '../../../../src');
         const result = analyzeModuleDependencies(srcPath);
 
         // Log any cycles found for debugging
@@ -37,9 +37,14 @@ suite('Dependency Analyzer', () => {
             });
         }
 
-        // This test documents the current state
-        // If cycles exist, they should be fixed
         console.log(`Found ${result.cycles.length} circular dependencies`);
+
+        const cycleList = result.cycles.map((c) => c.description).join('; ');
+        assert.strictEqual(
+            result.cycles.length,
+            0,
+            `Expected no circular dependencies, but found ${result.cycles.length}: ${cycleList}`,
+        );
     });
 
     test('should correctly identify module layers', () => {
@@ -68,7 +73,7 @@ suite('Dependency Analyzer', () => {
     });
 
     test('should validate layer boundaries', () => {
-        const srcPath = path.resolve(__dirname, '../../../src');
+        const srcPath = path.resolve(__dirname, '../../../../src');
         const result = analyzeModuleDependencies(srcPath);
         const violations = validateLayerBoundaries(result.modules);
 
@@ -81,12 +86,20 @@ suite('Dependency Analyzer', () => {
             });
         }
 
-        // This test documents the current state
         console.log(`Found ${violations.length} layer boundary violations`);
+
+        const violationList = violations
+            .map((v) => `${v.from} -> ${v.to} (${v.violation})`)
+            .join('; ');
+        assert.strictEqual(
+            violations.length,
+            0,
+            `Expected no layer boundary violations, but found ${violations.length}: ${violationList}`,
+        );
     });
 
     test('should calculate dependency statistics', () => {
-        const srcPath = path.resolve(__dirname, '../../../src');
+        const srcPath = path.resolve(__dirname, '../../../../src');
         const result = analyzeModuleDependencies(srcPath);
         const stats = getDependencyStatistics(result.modules);
 
@@ -116,7 +129,7 @@ suite('Dependency Analyzer', () => {
     });
 
     test('should exclude test directories', () => {
-        const srcPath = path.resolve(__dirname, '../../../src');
+        const srcPath = path.resolve(__dirname, '../../../../src');
         const result = analyzeModuleDependencies(srcPath);
 
         // Check that test files are excluded

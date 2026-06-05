@@ -49,11 +49,11 @@ export const LOW_PRIORITY_PATTERNS: readonly RegExp[] = [
     /\.snap$/,
     /\.map$/,
     /\.generated\./,
-    /[\\/]dist[\\/]/,
-    /[\\/]build[\\/]/,
-    /[\\/]out[\\/]/,
-    /[\\/]coverage[\\/]/,
-    /[\\/]__snapshots__[\\/]/,
+    /(^|[\\/])dist[\\/]/,
+    /(^|[\\/])build[\\/]/,
+    /(^|[\\/])out[\\/]/,
+    /(^|[\\/])coverage[\\/]/,
+    /(^|[\\/])__snapshots__[\\/]/,
 ];
 
 /**
