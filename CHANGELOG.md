@@ -1,5 +1,12 @@
 # Change Log
 
+## [2.16.11] - 2026-06-29
+
+### Changed
+
+- **Refreshed extension icon:** replaced the Marketplace/extension icon with the new `otak-committer-icon` artwork (`images/otak-committer-icon-128.png`) and removed the legacy `images/icon.png`.
+- **Rewrote the README:** restructured the documentation to match the shared otak-* template (centered header with badges, install links, tabular settings, and a related-extensions table) while keeping the existing screenshots and feature coverage.
+
 ## [2.16.10] - 2026-06-06
 
 ### Changed

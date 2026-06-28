@@ -4,7 +4,7 @@
   "description": "%extension.description%",
   "publisher": "odangoo",
   "license": "MIT",
-  "icon": "images/icon.png",
+  "icon": "images/otak-committer-icon-128.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/tsuyoshi-otake/otak-committer"
@@ -13,7 +13,7 @@
     "url": "https://github.com/tsuyoshi-otake/otak-committer/issues"
   },
   "homepage": "https://github.com/tsuyoshi-otake/otak-committer#readme",
-  "version": "2.16.10",
+  "version": "2.16.11",
   "overrides": {
     "minimatch": ">=10.2.3",
     "diff": ">=8.0.3",
