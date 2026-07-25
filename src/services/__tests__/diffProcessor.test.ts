@@ -119,5 +119,29 @@ suite('DiffProcessor', () => {
 
             assert.strictEqual(result.tier, DiffTier.Normal);
         });
+
+        test('should propagate Tier 3 aborts without returning a partial diff', async () => {
+            const controller = new AbortController();
+            const abortError = new Error('The operation was aborted');
+            abortError.name = 'AbortError';
+            const openai = {
+                summarizeChunk: async () => {
+                    controller.abort();
+                    throw abortError;
+                },
+            } as any;
+            const processor = new DiffProcessor(openai);
+            const diff = makeMultiFileDiff([
+                { path: 'src/a.ts', lineCount: 1000 },
+                { path: 'src/b.ts', lineCount: 1000 },
+                { path: 'src/c.ts', lineCount: 1000 },
+            ]);
+
+            await assert.rejects(
+                processor.process(diff, 100, controller.signal),
+                (error: unknown) =>
+                    error instanceof Error && error.name === 'AbortError',
+            );
+        });
     });
 });

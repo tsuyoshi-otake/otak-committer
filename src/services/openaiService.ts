@@ -5,7 +5,10 @@ import { PromptService } from './prompt';
 import { ServiceConfig, TemplateInfo } from '../types';
 import { MessageStyle } from '../types/enums/MessageStyle';
 import { PullRequestDiff } from '../types/interfaces/GitHub';
-import { invalidateValidatedApiKey } from './openaiKeyValidationCache';
+import {
+    invalidateValidatedConnection,
+    markConnectionValidated,
+} from './openaiKeyValidationCache';
 import { initializeOpenAIService, showApiKeyErrorDialog } from './openaiInitialize';
 import {
     createChatCompletionOp,
@@ -13,6 +16,13 @@ import {
     generatePRContentOp,
     summarizeChunkOp,
 } from './openai.ops';
+import {
+    createOpenAIConnectionContext,
+    type OpenAIConnectionContext,
+} from './openaiConnection';
+import { createOpenAIClient } from './openaiClient';
+import { getModelForOperation, type OpenAIOperation } from './openaiModels';
+import { validateApiKey as validateOpenAIConnection } from './openaiValidation';
 
 /**
  * High-level service that wraps the OpenAI client for commit message,
@@ -21,12 +31,18 @@ import {
 export class OpenAIService extends BaseService {
     protected openai: OpenAI;
     private promptService: PromptService;
-    private static readonly MODEL = 'gpt-5.4';
+    private readonly connection: OpenAIConnectionContext;
+    private authErrorPrompt?: Promise<void>;
 
     constructor(config?: Partial<ServiceConfig>) {
         super(config);
         this.validateState(!!this.config.openaiApiKey, 'OpenAI API key is required');
-        this.openai = new OpenAI({ apiKey: this.config.openaiApiKey });
+        this.connection = createOpenAIConnectionContext(
+            this.config.openaiApiKey,
+            this.config.openaiBaseUrl,
+            process.env.OPENAI_BASE_URL,
+        );
+        this.openai = createOpenAIClient(this.connection);
         this.promptService = new PromptService();
     }
 
@@ -50,11 +66,15 @@ export class OpenAIService extends BaseService {
     }
 
     private async promptToUpdateApiKey(): Promise<void> {
-        const apiKey = this.config.openaiApiKey?.trim();
-        if (apiKey) {
-            invalidateValidatedApiKey(apiKey);
+        invalidateValidatedConnection(this.connection.apiKey, this.connection.baseURL);
+        if (this.authErrorPrompt) {
+            return this.authErrorPrompt;
         }
-        await showApiKeyErrorDialog();
+
+        this.authErrorPrompt = showApiKeyErrorDialog().finally(() => {
+            this.authErrorPrompt = undefined;
+        });
+        return this.authErrorPrompt;
     }
 
     private getReasoningEffort(): 'low' | 'medium' | 'high' | undefined {
@@ -70,7 +90,7 @@ export class OpenAIService extends BaseService {
         signal?: AbortSignal,
     ): Promise<string | undefined> {
         return generateCommitMessageOp(
-            this.getOpsContext(signal),
+            this.getOpsContext('commit-message', signal),
             diff,
             language,
             messageStyle,
@@ -83,7 +103,11 @@ export class OpenAIService extends BaseService {
         language: string,
         signal?: AbortSignal,
     ): Promise<string | undefined> {
-        return summarizeChunkOp(this.getOpsContext(signal), chunkContent, language);
+        return summarizeChunkOp(
+            this.getOpsContext('commit-summary', signal),
+            chunkContent,
+            language,
+        );
     }
 
     async generatePRContent(
@@ -91,7 +115,7 @@ export class OpenAIService extends BaseService {
         language: string,
         template?: TemplateInfo,
     ): Promise<{ title: string; body: string } | undefined> {
-        return generatePRContentOp(this.getOpsContext(), diff, language, template);
+        return generatePRContentOp(this.getOpsContext('pr-content'), diff, language, template);
     }
 
     async createChatCompletion(params: {
@@ -99,19 +123,21 @@ export class OpenAIService extends BaseService {
         maxTokens?: number;
     }): Promise<string | undefined> {
         const language = this.config.language || 'english';
-        return createChatCompletionOp(this.getOpsContext(), params, language);
+        return createChatCompletionOp(this.getOpsContext('generic-chat'), params, language);
     }
 
     async validateApiKey(): Promise<boolean> {
-        try {
-            this.logger.debug('Validating OpenAI API key');
-            await this.openai.models.list();
+        this.logger.debug('Validating OpenAI API key');
+        const result = await validateOpenAIConnection(
+            this.connection.apiKey,
+            this.connection.baseURL,
+        );
+        if (result.ok) {
             this.logger.info('OpenAI API key validated successfully');
             return true;
-        } catch (error) {
-            this.logger.warning('OpenAI API key validation failed', error);
-            return false;
         }
+        this.logger.warning('OpenAI API key validation failed', result);
+        return false;
     }
 
     static async initialize(
@@ -121,16 +147,18 @@ export class OpenAIService extends BaseService {
         return initializeOpenAIService(config, context, async (cfg) => new OpenAIService(cfg));
     }
 
-    private getOpsContext(signal?: AbortSignal) {
+    private getOpsContext(operation: OpenAIOperation, signal?: AbortSignal) {
         return {
             openai: this.openai,
             promptService: this.promptService,
             logger: this.logger,
-            model: OpenAIService.MODEL,
+            model: getModelForOperation(operation),
             getReasoningEffort: () => this.getReasoningEffort(),
             onAuthError: () => this.promptToUpdateApiKey(),
             showError: (message: string, error?: unknown) => this.showError(message, error),
             isAuthenticationError: (error: unknown) => this.isAuthenticationError(error),
+            onRequestSuccess: () =>
+                markConnectionValidated(this.connection.apiKey, this.connection.baseURL),
             signal,
         };
     }

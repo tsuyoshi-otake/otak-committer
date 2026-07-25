@@ -1,7 +1,7 @@
 /**
  * Mock utilities for OpenAI Responses API testing
  *
- * Provides utilities to mock the GPT-5.4 Responses API for unit and property tests
+ * Provides utilities to mock legacy Responses API behavior for unit and property tests
  * without requiring actual API calls.
  */
 
@@ -300,7 +300,7 @@ export function getUserFriendlyMessage(
                 ? `OpenAI API rate limit reached. Please try again in ${retryAfter} seconds.`
                 : 'OpenAI API rate limit reached. Please try again later.';
         case ResponsesAPIErrorType.INVALID_MODEL:
-            return 'GPT-5.4 model not accessible. Please check your API key has access to GPT-5.4.';
+            return 'The configured OpenAI model is not accessible. Please check model access for your API key or gateway.';
         case ResponsesAPIErrorType.CONTEXT_LENGTH_EXCEEDED:
             return 'Input too large for processing. Content has been truncated.';
         case ResponsesAPIErrorType.NETWORK:

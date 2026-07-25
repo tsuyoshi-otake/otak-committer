@@ -59,39 +59,38 @@ suite('ApiKeyManager Unit Tests', () => {
             assert.strictEqual(ApiKeyManager.validateKeyFormat('key-' + 'a'.repeat(40)), false);
         });
 
-        test('should accept short keys (new permissive pattern)', () => {
-            // Short keys (1-39 chars after sk-) should now be accepted
+        test('should reject official keys shorter than the minimum suffix', () => {
             const shortKey = 'sk-' + 'a'.repeat(5);
-            assert.strictEqual(ApiKeyManager.validateKeyFormat(shortKey), true);
+            assert.strictEqual(ApiKeyManager.validateKeyFormat(shortKey), false);
 
-            // Minimum valid key: sk- + 1 character
-            assert.strictEqual(ApiKeyManager.validateKeyFormat('sk-a'), true);
-            assert.strictEqual(ApiKeyManager.validateKeyFormat('sk-1'), true);
+            assert.strictEqual(ApiKeyManager.validateKeyFormat('sk-a'), false);
+            assert.strictEqual(ApiKeyManager.validateKeyFormat('sk-1'), false);
         });
 
-        test('should accept key with special characters (new permissive pattern)', () => {
-            // Special characters after sk- should now be accepted
+        test('should reject unsupported characters for the official endpoint', () => {
             const keyWithSpecial = 'sk-' + 'a'.repeat(20) + '!' + 'a'.repeat(20);
-            assert.strictEqual(ApiKeyManager.validateKeyFormat(keyWithSpecial), true);
+            assert.strictEqual(ApiKeyManager.validateKeyFormat(keyWithSpecial), false);
         });
 
-        test('should accept key with spaces in middle (new permissive pattern)', () => {
-            // Spaces in the middle of the key are now accepted
+        test('should reject spaces in official endpoint keys', () => {
             const keyWithSpace = 'sk-' + 'a'.repeat(20) + ' ' + 'a'.repeat(20);
-            assert.strictEqual(ApiKeyManager.validateKeyFormat(keyWithSpace), true);
+            assert.strictEqual(ApiKeyManager.validateKeyFormat(keyWithSpace), false);
         });
 
-        test('should accept key with hyphen in suffix (new permissive pattern)', () => {
-            // Hyphens after sk- prefix should now be accepted
+        test('should accept hyphen and supported official key prefixes', () => {
             const keyWithHyphen = 'sk-' + 'a'.repeat(20) + '-' + 'a'.repeat(20);
             assert.strictEqual(ApiKeyManager.validateKeyFormat(keyWithHyphen), true);
 
-            // Project-style keys
-            assert.strictEqual(ApiKeyManager.validateKeyFormat('sk-proj-abc123'), true);
+            for (const prefix of ['proj-', 'svcacct-', 'admin-', 'or-', 'ant-']) {
+                assert.strictEqual(
+                    ApiKeyManager.validateKeyFormat(`sk-${prefix}${'a'.repeat(20)}`),
+                    true,
+                );
+            }
+            assert.strictEqual(ApiKeyManager.validateKeyFormat('sk-proj-abc123'), false);
         });
 
-        test('should accept key with underscore (new permissive pattern)', () => {
-            // Underscores after sk- should now be accepted
+        test('should accept key with underscore', () => {
             const keyWithUnderscore = 'sk-' + 'a'.repeat(20) + '_' + 'a'.repeat(20);
             assert.strictEqual(ApiKeyManager.validateKeyFormat(keyWithUnderscore), true);
         });
@@ -102,14 +101,23 @@ suite('ApiKeyManager Unit Tests', () => {
             const validKey = '  sk-' + 'a'.repeat(40) + '  ';
             assert.strictEqual(ApiKeyManager.validateKeyFormat(validKey), true);
 
-            // Short key with whitespace should also work
-            assert.strictEqual(ApiKeyManager.validateKeyFormat('  sk-test  '), true);
+            assert.strictEqual(ApiKeyManager.validateKeyFormat('  sk-test  '), false);
         });
 
         test('should reject sk- prefix alone without characters after', () => {
             // sk- with nothing after should be rejected
             assert.strictEqual(ApiKeyManager.validateKeyFormat('sk-'), false);
             assert.strictEqual(ApiKeyManager.validateKeyFormat('  sk-  '), false);
+        });
+
+        test('should accept any non-empty trimmed token for a custom gateway', () => {
+            const baseURL = 'https://gateway.example.com/openai/v1';
+            assert.strictEqual(
+                ApiKeyManager.validateKeyFormat(' gateway-token ', baseURL),
+                true,
+            );
+            assert.strictEqual(ApiKeyManager.validateKeyFormat('x', baseURL), true);
+            assert.strictEqual(ApiKeyManager.validateKeyFormat('   ', baseURL), false);
         });
     });
 

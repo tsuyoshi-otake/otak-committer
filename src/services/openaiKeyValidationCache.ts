@@ -1,9 +1,14 @@
 import * as crypto from 'crypto';
+import { resolveOpenAIBaseUrl } from './openaiConnection';
 
-const validatedKeyHashes = new Set<string>();
+const validatedConnectionHashes = new Set<string>();
 
-function hashKey(apiKey: string): string {
-    return crypto.createHash('sha256').update(apiKey).digest('hex');
+function hashConnection(apiKey: string, baseURL: string): string {
+    const normalizedBaseURL = resolveOpenAIBaseUrl(baseURL);
+    return crypto
+        .createHash('sha256')
+        .update(`${normalizedBaseURL}\0${apiKey}`)
+        .digest('hex');
 }
 
 /**
@@ -14,12 +19,12 @@ function hashKey(apiKey: string): string {
  * @param apiKey - OpenAI API key
  * @returns True if the key is already validated for this session
  */
-export function isApiKeyValidated(apiKey: string): boolean {
+export function isConnectionValidated(apiKey: string, baseURL: string): boolean {
     const trimmed = apiKey.trim();
     if (!trimmed) {
         return false;
     }
-    return validatedKeyHashes.has(hashKey(trimmed));
+    return validatedConnectionHashes.has(hashConnection(trimmed, baseURL));
 }
 
 /**
@@ -27,12 +32,12 @@ export function isApiKeyValidated(apiKey: string): boolean {
  *
  * @param apiKey - OpenAI API key
  */
-export function markApiKeyValidated(apiKey: string): void {
+export function markConnectionValidated(apiKey: string, baseURL: string): void {
     const trimmed = apiKey.trim();
     if (!trimmed) {
         return;
     }
-    validatedKeyHashes.add(hashKey(trimmed));
+    validatedConnectionHashes.add(hashConnection(trimmed, baseURL));
 }
 
 /**
@@ -43,10 +48,10 @@ export function markApiKeyValidated(apiKey: string): void {
  *
  * @param apiKey - OpenAI API key
  */
-export function invalidateValidatedApiKey(apiKey: string): void {
+export function invalidateValidatedConnection(apiKey: string, baseURL: string): void {
     const trimmed = apiKey.trim();
     if (!trimmed) {
         return;
     }
-    validatedKeyHashes.delete(hashKey(trimmed));
+    validatedConnectionHashes.delete(hashConnection(trimmed, baseURL));
 }

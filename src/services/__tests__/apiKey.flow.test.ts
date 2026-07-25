@@ -12,6 +12,7 @@ interface ApiKeyFlowModule {
         validateKeyFormat(key: string): boolean;
         validateWithProgress(apiKey: string): Promise<{
             isValid: boolean;
+            isUnsupported?: boolean;
             status?: number;
             error?: string;
         }>;
@@ -21,6 +22,7 @@ interface ApiKeyFlowModule {
         promptAndSaveApiKey(): Promise<void>;
         validateWithProgress(apiKey: string): Promise<{
             isValid: boolean;
+            isUnsupported?: boolean;
             status?: number;
             error?: string;
         }>;
@@ -120,6 +122,57 @@ suite('API Key Flow', () => {
 
         assert.strictEqual(validationAttempts, 2);
         assert.deepStrictEqual(savedKeys, ['sk-second']);
+    });
+
+    test('should save a gateway key unverified when model discovery is unsupported', async () => {
+        const savedKeys: string[] = [];
+        const logMessages: string[] = [];
+
+        await apiKeyFlow.promptAndSaveApiKey({
+            logger: { info: (message) => logMessages.push(message) },
+            storage: {
+                setApiKey: async (_service, key) => {
+                    savedKeys.push(key);
+                },
+            },
+            promptForApiKey: async () => 'gateway-token',
+            validateKeyFormat: () => true,
+            validateWithProgress: async () => ({
+                isValid: false,
+                isUnsupported: true,
+                status: 404,
+            }),
+        });
+
+        assert.deepStrictEqual(savedKeys, ['gateway-token']);
+        assert.ok(infoMessages.includes(t('messages.apiKeySaved')));
+        assert.ok(!infoMessages.includes(t('apiKey.validationSuccess')));
+        assert.ok(logMessages.includes('API key saved without validation'));
+    });
+
+    test('should finish current-key validation unverified when discovery is unsupported', async () => {
+        let validationAttempts = 0;
+        let updatePromptCalled = false;
+
+        await apiKeyFlow.validateCurrentApiKey({
+            storage: { getApiKey: async () => 'gateway-token' },
+            promptAndSaveApiKey: async () => {
+                updatePromptCalled = true;
+            },
+            validateWithProgress: async () => {
+                validationAttempts += 1;
+                return {
+                    isValid: false,
+                    isUnsupported: true,
+                    status: 405,
+                };
+            },
+            maxValidationRetries: 3,
+        });
+
+        assert.strictEqual(validationAttempts, 1);
+        assert.strictEqual(updatePromptCalled, false);
+        assert.ok(infoMessages.includes(t('apiKey.continueWithoutValidation')));
     });
 
     test('should prompt to configure a missing current key', async () => {

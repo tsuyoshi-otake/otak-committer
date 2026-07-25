@@ -22,6 +22,7 @@ interface OpenAIOpsContext {
     onAuthError: () => Promise<void>;
     showError: (message: string, error?: unknown) => void;
     isAuthenticationError: (error: unknown) => boolean;
+    onRequestSuccess: () => void;
     signal?: AbortSignal;
 }
 
@@ -61,6 +62,7 @@ export async function generateCommitMessageOp(
             maxCompletionTokens: TokenManager.OUTPUT_TOKENS.COMMIT_MESSAGE,
             signal: context.signal,
         });
+        context.onRequestSuccess();
 
         if (typeof message !== 'string' || !message.trim()) {
             context.logger.warning('No commit message content returned from API');
@@ -111,6 +113,7 @@ export async function summarizeChunkOp(
             maxCompletionTokens: TokenManager.SUMMARIZATION_OUTPUT_TOKENS,
             signal: context.signal,
         });
+        context.onRequestSuccess();
 
         if (!summary) {
             context.logger.warning('Empty summary returned from chunk summarization');
@@ -171,6 +174,7 @@ export async function generatePRContentOp(
             schemaName: 'pr_content',
             schema: PR_CONTENT_SCHEMA,
         });
+        context.onRequestSuccess();
 
         if (!result || !result.title || !result.body) {
             context.logger.warning('Empty PR content returned from API');
@@ -224,6 +228,7 @@ export async function createChatCompletionOp(
             reasoningEffort: context.getReasoningEffort(),
             maxCompletionTokens: params.maxTokens ?? 1000,
         });
+        context.onRequestSuccess();
 
         context.logger.info('Chat completion created successfully');
         return response;

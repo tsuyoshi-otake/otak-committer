@@ -6,18 +6,35 @@
  */
 
 import OpenAI from 'openai';
+import { createOpenAIClient } from '../../services/openaiClient';
+import {
+    createOpenAIConnectionContext,
+    isOfficialOpenAIBaseUrl,
+} from '../../services/openaiConnection';
+import { requestTextCompletion } from '../../services/openai.completion';
+import { getModelForOperation } from '../../services/openaiModels';
 
 suite('OpenAI API Integration Tests', () => {
     const apiKey = process.env.OPENAI_API_KEY;
 
-    // Check if API key is valid (not a placeholder or test key)
-    const isValidApiKey =
-        apiKey && apiKey.startsWith('sk-') && apiKey.length > 20 && !apiKey.includes('*');
+    const connection = apiKey
+        ? createOpenAIConnectionContext(
+              apiKey,
+              process.env.OPENAI_BASE_URL,
+          )
+        : undefined;
+    const officialKeyPattern =
+        /^sk-(?:proj-|svcacct-|admin-|or-|ant-)?[A-Za-z0-9_-]{20,}$/;
+    const hasUsableCredential =
+        !!connection &&
+        !connection.apiKey.includes('*') &&
+        (!isOfficialOpenAIBaseUrl(connection.baseURL) ||
+            officialKeyPattern.test(connection.apiKey));
 
-    test('GPT-5.4 Responses API should work with real API key', async function () {
-        this.timeout(30000); // 30 seconds timeout
+    test('GPT-5.6 Luna commit completion should work with the configured endpoint', async function () {
+        this.timeout(120000);
 
-        if (!isValidApiKey) {
+        if (!hasUsableCredential || !connection) {
             console.log(
                 'Skipping: Valid OPENAI_API_KEY not set. Run with: npx dotenvx run -f .env.local -- npm test',
             );
@@ -25,20 +42,15 @@ suite('OpenAI API Integration Tests', () => {
             return;
         }
 
-        const openai = new OpenAI({ apiKey });
-
-        // Test using Chat Completions API (since Responses API may not be available yet)
         try {
-            const response = await openai.chat.completions.create({
-                model: 'gpt-4o-mini',
-                messages: [
-                    { role: 'system', content: 'You are a helpful assistant.' },
-                    { role: 'user', content: 'Say "API test successful" and nothing else.' },
-                ],
-                max_tokens: 50,
+            const content = await requestTextCompletion({
+                openai: createOpenAIClient(connection),
+                model: getModelForOperation('commit-message'),
+                systemPrompt: 'You generate concise commit messages.',
+                userPrompt: 'Return exactly: test: verify OpenAI connection',
+                maxCompletionTokens: 100,
+                reasoningEffort: 'low',
             });
-
-            const content = response.choices[0]?.message?.content;
             console.log('API Response:', content);
 
             // Verify we got a response
@@ -67,7 +79,7 @@ suite('OpenAI API Integration Tests', () => {
     test('API key validation should work', async function () {
         this.timeout(10000);
 
-        if (!isValidApiKey) {
+        if (!hasUsableCredential) {
             console.log(
                 'Skipping: Valid OPENAI_API_KEY not set. Run with: npx dotenvx run -f .env.local -- npm test',
             );

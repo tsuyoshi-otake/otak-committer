@@ -273,7 +273,124 @@ export class CommitCommand extends BaseCommand {
 
 **Dependencies**: OpenAI SDK, StorageManager (for API key), ConfigManager, Logger
 
-**Error Handling**: Retries with exponential backoff, fallback to simpler models
+**Model routing**:
+
+- Commit messages and Tier 3 chunk summaries: `gpt-5.6-luna`
+- Pull request content and generic chat/issue operations: `gpt-5.4`
+
+**Connection policy**: `otakCommitter.openaiBaseUrl` overrides `OPENAI_BASE_URL`, which overrides `https://api.openai.com/v1`. Validation and generation share the same normalized endpoint. Custom endpoints are pass-through gateways that preserve OpenAI model IDs and Chat Completions request/response shapes.
+
+**Request policy**: validation uses a 30-second timeout with no automatic retry; completions use a 2-minute timeout with at most two SDK retries.
+
+### OpenAI Connection Sequences
+
+Normal validation and generation:
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant Command
+    participant Init as OpenAI initializer
+    participant Resolver as Connection resolver
+    participant Cache as Session validation cache
+    participant Gateway as OpenAI or gateway
+    participant Service as OpenAIService
+
+    User->>Command: Generate content
+    Command->>Init: initialize(config, stored key)
+    Init->>Resolver: resolve setting, environment, default
+    Resolver-->>Init: canonical base URL
+    Init->>Cache: lookup(base URL + key)
+    alt cached
+        Cache-->>Init: validated
+    else not cached
+        Init->>Gateway: GET {baseURL}/models (30s, 0 retries)
+        Gateway-->>Init: 200
+        Init->>Cache: mark(base URL + key)
+    end
+    Init-->>Command: service(connection)
+    Command->>Service: operation(prompt)
+    Service->>Service: select model by operation
+    Service->>Gateway: POST {baseURL}/chat/completions
+    Gateway-->>Service: successful completion
+    Service->>Cache: mark(base URL + key)
+    Service-->>Command: generated content
+```
+
+Validation and generation failures:
+
+```mermaid
+sequenceDiagram
+    participant Init as OpenAI initializer
+    participant Service as OpenAIService
+    participant Cache as Session validation cache
+    participant Gateway as Custom gateway
+    actor User
+
+    Init->>Gateway: GET /models
+    alt 404 or 405 on custom gateway
+        Gateway-->>Init: discovery unsupported
+        Init-->>Init: proceed unverified
+        Note over Init,Cache: Do not cache yet
+    else 401
+        Gateway-->>Init: authentication failure
+        Init-->>User: update/remove/cancel stored credential
+    else network, 429, or 5xx
+        Gateway-->>Init: transient failure
+        Init-->>User: retry/diagnose/continue/cancel
+        alt continue
+            Init-->>Init: proceed unverified
+            Note over Init,Cache: Do not cache yet
+        else retry or diagnose
+            Init->>Gateway: bounded next validation attempt
+        else cancel
+            Init-->>Init: stop
+        end
+    end
+    opt initialization proceeds
+        Init-->>Service: connection allowed
+        Service->>Gateway: POST /chat/completions (120s, at most 2 retries)
+        alt successful completion
+            Gateway-->>Service: generated content
+            Service->>Cache: mark(base URL + key)
+            Service-->>User: return generated content
+        else 401
+            Gateway-->>Service: authentication failure
+            Service->>Cache: invalidate(base URL + key)
+            Service-->>User: show one deduplicated credential prompt
+            Service-->>User: return no result
+        else abort
+            Gateway-->>Service: AbortError
+            Service--xUser: rethrow AbortError
+            Note over Service,Cache: Do not mark the connection validated
+        else network, 429, or 5xx after retry policy
+            Gateway-->>Service: terminal request failure
+            Service-->>User: show error and return no result
+            Note over Service,Cache: Do not mark the connection validated
+        end
+    end
+```
+
+Tier 3 cancellation:
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant Processor as DiffProcessor
+    participant Summarizer as MapReduceSummarizer
+    participant Gateway as OpenAI or gateway
+
+    Processor->>Summarizer: summarize(chunks, AbortSignal)
+    par bounded batch (maximum 3)
+        Summarizer->>Gateway: summarize chunk
+    and
+        Summarizer->>Gateway: summarize chunk
+    end
+    User->>Summarizer: abort
+    Gateway-->>Summarizer: AbortError
+    Summarizer--xProcessor: reject AbortError
+    Note over Processor: No partial result; no later batch starts
+```
 
 #### GitHubService
 
@@ -650,7 +767,7 @@ try {
 | API Key Retrieval | SecretStorage    | Encrypted GlobalState | Prompt User     |
 | Configuration     | Workspace Config | Global Config         | Default Values  |
 | Git Operations    | simple-git       | VS Code Git API       | Manual Input    |
-| OpenAI API        | gpt-5.4          | Error message         | Cached Response |
+| OpenAI API        | Operation model  | Bounded SDK retry     | Error message   |
 
 ## Storage Architecture
 
@@ -1096,7 +1213,7 @@ Before submitting a PR:
 
 - **Template size limits**: Template files are capped at 100 KB to prevent resource exhaustion
 - **Prompt sanitization**: `customMessage` is limited to 500 chars, template content to 10,000 chars before inclusion in prompts
-- **API validation timeout**: API key validation requests have a 30-second timeout via `AbortController`
+- **API validation timeout**: API key validation requests have a 30-second SDK request timeout and no automatic retry
 - **Sequential storage operations**: `SecretStorageProvider.set()` and `delete()` execute primary and backup operations sequentially for consistency
 - **Git index.lock retry**: Automatic 1-second delay retry when `index.lock` is detected during staging
 - **Sensitive field redaction**: Logger automatically redacts `apikey`, `token`, `secret`, `password`, `authorization`, `credential`, `bearer` fields
@@ -1108,10 +1225,11 @@ Before submitting a PR:
 - **PBKDF2 hardening**: Encryption uses 600,000 iterations (OWASP 2023 recommendation)
 - **API request timeout**: OpenAI API calls have a 2-minute timeout to prevent hung connections
 - **Retry-After cap**: Maximum 1-hour cap on `Retry-After` headers to prevent abuse
-- **Strict API key validation**: OpenAI key format enforces known prefixes and minimum 20 character length
+- **Endpoint-aware key validation**: the official endpoint enforces known `sk-` prefixes and a minimum 20-character suffix; custom gateways accept any non-empty trimmed token
+- **Gateway URL policy**: remote gateways require HTTPS; HTTP is limited to exact loopback hosts, and credentials, query strings, and fragments are rejected
 
 ---
 
-**Last Updated**: February 2026
+**Last Updated**: July 2026
 **Version**: 2.8.0
 **Maintainers**: otak-committer team

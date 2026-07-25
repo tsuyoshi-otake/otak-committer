@@ -1,94 +1,41 @@
 /**
- * Property-Based Tests for Responses API
+ * Property-Based Tests for OpenAI request routing
  *
- * Property 1: API endpoint and model consistency
- * Property 5: Reasoning effort configuration
+ * Property 1: Operation-specific model consistency
  * Property 9-12: Output allocation properties
  */
 
 import * as assert from 'assert';
 import * as fc from 'fast-check';
 import { runPropertyTest } from '../../test/helpers/property-test.helper';
-import { ResponsesAPIMock, ResponsesAPIRequest } from '../../test/mocks/responsesAPI.mock';
 import { TokenManager } from '../../services/tokenManager';
+import {
+    getModelForOperation,
+    type OpenAIOperation,
+} from '../../services/openaiModels';
 
-suite('Responses API Property Tests', () => {
-    setup(() => {
-        ResponsesAPIMock.reset();
-        ResponsesAPIMock.mockSuccess('Test response');
-    });
-
+suite('OpenAI Request Routing Property Tests', () => {
     /**
-     * Property 1: API endpoint and model consistency
-     * *For any* AI generation request (commit message, PR, or issue),
-     * the system should use the `/v1/responses` endpoint with the `gpt-5.4` model
-     * Validates: Requirements 1.1, 1.2, 1.3, 1.4
+     * Property 1: model selection is a total, stable mapping by operation.
      */
-    test('Property 1: All API calls should use /v1/responses endpoint', async () => {
-        const requestTypes = ['commit', 'pr_title', 'pr_body', 'issue'] as const;
+    test('Property 1: every supported operation should always resolve to its designated model', () => {
+        const expectedModels: Record<OpenAIOperation, string> = {
+            'commit-message': 'gpt-5.6-luna',
+            'commit-summary': 'gpt-5.6-luna',
+            'pr-content': 'gpt-5.4',
+            'generic-chat': 'gpt-5.4',
+        };
 
-        for (const requestType of requestTypes) {
-            const request: ResponsesAPIRequest = {
-                model: 'gpt-5.4',
-                input: `Generate ${requestType} content`,
-                max_output_tokens: 2000,
-                reasoning: { effort: 'low' },
-            };
-
-            await ResponsesAPIMock.call(request);
-        }
-
-        assert.strictEqual(ResponsesAPIMock.verifyAllCallsUseEndpoint('/v1/responses'), true);
-    });
-
-    test('Property 1: All API calls should use gpt-5.4 model', async () => {
         runPropertyTest(
-            fc.asyncProperty(
-                fc.constantFrom('commit', 'pr_title', 'pr_body', 'issue'),
-                fc.string({ minLength: 1, maxLength: 100 }),
-                async (requestType, content) => {
-                    ResponsesAPIMock.reset();
-                    ResponsesAPIMock.mockSuccess('Response');
-
-                    const request: ResponsesAPIRequest = {
-                        model: 'gpt-5.4',
-                        input: `${requestType}: ${content}`,
-                        max_output_tokens: 2000,
-                        reasoning: { effort: 'low' },
-                    };
-
-                    await ResponsesAPIMock.call(request);
-                    return ResponsesAPIMock.verifyAllCallsUseModel('gpt-5.4');
-                },
-            ),
-        );
-    });
-
-    /**
-     * Property 5: Reasoning effort configuration
-     * *For any* AI generation request, the system should include
-     * `reasoning.effort: "low"` in the API request parameters
-     * Validates: Requirements 3.1, 3.2, 3.3, 3.4
-     */
-    test('Property 5: All API calls should include reasoning.effort', async () => {
-        runPropertyTest(
-            fc.asyncProperty(
-                fc.constantFrom('commit', 'pr_title', 'pr_body', 'issue'),
-                fc.string({ minLength: 1, maxLength: 100 }),
-                async (requestType, content) => {
-                    ResponsesAPIMock.reset();
-                    ResponsesAPIMock.mockSuccess('Response');
-
-                    const request: ResponsesAPIRequest = {
-                        model: 'gpt-5.4',
-                        input: `${requestType}: ${content}`,
-                        max_output_tokens: 2000,
-                        reasoning: { effort: 'low' },
-                    };
-
-                    await ResponsesAPIMock.call(request);
-                    return ResponsesAPIMock.verifyAllCallsHaveReasoningEffort('low');
-                },
+            fc.property(
+                fc.constantFrom<OpenAIOperation>(
+                    'commit-message',
+                    'commit-summary',
+                    'pr-content',
+                    'generic-chat',
+                ),
+                (operation) =>
+                    getModelForOperation(operation) === expectedModels[operation],
             ),
         );
     });

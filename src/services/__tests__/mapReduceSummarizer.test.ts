@@ -127,5 +127,38 @@ suite('mapReduceSummarizer', () => {
             assert.strictEqual(result.chunksFailed, 0);
             assert.ok(result.summary.includes('summary'));
         });
+
+        test('should rethrow aborts instead of returning a partial summary', async () => {
+            const controller = new AbortController();
+            let callCount = 0;
+            const mockOpenAI = {
+                summarizeChunk: async () => {
+                    callCount++;
+                    controller.abort();
+                    const error = new Error('The operation was aborted');
+                    error.name = 'AbortError';
+                    throw error;
+                },
+            } as any;
+
+            const summarizer = new MapReduceSummarizer(mockOpenAI);
+            const files = [
+                makeFile('a.ts', 80_001),
+                makeFile('b.ts', 80_001),
+                makeFile('c.ts', 80_001),
+                makeFile('d.ts', 80_001),
+            ];
+
+            await assert.rejects(
+                summarizer.summarize(files, 'english', controller.signal),
+                (error: unknown) =>
+                    error instanceof Error && error.name === 'AbortError',
+            );
+            assert.strictEqual(
+                callCount,
+                3,
+                'the next batch must never start after the active batch aborts',
+            );
+        });
     });
 });

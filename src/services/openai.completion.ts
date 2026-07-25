@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { OPENAI_COMPLETION_POLICY } from './openaiRequestPolicy';
 
 /**
  * Parameters for a plain-text OpenAI chat completion request
@@ -35,9 +36,6 @@ interface CompletionRequestBase {
     signal?: AbortSignal;
 }
 
-/** Request timeout for OpenAI API calls (2 minutes) */
-const REQUEST_TIMEOUT_MS = 120000;
-
 function createCompletionParams(request: CompletionRequestBase) {
     return {
         model: request.model,
@@ -51,7 +49,10 @@ function createCompletionParams(request: CompletionRequestBase) {
 }
 
 function createRequestOptions(signal?: AbortSignal) {
-    return { timeout: REQUEST_TIMEOUT_MS, ...(signal ? { signal } : {}) };
+    return {
+        ...OPENAI_COMPLETION_POLICY,
+        ...(signal ? { signal } : {}),
+    };
 }
 
 function getCompletionContent(response: {

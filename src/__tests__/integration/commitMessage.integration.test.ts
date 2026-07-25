@@ -2,7 +2,7 @@
  * Integration test for Commit Message generation
  *
  * Verifies that the commit message prompt produces correctly
- * structured content when sent to the OpenAI API with gpt-5.4.
+ * structured content when sent to the OpenAI API with gpt-5.6-luna.
  *
  * Requires: OPENAI_API_KEY environment variable
  * Run with: OPENAI_API_KEY=sk-... npm run test:unit
@@ -112,7 +112,7 @@ suite('Commit Message Integration Tests', () => {
     const isValidApiKey =
         apiKey && apiKey.startsWith('sk-') && apiKey.length > 20 && !apiKey.includes('*');
 
-    test('gpt-5.4 should generate a valid conventional commit message', async function () {
+    test('gpt-5.6-luna should generate a valid conventional commit message', async function () {
         this.timeout(120000);
 
         if (!isValidApiKey) {
@@ -133,7 +133,7 @@ suite('Commit Message Integration Tests', () => {
 
         try {
             const response = await openai.chat.completions.create({
-                model: 'gpt-5.4',
+                model: 'gpt-5.6-luna',
                 messages: [
                     { role: 'developer', content: SYSTEM_PROMPT },
                     { role: 'user', content: prompt },
@@ -182,7 +182,7 @@ suite('Commit Message Integration Tests', () => {
         }
     });
 
-    test('gpt-5.4 should generate a simple style commit message', async function () {
+    test('gpt-5.6-luna should generate a simple style commit message', async function () {
         this.timeout(120000);
 
         if (!isValidApiKey) {
@@ -200,7 +200,7 @@ suite('Commit Message Integration Tests', () => {
 
         try {
             const response = await openai.chat.completions.create({
-                model: 'gpt-5.4',
+                model: 'gpt-5.6-luna',
                 messages: [
                     { role: 'developer', content: SYSTEM_PROMPT },
                     { role: 'user', content: prompt },
@@ -232,7 +232,7 @@ suite('Commit Message Integration Tests', () => {
         }
     });
 
-    test('gpt-5.4 should generate a Japanese commit message', async function () {
+    test('gpt-5.6-luna should generate a Japanese commit message', async function () {
         this.timeout(120000);
 
         if (!isValidApiKey) {
@@ -250,7 +250,7 @@ suite('Commit Message Integration Tests', () => {
 
         try {
             const response = await openai.chat.completions.create({
-                model: 'gpt-5.4',
+                model: 'gpt-5.6-luna',
                 messages: [
                     { role: 'developer', content: SYSTEM_PROMPT },
                     { role: 'user', content: prompt },

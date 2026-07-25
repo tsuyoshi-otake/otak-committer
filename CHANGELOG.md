@@ -1,5 +1,32 @@
 # Change Log
 
+## [2.17.0] - 2026-07-25
+
+### Added
+
+- **Custom OpenAI-compatible endpoints:** added an `otakCommitter.openaiBaseUrl` setting and `OPENAI_BASE_URL` fallback for pass-through gateways that preserve the OpenAI Responses API contract.
+- **Gateway safety and resilience:** validates HTTPS and loopback HTTP endpoints, keys cached clients by endpoint and credential, bounds retries and timeouts, honors `Retry-After`, and surfaces unsupported gateway routes clearly.
+- **Quality evaluation harness:** added opt-in live evaluations for generated commit messages while keeping paid API calls out of the default test suite.
+
+### Changed
+
+- **Commit-focused model routing:** commit message generation and diff summaries now use `gpt-5.6-luna`; PR and generic structured generation remain on `gpt-5.4`.
+- **Documentation and architecture:** refreshed the README settings/model guidance and added normal, retry, cancellation, and gateway-failure sequence diagrams to `ARCHITECTURE.md`.
+
+### Fixed
+
+- **Cancellation propagation:** abort signals now reach OpenAI requests and retry waits so cancelled operations terminate explicitly instead of continuing hidden work.
+- **Endpoint-aware client reuse:** changing the custom endpoint can no longer reuse a client created for a different gateway.
+
+### Removed
+
+- Removed the obsolete `.kiro` steering and specification directory.
+
+### Tests
+
+- Added model-routing, endpoint precedence/validation, client-cache, retry/backoff, cancellation, gateway contract, property, and VS Code integration coverage.
+- 383 unit tests and 5 local gateway integration tests passing; live OpenAI tests remain opt-in and require `OPENAI_API_KEY`.
+
 ## [2.16.11] - 2026-06-29
 
 ### Changed

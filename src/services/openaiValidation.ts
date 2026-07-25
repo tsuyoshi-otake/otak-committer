@@ -1,9 +1,22 @@
-import OpenAI from 'openai';
+import type OpenAI from 'openai';
+import { createOpenAIClient } from './openaiClient';
+import {
+    createOpenAIConnectionContext,
+    DEFAULT_OPENAI_BASE_URL,
+    type OpenAIConnectionContext,
+} from './openaiConnection';
+import { OPENAI_VALIDATION_POLICY, type OpenAIRequestPolicy } from './openaiRequestPolicy';
 
 /**
  * Category of API key validation failure
  */
-export type ValidationKind = 'auth' | 'rate_limit' | 'network' | 'server' | 'unknown';
+export type ValidationKind =
+    | 'auth'
+    | 'rate_limit'
+    | 'network'
+    | 'server'
+    | 'unsupported'
+    | 'unknown';
 
 /**
  * Result of an API key validation attempt, either success or a categorized failure
@@ -87,20 +100,37 @@ function getRetryAfterSeconds(error: unknown): number | undefined {
     return undefined;
 }
 
+interface ValidationDependencies {
+    client?: Pick<OpenAI, 'models'>;
+    policy?: OpenAIRequestPolicy;
+}
+
 /**
- * Validate an OpenAI API key by issuing a lightweight authenticated request
+ * Validate an OpenAI API key by issuing a lightweight authenticated request.
  *
  * @param apiKey - The API key to validate
+ * @param baseURL - The normalized official or gateway API base URL
+ * @param dependencies - Optional client and request policy used by deterministic tests
  * @returns A success result, or a categorized failure with status and reason
  */
-export async function validateApiKey(apiKey: string): Promise<ValidateApiKeyResult> {
+export async function validateApiKey(
+    apiKey: string,
+    baseURL = DEFAULT_OPENAI_BASE_URL,
+    dependencies: ValidationDependencies = {},
+): Promise<ValidateApiKeyResult> {
+    const connection = createOpenAIConnectionContext(apiKey, baseURL);
+    const client = dependencies.client ?? createOpenAIClient(connection);
+    const policy = dependencies.policy ?? OPENAI_VALIDATION_POLICY;
+
     try {
-        const client = new OpenAI({ apiKey });
-        await client.models.list();
+        await client.models.list(policy);
         return { ok: true };
     } catch (error) {
         const status = getErrorStatus(error);
-        const reason = redactApiKey(getErrorMessage(error) || 'Unknown error', apiKey);
+        const reason = redactApiKey(
+            getErrorMessage(error) || 'Unknown error',
+            connection.apiKey,
+        );
         const retryAfterSeconds = getRetryAfterSeconds(error);
 
         if (status === 401) {
@@ -108,6 +138,9 @@ export async function validateApiKey(apiKey: string): Promise<ValidateApiKeyResu
         }
         if (status === 429) {
             return { ok: false, kind: 'rate_limit', status, reason, retryAfterSeconds };
+        }
+        if (!connection.isOfficial && (status === 404 || status === 405)) {
+            return { ok: false, kind: 'unsupported', status, reason };
         }
         if (typeof status === 'number' && status >= 500) {
             return { ok: false, kind: 'server', status, reason, retryAfterSeconds };
@@ -119,3 +152,5 @@ export async function validateApiKey(apiKey: string): Promise<ValidateApiKeyResu
         return { ok: false, kind: 'unknown', status, reason, retryAfterSeconds };
     }
 }
+
+export type { OpenAIConnectionContext };

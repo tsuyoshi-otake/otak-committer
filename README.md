@@ -1,33 +1,56 @@
-<p align="center">
-  <h1 align="center">otak-committer</h1>
-  <p align="center">
-    AI-assisted commit messages, pull requests, and issues for VS Code.
-  </p>
-</p>
+<div align="center">
+
+# otak-committer
+
+**AI-assisted commit messages, pull requests, and issues — without leaving VS Code.**  
+otak-committer reads your staged diff, follows your templates and conventions, and writes commit messages, PR descriptions, and issues in 25 languages.
+
+[![VS Marketplace](https://img.shields.io/visual-studio-marketplace/v/odangoo.otak-committer?label=Marketplace&color=1d4ed8)](https://marketplace.visualstudio.com/items?itemName=odangoo.otak-committer)
+[![VS Code engine](https://img.shields.io/badge/VS%20Code-%5E1.90.0-007acc)](https://code.visualstudio.com/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![GitHub](https://img.shields.io/badge/GitHub-otak--committer-24292f)](https://github.com/tsuyoshi-otake/otak-committer)
+
+![25 languages](https://img.shields.io/badge/languages-25-2563eb)
+![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-ready-0f766e)
+![Git worktree support](https://img.shields.io/badge/Git%20worktree-supported-7c3aed)
+![No telemetry](https://img.shields.io/badge/telemetry-none-64748b)
+![Local diff analysis](https://img.shields.io/badge/diff%20analysis-local-334155)
+
+[**Install**](https://marketplace.visualstudio.com/items?itemName=odangoo.otak-committer) ·
+[**GitHub**](https://github.com/tsuyoshi-otake/otak-committer) ·
+[**Report an issue**](https://github.com/tsuyoshi-otake/otak-committer/issues)
+
+</div>
 
 ---
 
-Generate commit messages, PRs, and issues without leaving VS Code. The extension understands multiple languages, follows your templates, supports Git worktrees, and fits team workflows.
+Writing good commit messages, pull request descriptions, and issues is repetitive work that breaks your flow. otak-committer turns your staged changes into clear, conventional, and consistently formatted text in one click. It understands multiple languages, follows your repository's templates, supports Git worktrees, and fits team workflows — while keeping your code and API key handling local and private.
 
 ![Commit Message](images/generate-commit-message.png)
 
 ## Quick Start
 
+1. **Install** from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=odangoo.otak-committer).
+2. Get an OpenAI API key from [OpenAI](https://platform.openai.com/api-keys).
+3. Run `otak-committer: Set OpenAI API Key`.
+4. Stage your changes, then click **Generate Commit Message** in Source Control.
+
+By default the extension uses English and the Normal style. You can change both anytime from the status bar. PR and issue features additionally require GitHub sign-in via the Accounts icon in the Activity Bar.
+
 ### Commit Messages
 
 1. Stage your changes.
-2. Click "Generate Commit Message" in Source Control.
+2. Click **Generate Commit Message** in Source Control.
 3. Review and edit the result.
 4. Commit.
 
-It uses your repo's commit templates (`.gitmessage`, `.github/commit_template`, etc.) and adapts to your conventions.
-It works with standard Git repositories and linked Git worktrees.
+It uses your repository's commit templates (`.gitmessage`, `.github/commit_template`, etc.) and adapts to your conventions. It works with standard Git repositories and linked Git worktrees.
 
 ### Pull Requests
 
 ![Generate Pull Request Button](images/generate-pull-request.png)
 
-1. Click "Generate Pull Request" in Source Control.
+1. Click **Generate Pull Request** in Source Control.
 2. Select an issue to link, if needed.
 3. Choose the base and compare branches.
 4. Review the generated description.
@@ -39,7 +62,7 @@ Automatically uses PR templates and links issues when available. Requires GitHub
 
 ![Generate Issue Button](images/generate-issue.png)
 
-1. Click "Generate Issue" in Source Control.
+1. Click **Generate Issue** in Source Control.
 2. Choose the issue type (bug, feature, task, etc.).
 3. Select relevant files for context (optional).
 4. Describe your issue.
@@ -48,16 +71,16 @@ Automatically uses PR templates and links issues when available. Requires GitHub
 
 Generates clear titles and structured descriptions.
 
-## Features
+## Capabilities
 
-- **UI internationalization** — Automatically detects your VS Code display language, or lets you choose one manually. Supported UI languages: English, Japanese, Korean, Vietnamese, French, German, Spanish, Portuguese, Simplified Chinese, Traditional Chinese, Italian, Czech, Hungarian, Bulgarian, Turkish, Polish, Russian, Thai, Hindi, Bengali, Javanese, Tamil, Burmese, Arabic, Hebrew.
-- **Multilingual commit messages** — Generates commit messages in 25 languages: English, Français, Deutsch, Italiano, Español, Português, Čeština, Magyar, Български, Türkçe, Polski, Русский, 日本語, 中文, 繁體中文, 한국어, Tiếng Việt, ไทย, हिन्दी, বাংলা, Basa Jawa, தமிழ், မြန်မာဘာသာ, العربية, עברית.
-- **Message styles** — `simple`, `normal`, or `detailed`.
-- **Git worktree support** — Resolves the current repository from the active workspace, including linked worktrees and multi-root setups, instead of assuming the first Git repository in the window.
-- **Repository visibility indicator** — The status bar shows whether the current repository is public (`$(globe)`) or private (`$(lock)`). Public repositories trigger a warning when the workspace is opened and a confirmation prompt before generating commit messages to help prevent accidental exposure.
-- **Deep VS Code integration** — Source Control panel actions, status bar controls, and full UI localization.
-- **Smart PRs and issues** — Context-aware descriptions, template support, and issue linking.
-- **Custom instructions** — Team-specific guidance via `otakCommitter.customMessage`.
+- **UI internationalization**: automatically detects your VS Code display language, or lets you choose one manually.
+- **Multilingual commit messages**: generates messages in 25 languages, independent of the UI language.
+- **Message styles**: `simple`, `normal`, or `detailed`.
+- **Git worktree support**: resolves the current repository from the active workspace, including linked worktrees and multi-root setups, instead of assuming the first Git repository in the window.
+- **Repository visibility indicator**: the status bar shows whether the current repository is public (`$(globe)`) or private (`$(lock)`). Public repositories trigger a warning on open and a confirmation prompt before generating commit messages, helping prevent accidental exposure.
+- **Deep VS Code integration**: Source Control panel actions, status bar controls, and full UI localization.
+- **Smart PRs and issues**: context-aware descriptions, template support, and issue linking.
+- **Custom instructions**: team-specific guidance via `otakCommitter.customMessage`.
 
 ## How It Works
 
@@ -66,9 +89,9 @@ Generates clear titles and structured descriptions.
 - Resolves the current Git repository or worktree before reading diffs, templates, and branch state.
 - Analyzes staged diffs locally.
 - Handles large diffs with a three-tier strategy:
-  - **Tier 1**: Diffs within the token limit are sent as-is.
-  - **Tier 2**: Oversized diffs are split by file. Lock files (package-lock.json, yarn.lock, etc.) are excluded, source code is prioritized, and a change summary for all files is always included.
-  - **Tier 3**: If Tier 2 still exceeds the budget, the remaining files are split into chunks, summarized through parallel API calls, and then combined for commit message generation.
+  - **Tier 1**: diffs within the token limit are sent as-is.
+  - **Tier 2**: oversized diffs are split by file. Lock files (`package-lock.json`, `yarn.lock`, etc.) are excluded, source code is prioritized, and a change summary for all files is always included.
+  - **Tier 3**: if Tier 2 still exceeds the budget, the remaining files are split into chunks, summarized through parallel API calls, and combined for commit message generation.
 - Applies your commit template and style.
 - Generates the result in your selected language and detail level.
 
@@ -86,33 +109,49 @@ Generates clear titles and structured descriptions.
 
 ### GitHub Authentication
 
-Uses VS Code's built-in GitHub authentication. Sign in or out through the Accounts icon in the Activity Bar.
-When multiple repositories are open, PR and issue operations target the repository that matches the active workspace or worktree.
+Uses VS Code's built-in GitHub authentication. Sign in or out through the Accounts icon in the Activity Bar. When multiple repositories are open, PR and issue operations target the repository that matches the active workspace or worktree.
 
-## Configuration
+## Settings
 
 ![Settings](images/settings-otakCommitter.png)
 
-### Settings
+| Setting | Default | Description |
+| --- | --- | --- |
+| `otakCommitter.language` | `english` | Commit message language |
+| `otakCommitter.messageStyle` | `normal` | Message detail level (`simple`, `normal`, `detailed`) |
+| `otakCommitter.customMessage` | `""` | Custom AI instructions (optional) |
+| `otakCommitter.useEmoji` | `false` | Enable emoji prefixes |
+| `otakCommitter.emojiStyle` | `github` | Emoji format (`github` or `unicode`) |
+| `otakCommitter.openaiBaseUrl` | `""` | OpenAI pass-through gateway base URL (optional) |
+| `otakCommitter.reasoningEffort` | `high` | AI reasoning depth (`none`, `low`, `medium`, `high`) |
+| `otakCommitter.maxInputTokens` | `200000` | Maximum input tokens for diff analysis |
+| `otakCommitter.useBulletList` | `true` | Format the commit message body as a bullet list |
+| `otakCommitter.useConventionalCommits` | `true` | Use Conventional Commits format |
+| `otakCommitter.appendCommitTrailer` | `true` | Append the `Commit-Message-By: otak-committer` trailer |
 
-- **`otakCommitter.language`**: Commit message language (default: `english`)
-- **`otakCommitter.messageStyle`**: Message detail level (default: `normal`)
-- **UI language (extension UI)**: Follows VS Code display language (`Configure Display Language` command).
-  - Supported UI locales: `en`, `ja`, `ko`, `vi`, `fr`, `de`, `es`, `pt`, `zh-cn`, `zh-tw`, `it`, `cs`, `hu`, `bg`, `tr`, `pl`, `ru`, `th`, `hi`, `bn`, `jv`, `ta`, `my`, `ar`, `he`
-  - Other locales automatically fall back to English
-- **`otakCommitter.customMessage`**: Custom AI instructions (optional)
-- **`otakCommitter.useEmoji`**: Enable emoji prefixes (default: `false`)
-- **`otakCommitter.emojiStyle`**: Emoji format (`github` or `unicode`)
-- **`otakCommitter.reasoningEffort`**: AI reasoning depth — `none`, `low`, `medium`, `high` (default: `high`)
-- **`otakCommitter.maxInputTokens`**: Maximum input tokens for diff analysis (default: `200000`)
-- **`otakCommitter.useBulletList`**: Format commit message body as a bullet list (default: `true`)
-- **`otakCommitter.useConventionalCommits`**: Use Conventional Commits format (default: `true`)
-- **`otakCommitter.appendCommitTrailer`**: Append `Commit-Message-By: otak-committer` trailer (default: `true`)
+The extension UI language follows your VS Code display language (`Configure Display Language` command). Supported UI locales: `en`, `ja`, `ko`, `vi`, `fr`, `de`, `es`, `pt`, `zh-cn`, `zh-tw`, `it`, `cs`, `hu`, `bg`, `tr`, `pl`, `ru`, `th`, `hi`, `bn`, `jv`, `ta`, `my`, `ar`, `he`. Other locales fall back to English.
+
+### OpenAI Models and Gateway
+
+Commit message generation and the Tier 3 large-diff summaries use `gpt-5.6-luna`. Pull request generation and generic chat/issue operations continue to use `gpt-5.4`.
+
+By default, requests use `https://api.openai.com/v1`. To route validation and generation through an OpenAI pass-through gateway, set `otakCommitter.openaiBaseUrl` in VS Code settings. If that setting is empty, the extension checks `OPENAI_BASE_URL` and then falls back to the official endpoint:
+
+```json
+{
+  "otakCommitter.openaiBaseUrl": "https://gateway.example.com/openai/v1"
+}
+```
+
+Gateway support intentionally targets endpoints that preserve OpenAI model IDs and the current Chat Completions request/response shape. A gateway must accept `gpt-5.6-luna` and `gpt-5.4` unchanged; arbitrary local model servers or model-name translation are outside this compatibility contract.
+
+Remote endpoints must use HTTPS. Plain HTTP is accepted only for exact loopback hosts (`localhost`, `127.0.0.1`, or `::1`) so a local development gateway can be tested safely. URLs containing credentials, a query, or a fragment are rejected. Custom gateway credentials may use any non-empty token; the official endpoint requires an OpenAI `sk-...` key.
+
+The extension validates the configured connection through the same gateway before generation. Gateways may omit `GET /models`: a `404` or `405` on that route is treated as “validation unsupported,” and the first successful completion validates that endpoint-and-token pair for the current extension session.
 
 ### Custom Instruction Examples
 
 ```text
-// Examples:
 "Include JIRA ticket [PROJ-XXX] in commit messages"
 "Add breaking changes section when modifying APIs"
 "Reference design docs for UI changes"
@@ -120,7 +159,7 @@ When multiple repositories are open, PR and issue operations target the reposito
 
 ## Commands
 
-Access via the Command Palette (`Cmd/Ctrl+Shift+P`):
+Access via the Command Palette (<kbd>Ctrl</kbd>/<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>):
 
 - `Generate Commit Message`
 - `Generate Pull Request`
@@ -131,23 +170,11 @@ Access via the Command Palette (`Cmd/Ctrl+Shift+P`):
 - `Diagnose API Key Storage`
 - `Open Settings`
 
-## Requirements
+## Language Support
 
-- Visual Studio Code 1.90.0 or higher
-- Git
-- OpenAI API key (for AI features)
-- GitHub sign-in via VS Code for PR/issue features
+Commit messages can be generated in 25 languages, independent of the UI language:
 
-## Installation
-
-1. Install from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=odangoo.otak-committer).
-2. Get an OpenAI API key from [OpenAI](https://platform.openai.com/api-keys).
-3. Run `otak-committer: Set OpenAI API Key`.
-4. (Optional) Sign in to GitHub via the Accounts icon in the Activity Bar for PR/issue features.
-
-By default, the extension uses English and the Normal style. You can change these anytime from the status bar.
-
-The extension currently uses GPT-5.4 for high-quality commit message generation.
+**English** · Français · Deutsch · Italiano · Español · Português · Čeština · Magyar · Български · Türkçe · Polski · Русский · 日本語 · 中文 · 繁體中文 · 한국어 · Tiếng Việt · ไทย · हिन्दी · বাংলা · Basa Jawa · தமிழ் · မြန်မာဘာသာ · العربية · עברית
 
 ## Security & Privacy
 
@@ -156,22 +183,22 @@ The extension currently uses GPT-5.4 for high-quality commit message generation.
 - **Secure Storage only**: API keys are stored using VS Code SecretStorage.
 - **No Settings Sync for API keys**: API keys are not stored in synced extension state.
 - **No GlobalState backups**: API keys are not backed up to extension global state.
-- **Automatic Migration**: Legacy API keys in settings are migrated to secure storage and deleted after the secure write succeeds. If secure storage is unavailable, legacy keys are preserved for retry but not used.
-- **No `settings.json` secrets**: Keys never appear in `settings.json`.
-- **Diagnostic Tools**: Built-in diagnostics verify storage health.
+- **Automatic migration**: legacy API keys in settings are migrated to secure storage and deleted after the secure write succeeds. If secure storage is unavailable, legacy keys are preserved for retry but not used.
+- **No `settings.json` secrets**: keys never appear in `settings.json`.
+- **Diagnostic tools**: built-in diagnostics verify storage health.
 
 ### Data Handling
 
 - Git diff analysis happens locally.
-- **Secret detection**: Before generation, diffs and selected file content are scanned for potential secrets (API keys, tokens, passwords, private keys, connection strings, environment variable references, etc.). The extension asks for confirmation before sending commit, PR, or issue inputs that may contain secrets to the external AI service; map-reduce chunks are also checked and logged.
-- **Log redaction**: Logger automatically redacts sensitive field values, known secret formats, URL-embedded credentials, and secrets in error stack traces.
-- Only necessary diff context is sent to OpenAI for generation.
+- **Secret detection**: before generation, diffs and selected file content are scanned for potential secrets (API keys, tokens, passwords, private keys, connection strings, environment variable references, etc.). The extension asks for confirmation before sending inputs that may contain secrets to the external AI service; map-reduce chunks are also checked and logged.
+- **Log redaction**: the logger automatically redacts sensitive field values, known secret formats, URL-embedded credentials, and secrets in error stack traces.
+- Only necessary diff context is sent to the configured OpenAI endpoint for generation.
 - Large diffs are intelligently prioritized: lock files and generated files are excluded or summarized to minimize data sent to the API.
 
 ### Privacy Guarantees
 
 - No telemetry or usage analytics.
-- No intermediaries: requests go directly to OpenAI's API.
+- Requests go directly to OpenAI by default. If you configure a gateway, request data and credentials are sent to that gateway instead.
 - Source code is available for security review on GitHub.
 
 ### GitHub Integration
@@ -186,28 +213,68 @@ The extension currently uses GPT-5.4 for high-quality commit message generation.
 - Rotate API keys regularly.
 - Review generated content before committing or submitting PRs.
 
+## Requirements
+
+- Visual Studio Code **1.90.0** or newer
+- Git
+- An OpenAI API key (for AI features)
+- GitHub sign-in via VS Code (for PR and issue features)
+
+## Installation
+
+Install from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=odangoo.otak-committer), or run:
+
+```text
+ext install odangoo.otak-committer
+```
+
+Then:
+
+1. Get an OpenAI API key from [OpenAI](https://platform.openai.com/api-keys).
+2. Run `otak-committer: Set OpenAI API Key`.
+3. (Optional) Sign in to GitHub via the Accounts icon in the Activity Bar for PR and issue features.
+
+Commit generation uses GPT-5.6 Luna; PR and generic chat/issue generation use GPT-5.4.
+
+### Commit Model Quality Evaluation
+
+Maintainers can compare the commit-message model against the previous model with:
+
+```sh
+npm run eval:commit-model
+```
+
+The evaluation uses 10 fixed representative diffs and makes 20 paid API calls: each diff is generated once with `gpt-5.6-luna` and once with `gpt-5.4`, with concurrency capped at two. It writes an anonymized, blinded A/B review sheet and a run manifest under `~/tmp/otak-committer-eval/`. Set `OPENAI_API_KEY` (and optionally `OPENAI_BASE_URL`) before running it. Do not commit the generated review artifacts or credentials.
+
 ## Troubleshooting
 
-- **No output or empty results**: Ensure you have staged changes and an OpenAI API key configured.
-- **PR/issue creation fails**: Make sure you are signed in to GitHub via the Accounts icon in the Activity Bar.
-- **Wrong repository selected in a multi-root window**: Focus a file in the target workspace or worktree and run the command again so the extension resolves the correct Git repository.
-- **Wrong UI language**: Run `Configure Display Language` in VS Code and reload the window. Unsupported locales fall back to English.
+- **No output or empty results**: ensure you have staged changes and an OpenAI API key configured.
+- **PR/issue creation fails**: make sure you are signed in to GitHub via the Accounts icon in the Activity Bar.
+- **Wrong repository selected in a multi-root window**: focus a file in the target workspace or worktree and run the command again so the extension resolves the correct Git repository.
+- **Wrong UI language**: run `Configure Display Language` in VS Code and reload the window. Unsupported locales fall back to English.
 
 ## Related Extensions
 
-- **[otak-monitor](https://marketplace.visualstudio.com/items?itemName=odangoo.otak-monitor)** — Real-time system monitoring in VS Code.
-- **[otak-proxy](https://marketplace.visualstudio.com/items?itemName=odangoo.otak-proxy)** — One-click proxy management for VS Code, Git, npm, and terminals.
-- **[otak-restart](https://marketplace.visualstudio.com/items?itemName=odangoo.otak-restart)** — Quick reload shortcuts.
-- **[otak-clock](https://marketplace.visualstudio.com/items?itemName=odangoo.otak-clock)** — Dual time zone clock for VS Code.
-- **[otak-pomodoro](https://marketplace.visualstudio.com/items?itemName=odangoo.otak-pomodoro)** — Pomodoro timer in VS Code.
-- **[otak-zen](https://marketplace.visualstudio.com/items?itemName=odangoo.otak-zen)** — Minimal, distraction-free VS Code UI.
+More VS Code extensions by [odangoo](https://marketplace.visualstudio.com/publishers/odangoo):
+
+| Extension | Description |
+| --- | --- |
+| [**otak-proxy**](https://marketplace.visualstudio.com/items?itemName=odangoo.otak-proxy) | One-click proxy switching for VS Code, Git, npm, and integrated terminals |
+| [**otak-monitor**](https://marketplace.visualstudio.com/items?itemName=odangoo.otak-monitor) | Real-time CPU, memory, and disk usage in the status bar |
+| [**otak-paste**](https://marketplace.visualstudio.com/items?itemName=odangoo.otak-paste) | Paste optimized screenshots into Markdown and keep your repository lighter |
+| [**otak-clipboard**](https://marketplace.visualstudio.com/items?itemName=odangoo.otak-clipboard) | Copy a folder or the current tab to your clipboard in two clicks |
+| [**otak-clock**](https://marketplace.visualstudio.com/items?itemName=odangoo.otak-clock) | Dual time-zone clock for the status bar |
+| [**otak-pomodoro**](https://marketplace.visualstudio.com/items?itemName=odangoo.otak-pomodoro) | A Pomodoro focus timer built into VS Code |
+| [**otak-restart**](https://marketplace.visualstudio.com/items?itemName=odangoo.otak-restart) | Quick Extension Host and window restart from the status bar |
+| [**otak-zen**](https://marketplace.visualstudio.com/items?itemName=odangoo.otak-zen) | A calm, distraction-free Zen mode for VS Code |
+| [**otak-lsp**](https://marketplace.visualstudio.com/items?itemName=odangoo.otak-lsp) | Japanese morphological analysis with grammar checks, semantic highlights, and hovers |
+| [**otak-usage**](https://marketplace.visualstudio.com/items?itemName=odangoo.otak-usage) | At-a-glance usage statistics for VS Code |
 
 ## License
 
-MIT License - see the [LICENSE](LICENSE) file for details.
+Released under the [MIT License](LICENSE).
 
-## Links
-
-- **[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=odangoo.otak-committer)**
-- **[GitHub](https://github.com/tsuyoshi-otake/otak-committer)**
-- **[Issues](https://github.com/tsuyoshi-otake/otak-committer/issues)**
+<div align="center">
+<br>
+<sub>Built by <a href="https://github.com/tsuyoshi-otake">tsuyoshi-otake</a> · <a href="https://marketplace.visualstudio.com/items?itemName=odangoo.otak-committer">Marketplace</a> · <a href="https://github.com/tsuyoshi-otake/otak-committer">GitHub</a> · <a href="https://github.com/tsuyoshi-otake/otak-committer/issues">Issues</a></sub>
+</div>

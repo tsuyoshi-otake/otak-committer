@@ -10,6 +10,7 @@ import { Logger } from '../infrastructure/logging/Logger';
 import { TokenManager } from './tokenManager';
 import { ParsedFileDiff, estimateTokenCount } from '../utils/diffUtils';
 import { detectPotentialSecrets } from '../utils/secretDetection';
+import { isUserAbortError } from '../utils/errorGuards';
 
 // Use a type-only import to avoid circular dependency at runtime
 import type { OpenAIService } from './openaiService';
@@ -172,6 +173,9 @@ export class MapReduceSummarizer {
         try {
             return await this.openaiService.summarizeChunk(chunkContent, language, signal);
         } catch (error) {
+            if (signal?.aborted || isUserAbortError(error)) {
+                throw error;
+            }
             this.logger.error(`Failed to summarize chunk ${chunkIndex}`, error);
             return undefined;
         }

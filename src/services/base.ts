@@ -1,5 +1,5 @@
 import { ServiceConfig } from '../types';
-import { getServiceConfig } from '../utils';
+import { getServiceConfig } from './serviceConfig';
 import { Logger } from '../infrastructure/logging';
 import { ErrorHandler } from '../infrastructure/error';
 import { t } from '../i18n';

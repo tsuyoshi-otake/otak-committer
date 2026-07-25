@@ -5,6 +5,7 @@ import { t } from '../i18n/index';
 
 interface ValidationResultLike {
     isValid: boolean;
+    isUnsupported?: boolean;
     status?: number;
     error?: string;
 }
@@ -90,6 +91,10 @@ export async function validateCurrentApiKey(input: ValidateCurrentApiKeyInput): 
             vscode.window.showInformationMessage(t('apiKey.validationSuccess'));
             return;
         }
+        if (result.isUnsupported) {
+            vscode.window.showInformationMessage(t('apiKey.continueWithoutValidation'));
+            return;
+        }
 
         const decision = await handleCurrentKeyValidationFailure(result, promptAndSaveApiKey);
         if (decision === 'retry') {
@@ -105,6 +110,11 @@ async function handleNewKeyValidationResult(
     storage: StorageManager,
     logger: Logger,
 ): Promise<ValidationFailureDecision> {
+    if (result.isUnsupported) {
+        await saveOpenAIApiKey(storage, logger, apiKey, 'API key saved without validation');
+        return 'done';
+    }
+
     if (result.isValid) {
         await saveOpenAIApiKey(
             storage,

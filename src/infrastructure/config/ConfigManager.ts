@@ -1,11 +1,13 @@
 import * as vscode from 'vscode';
 import { SupportedLanguage } from '../../types/enums/SupportedLanguage.js';
 import { MessageStyle, EmojiStyle } from '../../types/enums/MessageStyle.js';
+import { ReasoningEffort } from '../../types/enums/ReasoningEffort.js';
 
 /**
  * Configuration interface for the extension
  */
 export interface ExtensionConfig {
+    openaiBaseUrl: string;
     language: SupportedLanguage;
     messageStyle: MessageStyle;
     useEmoji: boolean;
@@ -15,6 +17,7 @@ export interface ExtensionConfig {
     useBulletList: boolean;
     useConventionalCommits: boolean;
     maxInputTokens: number;
+    reasoningEffort: ReasoningEffort;
 }
 
 /**
@@ -86,6 +89,7 @@ export class ConfigManager {
      */
     getAll(): ExtensionConfig {
         return {
+            openaiBaseUrl: this.get('openaiBaseUrl'),
             language: this.get('language'),
             messageStyle: this.get('messageStyle'),
             useEmoji: this.get('useEmoji'),
@@ -95,6 +99,7 @@ export class ConfigManager {
             useBulletList: this.get('useBulletList'),
             useConventionalCommits: this.get('useConventionalCommits'),
             maxInputTokens: this.get('maxInputTokens'),
+            reasoningEffort: this.get('reasoningEffort'),
         };
     }
 

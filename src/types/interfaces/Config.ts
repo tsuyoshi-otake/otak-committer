@@ -5,6 +5,7 @@ import { ReasoningEffort } from '../enums/ReasoningEffort';
  */
 export interface ServiceConfig {
     openaiApiKey?: string;
+    openaiBaseUrl: string;
     githubToken?: string;
     language: string;
     messageStyle: string;

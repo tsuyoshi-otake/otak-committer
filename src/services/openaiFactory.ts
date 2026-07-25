@@ -3,7 +3,7 @@ import { BaseServiceFactory } from './base';
 import { ServiceConfig } from '../types';
 import { OpenAIService } from './openaiService';
 import { initializeOpenAIService } from './openaiInitialize';
-import { invalidateValidatedApiKey } from './openaiKeyValidationCache';
+import { invalidateValidatedConnection } from './openaiKeyValidationCache';
 
 /**
  * Factory for creating OpenAI service instances
@@ -15,8 +15,8 @@ export class OpenAIServiceFactory extends BaseServiceFactory<OpenAIService> {
         return new OpenAIService(config);
     }
 
-    static invalidateValidatedKey(apiKey: string): void {
-        invalidateValidatedApiKey(apiKey);
+    static invalidateValidatedKey(apiKey: string, baseURL: string): void {
+        invalidateValidatedConnection(apiKey, baseURL);
     }
 
     static async initialize(

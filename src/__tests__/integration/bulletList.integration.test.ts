@@ -138,7 +138,7 @@ suite('Bullet List Integration Tests', () => {
 
         try {
             const response = await openai.chat.completions.create({
-                model: 'gpt-5.4',
+                model: 'gpt-5.6-luna',
                 messages: [
                     { role: 'developer', content: SYSTEM_PROMPT },
                     { role: 'user', content: prompt },
@@ -209,7 +209,7 @@ suite('Bullet List Integration Tests', () => {
 
         try {
             const response = await openai.chat.completions.create({
-                model: 'gpt-5.4',
+                model: 'gpt-5.6-luna',
                 messages: [
                     { role: 'developer', content: SYSTEM_PROMPT },
                     { role: 'user', content: prompt },
@@ -264,7 +264,7 @@ suite('Bullet List Integration Tests', () => {
 
         try {
             const response = await openai.chat.completions.create({
-                model: 'gpt-5.4',
+                model: 'gpt-5.6-luna',
                 messages: [
                     { role: 'developer', content: SYSTEM_PROMPT },
                     { role: 'user', content: prompt },

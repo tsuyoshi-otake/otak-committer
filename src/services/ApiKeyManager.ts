@@ -5,6 +5,8 @@ import { ApiKeyValidator } from './ApiKeyValidator';
 import { ApiKeyAction, handleExistingKey, promptForApiKey } from './apiKey.prompts';
 import { promptAndSaveApiKey, validateCurrentApiKey } from './apiKey.flow';
 import { t } from '../i18n/index';
+import { ConfigManager } from '../infrastructure/config/ConfigManager';
+import { resolveOpenAIBaseUrl } from './openaiConnection';
 
 export type { ApiKeyAction };
 
@@ -13,6 +15,7 @@ export type { ApiKeyAction };
  */
 export interface ValidationResult {
     isValid: boolean;
+    isUnsupported?: boolean;
     status?: number;
     isNetworkError?: boolean;
     error?: string;
@@ -28,16 +31,27 @@ export class ApiKeyManager {
     constructor(
         _context: vscode.ExtensionContext,
         private readonly storage: StorageManager,
+        private readonly config: Pick<ConfigManager, 'get'> = new ConfigManager(),
     ) {
         this.logger = Logger.getInstance();
     }
 
-    static validateKeyFormat(key: string): boolean {
-        return ApiKeyValidator.validateKeyFormat(key);
+    static validateKeyFormat(key: string, baseURL?: string): boolean {
+        return ApiKeyValidator.validateKeyFormat(key, baseURL);
+    }
+
+    private getBaseURL(): string {
+        return resolveOpenAIBaseUrl(
+            this.config.get('openaiBaseUrl'),
+            process.env.OPENAI_BASE_URL,
+        );
     }
 
     async promptForApiKey(): Promise<string | undefined> {
-        return promptForApiKey(this.logger, ApiKeyManager.validateKeyFormat);
+        const baseURL = this.getBaseURL();
+        return promptForApiKey(this.logger, (key) =>
+            ApiKeyManager.validateKeyFormat(key, baseURL),
+        );
     }
 
     async handleExistingKey(): Promise<ApiKeyAction> {
@@ -52,7 +66,7 @@ export class ApiKeyManager {
     }
 
     async validateWithOpenAI(apiKey: string): Promise<ValidationResult> {
-        return ApiKeyValidator.validateWithOpenAI(apiKey);
+        return ApiKeyValidator.validateWithOpenAI(apiKey, this.getBaseURL());
     }
 
     private async validateWithProgress(apiKey: string): Promise<ValidationResult> {
@@ -71,7 +85,8 @@ export class ApiKeyManager {
             logger: this.logger,
             storage: this.storage,
             promptForApiKey: () => this.promptForApiKey(),
-            validateKeyFormat: ApiKeyManager.validateKeyFormat,
+            validateKeyFormat: (key) =>
+                ApiKeyManager.validateKeyFormat(key, this.getBaseURL()),
             validateWithProgress: (apiKey) => this.validateWithProgress(apiKey),
         });
     }

@@ -1,4 +1,10 @@
 import { Logger } from '../infrastructure/logging/Logger';
+import {
+    DEFAULT_OPENAI_BASE_URL,
+    isOfficialOpenAIBaseUrl,
+    resolveOpenAIBaseUrl,
+} from './openaiConnection';
+import { validateApiKey } from './openaiValidation';
 
 /**
  * API key validation utilities
@@ -9,12 +15,10 @@ export class ApiKeyValidator {
     /**
      * Regular expression for validating OpenAI API key format
      * Accepts known OpenAI key prefixes: sk-proj-, sk-svcacct-, sk-admin-, sk-or-,
-     * or legacy keys starting with sk- followed by 20+ alphanumeric characters.
+     * sk-ant-, or legacy keys starting with sk-, followed by 20+ characters from
+     * the alphanumeric, underscore, and hyphen set.
      */
     private static readonly API_KEY_PATTERN = /^sk-(?:proj-|svcacct-|admin-|or-|ant-)?[A-Za-z0-9_-]{20,}$/;
-
-    /** Timeout for API validation requests (30 seconds) */
-    private static readonly VALIDATION_TIMEOUT_MS = 30000;
 
     /**
      * Validates API key format
@@ -22,7 +26,7 @@ export class ApiKeyValidator {
      * @param key - The API key string to validate
      * @returns True if the key format is valid, false otherwise
      */
-    static validateKeyFormat(key: string): boolean {
+    static validateKeyFormat(key: string, baseURL = DEFAULT_OPENAI_BASE_URL): boolean {
         if (!key || typeof key !== 'string') {
             return false;
         }
@@ -32,7 +36,10 @@ export class ApiKeyValidator {
             return false;
         }
 
-        return ApiKeyValidator.API_KEY_PATTERN.test(trimmedKey);
+        const normalizedBaseURL = resolveOpenAIBaseUrl(baseURL);
+        return isOfficialOpenAIBaseUrl(normalizedBaseURL)
+            ? ApiKeyValidator.API_KEY_PATTERN.test(trimmedKey)
+            : true;
     }
 
     /**
@@ -45,43 +52,31 @@ export class ApiKeyValidator {
      */
     static async validateWithOpenAI(
         apiKey: string,
-    ): Promise<{ isValid: boolean; status?: number; isNetworkError?: boolean; error?: string }> {
+        baseURL = DEFAULT_OPENAI_BASE_URL,
+    ): Promise<{
+        isValid: boolean;
+        isUnsupported?: boolean;
+        status?: number;
+        isNetworkError?: boolean;
+        error?: string;
+    }> {
         const logger = Logger.getInstance();
         logger.info('Validating API key with OpenAI');
 
-        try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(
-                () => controller.abort(),
-                ApiKeyValidator.VALIDATION_TIMEOUT_MS,
-            );
-
-            const response = await fetch('https://api.openai.com/v1/models', {
-                method: 'GET',
-                headers: {
-                    Authorization: `Bearer ${apiKey}`,
-                    'Content-Type': 'application/json',
-                },
-                signal: controller.signal,
-            }).finally(() => clearTimeout(timeoutId));
-
-            if (response.ok) {
-                logger.info('API key validation successful');
-                return { isValid: true, status: response.status };
-            }
-
-            const errorData = await response.json().catch(() => ({}));
-            const errorMessage =
-                (errorData as { error?: { message?: string } }).error?.message || 'Unknown error';
-            logger.warning(`API key validation failed: ${response.status}`);
-            const sanitizedMessage = ApiKeyValidator.sanitizeErrorMessage(errorMessage, apiKey);
-            return { isValid: false, status: response.status, error: sanitizedMessage };
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Network error';
-            logger.error('API key validation error:', error);
-            const sanitizedMessage = ApiKeyValidator.sanitizeErrorMessage(errorMessage, apiKey);
-            return { isValid: false, status: 0, isNetworkError: true, error: sanitizedMessage };
+        const result = await validateApiKey(apiKey, baseURL);
+        if (result.ok) {
+            logger.info('API key validation successful');
+            return { isValid: true, status: 200 };
         }
+
+        logger.warning(`API key validation failed: ${result.status ?? 0}`);
+        return {
+            isValid: false,
+            isUnsupported: result.kind === 'unsupported',
+            status: result.status,
+            isNetworkError: result.kind === 'network',
+            error: result.reason,
+        };
     }
 
     /**

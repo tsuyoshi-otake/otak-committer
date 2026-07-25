@@ -4,7 +4,10 @@ import { StorageManager } from '../infrastructure/storage';
 import { Logger } from '../infrastructure/logging';
 import { ErrorHandler } from '../infrastructure/error';
 import { t } from '../i18n';
-import { isApiKeyValidated, markApiKeyValidated } from './openaiKeyValidationCache';
+import {
+    isConnectionValidated,
+    markConnectionValidated,
+} from './openaiKeyValidationCache';
 import {
     promptForInvalidStoredApiKey,
     promptForMissingApiKey,
@@ -12,12 +15,22 @@ import {
     showApiKeyErrorDialog,
 } from './openaiApiKeyDialogs';
 import { validateApiKey, type ValidateApiKeyResult } from './openaiValidation';
+import { resolveOpenAIBaseUrl } from './openaiConnection';
+import {
+    decideValidationFailureAction,
+    decideValidationResult,
+    type OpenAIConnectionVerification,
+} from './openaiValidationDecision';
 
 const MAX_INITIALIZATION_ATTEMPTS = 3;
 
 export { showApiKeyErrorDialog } from './openaiApiKeyDialogs';
 
-type ValidationDecision = 'valid' | 'retry' | 'reset-key' | 'stop';
+type ValidationDecision =
+    | { action: 'proceed'; verification: OpenAIConnectionVerification }
+    | { action: 'retry' }
+    | { action: 'reset-key' }
+    | { action: 'stop' };
 
 /**
  * Initializes an OpenAI-backed service instance with interactive API key handling.
@@ -44,6 +57,10 @@ export async function initializeOpenAIService<T>(
 
         const providedKey = config?.openaiApiKey;
         let apiKey = providedKey?.trim();
+        const baseURL = resolveOpenAIBaseUrl(
+            config?.openaiBaseUrl,
+            process.env.OPENAI_BASE_URL,
+        );
         const storage = context ? new StorageManager(context) : undefined;
         const isExplicitKey = providedKey !== undefined;
 
@@ -82,19 +99,24 @@ export async function initializeOpenAIService<T>(
                 isExplicitKey,
                 storage,
                 logger,
+                baseURL,
             );
-            if (validationDecision === 'stop') {
+            if (validationDecision.action === 'stop') {
                 return undefined;
             }
-            if (validationDecision === 'reset-key') {
+            if (validationDecision.action === 'reset-key') {
                 apiKey = undefined;
                 continue;
             }
-            if (validationDecision === 'retry') {
+            if (validationDecision.action === 'retry') {
                 continue;
             }
 
-            const service = await createService({ ...config, openaiApiKey: apiKey });
+            const service = await createService({
+                ...config,
+                openaiApiKey: apiKey,
+                openaiBaseUrl: baseURL,
+            });
             logger.info('OpenAI service initialized successfully');
             return service;
         }
@@ -149,9 +171,10 @@ async function ensureApiKeyValidated(
     isExplicitKey: boolean,
     storage: StorageManager | undefined,
     logger: Logger,
+    baseURL: string,
 ): Promise<ValidationDecision> {
-    if (isApiKeyValidated(apiKey)) {
-        return 'valid';
+    if (isConnectionValidated(apiKey, baseURL)) {
+        return { action: 'proceed', verification: 'validated' };
     }
 
     const validation = await vscode.window.withProgress(
@@ -160,17 +183,36 @@ async function ensureApiKeyValidated(
             title: t('apiKey.validating'),
             cancellable: false,
         },
-        async () => validateApiKey(apiKey),
+        async () => validateApiKey(apiKey, baseURL),
     );
 
-    if (validation.ok) {
-        markApiKeyValidated(apiKey);
-        return 'valid';
+    const immediateDecision = decideValidationResult(
+        validation,
+        !isExplicitKey && !!storage,
+    );
+
+    if (
+        immediateDecision.action === 'proceed' &&
+        immediateDecision.verification === 'validated'
+    ) {
+        markConnectionValidated(apiKey, baseURL);
+    }
+    if (
+        immediateDecision.action === 'proceed' &&
+        immediateDecision.verification === 'unverified'
+    ) {
+        logger.info('OpenAI gateway does not expose model validation; proceeding unverified');
+    }
+    if (immediateDecision.action !== 'recover') {
+        if (immediateDecision.action === 'stop' && !validation.ok) {
+            logger.warning('OpenAI API key validation failed', validation);
+        }
+        return immediateDecision;
     }
 
-    if (isExplicitKey || !storage) {
+    if (validation.ok || !storage) {
         logger.warning('OpenAI API key validation failed', validation);
-        return 'stop';
+        return { action: 'stop' };
     }
 
     return handleStoredKeyValidationFailure(validation, apiKey, storage);
@@ -188,16 +230,8 @@ async function handleStoredKeyValidationFailure(
     const action = await promptForValidationFailure(formatValidationReason(validation));
     if (action === 'diagnose') {
         await vscode.commands.executeCommand('otak-committer.diagnoseStorage');
-        return 'retry';
     }
-    if (action === 'retry') {
-        return 'retry';
-    }
-    if (action === 'continue') {
-        markApiKeyValidated(apiKey);
-        return 'valid';
-    }
-    return 'stop';
+    return decideValidationFailureAction(action);
 }
 
 async function handleInvalidStoredKey(storage: StorageManager): Promise<ValidationDecision> {
@@ -205,21 +239,21 @@ async function handleInvalidStoredKey(storage: StorageManager): Promise<Validati
 
     if (action === 'diagnose') {
         await vscode.commands.executeCommand('otak-committer.diagnoseStorage');
-        return 'stop';
+        return { action: 'stop' };
     }
 
     if (action === 'remove') {
         await storage.deleteApiKey('openai');
         vscode.window.showInformationMessage(t('apiKey.removed'));
-        return 'stop';
+        return { action: 'stop' };
     }
 
     if (action === 'update') {
         await vscode.commands.executeCommand('otak-committer.setApiKey');
-        return 'reset-key';
+        return { action: 'reset-key' };
     }
 
-    return 'stop';
+    return { action: 'stop' };
 }
 
 function formatValidationReason(validation: ValidateApiKeyResult & { ok: false }): string {

@@ -1,20 +1,3 @@
-import * as vscode from 'vscode';
-import { ServiceConfig } from '../types';
-import { ReasoningEffort } from '../types/enums/ReasoningEffort';
-
-// Configuration Management
-export function getServiceConfig(): ServiceConfig {
-    const config = vscode.workspace.getConfiguration('otakCommitter');
-    return {
-        openaiApiKey: config.get<string>('openaiApiKey'),
-        githubToken: config.get<string>('github.token'),
-        language: config.get<string>('language') || 'english',
-        messageStyle: config.get<string>('messageStyle') || 'normal',
-        useEmoji: config.get<boolean>('useEmoji') || false,
-        reasoningEffort: config.get<ReasoningEffort>('reasoningEffort') || 'low',
-    };
-}
-
 // File Helpers
 export function cleanPath(filePath: string): string {
     return filePath.replace(/\\/g, '/');
