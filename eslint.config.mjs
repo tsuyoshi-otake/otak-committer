@@ -1,6 +1,7 @@
 import typescriptEslint from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import eslintConfigPrettier from 'eslint-config-prettier/flat';
+import noInvisibleUnicode from './eslint-rules/no-invisible-unicode.mjs';
 
 export default [
     {
@@ -9,6 +10,11 @@ export default [
     {
         plugins: {
             '@typescript-eslint': typescriptEslint,
+            otak: {
+                rules: {
+                    'no-invisible-unicode': noInvisibleUnicode,
+                },
+            },
         },
 
         languageOptions: {
@@ -29,6 +35,7 @@ export default [
             curly: 'warn',
             eqeqeq: 'warn',
             'no-throw-literal': 'warn',
+            'otak/no-invisible-unicode': 'error',
             semi: 'warn',
         },
     },

@@ -37,6 +37,12 @@ jobs:
       - name: Unit tests
         run: npm run test:unit
 
+      - name: Build extension bundle
+        run: npm run vscode:prepublish
+
+      - name: Scan shipped artifacts for invisible Unicode
+        run: npm run lint:unicode:dist
+
   vscode-host-test:
     name: VSCode-host Tests (${{ matrix.os }})
     needs: build-test

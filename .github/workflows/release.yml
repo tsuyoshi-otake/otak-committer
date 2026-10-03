@@ -113,6 +113,14 @@ jobs:
       - name: Package VSIX
         run: .github/release-tools/node_modules/.bin/vsce package --no-dependencies --out "otak-committer-${RELEASE_TAG#v}.vsix"
 
+      # Scan every file that ships, including escape sequences in the bundled JS,
+      # so a hidden payload cannot reach the registries through the build output.
+      - name: Scan packaged VSIX for invisible Unicode
+        run: |
+          rm -rf vsix-scan
+          unzip -q "otak-committer-${RELEASE_TAG#v}.vsix" -d vsix-scan
+          node scripts/check-invisible-unicode.mjs --dist vsix-scan
+
       - name: Upload VSIX
         uses: actions/upload-artifact@v4
         with:

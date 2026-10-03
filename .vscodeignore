@@ -19,6 +19,9 @@ test/**
 *.vsix
 .git
 .github/**
+.codex/**
+eslint-rules/**
+scripts/**
 docs/**
 !docs/README.md
 **/package-lock.json

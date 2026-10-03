@@ -183,3 +183,54 @@
   - Node 20: only test-cli 0.0.15 declares a newer Node (>=22). That gives an EBADENGINE warning, not an error, and CI never runs test-cli.
 - `age-check.mjs` fix: it reported "no publish time" for npm aliases such as `string-width-cjs`, because it looked packages up by install path. It now takes the registry name from `resolved`.
 - Learning: rules.md [deps-audit].
+
+## 2026-10-03 — Remove https-proxy-agent; invisible-Unicode scan (#8)
+
+- Symptom: #8 asks to drop the `https-proxy-agent` runtime dependency without breaking proxy users, declare the Workspace Trust posture, and keep invisible-Unicode payloads (GlassWorm, Trojan Source) out of the repository and the VSIX. Codex left an uncommitted implementation: a custom `nativeProxyFetch` transport plus the Unicode scanner.
+- Root cause (proxy):
+  - `request: { agent: new HttpsProxyAgent(proxyUrl) }` never had an effect. Octokit 21 sends with `request.fetch || globalThis.fetch` and never reads `agent`.
+  - The code also logged `Using proxy: ${proxyUrl}`, which includes any `user:pass` from `http.proxy`.
+  - Proxy users were still served because the VS Code extension host patches the global `fetch`. A probe extension in VS Code 1.140.0 and 1.109.5 recorded `CONNECT ... :443` with `Proxy-Authorization`, and `http.noProxy` hosts went direct.
+- Decision: no custom transport. Codex's `nativeProxyFetch` was rejected:
+  - It validated an HTTPS proxy's certificate against the target host.
+  - It had no timeout and buffered responses without a limit.
+  - It ignored `http.noProxy`, `http.proxyStrictSSL` and the system certificates, all of which the patched `fetch` handles.
+  - Codex's files are backed up in `~/tmp/issue8-backup/codex-issue8-worktree.tar`.
+- Fix, commit 1 (proxy):
+  - `createGitHubClient` in `src/services/github.init.ts` builds Octokit with `auth` and `userAgent` only. The credential-bearing log line is gone.
+  - `https-proxy-agent` removed from `dependencies`. It stays in the lockfile as a dev-only transitive package.
+  - `capabilities.untrustedWorkspaces.supported: false`, which equals VS Code's default for an undeclared extension, so activation is unchanged.
+  - Tests: host test `githubProxy.integration.test.ts`; manifest test `extensionManifestSecurity.test.ts`.
+- Fix, commit 2 (Unicode): Codex's detector, ESLint rule and scanner, plus these review fixes:
+  - `--dist` decodes `\u` escapes in JS and JSON.
+  - NUL bytes are scanned instead of being treated as binary; invalid UTF-8 fails the scan.
+  - New categories: Hangul fillers, private use, unassigned plane 14, deprecated format, CGJ, Khmer inherent vowels, Braille blank, musical format.
+  - An unknown option exits 2.
+  - Output is capped at 20 findings per file.
+  - CI runs the dist scan; `release.yml` scans the unpacked VSIX before upload.
+- Verification (working tree):
+  - compile and `lint:ci` pass (repository scan: 436 files).
+  - `test:unit`: 529 passing. Host `npm test` on VS Code 1.140.0: 499 passing, including the proxy test.
+  - Fail-before:
+    - A throwing `request.fetch` injected into `out/services/github.init.js` failed only the proxy test (0 CONNECTs).
+    - Three scanner mutants (no escape scan, skip NUL files, lossy UTF-8) each failed exactly their own test.
+  - `lint:unicode:dist`: 30 files, 0 findings.
+  - `npm ls https-proxy-agent --omit=dev` is empty.
+  - VSIX built with vsce 4.0.0 (43 files): no https-proxy-agent, `.codex`, `eslint-rules`, `scripts`, `node_modules` or tests. The manifest keeps onStartupFinished, 8 commands, 3 menus and 11 settings. The release-step scan of the unpacked VSIX finds nothing.
+  - `npm audit --audit-level=high`: 0 vulnerabilities. Age check: PASS (347 packages).
+  - actionlint: clean.
+  - Commit trees, built in separate `GIT_INDEX_FILE`s and checked out to scratch: tree1 and tree2 both pass tsc and eslint; `test:unit` gives 503 for tree1 and 522 for tree2.
+    - 7 of the gap to 529 are a stale `out/utils/__tests__/dependencyAnalyzer.test.js` in the working tree.
+- Learning:
+  - rules.md: new [proxy], [unicode-scan] and [tool-escapes]; [commit-scope] updated with LF blobs and per-commit index files.
+  - Building blobs with a latin1 read and a utf8 write double-encoded every non-ASCII line. `git diff --stat HEAD <tree>` caught it (44 changed lines instead of 6).
+- Residual risk:
+  - VS Code builds without the fetch patch (or with `http.fetchAdditionalSupport` off) send GitHub requests directly, as they already did.
+  - The scanner may flag ZWJ or LRM/RLM in future i18n strings.
+  - File names are not scanned.
+  - The ESLint rule covers `src` only.
+- Verifier iteration 1 (rubric `.claude/goal-loop/issue8-proxy-unicode/rubric.md`): C1 and C3–C10 passed. C2 failed.
+  - Cause: the rubric's own grep (`http\.proxy|agent:`, case-insensitive) matched the doc comment and `userAgent:`, not a transport or a log line.
+  - Fix: the pattern now targets the real risks: reading `getConfiguration('http')`, a standalone `agent:`, `fetch:` or `request: {` option, and the old log text.
+  - Check: the narrowed pattern flags HEAD's 5 offending lines (import, settings read, log, `request: {`, `agent:`) and prints nothing for the new tree.
+- Commits: b75f392 (proxy client, dependency removal, Workspace Trust); the invisible-Unicode scan and this entry are in the commit that follows it.
