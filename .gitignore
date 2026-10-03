@@ -12,3 +12,8 @@ node_modules
 *.log
 # Snyk Security Extension - AI Rules (auto-generated)
 .github/instructions/snyk_rules.instructions.md
+
+# Agent goal-loop work files (rubrics and notes reference local scratch paths).
+# Distilled project memory lives in .claude/memory/ and .codex/memory/.
+.claude/goal-loop/
+.codex/goal-loop/
