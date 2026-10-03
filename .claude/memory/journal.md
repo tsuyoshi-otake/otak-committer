@@ -261,3 +261,21 @@
   - Removed 17 compiled files in `out/` whose TypeScript source no longer exists. These were the cause of the 529 vs 522 unit-test count.
   - Removed this session's scratch under `~/tmp`, about 6.7 MB: issue8-backup, proxyprobe, otak-committer-release, secscan, and the run logs.
 - Learning: [tool-escapes] now also covers text drafted for GitHub.
+
+## 2026-10-03 — release 2.18.1 (#8)
+
+- Release commit 249e0f3 `chore(release): 2.18.1`: version bump in package.json and package-lock.json, plus the `## [2.18.1]` CHANGELOG section.
+  - CI 37126563387 and Security Scan 37126563376 passed on 249e0f3.
+- Annotated tag `v2.18.1` on 249e0f3 started Release run 37126711595.
+  - Verify + Package, Publish to Open VSX and Publish to VS Code Marketplace all succeeded.
+  - Both publish jobs logged `Published odangoo.otak-committer v2.18.1`. Every `npm audit` line read `found 0 vulnerabilities`, and the VSIX scan was clean.
+- Registry lag after "Published": Open VSX served 2.18.1 after about 2 min (22:38:32), the Marketplace after about 8 min (22:44:18). Both APIs returned 2.18.0 until then; this is propagation, not a failed publish.
+- The workflow does not create a GitHub release. `gh release create v2.18.1` with the CHANGELOG section as notes; it is now Latest (the previous release was v1.7.1).
+- Pre-release check (personal data, history identities, visibility/tags, LICENSE), reported to the user, not changed:
+  - Tracked `.vscode/settings.json` holds a Snyk org UUID. It is excluded from the VSIX.
+  - Commit history contains a work email in older author/committer lines. Removing it needs a history rewrite and a force push of main and all tags, which is the user's decision.
+  - The repository is already public (0 forks) and has an MIT LICENSE. Every commit since v2.18.0 uses the personal identity.
+- Verifier (rubric `.claude/goal-loop/release-2.18.1/rubric.md`, C1–C8): overall pass on iteration 1.
+  - The Marketplace and Open VSX packages have identical sha256 for `extension/out/extension.js` and `extension/package.json`.
+  - The Open VSX package has version 2.18.1, `untrustedWorkspaces.supported: false`, no https-proxy-agent, and a clean `--dist` scan.
+- Learning: poll both registry APIs for up to 10 min after "Published" before treating an old version as a failure.
