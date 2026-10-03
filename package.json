@@ -25,6 +25,11 @@
   "engines": {
     "vscode": "^1.90.0"
   },
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false
+    }
+  },
   "categories": [
     "SCM Providers",
     "AI",
@@ -315,7 +320,6 @@
   },
   "dependencies": {
     "@octokit/rest": "^21.1.1",
-    "https-proxy-agent": "^7.0.2",
     "openai": "^4.85.4",
     "simple-git": "^3.36.0"
   }

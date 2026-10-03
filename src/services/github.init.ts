@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { authentication } from 'vscode';
-import { HttpsProxyAgent } from 'https-proxy-agent';
 import { t } from '../i18n';
 import { GitHubAPI } from '../types';
 import { Logger } from '../infrastructure/logging/Logger';
@@ -44,6 +43,25 @@ async function detectRepositoryInfo(repository: GitApiRepository, logger: Logger
 }
 
 /**
+ * Create the Octokit client used for every GitHub API call
+ *
+ * The client deliberately has no custom transport. Octokit sends requests with the
+ * global `fetch`, which the VS Code extension host routes through `http.proxy`,
+ * `http.noProxy`, proxy authentication and the system certificates. A custom
+ * `request.fetch` would bypass those settings, and `request.agent` is ignored by Octokit.
+ *
+ * @param accessToken - The GitHub token sent as the Authorization header
+ * @returns An Octokit client that follows VS Code's network settings
+ */
+export async function createGitHubClient(accessToken: string): Promise<GitHubAPI> {
+    const { Octokit } = await import('@octokit/rest');
+    return new Octokit({
+        auth: accessToken,
+        userAgent: 'otak-committer',
+    }) as unknown as GitHubAPI;
+}
+
+/**
  * Authenticate with GitHub and prepare the Octokit client and repository context
  *
  * @param logger - The logger used to record progress
@@ -79,23 +97,7 @@ export async function initializeGitHubState(logger: Logger): Promise<GitHubIniti
     }
 
     logger.info('GitHub authentication successful');
-    const proxyUrl = vscode.workspace.getConfiguration('http').get<string>('proxy');
-    if (proxyUrl) {
-        logger.info(`Using proxy: ${proxyUrl}`);
-    }
-
-    const { Octokit } = await import('@octokit/rest');
-    const octokit = new Octokit({
-        auth: authSession.accessToken,
-        userAgent: 'otak-committer',
-        ...(proxyUrl
-            ? {
-                  request: {
-                      agent: new HttpsProxyAgent(proxyUrl),
-                  },
-              }
-            : {}),
-    }) as unknown as GitHubAPI;
+    const octokit = await createGitHubClient(authSession.accessToken);
 
     const gitExtension = vscode.extensions.getExtension('vscode.git')?.exports;
     if (!gitExtension) {
