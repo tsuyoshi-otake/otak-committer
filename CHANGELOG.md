@@ -1,28 +1,57 @@
 # Change Log
 
+## [2.18.0] - 2026-10-03
+
+### Changed
+
+- **Default model:** all OpenAI operations (commit messages, diff summaries, PR content, and generic chat/issue generation) now use `gpt-6-luna`.
+- **Reasoning effort `none`:** the setting is now sent explicitly instead of omitting `reasoning_effort`, so it no longer falls back to the model default (`medium` on `gpt-6-luna`). When the setting cannot be read, the code now falls back to `high`, matching the setting's default; "Recommended" was removed from the `low` description.
+- **"Always stage" stages tracked changes only (`git add -u`):** when untracked files exist, the extension lists them and asks each time (Include Untracked / Tracked Files Only / Cancel). Paths the extension staged are unstaged again whenever no commit message is applied (cancel, declined secret warning, missing key, empty result, or error).
+- **Re-running "Generate Commit Message":** a second click cancels the running generation and starts only after that run has finished undoing its staging.
+- **Larger input limit:** `otakCommitter.maxInputTokens` now accepts up to 922,000 tokens (the `gpt-6-luna` input limit).
+- **Redaction:** error context and logs share one redaction rule set that masks credential-like names in any casing or separator and token formats such as `github_pat_` inside strings; `BaseError.toString()` no longer prints context.
+
+### Fixed
+
+- **Endpoint setting honored by commands:** commit, PR, and issue commands now validate and connect through `otakCommitter.openaiBaseUrl`; previously the setting was replaced by `OPENAI_BASE_URL` or the official endpoint during initialization.
+- **Invalid endpoint isolation:** an invalid `otakCommitter.openaiBaseUrl` now fails only OpenAI initialization with a clear error instead of breaking every service that reads configuration (including GitHub-only flows).
+- **PR and issue cancellation:** cancelling the progress notification now aborts the OpenAI request; a second PR or issue run while one is in progress is ignored, and only this extension's own preview tabs are closed.
+- **Structured output limits:** PR and issue generation send `max_completion_tokens`, and a truncated (`finish_reason: length`) or refused response is reported as such instead of as a JSON parse error.
+- **Oversized files:** a file larger than the diff chunk limit is split at line boundaries into labelled parts, so no chunk exceeds the limit.
+- **Authentication errors:** only HTTP 401 opens the API key dialog; a 400 no longer does.
+- **Repository and paths:** the commit command uses the repository whose Source Control title button was clicked, and non-ASCII file names are no longer shown C-quoted.
+- **Large repositories:** branch and issue lists page through up to 1,000 items; when GitHub's 300-file compare limit is reached, the user is warned and the PR prompt says more files exist.
+- **Issue preview cancellation:** pressing Esc in the modification input now returns to the action picker instead of creating the issue.
+- **Secret detection coverage and speed:** detects current OpenAI project/admin/service-account/OpenRouter and Anthropic keys that contain `-` or `_`; connection-string and JWT patterns are bounded so long single-line diffs are scanned in linear time (seconds to milliseconds on 340 KB inputs).
+- **GitHub remote parsing:** repository names containing dots (for example `owner.github.io`, `next.js`) and remotes with a trailing slash are now parsed correctly for PR/issue creation and the repository visibility indicator.
+- **Legacy plaintext settings:** service configuration no longer reads the legacy `openaiApiKey` or `github.token` settings.
+
+### Security
+
+- CI workflows declare `permissions: contents: read`.
+
+### Tests
+
+- Added tests for every fix above, including a real-repository test for the re-run staging race, and made VS Code host tests restore `vscode.workspace.getConfiguration` (the host runner now fails a test that leaves it replaced).
+- 500 unit tests and 519 VS Code host tests passing; live OpenAI tests remain opt-in and require `OPENAI_API_KEY`.
+
 ## [2.17.0] - 2026-07-25
 
 ### Added
 
-- **Custom OpenAI-compatible endpoints:** added an `otakCommitter.openaiBaseUrl` setting and `OPENAI_BASE_URL` fallback for pass-through gateways that preserve the OpenAI Responses API contract.
+- **Custom OpenAI-compatible endpoints:** added an `otakCommitter.openaiBaseUrl` setting and `OPENAI_BASE_URL` fallback for pass-through gateways that preserve the OpenAI Chat Completions request format.
 - **Gateway safety and resilience:** validates HTTPS and loopback HTTP endpoints, keys cached clients by endpoint and credential, bounds retries and timeouts, honors `Retry-After`, and surfaces unsupported gateway routes clearly.
 - **Quality evaluation harness:** added opt-in live evaluations for generated commit messages while keeping paid API calls out of the default test suite.
 
 ### Changed
 
-- **Default model:** all OpenAI operations (commit messages, diff summaries, PR content, and generic chat/issue generation) now use `gpt-6-luna`.
-- **Reasoning effort `none`:** the setting is now sent explicitly instead of omitting `reasoning_effort`, so it no longer falls back to the model default (`medium` on `gpt-6-luna`).
+- **Commit-focused model routing:** commit message generation and diff summaries now use `gpt-5.6-luna`; PR and generic structured generation remain on `gpt-5.4`.
 - **Documentation and architecture:** refreshed the README settings/model guidance and added normal, retry, cancellation, and gateway-failure sequence diagrams to `ARCHITECTURE.md`.
 
 ### Fixed
 
 - **Cancellation propagation:** abort signals now reach OpenAI requests and retry waits so cancelled operations terminate explicitly instead of continuing hidden work.
 - **Endpoint-aware client reuse:** changing the custom endpoint can no longer reuse a client created for a different gateway.
-- **Endpoint setting honored by commands:** commit, PR, and issue commands now validate and connect through `otakCommitter.openaiBaseUrl`; previously the setting was replaced by `OPENAI_BASE_URL` or the official endpoint during initialization.
-- **Invalid endpoint isolation:** an invalid `otakCommitter.openaiBaseUrl` now fails only OpenAI initialization with a clear error instead of breaking every service that reads configuration (including GitHub-only flows).
-- **Issue preview cancellation:** pressing Esc in the modification input now returns to the action picker instead of creating the issue.
-- **Secret detection coverage and speed:** detects current OpenAI project/admin/service-account/OpenRouter and Anthropic keys that contain `-` or `_`; connection-string patterns are bounded so long single-line diffs are scanned in linear time (seconds to milliseconds on 340 KB inputs).
-- **GitHub remote parsing:** repository names containing dots (for example `owner.github.io`, `next.js`) and remotes with a trailing slash are now parsed correctly for PR/issue creation and the repository visibility indicator.
 
 ### Removed
 
@@ -31,7 +60,7 @@
 ### Tests
 
 - Added model-routing, endpoint precedence/validation, client-cache, retry/backoff, cancellation, gateway contract, property, and VS Code integration coverage.
-- 406 unit tests and 5 local gateway integration tests passing; live OpenAI tests remain opt-in and require `OPENAI_API_KEY`.
+- 383 unit tests and 5 local gateway integration tests passing; live OpenAI tests remain opt-in and require `OPENAI_API_KEY`.
 
 ## [2.16.11] - 2026-06-29
 
