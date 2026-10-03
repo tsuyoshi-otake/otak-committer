@@ -1,5 +1,25 @@
 # Change Log
 
+## [2.18.1] - 2026-10-03
+
+### Security
+
+- **Proxy credentials no longer logged:** signing in to GitHub no longer writes `Using proxy: <http.proxy>` to the output channel, which exposed any `user:pass` in the proxy URL.
+- **`https-proxy-agent` removed:** GitHub requests use VS Code's proxy-aware `fetch`, which honors `http.proxy` (including credentials), `http.noProxy`, `http.proxyStrictSSL`, and the system certificates. Octokit 21 never used the old agent option, so proxy routing is unchanged.
+- **Workspace Trust declared:** the manifest now states `untrustedWorkspaces.supported: false`. This is VS Code's default for extensions that declare nothing, so activation is unchanged.
+- **Invisible-Unicode checks:** the source, the built bundle, and the packaged VSIX are scanned for invisible and bidirectional Unicode (GlassWorm, Trojan Source) in CI and before every release.
+- Cleared the dev-dependency advisories that failed the Security Scan workflow.
+
+### Changed
+
+- Releases are published to Open VSX as well as the Visual Studio Marketplace.
+- README: `otakCommitter.openaiBaseUrl` is described as an OpenAI-compatible endpoint; the compatibility requirements are unchanged.
+
+### Tests
+
+- Added a VS Code host test that sends a GitHub API call through a local recording proxy, a manifest test for the trust declaration and contributions, and 19 scanner tests.
+- CI: 507 unit tests passing (15 pending) and 482 VS Code host tests passing (17 pending) on Windows and Linux.
+
 ## [2.18.0] - 2026-10-03
 
 ### Changed
