@@ -133,7 +133,7 @@ The extension UI language follows your VS Code display language (`Configure Disp
 
 ### OpenAI Models and Gateway
 
-Commit message generation and the Tier 3 large-diff summaries use `gpt-5.6-luna`. Pull request generation and generic chat/issue operations continue to use `gpt-5.4`.
+All OpenAI operations — commit message generation, Tier 3 large-diff summaries, pull request generation, and generic chat/issue operations — use `gpt-6-luna` by default.
 
 By default, requests use `https://api.openai.com/v1`. To route validation and generation through an OpenAI pass-through gateway, set `otakCommitter.openaiBaseUrl` in VS Code settings. If that setting is empty, the extension checks `OPENAI_BASE_URL` and then falls back to the official endpoint:
 
@@ -143,7 +143,7 @@ By default, requests use `https://api.openai.com/v1`. To route validation and ge
 }
 ```
 
-Gateway support intentionally targets endpoints that preserve OpenAI model IDs and the current Chat Completions request/response shape. A gateway must accept `gpt-5.6-luna` and `gpt-5.4` unchanged; arbitrary local model servers or model-name translation are outside this compatibility contract.
+Gateway support intentionally targets endpoints that preserve OpenAI model IDs and the current Chat Completions request/response shape. A gateway must accept `gpt-6-luna` unchanged and pass `reasoning_effort` values (including `none`) through; arbitrary local model servers or model-name translation are outside this compatibility contract.
 
 Remote endpoints must use HTTPS. Plain HTTP is accepted only for exact loopback hosts (`localhost`, `127.0.0.1`, or `::1`) so a local development gateway can be tested safely. URLs containing credentials, a query, or a fragment are rejected. Custom gateway credentials may use any non-empty token; the official endpoint requires an OpenAI `sk-...` key.
 
@@ -234,7 +234,7 @@ Then:
 2. Run `otak-committer: Set OpenAI API Key`.
 3. (Optional) Sign in to GitHub via the Accounts icon in the Activity Bar for PR and issue features.
 
-Commit generation uses GPT-5.6 Luna; PR and generic chat/issue generation use GPT-5.4.
+Commit, PR, and generic chat/issue generation use GPT-6 Luna.
 
 ### Commit Model Quality Evaluation
 
@@ -244,7 +244,7 @@ Maintainers can compare the commit-message model against the previous model with
 npm run eval:commit-model
 ```
 
-The evaluation uses 10 fixed representative diffs and makes 20 paid API calls: each diff is generated once with `gpt-5.6-luna` and once with `gpt-5.4`, with concurrency capped at two. It writes an anonymized, blinded A/B review sheet and a run manifest under `~/tmp/otak-committer-eval/`. Set `OPENAI_API_KEY` (and optionally `OPENAI_BASE_URL`) before running it. Do not commit the generated review artifacts or credentials.
+The evaluation uses 10 fixed representative diffs and makes 20 paid API calls: each diff is generated once with the previous commit model `gpt-5.6-luna` and once with `gpt-6-luna`, with concurrency capped at two. It writes an anonymized, blinded A/B review sheet and a run manifest under `~/tmp/otak-committer-eval/`. Set `OPENAI_API_KEY` (and optionally `OPENAI_BASE_URL`) before running it. Do not commit the generated review artifacts or credentials.
 
 ## Troubleshooting
 

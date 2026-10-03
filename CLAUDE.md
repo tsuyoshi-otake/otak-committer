@@ -48,7 +48,7 @@ Kiro-style Spec Driven Development implementation on AI-DLC (AI Development Life
 
 - PR generation uses **structured output** (`response_format: json_schema`) for reliable title/body extraction
 - Commit message generation uses **text completion** with `max_completion_tokens: 5000`
-- Model: `gpt-5.4` (reasoning model) — uses `developer` role, `reasoning_effort`, no `temperature`
+- Model: `gpt-6-luna` for every operation (reasoning model) — uses `developer` role, `reasoning_effort` (sent explicitly, including `none`), no `temperature`
 - Integration tests require `OPENAI_API_KEY` in `.env.local`
 
 ## Steering Configuration

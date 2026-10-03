@@ -275,8 +275,8 @@ export class CommitCommand extends BaseCommand {
 
 **Model routing**:
 
-- Commit messages and Tier 3 chunk summaries: `gpt-5.6-luna`
-- Pull request content and generic chat/issue operations: `gpt-5.4`
+- All operations (commit messages, Tier 3 chunk summaries, pull request content, generic chat/issue): `gpt-6-luna`
+- `reasoning_effort` is always sent explicitly, including `none`, because omitting it selects the model default (`medium` for `gpt-6-luna`)
 
 **Connection policy**: `otakCommitter.openaiBaseUrl` overrides `OPENAI_BASE_URL`, which overrides `https://api.openai.com/v1`. Validation and generation share the same normalized endpoint. Custom endpoints are pass-through gateways that preserve OpenAI model IDs and Chat Completions request/response shapes.
 

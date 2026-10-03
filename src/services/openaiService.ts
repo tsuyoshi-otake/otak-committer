@@ -4,6 +4,7 @@ import { BaseService } from './base';
 import { PromptService } from './prompt';
 import { ServiceConfig, TemplateInfo } from '../types';
 import { MessageStyle } from '../types/enums/MessageStyle';
+import type { ReasoningEffort } from '../types/enums/ReasoningEffort';
 import { PullRequestDiff } from '../types/interfaces/GitHub';
 import {
     invalidateValidatedConnection,
@@ -77,9 +78,8 @@ export class OpenAIService extends BaseService {
         return this.authErrorPrompt;
     }
 
-    private getReasoningEffort(): 'low' | 'medium' | 'high' | undefined {
-        const effort = this.config.reasoningEffort || 'low';
-        return effort === 'none' ? undefined : effort;
+    private getReasoningEffort(): ReasoningEffort {
+        return this.config.reasoningEffort || 'low';
     }
 
     async generateCommitMessage(

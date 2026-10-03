@@ -1,4 +1,6 @@
 import OpenAI from 'openai';
+import type { ChatCompletionReasoningEffort } from 'openai/resources/chat/completions';
+import type { ReasoningEffort } from '../types/enums/ReasoningEffort';
 import { OPENAI_COMPLETION_POLICY } from './openaiRequestPolicy';
 
 /**
@@ -10,7 +12,7 @@ export interface TextCompletionRequest {
     systemPrompt: string;
     userPrompt: string;
     maxCompletionTokens: number;
-    reasoningEffort: 'low' | 'medium' | 'high' | undefined;
+    reasoningEffort: ReasoningEffort | undefined;
     signal?: AbortSignal;
 }
 
@@ -22,7 +24,7 @@ export interface StructuredCompletionRequest {
     model: string;
     systemPrompt: string;
     userPrompt: string;
-    reasoningEffort: 'low' | 'medium' | 'high' | undefined;
+    reasoningEffort: ReasoningEffort | undefined;
     signal?: AbortSignal;
     schemaName: string;
     schema: Record<string, unknown>;
@@ -32,7 +34,7 @@ interface CompletionRequestBase {
     model: string;
     systemPrompt: string;
     userPrompt: string;
-    reasoningEffort: 'low' | 'medium' | 'high' | undefined;
+    reasoningEffort: ReasoningEffort | undefined;
     signal?: AbortSignal;
 }
 
@@ -43,7 +45,9 @@ function createCompletionParams(request: CompletionRequestBase) {
             { role: 'developer' as const, content: request.systemPrompt },
             { role: 'user' as const, content: request.userPrompt },
         ],
-        reasoning_effort: request.reasoningEffort,
+        // 'none' is sent explicitly: omitting the field selects the model default
+        // (medium for gpt-6-luna). The pinned SDK typing predates 'none'.
+        reasoning_effort: request.reasoningEffort as ChatCompletionReasoningEffort | undefined,
         store: false,
     };
 }

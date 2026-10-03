@@ -7,7 +7,7 @@ import { createOpenAIConnectionContext } from '../../services/openaiConnection';
 import { requestTextCompletion } from '../../services/openai.completion';
 import { COMMIT_MODEL_EVAL_CASES, type CommitModelEvalCase } from './commitModelEvalFixtures';
 
-type EvaluatedModel = 'gpt-5.4' | 'gpt-5.6-luna';
+type EvaluatedModel = 'gpt-5.6-luna' | 'gpt-6-luna';
 
 interface AutomaticChecks {
     nonEmpty: boolean;
@@ -29,7 +29,7 @@ interface CaseResult {
     outputs: ModelOutput[];
 }
 
-const MODELS: readonly EvaluatedModel[] = ['gpt-5.4', 'gpt-5.6-luna'];
+const MODELS: readonly EvaluatedModel[] = ['gpt-5.6-luna', 'gpt-6-luna'];
 const CONVENTIONAL_SUBJECT =
     /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|i18n)(\([^)]+\))?:\s+\S+/i;
 
@@ -123,7 +123,7 @@ Notes:
         manifest,
         markdown: `# Blinded commit-model quality review
 
-Review all ten cases without opening \`manifest.json\`. A migration passes when Luna has no material correctness regression, no systematic loss of change coverage, and its aggregate human score is not lower than GPT-5.4 by more than 5%.
+Review all ten cases without opening \`manifest.json\`. A migration passes when GPT-6 Luna has no material correctness regression, no systematic loss of change coverage, and its aggregate human score is not lower than GPT-5.6 Luna by more than 5%.
 
 ${sections.join('\n\n')}`,
     };

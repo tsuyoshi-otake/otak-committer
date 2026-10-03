@@ -128,7 +128,7 @@ suite('OpenAI gateway validation integration', () => {
         }
     });
 
-    test('sends commit generation through the same custom gateway with GPT-5.6 Luna', async () => {
+    test('sends commit generation through the same custom gateway with GPT-6 Luna', async () => {
         let requestBody: Record<string, unknown> | undefined;
         const gateway = await startGateway((request, response) => {
             let rawBody = '';
@@ -144,7 +144,7 @@ suite('OpenAI gateway validation integration', () => {
                         id: 'chatcmpl-gateway-test',
                         object: 'chat.completion',
                         created: 1,
-                        model: 'gpt-5.6-luna',
+                        model: 'gpt-6-luna',
                         choices: [
                             {
                                 index: 0,
@@ -178,7 +178,7 @@ suite('OpenAI gateway validation integration', () => {
                 url: '/v1/chat/completions',
                 authorization: 'Bearer gateway-token',
             });
-            assert.strictEqual(requestBody?.model, 'gpt-5.6-luna');
+            assert.strictEqual(requestBody?.model, 'gpt-6-luna');
             assert.strictEqual(requestBody?.reasoning_effort, 'high');
             assert.strictEqual(requestBody?.max_completion_tokens, 5000);
             assert.strictEqual(requestBody?.store, false);

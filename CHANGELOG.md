@@ -10,7 +10,8 @@
 
 ### Changed
 
-- **Commit-focused model routing:** commit message generation and diff summaries now use `gpt-5.6-luna`; PR and generic structured generation remain on `gpt-5.4`.
+- **Default model:** all OpenAI operations (commit messages, diff summaries, PR content, and generic chat/issue generation) now use `gpt-6-luna`.
+- **Reasoning effort `none`:** the setting is now sent explicitly instead of omitting `reasoning_effort`, so it no longer falls back to the model default (`medium` on `gpt-6-luna`).
 - **Documentation and architecture:** refreshed the README settings/model guidance and added normal, retry, cancellation, and gateway-failure sequence diagrams to `ARCHITECTURE.md`.
 
 ### Fixed

@@ -176,7 +176,7 @@ suite('PR Generation Integration Tests', () => {
 
         try {
             const response = await openai.chat.completions.create({
-                model: 'gpt-5.4',
+                model: 'gpt-6-luna',
                 messages: [
                     { role: 'developer', content: SYSTEM_PROMPT },
                     { role: 'user', content: prompt },
@@ -251,7 +251,7 @@ suite('PR Generation Integration Tests', () => {
 
         try {
             const response = await openai.chat.completions.create({
-                model: 'gpt-5.4',
+                model: 'gpt-6-luna',
                 messages: [
                     { role: 'developer', content: SYSTEM_PROMPT },
                     { role: 'user', content: prompt },
@@ -303,7 +303,7 @@ suite('PR Generation Integration Tests', () => {
 
         try {
             const response = await openai.chat.completions.create({
-                model: 'gpt-5.4',
+                model: 'gpt-6-luna',
                 messages: [
                     { role: 'developer', content: SYSTEM_PROMPT },
                     { role: 'user', content: prompt },

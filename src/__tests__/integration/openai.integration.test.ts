@@ -31,7 +31,7 @@ suite('OpenAI API Integration Tests', () => {
         (!isOfficialOpenAIBaseUrl(connection.baseURL) ||
             officialKeyPattern.test(connection.apiKey));
 
-    test('GPT-5.6 Luna commit completion should work with the configured endpoint', async function () {
+    test('GPT-6 Luna commit completion should work with the configured endpoint', async function () {
         this.timeout(120000);
 
         if (!hasUsableCredential || !connection) {

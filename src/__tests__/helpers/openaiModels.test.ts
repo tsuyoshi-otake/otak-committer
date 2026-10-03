@@ -1,14 +1,16 @@
 import * as assert from 'assert';
-import { getModelForOperation } from '../../services/openaiModels';
+import { getModelForOperation, type OpenAIOperation } from '../../services/openaiModels';
 
 suite('OpenAI model routing', () => {
-    test('routes the entire commit pipeline to GPT-5.6 Luna', () => {
-        assert.strictEqual(getModelForOperation('commit-message'), 'gpt-5.6-luna');
-        assert.strictEqual(getModelForOperation('commit-summary'), 'gpt-5.6-luna');
-    });
-
-    test('preserves GPT-5.4 for PR and generic chat operations', () => {
-        assert.strictEqual(getModelForOperation('pr-content'), 'gpt-5.4');
-        assert.strictEqual(getModelForOperation('generic-chat'), 'gpt-5.4');
+    test('routes every operation to GPT-6 Luna by default', () => {
+        const operations: OpenAIOperation[] = [
+            'commit-message',
+            'commit-summary',
+            'pr-content',
+            'generic-chat',
+        ];
+        for (const operation of operations) {
+            assert.strictEqual(getModelForOperation(operation), 'gpt-6-luna', operation);
+        }
     });
 });

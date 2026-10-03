@@ -20,10 +20,10 @@ suite('OpenAI Request Routing Property Tests', () => {
      */
     test('Property 1: every supported operation should always resolve to its designated model', () => {
         const expectedModels: Record<OpenAIOperation, string> = {
-            'commit-message': 'gpt-5.6-luna',
-            'commit-summary': 'gpt-5.6-luna',
-            'pr-content': 'gpt-5.4',
-            'generic-chat': 'gpt-5.4',
+            'commit-message': 'gpt-6-luna',
+            'commit-summary': 'gpt-6-luna',
+            'pr-content': 'gpt-6-luna',
+            'generic-chat': 'gpt-6-luna',
         };
 
         runPropertyTest(

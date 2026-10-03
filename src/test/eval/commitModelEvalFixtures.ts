@@ -10,7 +10,7 @@ export interface CommitModelEvalCase {
 }
 
 /**
- * Stable, representative commit diffs used for blinded GPT-5.4/Luna comparisons.
+ * Stable, representative commit diffs used for blinded previous-model/GPT-6 Luna comparisons.
  */
 export const COMMIT_MODEL_EVAL_CASES: readonly CommitModelEvalCase[] = [
     {

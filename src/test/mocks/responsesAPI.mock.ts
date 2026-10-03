@@ -102,7 +102,7 @@ export class ResponsesAPIMock {
             id: `response_${Date.now()}`,
             object: 'response',
             created: Math.floor(Date.now() / 1000),
-            model: 'gpt-5.4',
+            model: 'gpt-6-luna',
             output,
             usage: {
                 input_tokens: usage?.input_tokens ?? 100,
@@ -163,7 +163,7 @@ export class ResponsesAPIMock {
             id: `response_${Date.now()}`,
             object: 'response',
             created: Math.floor(Date.now() / 1000),
-            model: 'gpt-5.4',
+            model: 'gpt-6-luna',
             output: 'Default mock response',
             usage: {
                 input_tokens: 100,

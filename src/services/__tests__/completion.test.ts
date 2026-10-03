@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import { requestStructuredCompletion, requestTextCompletion } from '../openai.completion';
 
 interface CapturedRequest {
-    params: { model: string };
+    params: { model: string; reasoning_effort?: string };
 }
 
 function createMockOpenAI(responses: Array<unknown>) {
@@ -43,7 +43,7 @@ suite('OpenAI Completion Requests', () => {
 
         const result = await requestTextCompletion({
             openai: openai as any,
-            model: 'gpt-5.4',
+            model: 'gpt-6-luna',
             systemPrompt: 'system',
             userPrompt: 'user',
             maxCompletionTokens: 100,
@@ -53,8 +53,24 @@ suite('OpenAI Completion Requests', () => {
         assert.strictEqual(result, 'generated response');
         assert.deepStrictEqual(
             calls.map((call) => call.params.model),
-            ['gpt-5.4'],
+            ['gpt-6-luna'],
         );
+    });
+
+    test('requestTextCompletion should send reasoning effort none explicitly', async () => {
+        const { openai, calls } = createMockOpenAI([completion('generated')]);
+
+        await requestTextCompletion({
+            openai: openai as any,
+            model: 'gpt-6-luna',
+            systemPrompt: 'system',
+            userPrompt: 'user',
+            maxCompletionTokens: 100,
+            reasoningEffort: 'none',
+        });
+
+        // Omitting the field would fall back to the model default (medium for gpt-6-luna).
+        assert.strictEqual(calls[0].params.reasoning_effort, 'none');
     });
 
     test('requestTextCompletion should rethrow failures without fallback retry', async () => {
@@ -64,7 +80,7 @@ suite('OpenAI Completion Requests', () => {
             () =>
                 requestTextCompletion({
                     openai: openai as any,
-                    model: 'gpt-5.4',
+                    model: 'gpt-6-luna',
                     systemPrompt: 'system',
                     userPrompt: 'user',
                     maxCompletionTokens: 100,
@@ -82,7 +98,7 @@ suite('OpenAI Completion Requests', () => {
 
         const result = await requestStructuredCompletion<{ title: string; body: string }>({
             openai: openai as any,
-            model: 'gpt-5.4',
+            model: 'gpt-6-luna',
             systemPrompt: 'system',
             userPrompt: 'user',
             reasoningEffort: 'medium',
@@ -101,7 +117,7 @@ suite('OpenAI Completion Requests', () => {
         assert.deepStrictEqual(result, { title: 'Generated', body: 'Details' });
         assert.deepStrictEqual(
             calls.map((call) => call.params.model),
-            ['gpt-5.4'],
+            ['gpt-6-luna'],
         );
     });
 });

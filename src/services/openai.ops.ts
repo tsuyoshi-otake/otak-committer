@@ -8,6 +8,7 @@ import { formatMarkdown, cleanMarkdown } from '../utils';
 import { getPrompt } from '../languages/prompts';
 import type { SupportedLanguage } from '../languages';
 import { PromptType } from '../types/enums/PromptType';
+import type { ReasoningEffort } from '../types/enums/ReasoningEffort';
 import { requestTextCompletion, requestStructuredCompletion } from './openai.completion';
 import { TokenManager } from './tokenManager';
 import { t } from '../i18n/index.js';
@@ -18,7 +19,7 @@ interface OpenAIOpsContext {
     promptService: PromptService;
     logger: Logger;
     model: string;
-    getReasoningEffort: () => 'low' | 'medium' | 'high' | undefined;
+    getReasoningEffort: () => ReasoningEffort;
     onAuthError: () => Promise<void>;
     showError: (message: string, error?: unknown) => void;
     isAuthenticationError: (error: unknown) => boolean;
