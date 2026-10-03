@@ -1,0 +1,120 @@
+name: Release
+
+# Publishes the extension to the VS Code Marketplace when a version tag is
+# pushed, for example:
+#   git tag v2.18.0 && git push origin v2.18.0
+# The tag must equal "v" + package.json "version" and point at a commit on
+# main. Re-running the workflow for a version that is already published
+# succeeds without publishing again (--skip-duplicate).
+on:
+  push:
+    tags: ['v*.*.*']
+
+# Least privilege for GITHUB_TOKEN: the jobs only check out, build and hand
+# the VSIX to the publish job. The Marketplace token is the VSCE_PAT secret.
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    name: Verify + Package
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          # @vscode/vsce 4 requires Node 22.
+          node-version: '22.x'
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            .github/release-tools/package-lock.json
+
+      - name: Check tag against package.json and main
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $version"
+            exit 1
+          fi
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::Tag $GITHUB_REF_NAME points at a commit that is not on main"
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: npm ci
+
+      # The publishing CLI has its own lockfile so it never changes the
+      # extension's dependency tree.
+      - name: Install release tools
+        run: npm ci --prefix .github/release-tools --ignore-scripts
+
+      - name: Audit release tools
+        run: npm audit --prefix .github/release-tools --audit-level=high
+
+      - name: Type check
+        run: npm run compile
+
+      - name: Lint (no warnings)
+        run: npm run lint:ci
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      # node_modules is excluded by .vscodeignore and esbuild bundles the
+      # runtime dependencies, so npm dependency detection adds nothing.
+      - name: Package VSIX
+        run: .github/release-tools/node_modules/.bin/vsce package --no-dependencies --out "otak-committer-${GITHUB_REF_NAME#v}.vsix"
+
+      - name: Upload VSIX
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix
+          path: otak-committer-*.vsix
+          if-no-files-found: error
+          retention-days: 30
+
+  # Only this job receives the Marketplace token; it runs no project scripts.
+  marketplace:
+    name: Publish to VS Code Marketplace
+    needs: package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout release tools
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/release-tools
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+          cache-dependency-path: .github/release-tools/package-lock.json
+
+      - name: Install release tools
+        run: npm ci --prefix .github/release-tools --ignore-scripts
+
+      - name: Download VSIX
+        uses: actions/download-artifact@v4
+        with:
+          name: vsix
+
+      - name: Publish
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: .github/release-tools/node_modules/.bin/vsce publish --packagePath "otak-committer-${GITHUB_REF_NAME#v}.vsix" --skip-duplicate

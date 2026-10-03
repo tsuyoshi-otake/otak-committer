@@ -1,0 +1,8 @@
+{
+  "name": "otak-committer-release-tools",
+  "private": true,
+  "description": "Pinned publishing CLI used only by .github/workflows/release.yml; kept separate from the extension's own dependencies.",
+  "dependencies": {
+    "@vscode/vsce": "4.0.0"
+  }
+}
