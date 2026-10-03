@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { Logger } from '../infrastructure/logging/Logger.js';
 import { getRepositoryForCurrentWorkspace } from '../services/git.repository.js';
+import { parseGitHubRemoteUrl } from '../services/github.remote.js';
 
 export interface RepositoryVisibility {
     fullName: string;
@@ -45,15 +46,6 @@ export async function detectRepositoryVisibility(
         logger.debug(`Failed to detect repo visibility: ${error}`);
         return undefined;
     }
-}
-
-function parseGitHubRemoteUrl(remoteUrl: string): { owner: string; repo: string } | undefined {
-    const match = remoteUrl.match(/github\.com[:/]([^/]+)\/([^.]+)(?:\.git)?$/);
-    if (!match) {
-        return undefined;
-    }
-    const [, owner, repo] = match;
-    return { owner, repo };
 }
 
 async function fetchGitHubRepositoryPrivacy(

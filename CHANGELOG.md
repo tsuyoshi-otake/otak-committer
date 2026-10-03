@@ -18,6 +18,11 @@
 
 - **Cancellation propagation:** abort signals now reach OpenAI requests and retry waits so cancelled operations terminate explicitly instead of continuing hidden work.
 - **Endpoint-aware client reuse:** changing the custom endpoint can no longer reuse a client created for a different gateway.
+- **Endpoint setting honored by commands:** commit, PR, and issue commands now validate and connect through `otakCommitter.openaiBaseUrl`; previously the setting was replaced by `OPENAI_BASE_URL` or the official endpoint during initialization.
+- **Invalid endpoint isolation:** an invalid `otakCommitter.openaiBaseUrl` now fails only OpenAI initialization with a clear error instead of breaking every service that reads configuration (including GitHub-only flows).
+- **Issue preview cancellation:** pressing Esc in the modification input now returns to the action picker instead of creating the issue.
+- **Secret detection coverage and speed:** detects current OpenAI project/admin/service-account/OpenRouter and Anthropic keys that contain `-` or `_`; connection-string patterns are bounded so long single-line diffs are scanned in linear time (seconds to milliseconds on 340 KB inputs).
+- **GitHub remote parsing:** repository names containing dots (for example `owner.github.io`, `next.js`) and remotes with a trailing slash are now parsed correctly for PR/issue creation and the repository visibility indicator.
 
 ### Removed
 
@@ -26,7 +31,7 @@
 ### Tests
 
 - Added model-routing, endpoint precedence/validation, client-cache, retry/backoff, cancellation, gateway contract, property, and VS Code integration coverage.
-- 383 unit tests and 5 local gateway integration tests passing; live OpenAI tests remain opt-in and require `OPENAI_API_KEY`.
+- 406 unit tests and 5 local gateway integration tests passing; live OpenAI tests remain opt-in and require `OPENAI_API_KEY`.
 
 ## [2.16.11] - 2026-06-29
 

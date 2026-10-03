@@ -96,4 +96,46 @@ suite('Secret Detection Utility', () => {
         assert.strictEqual(result.hasPotentialSecrets, true);
         assert.ok(result.matchedPatternIds.includes('service_account_json_type'));
     });
+
+    test('detects base64url OpenAI and Anthropic keys containing "-" and "_"', () => {
+        const cases: Array<[string, string]> = [
+            ['sk-proj-Ab3_dE-9fGhIjKlMnOpQrStUvWxYz012345', 'openai_project_api_key'],
+            ['sk-admin-Ab3_dE-9fGhIjKlMnOpQrStUvWxYz012345', 'openai_admin_api_key'],
+            ['sk-svcacct-Ab3_dE-9fGhIjKlMnOpQrStUvWxYz012345', 'openai_service_account_key'],
+            ['sk-or-v1-0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f', 'openai_org_key'],
+            ['sk-ant-api03-Ab3_dE-9fGhIjKlMnOpQrStUvWxYz0123', 'anthropic_api_key'],
+        ];
+
+        for (const [key, patternId] of cases) {
+            const result = detectPotentialSecrets(`+ API_KEY="${key}"`, 50);
+            assert.ok(result.matchedPatternIds.includes(patternId), `${patternId}: ${key}`);
+        }
+    });
+
+    test('detects a Neon connection string with a password', () => {
+        const diff = '+ DATABASE_URL=postgres://user:s3cret@ep-cool-1.us-east-2.aws.neon.tech/db';
+
+        const result = detectPotentialSecrets(diff, 50);
+
+        assert.ok(result.matchedPatternIds.includes('neon_connection_string_with_password'));
+    });
+
+    test('scans long single-line connection-string-like input in linear time', () => {
+        // Each input previously took several seconds because an unbounded segment
+        // rescanned the rest of the line from every scheme occurrence.
+        const inputs = [
+            'postgres://a:b@x '.repeat(20000),
+            'postgres://a:b'.repeat(25000),
+            'mongodb://a:b'.repeat(25000),
+            'mysql://a:b'.repeat(30000),
+            'redis://:b'.repeat(35000),
+        ];
+
+        for (const input of inputs) {
+            const started = Date.now();
+            detectPotentialSecrets(input, 50);
+            const elapsed = Date.now() - started;
+            assert.ok(elapsed < 750, `${input.slice(0, 16)}... took ${elapsed}ms`);
+        }
+    });
 });

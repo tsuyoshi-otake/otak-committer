@@ -22,12 +22,12 @@ interface SecretPattern {
 }
 
 const SECRET_PATTERN_DEFINITIONS: readonly SecretPatternDefinition[] = [
-    // AI / LLM
-    { id: 'anthropic_api_key', source: String.raw`\bsk-ant-[A-Za-z0-9-]{10,}\b` },
-    { id: 'openai_project_api_key', source: String.raw`\bsk-proj-[A-Za-z0-9]{20,}\b` },
-    { id: 'openai_admin_api_key', source: String.raw`\bsk-admin-[A-Za-z0-9]{20,}\b` },
-    { id: 'openai_service_account_key', source: String.raw`\bsk-svcacct-[A-Za-z0-9]{20,}\b` },
-    { id: 'openai_org_key', source: String.raw`\bsk-or-[A-Za-z0-9]{20,}\b` },
+    // AI / LLM (current OpenAI and Anthropic keys use the base64url alphabet, including - and _)
+    { id: 'anthropic_api_key', source: String.raw`\bsk-ant-[A-Za-z0-9_-]{10,}` },
+    { id: 'openai_project_api_key', source: String.raw`\bsk-proj-[A-Za-z0-9_-]{20,}` },
+    { id: 'openai_admin_api_key', source: String.raw`\bsk-admin-[A-Za-z0-9_-]{20,}` },
+    { id: 'openai_service_account_key', source: String.raw`\bsk-svcacct-[A-Za-z0-9_-]{20,}` },
+    { id: 'openai_org_key', source: String.raw`\bsk-or-[A-Za-z0-9_-]{20,}` },
     {
         id: 'legacy_openai_api_key',
         source: String.raw`\bsk-[A-Za-z0-9]{20,}T3BlbkFJ[A-Za-z0-9]*\b`,
@@ -151,19 +151,28 @@ const SECRET_PATTERN_DEFINITIONS: readonly SecretPatternDefinition[] = [
         id: 'jwt_token',
         source: String.raw`\beyJhbGciOiJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9._-]+\.[A-Za-z0-9._-]+\b`,
     },
+    // Credential segments are bounded so a long line with many scheme prefixes but
+    // no '@' is scanned in linear time instead of rescanning the rest of the line
+    // from every occurrence.
     {
         id: 'mongodb_connection_string_with_password',
-        source: String.raw`mongodb(?:\+srv)?:\/\/[^:\s]+:[^@\s]+@`,
+        source: String.raw`mongodb(?:\+srv)?:\/\/[^:\s]{1,256}:[^@\s]{1,512}@`,
     },
     {
         id: 'postgres_connection_string_with_password',
-        source: String.raw`postgres(?:ql)?:\/\/[^:\s]+:[^@\s]+@`,
+        source: String.raw`postgres(?:ql)?:\/\/[^:\s]{1,256}:[^@\s]{1,512}@`,
     },
-    { id: 'mysql_connection_string_with_password', source: String.raw`mysql:\/\/[^:\s]+:[^@\s]+@` },
-    { id: 'redis_connection_string_with_password', source: String.raw`rediss?:\/\/:[^@\s]+@` },
+    {
+        id: 'mysql_connection_string_with_password',
+        source: String.raw`mysql:\/\/[^:\s]{1,256}:[^@\s]{1,512}@`,
+    },
+    {
+        id: 'redis_connection_string_with_password',
+        source: String.raw`rediss?:\/\/:[^@\s]{1,512}@`,
+    },
     {
         id: 'neon_connection_string_with_password',
-        source: String.raw`postgres(?:ql)?:\/\/[^:\s]+:[^@\s]+@.*neon\.tech`,
+        source: String.raw`postgres(?:ql)?:\/\/[^:\s]{1,256}:[^@\s]{1,512}@[A-Za-z0-9.-]{0,253}neon\.tech`,
     },
     {
         id: 'turso_connection_string',

@@ -9,6 +9,7 @@ import {
     GitApiRepository,
     GitExtensionAPI,
 } from './git.repository';
+import { parseGitHubRemoteUrl } from './github.remote';
 
 /**
  * Resolved state produced when the GitHub service is initialized for a workspace
@@ -32,15 +33,14 @@ async function detectRepositoryInfo(repository: GitApiRepository, logger: Logger
         throw new Error(t('errors.noRemoteOriginUrl'));
     }
 
-    const match = remoteUrl.match(/github\.com[:/]([^/]+)\/([^.]+)(?:\.git)?$/);
-    if (!match) {
+    const identity = parseGitHubRemoteUrl(remoteUrl);
+    if (!identity) {
         logger.error(`Unable to parse GitHub repository from URL: ${remoteUrl}`);
         throw new Error(t('errors.unableToParseGitHubRepository'));
     }
 
-    const [, owner, repoName] = match;
-    logger.info(`Detected repository: ${owner}/${repoName}`);
-    return { owner, repo: repoName };
+    logger.info(`Detected repository: ${identity.owner}/${identity.repo}`);
+    return identity;
 }
 
 /**

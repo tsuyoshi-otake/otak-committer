@@ -4,6 +4,7 @@ import { t } from '../i18n/index.js';
 import { IssueType, GeneratedIssueContent } from '../types/interfaces/Issue';
 import { IssueGeneratorService } from '../services/issueGenerator';
 import { showMarkdownPreview } from '../utils/preview';
+import { decideIssueModificationStep } from './issue.previewDecision';
 
 type PreviewFile = { uri: vscode.Uri; document: vscode.TextDocument };
 type IssueAction = 'modify' | 'create' | 'cancel';
@@ -118,18 +119,17 @@ export async function runIssuePreviewLoop(
             return preview;
         }
 
-        const modifications = await promptModificationInstructions(progress);
-        if (modifications === undefined) {
-            return preview;
-        }
-        if (!modifications.trim()) {
+        const modification = decideIssueModificationStep(
+            await promptModificationInstructions(progress),
+        );
+        if (modification.action === 'choose-again') {
             continue;
         }
 
         progress.report({ message: t('messages.updatingContent') });
         preview = await service.generatePreview({
             type: issueType,
-            description: `${description}\n\nModification instructions: ${modifications}`,
+            description: `${description}\n\nModification instructions: ${modification.instructions}`,
             files: selectedFiles,
         });
     }

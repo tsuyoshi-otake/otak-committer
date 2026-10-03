@@ -278,7 +278,7 @@ export class CommitCommand extends BaseCommand {
 - All operations (commit messages, Tier 3 chunk summaries, pull request content, generic chat/issue): `gpt-6-luna`
 - `reasoning_effort` is always sent explicitly, including `none`, because omitting it selects the model default (`medium` for `gpt-6-luna`)
 
-**Connection policy**: `otakCommitter.openaiBaseUrl` overrides `OPENAI_BASE_URL`, which overrides `https://api.openai.com/v1`. Validation and generation share the same normalized endpoint. Custom endpoints are pass-through gateways that preserve OpenAI model IDs and Chat Completions request/response shapes.
+**Connection policy**: `otakCommitter.openaiBaseUrl` overrides `OPENAI_BASE_URL`, which overrides `https://api.openai.com/v1`. Validation and generation share the same normalized endpoint. `getServiceConfig()` returns the raw setting; it is resolved and validated only by OpenAI initialization (`resolveOpenAIBaseUrl`) and `createOpenAIConnectionContext`, so an invalid value cannot break non-OpenAI services. Custom endpoints are pass-through gateways that preserve OpenAI model IDs and Chat Completions request/response shapes.
 
 **Request policy**: validation uses a 30-second timeout with no automatic retry; completions use a 2-minute timeout with at most two SDK retries.
 

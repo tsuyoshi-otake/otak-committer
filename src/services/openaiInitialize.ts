@@ -16,6 +16,7 @@ import {
 } from './openaiApiKeyDialogs';
 import { validateApiKey, type ValidateApiKeyResult } from './openaiValidation';
 import { resolveOpenAIBaseUrl } from './openaiConnection';
+import { getServiceConfig } from './serviceConfig';
 import {
     decideValidationFailureAction,
     decideValidationResult,
@@ -57,8 +58,10 @@ export async function initializeOpenAIService<T>(
 
         const providedKey = config?.openaiApiKey;
         let apiKey = providedKey?.trim();
+        // A caller that omits the endpoint gets the configured setting, matching the
+        // BaseService merge; OPENAI_BASE_URL applies only when that value is empty.
         const baseURL = resolveOpenAIBaseUrl(
-            config?.openaiBaseUrl,
+            config?.openaiBaseUrl ?? getServiceConfig().openaiBaseUrl,
             process.env.OPENAI_BASE_URL,
         );
         const storage = context ? new StorageManager(context) : undefined;
