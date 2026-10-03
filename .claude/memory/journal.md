@@ -82,3 +82,68 @@
   - No runner process was left.
 - Residual: the committed README still has the heading "OpenAI Models and Gateway", while its body now says "endpoint". The contributor's uncommitted heading change resolves this.
 - Learning: see rules.md [commit-scope] and [git-identity].
+
+## 2026-10-03 — release 2.18.0 (#9, #10)
+
+- Commit: `d8236d2` `chore(release): 2.18.0`, pushed to origin/main. Only CHANGELOG.md plus the version lines of package.json and package-lock.json were staged; the contributor's package hunks stay uncommitted, and their diff was unchanged before and after.
+- CHANGELOG: entries added under [2.17.0] after it shipped were moved to [2.18.0]. [2.17.0] was restored from `ae54d64`, with "Responses API" corrected to "Chat Completions" (the 2.17.0 code used `chat.completions.create`).
+- Build: `checkout-index` of the index into the scratchpad, then a fresh `npm ci` (not a junction: the repo's node_modules follows the contributor's lockfile, which drops https-proxy-agent). compile and lint:ci exit 0; test:unit 500 passing / 0 failing (TKW run 8ef8f9453ba051d9351ebd98c53892f1).
+- Symptom: `vsce package` (3.9.1) failed with "Extension entrypoint(s) missing: extension/out/extension.js" in the export, and `vsce ls` listed nothing. With `--no-dependencies` it listed 41 files, identical to `vsce ls` in the repo. Root cause not isolated: `npm ls --omit=dev --parseable` in the export printed normal paths. The `.vscodeignore` excludes node_modules, so dependency detection does not change the contents.
+- VSIX: `~/tmp/otak-committer-release/otak-committer-2.18.0.vsix`, 43 files, 1.18 MB, sha256 2beb6c55…95f8. Version 2.18.0, no src/.ts/.map files, none of the contributor's files, no personal-data strings.
+- Independent verifier (rubric `.claude/goal-loop/release-2.18.0/rubric.md`): 8 of 8 criteria pass.
+- Publishing: not done by the agent. The vsce credential store has only publisher `otak`, VSCE_PAT is unset, and `--azure-credential` failed because the az CLI is signed in to the work tenant and its refresh token expired (AADSTS700082). The user must run `vsce login odangoo` and enter the PAT. Open VSX is at 2.16.11 (2.17.0 was never published there); ovsx is not installed.
+- Pre-release check (global rule):
+  - History contains the work email in 86 commits (2025-02-15 to 2025-04-27, all 16 tags). The repository is already public (0 forks). It was not rewritten, because that needs the user's decision (force push of main and all tags).
+  - `.vscode/settings.json` contains a Snyk organization UUID. It is excluded from the VSIX and was left unchanged.
+  - LICENSE (MIT) exists.
+  - npm audit: dev-only findings (high); runtime `--omit=dev` has 0.
+- Learning: rules.md [vsce-package], [publish-auth].
+
+## 2026-10-03 — release 2.18.0 via CI (tag-triggered CD)
+
+- Trigger: the user asked "can't this be done through CI/CD?" instead of entering a PAT locally. The repository already had `VSCE_PAT` and `OVSX_PAT` secrets (2026-07-11) but no publish workflow.
+- Commit `b1aa652` `ci: publish Marketplace releases from version tags`:
+  - `.github/workflows/release.yml` has 2 jobs. `package` runs without secrets: tag guard, npm ci, compile, lint:ci, test:unit, `vsce package --no-dependencies`, then artifact upload. `marketplace` is the only job with VSCE_PAT; it does a sparse checkout of release-tools and runs `vsce publish --packagePath --skip-duplicate`.
+  - `.github/release-tools` pins `@vscode/vsce` 4.0.0 with its own lockfile.
+- Tool choice:
+  - vsce 3.9.1/3.9.2 had 6 high audit findings (secretlint → globby → fast-glob → micromatch → braces). vsce 4.0.0 (2026-09-14) audits clean and needs Node ≥ 22.
+  - ovsx 1.2.0 depends on vsce 3.9.2 and brings the same 6 findings back, so Open VSX was left out. It is still at 2.16.11.
+- Local verification:
+  - The export of the commit tree produced the same 43-file VSIX with a byte-identical `out/extension.js` as the d8236d2 build.
+  - Tag guard: v2.18.0 on main passed; v2.18.1 failed; a dangling commit failed.
+- Release: tag `v2.18.0` (annotated, on b1aa652) → run 37104627677 succeeded.
+  - Linux unit tests: 485 passing + 15 pending, matching CI on main.
+  - Publish log: "Published odangoo.otak-committer v2.18.0."
+  - The Marketplace public query kept returning 2.17.0 for several minutes after publishing (Marketplace verification delay).
+- Learning: rules.md [release] replaces [publish-auth].
+- Marketplace listing: confirmed 2.18.0 by the public extensionquery API after publishing (poll every 60–75 s).
+
+## 2026-10-03 — Open VSX publishing in the release workflow (#11)
+
+- Symptom: Open VSX stayed at 2.16.11. 2.17.0 and 2.18.0 were published only to the Marketplace.
+- Root cause: ovsx was left out of `.github/release-tools`. ovsx 1.2.0 (2026-09-10; the newest version older than 7 days) asks for `@vscode/vsce` ^3.7.1. That resolves to 3.9.2, whose tree has 6 high advisories, and the release job fails on high advisories.
+- Investigation (ovsx 1.2.0 source):
+  - `doPublish` turns a `.vsix` argument into `extensionFile` and then skips `packageExtension`.
+  - `createVSIX` is called only inside `packageExtension`.
+  - The token comes from `OVSX_PAT`.
+  - `--skip-duplicate` ignores errors that end with "is already published.".
+  - `main.js` exits 1 when any publish is rejected.
+- Fix:
+  - `.github/release-tools`: added ovsx 1.2.0, plus `overrides: { ovsx: { "@vscode/vsce": "$@vscode/vsce" } }`. Lockfile regenerated with `--before` 7 days ago. 63 packages were added; all existing entries are unchanged, and there is one vsce (4.0.0).
+  - `release.yml`:
+    - New `openvsx` job (`needs: package` only, `OVSX_PAT` only in its Publish step, `ovsx publish <vsix> --skip-duplicate`).
+    - Both publish jobs now run `npm audit` before publishing.
+    - New `workflow_dispatch` input `tag`. The package job checks out `refs/tags/<tag>`. The guard requires dispatch from main and `[[ =~ ^vX.Y.Z$ ]]`.
+- Verification:
+  - actionlint v1.7.12 passes with exit 0; a mutant with `inputs.tagg` failed it.
+  - `guard-test.sh`: 10 of 10 cases pass. The first version used `grep -Eq`, which accepted "v2.18.0\n::warning::x" because grep matches line by line; changed to bash `[[ =~ ]]`.
+  - `mock-publish.mjs`: publish → skip duplicate (exit 0) → without the flag, exit 1. The full 1,240,585-byte VSIX was uploaded each time.
+  - `age-check.mjs`: all 196 packages are 7 or more days old (newest: bundle-name 4.1.1, 2026-09-25).
+  - npm audit: 0 vulnerabilities.
+- Pre-release check:
+  - The work email is still in history (86 commits; the user's decision).
+  - The Snyk UUID in `.vscode/settings.json` is not in the VSIX.
+  - LICENSE (MIT) exists.
+  - The repository is public with 0 forks.
+  - This journal had a local user path (the VSIX location); it was replaced with `~/tmp/…`.
+- Learning: rules.md [release] (updated) and [release-tools-audit].

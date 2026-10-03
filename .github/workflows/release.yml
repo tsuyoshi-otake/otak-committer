@@ -1,22 +1,39 @@
 name: Release
 
-# Publishes the extension to the VS Code Marketplace when a version tag is
-# pushed, for example:
+# Publishes the extension to the VS Code Marketplace and Open VSX when a
+# version tag is pushed, for example:
 #   git tag v2.18.0 && git push origin v2.18.0
 # The tag must equal "v" + package.json "version" and point at a commit on
-# main. Re-running the workflow for a version that is already published
-# succeeds without publishing again (--skip-duplicate).
+# main. Each registry has its own job, so one failing does not block the
+# other; re-running a failed job publishes only what is still missing,
+# because both publish commands skip a version that already exists.
+#
+# To release an existing tag again (for example to a registry that was added
+# later), run the workflow manually from main with that tag:
+#   gh workflow run release.yml --ref main -f tag=v2.18.0
+# The VSIX is built from the tag; the publishing tools come from main. Tags
+# before v2.18.0 have no .github/release-tools and cannot be released this way.
 on:
   push:
     tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing version tag to release, for example v2.18.0'
+        required: true
+        type: string
 
 # Least privilege for GITHUB_TOKEN: the jobs only check out, build and hand
-# the VSIX to the publish job. The Marketplace token is the VSCE_PAT secret.
+# the VSIX to the publish jobs. The registry tokens are the VSCE_PAT and
+# OVSX_PAT secrets, each passed only to its own publish step.
 permissions:
   contents: read
 
+env:
+  RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+
 concurrency:
-  group: release-${{ github.ref_name }}
+  group: release-${{ inputs.tag || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
@@ -26,15 +43,33 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - name: Checkout repository
+      # Inputs reach the shell only through env, never through ${{ }} in run.
+      - name: Check release request
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          # [[ =~ ]] matches the whole value; grep would accept a valid first
+          # line followed by more lines. The rejected value is not echoed: it
+          # could carry workflow commands.
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::The release tag is not of the form vX.Y.Z"
+            exit 1
+          fi
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "::error::Run the release workflow from main, not $GITHUB_REF"
+            exit 1
+          fi
+
+      - name: Checkout tag
         uses: actions/checkout@v4
         with:
+          ref: refs/tags/${{ env.RELEASE_TAG }}
           fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          # @vscode/vsce 4 requires Node 22.
+          # @vscode/vsce 4 and ovsx 1.2 require Node 22.
           node-version: '22.x'
           cache: 'npm'
           cache-dependency-path: |
@@ -44,19 +79,19 @@ jobs:
       - name: Check tag against package.json and main
         run: |
           version="$(node -p "require('./package.json').version")"
-          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
-            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $version"
+          if [ "$RELEASE_TAG" != "v$version" ]; then
+            echo "::error::Tag $RELEASE_TAG does not match package.json version $version"
             exit 1
           fi
-          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
-            echo "::error::Tag $GITHUB_REF_NAME points at a commit that is not on main"
+          if ! git merge-base --is-ancestor HEAD origin/main; then
+            echo "::error::Tag $RELEASE_TAG points at a commit that is not on main"
             exit 1
           fi
 
       - name: Install dependencies
         run: npm ci
 
-      # The publishing CLI has its own lockfile so it never changes the
+      # The publishing CLIs have their own lockfile so they never change the
       # extension's dependency tree.
       - name: Install release tools
         run: npm ci --prefix .github/release-tools --ignore-scripts
@@ -76,7 +111,7 @@ jobs:
       # node_modules is excluded by .vscodeignore and esbuild bundles the
       # runtime dependencies, so npm dependency detection adds nothing.
       - name: Package VSIX
-        run: .github/release-tools/node_modules/.bin/vsce package --no-dependencies --out "otak-committer-${GITHUB_REF_NAME#v}.vsix"
+        run: .github/release-tools/node_modules/.bin/vsce package --no-dependencies --out "otak-committer-${RELEASE_TAG#v}.vsix"
 
       - name: Upload VSIX
         uses: actions/upload-artifact@v4
@@ -86,7 +121,9 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-  # Only this job receives the Marketplace token; it runs no project scripts.
+  # The publish jobs receive one registry token each and run no project
+  # scripts. Their tools come from the workflow's own commit (the tag on a
+  # tag push, main on a manual run) and are audited again before use.
   marketplace:
     name: Publish to VS Code Marketplace
     needs: package
@@ -109,6 +146,9 @@ jobs:
       - name: Install release tools
         run: npm ci --prefix .github/release-tools --ignore-scripts
 
+      - name: Audit release tools
+        run: npm audit --prefix .github/release-tools --audit-level=high
+
       - name: Download VSIX
         uses: actions/download-artifact@v4
         with:
@@ -117,4 +157,41 @@ jobs:
       - name: Publish
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
-        run: .github/release-tools/node_modules/.bin/vsce publish --packagePath "otak-committer-${GITHUB_REF_NAME#v}.vsix" --skip-duplicate
+        run: .github/release-tools/node_modules/.bin/vsce publish --packagePath "otak-committer-${RELEASE_TAG#v}.vsix" --skip-duplicate
+
+  openvsx:
+    name: Publish to Open VSX
+    needs: package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout release tools
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/release-tools
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+          cache-dependency-path: .github/release-tools/package-lock.json
+
+      - name: Install release tools
+        run: npm ci --prefix .github/release-tools --ignore-scripts
+
+      - name: Audit release tools
+        run: npm audit --prefix .github/release-tools --audit-level=high
+
+      - name: Download VSIX
+        uses: actions/download-artifact@v4
+        with:
+          name: vsix
+
+      # Given a .vsix, ovsx uploads it as-is and never runs vsce (see the
+      # "//" note in .github/release-tools/package.json).
+      - name: Publish
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: .github/release-tools/node_modules/.bin/ovsx publish "otak-committer-${RELEASE_TAG#v}.vsix" --skip-duplicate

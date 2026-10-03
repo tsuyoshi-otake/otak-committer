@@ -1,8 +1,15 @@
 {
   "name": "otak-committer-release-tools",
   "private": true,
-  "description": "Pinned publishing CLI used only by .github/workflows/release.yml; kept separate from the extension's own dependencies.",
+  "description": "Pinned publishing CLIs used only by .github/workflows/release.yml; kept separate from the extension's own dependencies.",
+  "//": "ovsx 1.2.0 asks for @vscode/vsce ^3.7.1, whose 3.x tree has high-severity advisories. ovsx only calls vsce when it packages the extension itself; the release workflow always hands it a prebuilt .vsix, so it is pointed at the same vsce as the root.",
   "dependencies": {
-    "@vscode/vsce": "4.0.0"
+    "@vscode/vsce": "4.0.0",
+    "ovsx": "1.2.0"
+  },
+  "overrides": {
+    "ovsx": {
+      "@vscode/vsce": "$@vscode/vsce"
+    }
   }
 }
