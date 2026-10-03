@@ -14,6 +14,11 @@ interface SecretPatternDefinition {
     id: string;
     source: string;
     flags?: string;
+    /**
+     * Structural indicators (headers, markers) flag content as risky but are not
+     * themselves secret values, so redaction leaves them in place.
+     */
+    structural?: boolean;
 }
 
 interface SecretPattern {
@@ -53,6 +58,7 @@ const SECRET_PATTERN_DEFINITIONS: readonly SecretPatternDefinition[] = [
     {
         id: 'azure_storage_connection_string',
         source: String.raw`DefaultEndpointsProtocol=https;AccountName=`,
+        structural: true,
     },
     { id: 'oci_identifier', source: String.raw`\bocid1\.[a-z]+\.oc1\.\.[a-z0-9]{30,}\b` },
 
@@ -62,6 +68,7 @@ const SECRET_PATTERN_DEFINITIONS: readonly SecretPatternDefinition[] = [
     { id: 'github_oauth_token', source: String.raw`\bgho_[0-9A-Za-z]{36}\b` },
     { id: 'github_server_token', source: String.raw`\bghs_[0-9A-Za-z]{36}\b` },
     { id: 'github_user_token', source: String.raw`\bghu_[0-9A-Za-z]{36}\b` },
+    { id: 'github_refresh_token', source: String.raw`\bghr_[0-9A-Za-z]{36,}\b` },
     { id: 'gitlab_pat', source: String.raw`\bglpat-[0-9A-Za-z_-]{20}\b` },
     { id: 'gitlab_runner_token', source: String.raw`\bglrt-[0-9A-Za-z_-]{20}\b` },
 
@@ -143,13 +150,20 @@ const SECRET_PATTERN_DEFINITIONS: readonly SecretPatternDefinition[] = [
     {
         id: 'private_key_block',
         source: String.raw`-----BEGIN (?:RSA |DSA |EC |OPENSSH )?PRIVATE KEY-----`,
+        structural: true,
     },
-    { id: 'pgp_private_key_block', source: String.raw`-----BEGIN PGP PRIVATE KEY BLOCK-----` },
+    {
+        id: 'pgp_private_key_block',
+        source: String.raw`-----BEGIN PGP PRIVATE KEY BLOCK-----`,
+        structural: true,
+    },
 
     // JWT / credentials in URLs
+    // Segments are base64url only (no '.') and bounded: allowing '.' inside a
+    // segment made a long run of dots after the header backtrack quadratically.
     {
         id: 'jwt_token',
-        source: String.raw`\beyJhbGciOiJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9._-]+\.[A-Za-z0-9._-]+\b`,
+        source: String.raw`\beyJhbGciOiJ[A-Za-z0-9_-]{10,2048}\.[A-Za-z0-9_-]{1,8192}\.[A-Za-z0-9_-]{1,2048}`,
     },
     // Credential segments are bounded so a long line with many scheme prefixes but
     // no '@' is scanned in linear time instead of rescanning the rest of the line
@@ -180,13 +194,29 @@ const SECRET_PATTERN_DEFINITIONS: readonly SecretPatternDefinition[] = [
     },
 
     // Structural indicators (detect specific content patterns, not variable names)
-    { id: 'service_account_json_type', source: String.raw`"type"\s*:\s*"service_account"`, flags: 'i' },
+    {
+        id: 'service_account_json_type',
+        source: String.raw`"type"\s*:\s*"service_account"`,
+        flags: 'i',
+        structural: true,
+    },
 ];
 
 const SECRET_PATTERNS: readonly SecretPattern[] = SECRET_PATTERN_DEFINITIONS.map((definition) => ({
     id: definition.id,
     regex: new RegExp(definition.source, (definition.flags ?? '') + 'g'),
 }));
+
+/**
+ * One alternation of every secret-value pattern, so redaction is a single pass.
+ * Structural indicators (the only pattern with flags is one of them) are excluded.
+ */
+const SECRET_VALUE_REGEX = new RegExp(
+    SECRET_PATTERN_DEFINITIONS.filter((definition) => !definition.structural)
+        .map((definition) => `(?:${definition.source})`)
+        .join('|'),
+    'g',
+);
 
 const DEFAULT_MAX_MATCHES = 5;
 
@@ -229,4 +259,22 @@ export function detectPotentialSecrets(
         hasPotentialSecrets: matchedPatternIds.length > 0,
         matchedPatternIds,
     };
+}
+
+/**
+ * Replace every value that matches a known secret format with `replacement`.
+ *
+ * Uses the same value patterns as {@link detectPotentialSecrets}, so a format
+ * that is caught before an AI request is also masked in logs and error output.
+ * Placeholders are masked too; masking a fake value is harmless.
+ *
+ * @param text - Text that may contain secret values
+ * @param replacement - Text substituted for each match
+ * @returns The text with secret values replaced
+ */
+export function redactPotentialSecrets(text: string, replacement = '[REDACTED]'): string {
+    if (!text) {
+        return text;
+    }
+    return text.replace(SECRET_VALUE_REGEX, () => replacement);
 }

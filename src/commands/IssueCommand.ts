@@ -6,6 +6,7 @@ import { IssueType } from '../types/interfaces/Issue';
 import { t } from '../i18n/index.js';
 import { promptIssueDescription, selectFilesForAnalysis, selectIssueType } from './issue.input';
 import { runIssuePreviewLoop } from './issue.previewFlow';
+import { runWithAbortOnCancel } from '../utils/cancellation';
 
 /**
  * Command that drives the AI-assisted GitHub issue generation flow
@@ -104,31 +105,33 @@ export class IssueCommand extends BaseCommand {
             {
                 location: vscode.ProgressLocation.Notification,
                 title: t('messages.generatingIssue'),
-                cancellable: false,
+                cancellable: true,
             },
-            async (progress) => {
-                const preview = await runIssuePreviewLoop({
-                    service,
-                    issueType,
-                    description,
-                    selectedFiles,
-                    progress,
-                    logger: this.logger,
-                    previewStorageUri: this.context.globalStorageUri,
-                    onPreviewRendered: (previewFile) => {
-                        this.previewFile = previewFile;
-                    },
-                });
-                if (!preview) {
-                    return;
-                }
+            (progress, token) =>
+                runWithAbortOnCancel(token, async (signal) => {
+                    const preview = await runIssuePreviewLoop({
+                        service,
+                        issueType,
+                        description,
+                        selectedFiles,
+                        progress,
+                        signal,
+                        logger: this.logger,
+                        previewStorageUri: this.context.globalStorageUri,
+                        onPreviewRendered: (previewFile) => {
+                            this.previewFile = previewFile;
+                        },
+                    });
+                    if (!preview || signal.aborted) {
+                        return;
+                    }
 
-                progress.report({ message: t('messages.creatingIssue') });
-                const issueUrl = await service.createIssue(preview, issueType);
-                if (issueUrl) {
-                    await this.handleSuccessfulCreation(issueUrl);
-                }
-            },
+                    progress.report({ message: t('messages.creatingIssue') });
+                    const issueUrl = await service.createIssue(preview, issueType);
+                    if (issueUrl) {
+                        await this.handleSuccessfulCreation(issueUrl);
+                    }
+                }),
         );
     }
 

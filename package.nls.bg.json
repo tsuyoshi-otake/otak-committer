@@ -21,7 +21,7 @@
   "config.openaiBaseUrl": "Base URL for an OpenAI-compatible pass-through gateway that preserves model IDs and the current Chat Completions request format.",
   "config.reasoningEffort": "Ниво на разсъждение на OpenAI (влияе на качеството и забавянето на отговора)",
   "config.reasoningEffort.none": "Без разсъждение (най-бързо, най-ниско качество)",
-  "config.reasoningEffort.low": "Ниско разсъждение (бързо, добро качество) - Препоръчително",
+  "config.reasoningEffort.low": "Ниско разсъждение (бързо, добро качество)",
   "config.reasoningEffort.medium": "Средно разсъждение (балансирано)",
   "config.reasoningEffort.high": "Високо разсъждение (най-бавно, най-високо качество)",
   "config.maxInputTokens": "Максимален брой входни токени за AI обработка (по подразбиране: 200K)",

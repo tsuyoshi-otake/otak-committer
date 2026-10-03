@@ -29,6 +29,31 @@ export function isUserAbortError(error: unknown): boolean {
 }
 
 /**
+ * Check whether an OpenAI request failure means the API key was rejected.
+ *
+ * An HTTP status is authoritative: only 401 is an authentication failure, so a
+ * 400/429/5xx whose message happens to mention "api key" or "authentication" does
+ * not send the user to the key-update dialog. Message matching applies only to
+ * errors without a status (e.g. thrown before a response was received).
+ */
+export function isOpenAIAuthenticationError(error: unknown): boolean {
+    if (typeof error === 'object' && error !== null && 'status' in error) {
+        const status = (error as { status?: unknown }).status;
+        if (typeof status === 'number') {
+            return status === 401;
+        }
+    }
+
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const lower = errorMessage.toLowerCase();
+    return (
+        lower.includes('unauthorized') ||
+        lower.includes('authentication') ||
+        lower.includes('api key')
+    );
+}
+
+/**
  * Check if an error is an API key error.
  */
 export function isApiKeyError(error: Error | CommitError): boolean {

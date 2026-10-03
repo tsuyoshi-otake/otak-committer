@@ -15,6 +15,8 @@ interface RunIssuePreviewLoopInput {
     description: string;
     selectedFiles: string[];
     progress: vscode.Progress<{ message?: string }>;
+    /** Aborted by the progress Cancel button; ends the loop as a cancellation */
+    signal: AbortSignal;
     logger: Logger;
     previewStorageUri?: vscode.Uri;
     onPreviewRendered: (previewFile: PreviewFile | undefined) => void;
@@ -93,6 +95,7 @@ export async function runIssuePreviewLoop(
         description,
         selectedFiles,
         progress,
+        signal,
         logger,
         previewStorageUri,
         onPreviewRendered,
@@ -103,6 +106,7 @@ export async function runIssuePreviewLoop(
         type: issueType,
         description,
         files: selectedFiles,
+        signal,
     });
 
     while (true) {
@@ -110,7 +114,7 @@ export async function runIssuePreviewLoop(
         onPreviewRendered(previewFile);
 
         const action = await promptIssueAction();
-        if (!action || action === 'cancel') {
+        if (!action || action === 'cancel' || signal.aborted) {
             logger.info('Issue creation cancelled by user');
             return undefined;
         }
@@ -122,6 +126,10 @@ export async function runIssuePreviewLoop(
         const modification = decideIssueModificationStep(
             await promptModificationInstructions(progress),
         );
+        if (signal.aborted) {
+            logger.info('Issue creation cancelled by user');
+            return undefined;
+        }
         if (modification.action === 'choose-again') {
             continue;
         }
@@ -131,6 +139,7 @@ export async function runIssuePreviewLoop(
             type: issueType,
             description: `${description}\n\nModification instructions: ${modification.instructions}`,
             files: selectedFiles,
+            signal,
         });
     }
 }

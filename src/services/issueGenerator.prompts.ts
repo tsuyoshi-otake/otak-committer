@@ -1,6 +1,7 @@
 import { Logger } from '../infrastructure/logging/Logger';
 import { IssueType } from '../types/interfaces/Issue';
 import { OpenAIService } from './openai';
+import { isUserAbortError } from '../utils/errorGuards';
 
 const MAX_TITLE_TOKENS = 50;
 
@@ -48,14 +49,16 @@ export function getAvailableIssueTypes(useEmoji: boolean): IssueType[] {
  * @param description - User-provided description summarizing the issue
  * @param language - Natural language to write the title in
  * @param logger - Logger used for diagnostics
+ * @param signal - Aborts the request; the abort error is rethrown, not replaced by the fallback
  * @returns The generated title or a truncated fallback
  */
 export async function generateTitle(
-    openai: OpenAIService,
+    openai: Pick<OpenAIService, 'createChatCompletion'>,
     type: string,
     description: string,
     language: string,
-    logger: Logger,
+    logger: Pick<Logger, 'debug' | 'info' | 'error'>,
+    signal?: AbortSignal,
 ): Promise<string> {
     try {
         logger.debug(`Generating title for ${type}`);
@@ -63,11 +66,15 @@ export async function generateTitle(
         const title = await openai.createChatCompletion({
             prompt: `Create a concise title (maximum ${MAX_TITLE_TOKENS} characters) in ${language} for this ${type} based on the following description:\n\n${description}\n\nRequirements:\n- Must be in ${language}\n- Maximum ${MAX_TITLE_TOKENS} characters\n- Clear and descriptive\n- No technical jargon unless necessary`,
             maxTokens: MAX_TITLE_TOKENS,
+            signal,
         });
 
         logger.info('Title generated successfully');
         return title || description.slice(0, MAX_TITLE_TOKENS);
     } catch (error) {
+        if (isUserAbortError(error)) {
+            throw error;
+        }
         logger.error('Failed to generate title', error);
         return description.slice(0, MAX_TITLE_TOKENS);
     }

@@ -4,7 +4,7 @@ import { BaseService } from './base';
 import { PromptService } from './prompt';
 import { ServiceConfig, TemplateInfo } from '../types';
 import { MessageStyle } from '../types/enums/MessageStyle';
-import type { ReasoningEffort } from '../types/enums/ReasoningEffort';
+import { DEFAULT_REASONING_EFFORT, type ReasoningEffort } from '../types/enums/ReasoningEffort';
 import { PullRequestDiff } from '../types/interfaces/GitHub';
 import {
     invalidateValidatedConnection,
@@ -24,6 +24,7 @@ import {
 import { createOpenAIClient } from './openaiClient';
 import { getModelForOperation, type OpenAIOperation } from './openaiModels';
 import { validateApiKey as validateOpenAIConnection } from './openaiValidation';
+import { isOpenAIAuthenticationError } from '../utils/errorGuards';
 
 /**
  * High-level service that wraps the OpenAI client for commit message,
@@ -47,25 +48,6 @@ export class OpenAIService extends BaseService {
         this.promptService = new PromptService();
     }
 
-    private isAuthenticationError(error: unknown): boolean {
-        if (
-            typeof error === 'object' &&
-            error !== null &&
-            'status' in error &&
-            error.status === 401
-        ) {
-            return true;
-        }
-
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        const lower = errorMessage.toLowerCase();
-        return (
-            lower.includes('unauthorized') ||
-            lower.includes('authentication') ||
-            lower.includes('api key')
-        );
-    }
-
     private async promptToUpdateApiKey(): Promise<void> {
         invalidateValidatedConnection(this.connection.apiKey, this.connection.baseURL);
         if (this.authErrorPrompt) {
@@ -79,7 +61,7 @@ export class OpenAIService extends BaseService {
     }
 
     private getReasoningEffort(): ReasoningEffort {
-        return this.config.reasoningEffort || 'low';
+        return this.config.reasoningEffort || DEFAULT_REASONING_EFFORT;
     }
 
     async generateCommitMessage(
@@ -114,16 +96,27 @@ export class OpenAIService extends BaseService {
         diff: PullRequestDiff,
         language: string,
         template?: TemplateInfo,
+        signal?: AbortSignal,
     ): Promise<{ title: string; body: string } | undefined> {
-        return generatePRContentOp(this.getOpsContext('pr-content'), diff, language, template);
+        return generatePRContentOp(
+            this.getOpsContext('pr-content', signal),
+            diff,
+            language,
+            template,
+        );
     }
 
     async createChatCompletion(params: {
         prompt: string;
         maxTokens?: number;
+        signal?: AbortSignal;
     }): Promise<string | undefined> {
         const language = this.config.language || 'english';
-        return createChatCompletionOp(this.getOpsContext('generic-chat'), params, language);
+        return createChatCompletionOp(
+            this.getOpsContext('generic-chat', params.signal),
+            params,
+            language,
+        );
     }
 
     async validateApiKey(): Promise<boolean> {
@@ -156,7 +149,7 @@ export class OpenAIService extends BaseService {
             getReasoningEffort: () => this.getReasoningEffort(),
             onAuthError: () => this.promptToUpdateApiKey(),
             showError: (message: string, error?: unknown) => this.showError(message, error),
-            isAuthenticationError: (error: unknown) => this.isAuthenticationError(error),
+            isAuthenticationError: isOpenAIAuthenticationError,
             onRequestSuccess: () =>
                 markConnectionValidated(this.connection.apiKey, this.connection.baseURL),
             signal,

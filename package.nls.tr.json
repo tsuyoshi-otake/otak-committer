@@ -21,7 +21,7 @@
   "config.openaiBaseUrl": "Base URL for an OpenAI-compatible pass-through gateway that preserves model IDs and the current Chat Completions request format.",
   "config.reasoningEffort": "OpenAI akıl yürütme çaba düzeyi (yanıt kalitesini ve gecikmeyi etkiler)",
   "config.reasoningEffort.none": "Akıl yürütme yok (en hızlı, en düşük kalite)",
-  "config.reasoningEffort.low": "Düşük akıl yürütme (hızlı, iyi kalite) - Önerilen",
+  "config.reasoningEffort.low": "Düşük akıl yürütme (hızlı, iyi kalite)",
   "config.reasoningEffort.medium": "Orta akıl yürütme (dengeli)",
   "config.reasoningEffort.high": "Yüksek akıl yürütme (en yavaş, en yüksek kalite)",
   "config.maxInputTokens": "AI işleme için maksimum giriş token sayısı (varsayılan: 200K)",

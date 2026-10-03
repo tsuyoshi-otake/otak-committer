@@ -13,6 +13,7 @@ import { getBranchDiffDetails, isNoCommitsBetweenBranchesError } from './github.
 import { createIssue, getIssue, getIssues } from './github.issues';
 import { createPullRequest } from './github.pulls';
 import { getBranches } from './github.branches';
+import { GITHUB_PAGE_SIZE } from './github.pagination';
 import { initializeGitHubState } from './github.init';
 import { GitApiRepository } from './git.repository';
 import { t } from '../i18n';
@@ -22,7 +23,6 @@ import { t } from '../i18n';
  * handling authentication, branch selection, issues, and pull requests.
  */
 export class GitHubService extends BaseService implements BranchManager {
-    private static readonly GITHUB_PAGE_SIZE = 100;
     private octokit?: GitHubAPI;
     private owner = '';
     private repo = '';
@@ -100,7 +100,13 @@ export class GitHubService extends BaseService implements BranchManager {
         this.validateState(!!this.octokit, t('errors.githubClientNotInitialized'));
 
         try {
-            return await createPullRequest(this.octokit, this.owner, this.repo, params, this.logger);
+            return await createPullRequest(
+                this.octokit,
+                this.owner,
+                this.repo,
+                params,
+                this.logger,
+            );
         } catch (error: unknown) {
             if (isNoCommitsBetweenBranchesError(error)) {
                 throw new Error('No changes to create a pull request');
@@ -132,7 +138,7 @@ export class GitHubService extends BaseService implements BranchManager {
                 this.octokit,
                 this.owner,
                 this.repo,
-                GitHubService.GITHUB_PAGE_SIZE,
+                GITHUB_PAGE_SIZE,
                 this.logger,
             );
         } catch (error) {
@@ -150,7 +156,7 @@ export class GitHubService extends BaseService implements BranchManager {
                 this.octokit,
                 this.owner,
                 this.repo,
-                GitHubService.GITHUB_PAGE_SIZE,
+                GITHUB_PAGE_SIZE,
                 this.logger,
             );
         } catch (error) {

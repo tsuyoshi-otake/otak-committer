@@ -7,6 +7,7 @@ import { GitService } from './git';
 import { GitHubService } from './github';
 import { TokenManager } from './tokenManager';
 import { detectPotentialSecrets } from '../utils';
+import { isUserAbortError } from '../utils/errorGuards';
 import { t } from '../i18n/index.js';
 import { analyzeFiles, formatAnalysisResult } from './issueGenerator.analysis';
 import { confirmProceedWithPotentialSecrets } from './secretConfirmation';
@@ -91,6 +92,7 @@ export class IssueGeneratorService extends BaseService {
                         customMessage,
                     ),
                     maxTokens: 1000,
+                    signal: params.signal,
                 }),
                 generateTitle(
                     this.openai,
@@ -98,6 +100,7 @@ export class IssueGeneratorService extends BaseService {
                     params.description,
                     this.config.language || 'english',
                     this.logger,
+                    params.signal,
                 ),
             ]);
 
@@ -109,6 +112,10 @@ export class IssueGeneratorService extends BaseService {
             this.logger.info('Issue preview generated successfully');
             return { title, body };
         } catch (error) {
+            // A cancellation must stay recognizable as one, not become a preview failure.
+            if (isUserAbortError(error)) {
+                throw error;
+            }
             this.logger.error('Failed to generate preview', error);
             const detail = error instanceof Error ? error.message : String(error);
             throw new Error(t('errors.failedToGeneratePreviewWithDetail', { detail }));

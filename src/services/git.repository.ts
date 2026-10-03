@@ -187,6 +187,87 @@ export function selectRepositoryForPath(
 }
 
 /**
+ * Read the repository root from a `scm/title` command argument.
+ *
+ * VS Code passes the clicked `SourceControl` (with its `rootUri`) to
+ * `scm/title` commands; the command palette and keybindings pass nothing.
+ *
+ * @param arg - The first command argument
+ * @returns The repository root path, or undefined when the argument has none
+ */
+export function getSourceControlRootPath(arg: unknown): string | undefined {
+    const rootUri = (arg as { rootUri?: unknown } | null | undefined)?.rootUri;
+    const fsPath = (rootUri as { fsPath?: unknown } | null | undefined)?.fsPath;
+    return typeof fsPath === 'string' && fsPath.length > 0 ? fsPath : undefined;
+}
+
+/**
+ * Pick the repository a command should act on.
+ *
+ * A repository root named by the caller (the clicked SCM provider) wins over
+ * the SCM view selection; otherwise {@link selectRepositoryForPath} decides.
+ *
+ * @param repositories - Candidate repositories from the Git extension API
+ * @param preferredRootPath - Root of the repository the user acted on, if known
+ * @param workspacePath - Active workspace path used when no root is named
+ * @returns The repository to use, or undefined when none are available
+ */
+export function selectTargetRepository(
+    repositories: GitApiRepository[],
+    preferredRootPath: string | undefined,
+    workspacePath: string | undefined,
+): GitApiRepository | undefined {
+    if (preferredRootPath) {
+        const preferred = normalizeForComparison(preferredRootPath);
+        const exact = repositories.find(
+            (repository) =>
+                repository.rootUri &&
+                normalizeForComparison(repository.rootUri.fsPath) === preferred,
+        );
+        if (exact) {
+            return exact;
+        }
+    }
+
+    return selectRepositoryForPath(repositories, workspacePath);
+}
+
+/**
+ * The repository one command run reads from and writes to.
+ */
+export interface RepositoryTarget {
+    /** Path the diff is read from: the repository root, else the workspace path */
+    workspacePath: string | undefined;
+    /** Repository whose SCM input box receives the result */
+    repository: GitApiRepository | undefined;
+    /** False when the built-in Git extension could not be loaded */
+    gitExtensionAvailable: boolean;
+}
+
+/**
+ * Resolve the repository for one command run, once, so the diff and the SCM
+ * input box always refer to the same repository.
+ *
+ * @param preferredRootPath - Root of the repository the user acted on, if known
+ * @returns The resolved target
+ */
+export async function resolveRepositoryTarget(
+    preferredRootPath?: string,
+): Promise<RepositoryTarget> {
+    const workspacePath = resolveWorkspacePath();
+    const gitApi = await loadGitExtensionApi();
+    const repository = gitApi
+        ? selectTargetRepository(gitApi.repositories ?? [], preferredRootPath, workspacePath)
+        : undefined;
+
+    return {
+        workspacePath: repository?.rootUri?.fsPath ?? preferredRootPath ?? workspacePath,
+        repository,
+        gitExtensionAvailable: gitApi !== undefined,
+    };
+}
+
+/**
  * Get the repository corresponding to the active workspace folder
  *
  * @param gitApi - The VS Code Git extension API
@@ -221,21 +302,6 @@ async function loadGitExtensionApi(): Promise<GitExtensionAPI | undefined> {
     } catch {
         return undefined;
     }
-}
-
-/**
- * Resolve the workspace path that should be used as the repository root
- *
- * @returns The repository root path, falling back to the active workspace when needed
- */
-export async function resolveRepositoryWorkspacePath(): Promise<string | undefined> {
-    const workspacePath = resolveWorkspacePath();
-    const gitApi = await loadGitExtensionApi();
-    const repository = gitApi
-        ? selectRepositoryForPath(gitApi.repositories ?? [], workspacePath)
-        : undefined;
-
-    return repository?.rootUri?.fsPath ?? workspacePath;
 }
 
 /**

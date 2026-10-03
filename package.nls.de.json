@@ -21,7 +21,7 @@
   "config.openaiBaseUrl": "Base URL for an OpenAI-compatible pass-through gateway that preserves model IDs and the current Chat Completions request format.",
   "config.reasoningEffort": "OpenAI-Denkaufwand (beeinflusst Antwortqualitat und Latenz)",
   "config.reasoningEffort.none": "Kein Denken (am schnellsten, niedrigste Qualitat)",
-  "config.reasoningEffort.low": "Geringer Denkaufwand (schnell, gute Qualitat) - Empfohlen",
+  "config.reasoningEffort.low": "Geringer Denkaufwand (schnell, gute Qualitat)",
   "config.reasoningEffort.medium": "Mittlerer Denkaufwand (ausgewogen)",
   "config.reasoningEffort.high": "Hoher Denkaufwand (am langsamsten, hochste Qualitat)",
   "config.maxInputTokens": "Maximale Eingabe-Tokens fur KI-Verarbeitung (Standard: 200K)",

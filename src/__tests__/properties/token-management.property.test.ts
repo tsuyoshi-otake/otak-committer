@@ -42,13 +42,13 @@ suite('Token Management Property Tests', () => {
     /**
      * Property 13: Token budget invariant
      * *For any* API request, the sum of input tokens, output tokens, and a 10,000 token
-     * buffer for reasoning should not exceed 400,000 tokens
+     * buffer for reasoning should not exceed TokenManager.CONTEXT_LIMIT
      * Validates: Requirements 6.5
      */
-    test('Property 13: Token budget should never exceed 400K limit when validation passes', () => {
+    test('Property 13: Token budget should never exceed the context limit when validation passes', () => {
         runPropertyTest(
             fc.property(
-                fc.integer({ min: 0, max: 400000 }),
+                fc.integer({ min: 0, max: TokenManager.CONTEXT_LIMIT }),
                 fc.integer({ min: 0, max: 100000 }),
                 (inputTokens, outputTokens) => {
                     const isValid = TokenManager.validateAllocation(inputTokens, outputTokens);

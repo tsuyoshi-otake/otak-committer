@@ -3,6 +3,9 @@ import { Logger } from '../infrastructure/logging/Logger';
 import { ConfigManager } from '../infrastructure/config/ConfigManager';
 import { t } from '../i18n/index.js';
 import { GitService, GitServiceFactory } from '../services/git';
+import type { CollectedDiff } from '../services/git.diff';
+import { resolveRepositoryTarget } from '../services/git.repository';
+import { undoStagingUnlessApplied } from '../services/git.staging';
 import { OpenAIService } from '../services/openai';
 import { confirmProceedWithPotentialSecrets } from '../services/secretConfirmation';
 import { TemplateInfo } from '../types';
@@ -19,6 +22,8 @@ interface CommitGenerationWorkflowOptions {
     config: Pick<ConfigManager, 'get'>;
     logger: Logger;
     signal?: AbortSignal;
+    /** Root of the repository whose SCM title button was clicked, if any */
+    repositoryRootPath?: string;
     initializeOpenAI: () => Promise<OpenAIService | undefined>;
     withProgress: ProgressRunner;
 }
@@ -34,58 +39,85 @@ export async function runCommitGenerationWorkflow({
     config,
     logger,
     signal,
+    repositoryRootPath,
     initializeOpenAI,
     withProgress,
 }: CommitGenerationWorkflowOptions): Promise<boolean> {
-    const git = await initializeGit(logger);
-    if (!git) {
+    // Resolve once: the diff and the input box must refer to the same repository
+    const target = await resolveRepositoryTarget(repositoryRootPath);
+    const git = await initializeGit(target.workspacePath, logger);
+    // A superseded run stops before prompting, so the next run need not wait on it
+    if (!git || signal?.aborted) {
         return false;
     }
 
-    const rawDiff = await getRawDiff(git, context.globalState, logger);
-    if (!rawDiff || !(await confirmIfPotentialSecrets(rawDiff, logger))) {
+    const collected = await getRawDiff(git, context.globalState, logger);
+    if (!collected) {
         return false;
     }
 
-    const openai = await initializeOpenAI();
-    if (!openai) {
-        return false;
-    }
-
-    const language = config.get('language') || 'english';
-    const diffResult = await processCommitDiff({
-        rawDiff,
-        openai,
-        language,
-        signal,
+    // Staging done for this run is undone on every path that applies no message
+    const applied = await undoStagingUnlessApplied(
+        collected.stagedByExtension,
+        (paths) => git.unstagePaths(paths),
         logger,
-        withProgress,
-    });
+        async () => {
+            if (signal?.aborted) {
+                return false;
+            }
+            const rawDiff = collected.diff;
+            if (!(await confirmIfPotentialSecrets(rawDiff, logger))) {
+                return false;
+            }
 
-    const templates = await findTemplates(git, logger);
-    const message = await generateMessage({
-        openai,
-        diff: diffResult.processedDiff,
-        template: templates.commit,
-        language,
-        messageStyle: config.get('messageStyle') || MessageStyle.Normal,
-        signal,
-        logger,
-        withProgress,
-    });
+            const openai = await initializeOpenAI();
+            if (!openai) {
+                return false;
+            }
 
-    if (!message) {
-        return false;
+            const language = config.get('language') || 'english';
+            const diffResult = await processCommitDiff({
+                rawDiff,
+                openai,
+                language,
+                signal,
+                logger,
+                withProgress,
+            });
+
+            const templates = await findTemplates(git, logger);
+            const message = await generateMessage({
+                openai,
+                diff: diffResult.processedDiff,
+                template: templates.commit,
+                language,
+                messageStyle: config.get('messageStyle') || MessageStyle.Normal,
+                signal,
+                logger,
+                withProgress,
+            });
+
+            if (!message) {
+                return false;
+            }
+
+            const finalMessage = appendTrailerIfEnabled(message, config);
+            setCommitMessageInSourceControl(finalMessage, target, logger);
+            return true;
+        },
+    );
+
+    if (applied) {
+        await showTimedNotification(t('messages.commitMessageGenerated'), 3000);
     }
-
-    const finalMessage = appendTrailerIfEnabled(message, config);
-    await setCommitMessageInSourceControl(finalMessage, logger);
-    await showTimedNotification(t('messages.commitMessageGenerated'), 3000);
-    return true;
+    return applied;
 }
 
-async function initializeGit(logger: Logger): Promise<GitService | undefined> {
-    const git = await GitServiceFactory.initialize();
+async function initializeGit(
+    repositoryPath: string | undefined,
+    logger: Logger,
+): Promise<GitService | undefined> {
+    const git = await GitServiceFactory.initialize(undefined, repositoryPath);
     if (!git) {
         logger.error('Failed to initialize GitService');
         return undefined;
@@ -97,7 +129,7 @@ async function getRawDiff(
     git: GitService,
     globalState: vscode.Memento,
     logger: Logger,
-): Promise<string | undefined> {
+): Promise<CollectedDiff | undefined> {
     logger.debug('Getting raw Git diff');
     const diff = await git.getRawDiff(globalState);
 

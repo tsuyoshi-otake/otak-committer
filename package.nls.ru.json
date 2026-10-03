@@ -21,7 +21,7 @@
   "config.openaiBaseUrl": "Base URL for an OpenAI-compatible pass-through gateway that preserves model IDs and the current Chat Completions request format.",
   "config.reasoningEffort": "Уровень рассуждения OpenAI (влияет на качество ответа и задержку)",
   "config.reasoningEffort.none": "Без рассуждения (самый быстрый, низшее качество)",
-  "config.reasoningEffort.low": "Низкий уровень рассуждения (быстрый, хорошее качество) — Рекомендуется",
+  "config.reasoningEffort.low": "Низкий уровень рассуждения (быстрый, хорошее качество)",
   "config.reasoningEffort.medium": "Средний уровень рассуждения (сбалансированный)",
   "config.reasoningEffort.high": "Высокий уровень рассуждения (самый медленный, высшее качество)",
   "config.maxInputTokens": "Максимальное количество входных токенов для обработки ИИ (по умолчанию: 200K)",

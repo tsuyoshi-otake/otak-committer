@@ -21,7 +21,7 @@
   "config.openaiBaseUrl": "Base URL for an OpenAI-compatible pass-through gateway that preserves model IDs and the current Chat Completions request format.",
   "config.reasoningEffort": "ระดับการใช้เหตุผลของ OpenAI (มีผลต่อคุณภาพการตอบสนองและความหน่วง)",
   "config.reasoningEffort.none": "ไม่ใช้เหตุผล (เร็วที่สุด คุณภาพต่ำสุด)",
-  "config.reasoningEffort.low": "ใช้เหตุผลระดับต่ำ (เร็ว คุณภาพดี) — แนะนำ",
+  "config.reasoningEffort.low": "ใช้เหตุผลระดับต่ำ (เร็ว คุณภาพดี)",
   "config.reasoningEffort.medium": "ใช้เหตุผลระดับกลาง (สมดุล)",
   "config.reasoningEffort.high": "ใช้เหตุผลระดับสูง (ช้าที่สุด คุณภาพสูงสุด)",
   "config.maxInputTokens": "จำนวนโทเคนอินพุตสูงสุดสำหรับการประมวลผล AI (ค่าเริ่มต้น: 200K)",

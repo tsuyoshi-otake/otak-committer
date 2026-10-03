@@ -16,6 +16,8 @@ export interface IssueGenerationParams {
     type: IssueType;
     description: string;
     files?: string[];
+    /** Aborts the AI requests; generation then rejects with the abort error */
+    signal?: AbortSignal;
 }
 
 /**

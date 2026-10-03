@@ -17,6 +17,8 @@ export class PRCommand extends BaseCommand {
                     storageUri: this.context.globalStorageUri,
                     initializeOpenAI: () => this.initializeOpenAI(),
                     withProgress: (title, task) => this.withProgress(title, task),
+                    withCancellableProgress: (title, task) =>
+                        this.withCancellableProgress(title, task),
                     setPreviewFile: (previewFile) => {
                         this.previewFile = previewFile;
                     },

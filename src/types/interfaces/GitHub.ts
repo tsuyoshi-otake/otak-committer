@@ -51,6 +51,8 @@ export interface PullRequestDiff {
         additions: number;
         deletions: number;
     };
+    /** True when GitHub's compare file cap was reached, so later files are missing */
+    fileLimitReached?: boolean;
 }
 
 /**
@@ -113,6 +115,7 @@ export interface GitHubAPI {
             owner: string;
             repo: string;
             per_page?: number;
+            page?: number;
         }) => Promise<GitHubBranchResponse>;
     };
     issues: {
@@ -128,6 +131,7 @@ export interface GitHubAPI {
             sort?: string;
             direction?: string;
             per_page?: number;
+            page?: number;
         }) => Promise<GitHubIssueListResponse>;
         create: (params: {
             owner: string;

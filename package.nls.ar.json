@@ -21,7 +21,7 @@
   "config.openaiBaseUrl": "Base URL for an OpenAI-compatible pass-through gateway that preserves model IDs and the current Chat Completions request format.",
   "config.reasoningEffort": "مستوى جهد الاستدلال OpenAI (يؤثر على جودة الاستجابة والتأخير)",
   "config.reasoningEffort.none": "بدون استدلال (الأسرع، أقل جودة)",
-  "config.reasoningEffort.low": "استدلال منخفض (سريع، جودة جيدة) - موصى به",
+  "config.reasoningEffort.low": "استدلال منخفض (سريع، جودة جيدة)",
   "config.reasoningEffort.medium": "استدلال متوسط (متوازن)",
   "config.reasoningEffort.high": "استدلال عالي (الأبطأ، أعلى جودة)",
   "config.maxInputTokens": "الحد الأقصى لرموز الإدخال لمعالجة الذكاء الاصطناعي (الافتراضي: 200K)",

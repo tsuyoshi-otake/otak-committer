@@ -8,6 +8,10 @@ on:
   schedule:
     - cron: '0 0 * * 0' # 毎週日曜日の午前0時に実行
 
+# Least privilege for GITHUB_TOKEN; CodeQL widens its own job below.
+permissions:
+  contents: read
+
 jobs:
   security-scan:
     name: Security Scan

@@ -3,6 +3,14 @@ export function cleanPath(filePath: string): string {
     return filePath.replace(/\\/g, '/');
 }
 
+/**
+ * Split NUL-terminated git path output (e.g. `git ls-files -z`). With -z, git
+ * neither C-quotes nor escapes non-ASCII or special characters in the paths.
+ */
+export function splitNulSeparatedPaths(output: string): string[] {
+    return output.split('\0').filter((filePath) => filePath !== '');
+}
+
 export function isSourceFile(filePath: string): boolean {
     const ignoredPatterns = [/node_modules/, /\.git/, /dist/, /build/, /\.vsix$/, /\.log$/];
     return !ignoredPatterns.some((pattern) => pattern.test(filePath));

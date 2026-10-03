@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
 import type { ChatCompletionReasoningEffort } from 'openai/resources/chat/completions';
 import type { ReasoningEffort } from '../types/enums/ReasoningEffort';
+import { OpenAIServiceError } from '../types/errors/ServiceError';
 import { OPENAI_COMPLETION_POLICY } from './openaiRequestPolicy';
 
 /**
@@ -24,10 +25,33 @@ export interface StructuredCompletionRequest {
     model: string;
     systemPrompt: string;
     userPrompt: string;
+    /** Output budget; reasoning tokens count against it as well */
+    maxCompletionTokens: number;
     reasoningEffort: ReasoningEffort | undefined;
     signal?: AbortSignal;
     schemaName: string;
     schema: Record<string, unknown>;
+}
+
+/**
+ * Why a structured completion produced no usable JSON object:
+ * - `truncated`: generation hit `max_completion_tokens` (`finish_reason: length`)
+ * - `refused`: the model returned a refusal instead of schema output
+ * - `invalid-json`: the content was not parseable JSON
+ */
+export type StructuredCompletionFailure = 'truncated' | 'refused' | 'invalid-json';
+
+/**
+ * Thrown when a JSON-schema completion cannot yield a parsed object, so callers
+ * report the actual cause instead of a JSON.parse SyntaxError.
+ */
+export class StructuredCompletionError extends OpenAIServiceError {
+    constructor(
+        public readonly reason: StructuredCompletionFailure,
+        message: string,
+    ) {
+        super(message, { reason });
+    }
 }
 
 interface CompletionRequestBase {
@@ -91,6 +115,7 @@ export async function requestTextCompletion(
  *
  * @param request - Structured completion request parameters including the JSON schema
  * @returns The parsed JSON response typed as T, or undefined when no content is returned
+ * @throws {StructuredCompletionError} When the output was truncated, refused, or not JSON
  */
 export async function requestStructuredCompletion<T>(
     request: StructuredCompletionRequest,
@@ -98,6 +123,7 @@ export async function requestStructuredCompletion<T>(
     const response = await request.openai.chat.completions.create(
         {
             ...createCompletionParams(request),
+            max_completion_tokens: request.maxCompletionTokens,
             response_format: {
                 type: 'json_schema',
                 json_schema: {
@@ -110,9 +136,31 @@ export async function requestStructuredCompletion<T>(
         createRequestOptions(request.signal),
     );
 
+    const choice = response.choices?.[0];
+    const refusal = choice?.message?.refusal;
+    if (refusal) {
+        throw new StructuredCompletionError(
+            'refused',
+            `The model declined to generate the response: ${refusal}`,
+        );
+    }
+    if (choice?.finish_reason === 'length') {
+        throw new StructuredCompletionError(
+            'truncated',
+            `The response hit the ${request.maxCompletionTokens}-token output limit before the JSON was complete`,
+        );
+    }
+
     const content = getCompletionContent(response);
     if (!content) {
         return undefined;
     }
-    return JSON.parse(content) as T;
+    try {
+        return JSON.parse(content) as T;
+    } catch {
+        throw new StructuredCompletionError(
+            'invalid-json',
+            'The model returned malformed JSON for a schema-constrained response',
+        );
+    }
 }

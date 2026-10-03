@@ -1,6 +1,7 @@
 import { GitHubAPI, GitHubServiceError, GitHubDiffFile, PullRequestDiff } from '../types';
 import { Logger } from '../infrastructure/logging/Logger';
 import { TokenManager } from './tokenManager';
+import { GITHUB_COMPARE_FILE_LIMIT } from './github.pagination';
 
 /**
  * Check whether an error indicates that there are no commits between two branches
@@ -84,6 +85,13 @@ export async function getBranchDiffDetails(
     }));
 
     logger.info(`Retrieved diff for ${files.length} files`);
+    // The compare endpoint cannot page files; at the cap, later files are silently missing
+    const fileLimitReached = files.length >= GITHUB_COMPARE_FILE_LIMIT;
+    if (fileLimitReached) {
+        logger.warning(
+            `Compare returned ${files.length} files (GitHub limit ${GITHUB_COMPARE_FILE_LIMIT}); later files are missing`,
+        );
+    }
     const maxTokensLimit = TokenManager.getConfiguredMaxTokens();
 
     for (const file of files) {
@@ -91,12 +99,16 @@ export async function getBranchDiffDetails(
     }
 
     if (totalTokens > maxTokensLimit) {
-        logger.warning(`Diff size (${totalTokens} tokens) exceeds limit (${maxTokensLimit}), truncating`);
+        logger.warning(
+            `Diff size (${totalTokens} tokens) exceeds limit (${maxTokensLimit}), truncating`,
+        );
         const ratio = maxTokensLimit / totalTokens;
         for (const file of files) {
             const maxLength = Math.floor(file.patch.length * ratio);
             if (file.patch.length > maxLength) {
-                file.patch = file.patch.substring(0, maxLength) + '\n... (diff truncated due to token limit)';
+                file.patch =
+                    file.patch.substring(0, maxLength) +
+                    '\n... (diff truncated due to token limit)';
             }
         }
     }
@@ -107,5 +119,6 @@ export async function getBranchDiffDetails(
             additions: files.reduce((sum: number, file: GitHubDiffFile) => sum + file.additions, 0),
             deletions: files.reduce((sum: number, file: GitHubDiffFile) => sum + file.deletions, 0),
         },
+        ...(fileLimitReached ? { fileLimitReached } : {}),
     };
 }

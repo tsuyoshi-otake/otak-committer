@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as os from 'os';
 import * as path from 'path';
 import * as crypto from 'crypto';
+import { buildPreviewFileName, isExtensionPreviewLabel } from './previewFileName';
 
 const PREVIEW_DIR_NAME = 'preview';
 const FALLBACK_PREVIEW_DIR = path.join(os.tmpdir(), 'otak-committer');
@@ -22,18 +23,20 @@ export async function cleanupPreviewFiles(storageUri?: vscode.Uri) {
 }
 
 function generateRandomFileName(prefix: string): string {
-    const timestamp = Date.now();
-    const random = crypto.randomBytes(4).toString('hex');
-    return `${prefix}-preview-${timestamp}-${random}.md`;
+    return buildPreviewFileName(prefix, Date.now(), crypto.randomBytes(4).toString('hex'));
 }
 
+/**
+ * Close the Markdown preview tabs of this extension's preview files.
+ *
+ * Other webviews whose label merely contains "Preview" are left open.
+ */
 export async function closePreviewTabs() {
     const tabs = vscode.window.tabGroups.all.flatMap((group) => group.tabs);
     const closeTasks = tabs
         .filter(
             (tab) =>
-                (tab.label.includes('Preview') || tab.label.includes('プレビュー')) &&
-                tab.input instanceof vscode.TabInputWebview,
+                tab.input instanceof vscode.TabInputWebview && isExtensionPreviewLabel(tab.label),
         )
         .map((tab) => vscode.window.tabGroups.close(tab));
     await Promise.all(closeTasks);

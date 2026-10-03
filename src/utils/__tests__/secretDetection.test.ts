@@ -138,4 +138,33 @@ suite('Secret Detection Utility', () => {
             assert.ok(elapsed < 750, `${input.slice(0, 16)}... took ${elapsed}ms`);
         }
     });
+
+    test('detects a signed JWT', () => {
+        const jwt =
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9' +
+            '.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ' +
+            '.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+
+        const result = detectPotentialSecrets(`+ Authorization: Bearer ${jwt}`, 50);
+
+        assert.ok(result.matchedPatternIds.includes('jwt_token'));
+    });
+
+    test('scans long JWT-like runs of dots in linear time', () => {
+        // The JWT pattern used to allow '.' inside segments, so a header followed by
+        // a long run of dots backtracked quadratically (84 s at 340 KB).
+        const header = 'eyJhbGciOiJ' + 'A'.repeat(20);
+        const inputs = [
+            header + '.'.repeat(340000),
+            (header + '.').repeat(10000),
+            ('eyJhbGciOiJIUzI1NiJ9.' + '.'.repeat(79)).repeat(3400),
+        ];
+
+        for (const input of inputs) {
+            const started = Date.now();
+            detectPotentialSecrets(input, 50);
+            const elapsed = Date.now() - started;
+            assert.ok(elapsed < 750, `${input.slice(0, 40)}... took ${elapsed}ms`);
+        }
+    });
 });

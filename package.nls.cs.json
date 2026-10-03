@@ -21,7 +21,7 @@
   "config.openaiBaseUrl": "Base URL for an OpenAI-compatible pass-through gateway that preserves model IDs and the current Chat Completions request format.",
   "config.reasoningEffort": "Uroven uvazovani OpenAI (ovlivnuje kvalitu a latenci odpovedi)",
   "config.reasoningEffort.none": "Zadne uvazovani (nejrychlejsi, nejnizsi kvalita)",
-  "config.reasoningEffort.low": "Nizke uvazovani (rychle, dobra kvalita) - Doporuceno",
+  "config.reasoningEffort.low": "Nizke uvazovani (rychle, dobra kvalita)",
   "config.reasoningEffort.medium": "Stredni uvazovani (vyvazene)",
   "config.reasoningEffort.high": "Vysoke uvazovani (nejpomalejsi, nejvyssi kvalita)",
   "config.maxInputTokens": "Maximalni vstupni tokeny pro zpracovani AI (vychozi: 200K)",

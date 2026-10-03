@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { Logger } from '../logging/Logger';
 import { BaseError, ErrorSeverity } from '../../types/errors/BaseError';
 import { isUserAbortError } from '../../utils/errorGuards';
+import { formatErrorDetail } from './formatErrorDetail';
 
 export { ErrorSeverity };
 
@@ -67,17 +68,7 @@ export class ErrorHandler {
      * @returns A formatted error message
      */
     private static formatErrorMessage(error: unknown, ctx: ErrorContext): string {
-        let errorMsg: string;
-
-        if (error instanceof BaseError) {
-            errorMsg = error.toString();
-        } else if (error instanceof Error) {
-            errorMsg = error.message;
-        } else {
-            errorMsg = String(error);
-        }
-
-        return `[${ctx.component}] ${ctx.operation}: ${errorMsg}`;
+        return `[${ctx.component}] ${ctx.operation}: ${formatErrorDetail(error)}`;
     }
 
     /**

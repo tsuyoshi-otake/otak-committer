@@ -21,7 +21,7 @@
   "config.openaiBaseUrl": "Base URL for an OpenAI-compatible pass-through gateway that preserves model IDs and the current Chat Completions request format.",
   "config.reasoningEffort": "Livello di ragionamento OpenAI (influisce su qualita e latenza della risposta)",
   "config.reasoningEffort.none": "Nessun ragionamento (piu veloce, qualita minore)",
-  "config.reasoningEffort.low": "Ragionamento basso (veloce, buona qualita) - Consigliato",
+  "config.reasoningEffort.low": "Ragionamento basso (veloce, buona qualita)",
   "config.reasoningEffort.medium": "Ragionamento medio (bilanciato)",
   "config.reasoningEffort.high": "Ragionamento alto (piu lento, qualita massima)",
   "config.maxInputTokens": "Token di input massimi per l'elaborazione AI (predefinito: 200K)",

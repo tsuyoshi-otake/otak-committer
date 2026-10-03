@@ -30,9 +30,10 @@ export class CommitCommand extends BaseCommand {
      * 7. Sanitize and set the message in source control input
      *
      * @param signal - Optional AbortSignal to cancel the operation
+     * @param repositoryRootPath - Root of the repository the command was invoked on, if known
      * @returns A promise that resolves when the command completes
      */
-    async execute(signal?: AbortSignal): Promise<void> {
+    async execute(signal?: AbortSignal, repositoryRootPath?: string): Promise<void> {
         try {
             this.logger.info('Starting commit message generation');
 
@@ -42,6 +43,7 @@ export class CommitCommand extends BaseCommand {
                     config: this.config,
                     logger: this.logger,
                     signal,
+                    repositoryRootPath,
                     initializeOpenAI: () => this.initializeOpenAI(),
                     withProgress: (title, task) => this.withProgress(title, task),
                 })

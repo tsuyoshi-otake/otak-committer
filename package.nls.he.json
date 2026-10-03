@@ -21,7 +21,7 @@
   "config.openaiBaseUrl": "Base URL for an OpenAI-compatible pass-through gateway that preserves model IDs and the current Chat Completions request format.",
   "config.reasoningEffort": "רמת מאמץ החשיבה של OpenAI (משפיעה על איכות התגובה והשהייה)",
   "config.reasoningEffort.none": "ללא חשיבה (מהיר ביותר, איכות נמוכה ביותר)",
-  "config.reasoningEffort.low": "חשיבה נמוכה (מהיר, איכות טובה) - מומלץ",
+  "config.reasoningEffort.low": "חשיבה נמוכה (מהיר, איכות טובה)",
   "config.reasoningEffort.medium": "חשיבה בינונית (מאוזן)",
   "config.reasoningEffort.high": "חשיבה גבוהה (איטי ביותר, איכות גבוהה ביותר)",
   "config.maxInputTokens": "מספר מרבי של טוקנים לעיבוד AI (ברירת מחדל: 200K)",

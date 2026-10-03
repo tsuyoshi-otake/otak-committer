@@ -1,11 +1,6 @@
-import {
-    GitHubAPI,
-    GitHubServiceError,
-    GitHubLabel,
-    IssueInfo,
-    IssueParams,
-} from '../types';
+import { GitHubAPI, GitHubServiceError, GitHubLabel, IssueInfo, IssueParams } from '../types';
 import { Logger } from '../infrastructure/logging/Logger';
+import { collectPages } from './github.pagination';
 
 /**
  * Fetch a single issue by number
@@ -88,12 +83,13 @@ export async function createIssue(
 }
 
 /**
- * List open issues for the repository, excluding pull requests
+ * List open issues for the repository, excluding pull requests, page by page
+ * up to the shared page limit
  *
  * @param octokit - The GitHub API client
  * @param owner - The repository owner
  * @param repo - The repository name
- * @param pageSize - The maximum number of issues to retrieve per page
+ * @param pageSize - The number of issues and pull requests requested per page
  * @param logger - The logger used to record progress
  * @returns The open issues sorted by most recently updated
  */
@@ -106,21 +102,31 @@ export async function getIssues(
 ): Promise<IssueInfo[]> {
     logger.debug('Getting issues');
 
-    const response = await octokit.issues.listForRepo({
-        owner,
-        repo,
-        state: 'open',
-        sort: 'updated',
-        direction: 'desc',
-        per_page: pageSize,
-    });
+    // The endpoint mixes pull requests into its pages, so filter after paging
+    const { items, truncated } = await collectPages(async (page) => {
+        const response = await octokit.issues.listForRepo({
+            owner,
+            repo,
+            state: 'open',
+            sort: 'updated',
+            direction: 'desc',
+            per_page: pageSize,
+            page,
+        });
 
-    if (response.status !== 200) {
-        logger.error(`Failed to get issues: status ${response.status}`);
-        throw new GitHubServiceError('Failed to get issues', response.status);
+        if (response.status !== 200) {
+            logger.error(`Failed to get issues: status ${response.status}`);
+            throw new GitHubServiceError('Failed to get issues', response.status);
+        }
+
+        return response.data;
+    }, pageSize);
+
+    if (truncated) {
+        logger.warning(`Issue list stopped after ${items.length} items (page limit reached)`);
     }
 
-    const issues = response.data
+    const issues = items
         .filter((item) => !('pull_request' in item))
         .map((issue) => ({
             number: issue.number,

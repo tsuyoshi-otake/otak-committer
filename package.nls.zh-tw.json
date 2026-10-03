@@ -21,7 +21,7 @@
   "config.openaiBaseUrl": "Base URL for an OpenAI-compatible pass-through gateway that preserves model IDs and the current Chat Completions request format.",
   "config.reasoningEffort": "OpenAI reasoning effort 等級（會影響品質與延遲）",
   "config.reasoningEffort.none": "無推理（最快，品質最低）",
-  "config.reasoningEffort.low": "低（快，品質好）- 推薦",
+  "config.reasoningEffort.low": "低（快，品質好）",
   "config.reasoningEffort.medium": "中（平衡）",
   "config.reasoningEffort.high": "高（最慢，品質最高）",
   "config.maxInputTokens": "AI 處理的最大輸入 token 數（預設：200K）",

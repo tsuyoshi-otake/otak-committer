@@ -46,6 +46,8 @@ By default the extension uses English and the Normal style. You can change both 
 
 It uses your repository's commit templates (`.gitmessage`, `.github/commit_template`, etc.) and adapts to your conventions. It works with standard Git repositories and linked Git worktrees.
 
+If nothing is staged, the extension offers to stage your tracked changes (**Stage All**, or **Always Stage** to skip this prompt from then on). Untracked files are never staged silently: whenever there are any, it lists them and asks whether to include them or stage tracked files only. If no message ends up in the commit box — you cancel, decline a secret warning, or generation fails — the files the extension staged are unstaged again. Running the command again while a message is being generated cancels the earlier request; the new run starts once the earlier one has finished cleaning up its staging.
+
 ### Pull Requests
 
 ![Generate Pull Request Button](images/generate-pull-request.png)
@@ -76,8 +78,8 @@ Generates clear titles and structured descriptions.
 - **UI internationalization**: automatically detects your VS Code display language, or lets you choose one manually.
 - **Multilingual commit messages**: generates messages in 25 languages, independent of the UI language.
 - **Message styles**: `simple`, `normal`, or `detailed`.
-- **Git worktree support**: resolves the current repository from the active workspace, including linked worktrees and multi-root setups, instead of assuming the first Git repository in the window.
-- **Repository visibility indicator**: the status bar shows whether the current repository is public (`$(globe)`) or private (`$(lock)`). Public repositories trigger a warning on open and a confirmation prompt before generating commit messages, helping prevent accidental exposure.
+- **Git worktree support**: resolves the current repository from the active workspace, including linked worktrees and multi-root setups, instead of assuming the first Git repository in the window. The commit button in a repository's Source Control title always targets that repository.
+- **Repository visibility indicator**: the status bar shows whether the current repository is public (`$(globe)`) or private (`$(lock)`). Public repositories trigger a warning on open and a confirmation prompt before generating commit messages, helping prevent accidental exposure. Choose **Don't Show Again** to turn both off for that repository.
 - **Deep VS Code integration**: Source Control panel actions, status bar controls, and full UI localization.
 - **Smart PRs and issues**: context-aware descriptions, template support, and issue linking.
 - **Custom instructions**: team-specific guidance via `otakCommitter.customMessage`.
@@ -91,7 +93,7 @@ Generates clear titles and structured descriptions.
 - Handles large diffs with a three-tier strategy:
   - **Tier 1**: diffs within the token limit are sent as-is.
   - **Tier 2**: oversized diffs are split by file. Lock files (`package-lock.json`, `yarn.lock`, etc.) are excluded, source code is prioritized, and a change summary for all files is always included.
-  - **Tier 3**: if Tier 2 still exceeds the budget, the remaining files are split into chunks, summarized through parallel API calls, and combined for commit message generation.
+  - **Tier 3**: if Tier 2 still exceeds the budget, the remaining files are split into chunks, summarized through parallel API calls (always with `low` reasoning effort), and combined for commit message generation. A single file larger than one chunk is cut at line boundaries into labelled parts.
 - Applies your commit template and style.
 - Generates the result in your selected language and detail level.
 
@@ -100,12 +102,16 @@ Generates clear titles and structured descriptions.
 - Generates a description from your changes.
 - Honors your PR template.
 - Links selected issues when available.
+- Branch and issue pickers list up to 1,000 entries (10 pages of 100).
+- If GitHub's compare API reaches its 300-file limit, you are warned that the description may not cover the remaining files.
+- Generation can be cancelled from the progress notification; clicking the button again while it runs has no effect.
 
 ### Issue Flow
 
 - Structures the issue based on the selected type.
 - Adds concise, actionable titles and descriptions.
 - Includes relevant context from selected files.
+- Generation can be cancelled from the progress notification; clicking the button again while it runs has no effect.
 
 ### GitHub Authentication
 
@@ -123,8 +129,8 @@ Uses VS Code's built-in GitHub authentication. Sign in or out through the Accoun
 | `otakCommitter.useEmoji` | `false` | Enable emoji prefixes |
 | `otakCommitter.emojiStyle` | `github` | Emoji format (`github` or `unicode`) |
 | `otakCommitter.openaiBaseUrl` | `""` | OpenAI pass-through gateway base URL (optional) |
-| `otakCommitter.reasoningEffort` | `high` | AI reasoning depth (`none`, `low`, `medium`, `high`) |
-| `otakCommitter.maxInputTokens` | `200000` | Maximum input tokens for diff analysis |
+| `otakCommitter.reasoningEffort` | `high` | AI reasoning depth (`none`, `low`, `medium`, `high`); Tier 3 chunk summaries always use `low` |
+| `otakCommitter.maxInputTokens` | `200000` | Maximum input tokens for diff analysis (1,000–922,000) |
 | `otakCommitter.useBulletList` | `true` | Format the commit message body as a bullet list |
 | `otakCommitter.useConventionalCommits` | `true` | Use Conventional Commits format |
 | `otakCommitter.appendCommitTrailer` | `true` | Append the `Commit-Message-By: otak-committer` trailer |
@@ -143,11 +149,11 @@ By default, requests use `https://api.openai.com/v1`. To route validation and ge
 }
 ```
 
-Gateway support intentionally targets endpoints that preserve OpenAI model IDs and the current Chat Completions request/response shape. A gateway must accept `gpt-6-luna` unchanged and pass `reasoning_effort` values (including `none`) through; arbitrary local model servers or model-name translation are outside this compatibility contract.
+Custom endpoint support intentionally targets endpoints that preserve OpenAI model IDs and the current Chat Completions request/response shape. The endpoint must accept `gpt-6-luna` unchanged and pass `reasoning_effort` values (including `none`) through; arbitrary local model servers or model-name translation are outside this compatibility contract.
 
-Remote endpoints must use HTTPS. Plain HTTP is accepted only for exact loopback hosts (`localhost`, `127.0.0.1`, or `::1`) so a local development gateway can be tested safely. URLs containing credentials, a query, or a fragment are rejected. Custom gateway credentials may use any non-empty token; the official endpoint requires an OpenAI `sk-...` key.
+Remote endpoints must use HTTPS. Plain HTTP is accepted only for exact loopback hosts (`localhost`, `127.0.0.1`, or `::1`) so a local development endpoint can be tested safely. URLs containing credentials, a query, or a fragment are rejected. A custom endpoint accepts any non-empty token; the official endpoint requires an OpenAI `sk-...` key.
 
-The extension validates the configured connection through the same gateway before generation. Gateways may omit `GET /models`: a `404` or `405` on that route is treated as “validation unsupported,” and the first successful completion validates that endpoint-and-token pair for the current extension session.
+The extension validates the configured connection through the same endpoint before generation. Custom endpoints may omit `GET /models`: a `404` or `405` on that route is treated as “validation unsupported,” and the first successful completion validates that endpoint-and-token pair for the current extension session.
 
 ### Custom Instruction Examples
 
@@ -191,20 +197,20 @@ Commit messages can be generated in 25 languages, independent of the UI language
 
 - Git diff analysis happens locally.
 - **Secret detection**: before generation, diffs and selected file content are scanned for potential secrets (API keys, tokens, passwords, private keys, connection strings, environment variable references, etc.). The extension asks for confirmation before sending inputs that may contain secrets to the external AI service; map-reduce chunks are also checked and logged.
-- **Log redaction**: the logger automatically redacts sensitive field values, known secret formats, URL-embedded credentials, and secrets in error stack traces.
+- **Log redaction**: the logger automatically redacts the values of credential-like fields in any naming style (`accessToken`, `client_secret`, `X-Api-Key`, `OPENAI_API_KEY`, …), known secret formats even inside longer text, URL-embedded credentials, and secrets in error stack traces. An error's string form never includes its context data.
 - Only necessary diff context is sent to the configured OpenAI endpoint for generation.
 - Large diffs are intelligently prioritized: lock files and generated files are excluded or summarized to minimize data sent to the API.
 
 ### Privacy Guarantees
 
 - No telemetry or usage analytics.
-- Requests go directly to OpenAI by default. If you configure a gateway, request data and credentials are sent to that gateway instead.
+- Requests go directly to OpenAI by default. If you configure a custom endpoint, request data and credentials are sent to that endpoint instead.
 - Source code is available for security review on GitHub.
 
 ### GitHub Integration
 
 - Uses GitHub's official REST API.
-- GitHub tokens are stored in the same secure storage as API keys.
+- Authenticates with the GitHub session from VS Code's built-in authentication; the extension does not use a personal access token. A legacy `otakCommitter.githubToken` setting is moved out of `settings.json` into secure storage.
 - Only requests the `repo` scope for PR and issue operations.
 
 ### Best Practices
@@ -250,7 +256,8 @@ The evaluation uses 10 fixed representative diffs and makes 20 paid API calls: e
 
 - **No output or empty results**: ensure you have staged changes and an OpenAI API key configured.
 - **PR/issue creation fails**: make sure you are signed in to GitHub via the Accounts icon in the Activity Bar.
-- **Wrong repository selected in a multi-root window**: focus a file in the target workspace or worktree and run the command again so the extension resolves the correct Git repository.
+- **Wrong repository selected in a multi-root window**: for commit messages, use the button in the target repository's Source Control title. For PRs and issues, focus a file in the target workspace or worktree and run the command again so the extension resolves the correct Git repository.
+- **API key validation reports a rate limit**: the message shows the wait time from the server's `Retry-After` header (for example `retry after 30s`); try again after that.
 - **Wrong UI language**: run `Configure Display Language` in VS Code and reload the window. Unsupported locales fall back to English.
 
 ## Related Extensions

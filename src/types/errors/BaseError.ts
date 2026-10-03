@@ -36,30 +36,14 @@ export abstract class BaseError extends Error {
         }
     }
 
-    private static readonly SENSITIVE_KEYS = new Set([
-        'apikey',
-        'api_key',
-        'token',
-        'secret',
-        'password',
-        'authorization',
-        'credential',
-        'openaiApiKey',
-        'githubToken',
-    ]);
-
     /**
-     * Returns a formatted error message with code and sanitized context
+     * Returns the error name, code, and message
+     *
+     * Context is intentionally not serialized here: it may hold credentials, and the
+     * redaction rules live above this layer. Use `formatErrorDetail` from
+     * infrastructure/error to render an error together with its redacted context.
      */
     public toString(): string {
-        const contextStr = this.context
-            ? ` | Context: ${JSON.stringify(this.context, (key, value) => {
-                  if (typeof key === 'string' && BaseError.SENSITIVE_KEYS.has(key.toLowerCase())) {
-                      return typeof value === 'string' ? '[REDACTED]' : value;
-                  }
-                  return value;
-              })}`
-            : '';
-        return `${this.name} [${this.code}]: ${this.message}${contextStr}`;
+        return `${this.name} [${this.code}]: ${this.message}`;
     }
 }

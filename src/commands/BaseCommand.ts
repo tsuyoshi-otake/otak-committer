@@ -6,6 +6,7 @@ import { ErrorHandler, ErrorContext } from '../infrastructure/error/ErrorHandler
 import { OpenAIService } from '../services/openai';
 import { ServiceError } from '../types/errors';
 import { closePreviewTabs, cleanupPreviewFiles } from '../utils/preview';
+import { runWithAbortOnCancel } from '../utils/cancellation';
 import { t } from '../i18n';
 
 /**
@@ -93,6 +94,31 @@ export abstract class BaseCommand {
                 cancellable: false,
             },
             task,
+        );
+    }
+
+    /**
+     * Execute a task with a cancellable progress notification
+     *
+     * Cancelling the notification aborts the signal passed to the task. The task
+     * should forward it to its requests and let the resulting abort error propagate;
+     * `ErrorHandler` logs it as a user cancellation without notifying the user.
+     *
+     * @param title - The title to display in the progress notification
+     * @param task - The async task, receiving the signal to forward
+     * @returns A promise that resolves with the task result
+     */
+    protected async withCancellableProgress<T>(
+        title: string,
+        task: (signal: AbortSignal) => Promise<T>,
+    ): Promise<T> {
+        return vscode.window.withProgress(
+            {
+                location: vscode.ProgressLocation.Notification,
+                title,
+                cancellable: true,
+            },
+            (_progress, token) => runWithAbortOnCancel(token, task),
         );
     }
 

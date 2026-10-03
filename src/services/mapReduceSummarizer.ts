@@ -9,6 +9,7 @@
 import { Logger } from '../infrastructure/logging/Logger';
 import { TokenManager } from './tokenManager';
 import { ParsedFileDiff, estimateTokenCount } from '../utils/diffUtils';
+import { groupIntoChunks } from '../utils/diffChunking';
 import { detectPotentialSecrets } from '../utils/secretDetection';
 import { isUserAbortError } from '../utils/errorGuards';
 
@@ -30,54 +31,6 @@ export interface MapReduceResult {
     chunksProcessed: number;
     /** Number of chunks that failed summarization */
     chunksFailed: number;
-}
-
-/**
- * Group parsed file diffs into chunks that fit within a token limit
- *
- * Respects file boundaries — a single file is never split across chunks.
- *
- * @param files - Files to group into chunks
- * @param chunkTokenLimit - Maximum tokens per chunk
- * @returns Array of chunks, each containing one or more files
- */
-export function groupIntoChunks(
-    files: ParsedFileDiff[],
-    chunkTokenLimit: number,
-): ParsedFileDiff[][] {
-    const chunks: ParsedFileDiff[][] = [];
-    let currentChunk: ParsedFileDiff[] = [];
-    let currentTokens = 0;
-
-    for (const file of files) {
-        // If a single file exceeds the chunk limit, it gets its own chunk
-        if (file.tokenCount > chunkTokenLimit) {
-            if (currentChunk.length > 0) {
-                chunks.push(currentChunk);
-                currentChunk = [];
-                currentTokens = 0;
-            }
-            chunks.push([file]);
-            continue;
-        }
-
-        if (currentTokens + file.tokenCount > chunkTokenLimit) {
-            if (currentChunk.length > 0) {
-                chunks.push(currentChunk);
-            }
-            currentChunk = [file];
-            currentTokens = file.tokenCount;
-        } else {
-            currentChunk.push(file);
-            currentTokens += file.tokenCount;
-        }
-    }
-
-    if (currentChunk.length > 0) {
-        chunks.push(currentChunk);
-    }
-
-    return chunks;
 }
 
 /**
@@ -109,7 +62,9 @@ export class MapReduceSummarizer {
         const chunkSize = TokenManager.MAP_REDUCE_CHUNK_SIZE;
         const chunks = groupIntoChunks(overflowFiles, chunkSize);
 
-        this.logger.info(`Map-reduce: processing ${chunks.length} chunks from ${overflowFiles.length} files`);
+        this.logger.info(
+            `Map-reduce: processing ${chunks.length} chunks from ${overflowFiles.length} files`,
+        );
 
         const summaries: string[] = [];
         let chunksFailed = 0;
@@ -119,9 +74,7 @@ export class MapReduceSummarizer {
             const batch = chunks.slice(i, i + MapReduceSummarizer.MAX_PARALLEL_CALLS);
             const batchPromises = batch.map((chunk, batchIndex) => {
                 const chunkIndex = i + batchIndex;
-                this.progressCallback?.(
-                    `${chunkIndex + 1}/${chunks.length}`,
-                );
+                this.progressCallback?.(`${chunkIndex + 1}/${chunks.length}`);
                 return this.summarizeChunk(chunk, language, chunkIndex, signal);
             });
 
@@ -158,7 +111,9 @@ export class MapReduceSummarizer {
         signal?: AbortSignal,
     ): Promise<string | undefined> {
         const chunkContent = chunk.map((f) => f.content).join('\n');
-        this.logger.debug(`Summarizing chunk ${chunkIndex} (${estimateTokenCount(chunkContent)} tokens, ${chunk.length} files)`);
+        this.logger.debug(
+            `Summarizing chunk ${chunkIndex} (${estimateTokenCount(chunkContent)} tokens, ${chunk.length} files)`,
+        );
 
         // Warn if potential secrets are detected (non-blocking)
         const detection = detectPotentialSecrets(chunkContent);

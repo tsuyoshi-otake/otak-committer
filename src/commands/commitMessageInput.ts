@@ -1,31 +1,30 @@
-import * as vscode from 'vscode';
-import { Logger } from '../infrastructure/logging/Logger';
+import type { Logger } from '../infrastructure/logging/Logger';
 import { t } from '../i18n';
-import { getRepositoryForCurrentWorkspace } from '../services/git.repository';
+import type { RepositoryTarget } from '../services/git.repository';
 
 /**
  * Set the generated commit message in the source control input box.
  *
+ * The target is the repository resolved when the command started, so the
+ * message lands in the repository whose diff it describes.
+ *
  * @param message - The commit message to set
+ * @param target - Repository resolved at the start of the command
  * @param logger - Logger for command diagnostics
  */
-export async function setCommitMessageInSourceControl(
+export function setCommitMessageInSourceControl(
     message: string,
-    logger: Logger,
-): Promise<void> {
+    target: Pick<RepositoryTarget, 'repository' | 'gitExtensionAvailable'>,
+    logger: Pick<Logger, 'debug' | 'error'>,
+): void {
     logger.debug('Setting generated message to source control input');
 
-    // Get Git extension
-    const gitExtension = vscode.extensions.getExtension('vscode.git');
-    if (!gitExtension) {
+    if (!target.gitExtensionAvailable) {
         logger.error('Git extension not found');
         throw new Error(t('errors.gitExtensionNotFound'));
     }
 
-    // Get Git API
-    const gitApi = gitExtension.exports.getAPI(1);
-    const repository = getRepositoryForCurrentWorkspace(gitApi);
-
+    const { repository } = target;
     if (!repository) {
         logger.error('No Git repository found');
         throw new Error(t('errors.noGitRepository'));

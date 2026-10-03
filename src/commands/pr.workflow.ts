@@ -5,6 +5,7 @@ import { t } from '../i18n/index.js';
 import { BranchSelection, BranchSelector } from '../services/branch';
 import { GitServiceFactory } from '../services/git';
 import { GitHubService, GitHubServiceFactory } from '../services/github';
+import { GITHUB_COMPARE_FILE_LIMIT } from '../services/github.pagination';
 import { OpenAIService } from '../services/openai';
 import { confirmProceedWithPotentialSecrets } from '../services/secretConfirmation';
 import { PullRequestDiff, TemplateInfo } from '../types';
@@ -16,6 +17,10 @@ import { selectIssue, selectPRType } from './pr.input';
 import { showPRPreview } from './pr.preview';
 
 type ProgressRunner = <T>(title: string, task: () => Promise<T>) => Promise<T>;
+type CancellableProgressRunner = <T>(
+    title: string,
+    task: (signal: AbortSignal) => Promise<T>,
+) => Promise<T>;
 type PreviewFile = { uri: vscode.Uri; document: vscode.TextDocument };
 type PRContent = { title: string; body: string };
 
@@ -25,6 +30,8 @@ interface PRGenerationWorkflowOptions {
     storageUri: vscode.Uri;
     initializeOpenAI: () => Promise<OpenAIService | undefined>;
     withProgress: ProgressRunner;
+    /** Progress whose Cancel button aborts the AI request; the abort error propagates */
+    withCancellableProgress: CancellableProgressRunner;
     setPreviewFile: (previewFile: PreviewFile) => void;
     openExternalUrl: (url: string) => Promise<void>;
 }
@@ -41,6 +48,7 @@ export async function runPRGenerationWorkflow({
     storageUri,
     initializeOpenAI,
     withProgress,
+    withCancellableProgress,
     setPreviewFile,
     openExternalUrl,
 }: PRGenerationWorkflowOptions): Promise<boolean> {
@@ -72,7 +80,7 @@ export async function runPRGenerationWorkflow({
         templates.pr,
         config,
         logger,
-        withProgress,
+        withCancellableProgress,
     );
     if (!prContent) {
         return false;
@@ -146,6 +154,12 @@ async function getBranchDiff(
             vscode.window.showErrorMessage(t('messages.noChangesBetweenBranches'));
             return undefined;
         }
+        if (diff.fileLimitReached) {
+            // Informational: generation continues with the files GitHub returned
+            void vscode.window.showWarningMessage(
+                t('messages.prDiffFileLimitReached', { limit: GITHUB_COMPARE_FILE_LIMIT }),
+            );
+        }
         return diff;
     } catch (error) {
         logger.error('Failed to get branch diff', error);
@@ -161,15 +175,18 @@ async function generatePRContent(
     template: TemplateInfo | undefined,
     config: Pick<ConfigManager, 'get'>,
     logger: Logger,
-    withProgress: ProgressRunner,
+    withCancellableProgress: CancellableProgressRunner,
 ): Promise<PRContent | undefined> {
     logger.debug('Generating PR content with AI');
 
-    const prContent = await withProgress(t('progress.analyzingChanges'), async () => {
-        const language = config.get('language') || 'english';
-        logger.debug(`Using language: ${language}`);
-        return openai.generatePRContent(diff, language, template);
-    });
+    const prContent = await withCancellableProgress(
+        t('progress.analyzingChanges'),
+        async (signal) => {
+            const language = config.get('language') || 'english';
+            logger.debug(`Using language: ${language}`);
+            return openai.generatePRContent(diff, language, template, signal);
+        },
+    );
 
     if (!prContent) {
         logger.warning('PR content generation returned empty');

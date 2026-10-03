@@ -218,12 +218,11 @@ async function ensureApiKeyValidated(
         return { action: 'stop' };
     }
 
-    return handleStoredKeyValidationFailure(validation, apiKey, storage);
+    return handleStoredKeyValidationFailure(validation, storage);
 }
 
 async function handleStoredKeyValidationFailure(
     validation: ValidateApiKeyResult & { ok: false },
-    apiKey: string,
     storage: StorageManager,
 ): Promise<ValidationDecision> {
     if (validation.kind === 'auth') {

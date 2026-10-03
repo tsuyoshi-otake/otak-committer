@@ -21,7 +21,7 @@
   "config.openaiBaseUrl": "Base URL for an OpenAI-compatible pass-through gateway that preserves model IDs and the current Chat Completions request format.",
   "config.reasoningEffort": "Muc reasoning effort cua OpenAI (anh huong chat luong va do tre)",
   "config.reasoningEffort.none": "Khong reasoning (nhanh nhat, chat luong thap nhat)",
-  "config.reasoningEffort.low": "Reasoning thap (nhanh, chat luong tot) - De xuat",
+  "config.reasoningEffort.low": "Reasoning thap (nhanh, chat luong tot)",
   "config.reasoningEffort.medium": "Reasoning vua (can bang)",
   "config.reasoningEffort.high": "Reasoning cao (cham nhat, chat luong cao nhat)",
   "config.maxInputTokens": "So token dau vao toi da cho AI xu ly (mac dinh: 200K)",

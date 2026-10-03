@@ -21,7 +21,7 @@
   "config.openaiBaseUrl": "Base URL for an OpenAI-compatible pass-through gateway that preserves model IDs and the current Chat Completions request format.",
   "config.reasoningEffort": "OpenAI பகுத்தறிவு முயற்சி நிலை (பதிலின் தரம் மற்றும் தாமதத்தைப் பாதிக்கும்)",
   "config.reasoningEffort.none": "பகுத்தறிவு இல்லை (விரைவான, குறைந்த தரம்)",
-  "config.reasoningEffort.low": "குறைந்த பகுத்தறிவு (விரைவான, நல்ல தரம்) — பரிந்துரைக்கப்படுகிறது",
+  "config.reasoningEffort.low": "குறைந்த பகுத்தறிவு (விரைவான, நல்ல தரம்)",
   "config.reasoningEffort.medium": "நடுத்தர பகுத்தறிவு (சமநிலை)",
   "config.reasoningEffort.high": "உயர் பகுத்தறிவு (மெதுவான, உயர்ந்த தரம்)",
   "config.maxInputTokens": "AI செயலாக்கத்திற்கான அதிகபட்ச உள்ளீட்டு டோக்கன்கள் (இயல்புநிலை: 200K)",

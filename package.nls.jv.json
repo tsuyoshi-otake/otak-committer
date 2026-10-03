@@ -21,7 +21,7 @@
   "config.openaiBaseUrl": "Base URL for an OpenAI-compatible pass-through gateway that preserves model IDs and the current Chat Completions request format.",
   "config.reasoningEffort": "Tingkat upaya penalaran OpenAI (mengaruhi kualitas respons lan latensi)",
   "config.reasoningEffort.none": "Tanpa penalaran (paling cepet, kualitas paling endhek)",
-  "config.reasoningEffort.low": "Penalaran endhek (cepet, kualitas apik) — Disaranake",
+  "config.reasoningEffort.low": "Penalaran endhek (cepet, kualitas apik)",
   "config.reasoningEffort.medium": "Penalaran sedhengan (seimbang)",
   "config.reasoningEffort.high": "Penalaran dhuwur (paling alon, kualitas paling dhuwur)",
   "config.maxInputTokens": "Token input maksimal kanggo proses AI (standar: 200K)",

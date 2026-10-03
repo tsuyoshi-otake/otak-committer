@@ -9,6 +9,9 @@ import { PromptGenerationOptions, sanitizeTemplateContent } from './promptConfig
  * @returns A textual summary describing changed files and detailed patches
  */
 export function generateDiffSummaryContent(diff: PullRequestDiff): string {
+    const limitNote = diff.fileLimitReached
+        ? `\n\nNote: GitHub listed only the first ${diff.files.length} changed files; further changed files exist but are not shown.`
+        : '';
     return `Changed files:
 ${diff.files.map((file) => `- ${file.filename} (additions: ${file.additions}, deletions: ${file.deletions})`).join('\n')}
 
@@ -19,7 +22,7 @@ ${diff.files
 [${file.filename}]
 ${file.patch}`,
     )
-    .join('\n')}`;
+    .join('\n')}${limitNote}`;
 }
 
 /**

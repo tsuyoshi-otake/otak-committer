@@ -21,7 +21,7 @@
   "config.openaiBaseUrl": "OpenAI互換パススルーゲートウェイのベースURL。OpenAIのモデルIDと現在のChat Completionsリクエスト形式をそのまま処理できる必要があります。",
   "config.reasoningEffort": "OpenAIモデルの reasoning effort レベル（品質とレイテンシに影響）",
   "config.reasoningEffort.none": "推論なし（最速、品質低）",
-  "config.reasoningEffort.low": "低（速い、品質良）- 推奨",
+  "config.reasoningEffort.low": "低（速い、品質良）",
   "config.reasoningEffort.medium": "中（バランス）",
   "config.reasoningEffort.high": "高（最も遅い、品質最高）",
   "config.maxInputTokens": "AI処理の最大入力トークン数（デフォルト: 200K）",

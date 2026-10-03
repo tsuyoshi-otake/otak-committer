@@ -8,6 +8,9 @@
 import {
     MAX_INPUT_TOKENS as _MAX_INPUT_TOKENS,
     CHARS_PER_TOKEN as _CHARS_PER_TOKEN,
+    MIN_CONFIGURED_INPUT_TOKENS,
+    MODEL_CONTEXT_WINDOW_TOKENS,
+    MODEL_MAX_INPUT_TOKENS,
 } from '../constants/tokenLimits';
 
 /**
@@ -35,8 +38,11 @@ export class TokenManager {
     /** Characters per token estimation ratio */
     public static readonly CHARS_PER_TOKEN = _CHARS_PER_TOKEN;
 
-    /** Effective context budget enforced by the extension (400K) */
-    public static readonly CONTEXT_LIMIT = 400 * 1000;
+    /** Effective context budget enforced by the extension (gpt-6-luna context window) */
+    public static readonly CONTEXT_LIMIT = MODEL_CONTEXT_WINDOW_TOKENS;
+
+    /** Largest input budget a user setting may select (gpt-6-luna max input) */
+    public static readonly MODEL_MAX_INPUT_TOKENS = MODEL_MAX_INPUT_TOKENS;
 
     /** Buffer reserved for reasoning tokens */
     public static readonly REASONING_BUFFER = 10 * 1000;
@@ -60,6 +66,15 @@ export class TokenManager {
         PR_BODY: 8000, // Increased for detailed PR bodies
         ISSUE: 12000, // Increased for comprehensive issues
     };
+
+    /**
+     * `max_completion_tokens` for the structured PR title + body request. Reasoning
+     * tokens count against this limit, so the reasoning buffer is added on top.
+     */
+    public static readonly PR_CONTENT_COMPLETION_TOKENS =
+        TokenManager.OUTPUT_TOKENS.PR_TITLE +
+        TokenManager.OUTPUT_TOKENS.PR_BODY +
+        TokenManager.REASONING_BUFFER;
 
     /**
      * Estimate token count from text using 4 characters per token ratio
@@ -106,7 +121,7 @@ export class TokenManager {
     /**
      * Validate that token allocation is within the extension context budget
      *
-     * Ensures that input + output + reasoning buffer does not exceed 400K tokens
+     * Ensures that input + output + reasoning buffer does not exceed CONTEXT_LIMIT
      *
      * @param inputTokens - Number of input tokens
      * @param outputTokens - Number of output tokens
@@ -115,7 +130,7 @@ export class TokenManager {
      * @example
      * ```typescript
      * const isValid = TokenManager.validateAllocation(180000, 8000);
-     * // Returns true (180K + 8K + 10K buffer = 198K < 400K)
+     * // Returns true (180K + 8K + 10K buffer = 198K < 1,050K)
      * ```
      */
     public static validateAllocation(inputTokens: number, outputTokens: number): boolean {
@@ -137,6 +152,27 @@ export class TokenManager {
     }
 
     /**
+     * Resolve a raw `otakCommitter.maxInputTokens` value to the input budget in use.
+     *
+     * Non-numeric values and values below the minimum fall back to MAX_INPUT_TOKENS.
+     * Values above the model's maximum input are clamped, because settings.json
+     * edits are not bounded by the manifest schema.
+     *
+     * @param configuredMaxTokens - Raw setting value
+     * @returns The input token budget
+     */
+    public static resolveConfiguredMaxTokens(configuredMaxTokens: unknown): number {
+        if (
+            typeof configuredMaxTokens !== 'number' ||
+            !Number.isFinite(configuredMaxTokens) ||
+            configuredMaxTokens < MIN_CONFIGURED_INPUT_TOKENS
+        ) {
+            return this.MAX_INPUT_TOKENS;
+        }
+        return Math.min(Math.floor(configuredMaxTokens), this.MODEL_MAX_INPUT_TOKENS);
+    }
+
+    /**
      * Get the configured max tokens from user settings, falling back to MAX_INPUT_TOKENS
      *
      * @returns The configured max token limit
@@ -144,12 +180,9 @@ export class TokenManager {
     public static getConfiguredMaxTokens(): number {
         try {
             const vscode = require('vscode');
-            const configuredMaxTokens: unknown = vscode.workspace
-                .getConfiguration('otakCommitter')
-                .get('maxInputTokens');
-            if (typeof configuredMaxTokens === 'number' && configuredMaxTokens >= 1000) {
-                return configuredMaxTokens;
-            }
+            return this.resolveConfiguredMaxTokens(
+                vscode.workspace.getConfiguration('otakCommitter').get('maxInputTokens'),
+            );
         } catch {
             // Not running in VS Code context (e.g., unit tests)
         }

@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+# Least privilege for GITHUB_TOKEN: the jobs only check out and build.
+permissions:
+  contents: read
+
 jobs:
   build-test:
     name: Build + Lint + Unit Tests

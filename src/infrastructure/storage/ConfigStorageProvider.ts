@@ -66,9 +66,9 @@ export class ConfigStorageProvider implements StorageProvider {
             this.logger.debug(`[ConfigStorageProvider] Stored value for key: ${key}`);
         } catch (error) {
             this.logger.error(`[ConfigStorageProvider] Error storing key ${key}:`, error);
+            // The value is deliberately omitted: this provider may store credentials.
             throw new ConfigurationError(`Failed to store configuration value for key: ${key}`, {
                 key,
-                value,
                 originalError: error,
             });
         }

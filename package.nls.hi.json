@@ -21,7 +21,7 @@
   "config.openaiBaseUrl": "Base URL for an OpenAI-compatible pass-through gateway that preserves model IDs and the current Chat Completions request format.",
   "config.reasoningEffort": "OpenAI तर्क प्रयास स्तर (प्रतिक्रिया गुणवत्ता और विलंबता को प्रभावित करता है)",
   "config.reasoningEffort.none": "कोई तर्क नहीं (सबसे तेज़, सबसे कम गुणवत्ता)",
-  "config.reasoningEffort.low": "कम तर्क (तेज़, अच्छी गुणवत्ता) — अनुशंसित",
+  "config.reasoningEffort.low": "कम तर्क (तेज़, अच्छी गुणवत्ता)",
   "config.reasoningEffort.medium": "मध्यम तर्क (संतुलित)",
   "config.reasoningEffort.high": "उच्च तर्क (सबसे धीमा, सर्वोच्च गुणवत्ता)",
   "config.maxInputTokens": "AI प्रोसेसिंग के लिए अधिकतम इनपुट टोकन (डिफ़ॉल्ट: 200K)",

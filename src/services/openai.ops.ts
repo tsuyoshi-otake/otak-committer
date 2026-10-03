@@ -171,7 +171,9 @@ export async function generatePRContentOp(
             model: context.model,
             systemPrompt,
             userPrompt,
+            maxCompletionTokens: TokenManager.PR_CONTENT_COMPLETION_TOKENS,
             reasoningEffort: context.getReasoningEffort(),
+            signal: context.signal,
             schemaName: 'pr_content',
             schema: PR_CONTENT_SCHEMA,
         });
@@ -228,6 +230,7 @@ export async function createChatCompletionOp(
             userPrompt: params.prompt,
             reasoningEffort: context.getReasoningEffort(),
             maxCompletionTokens: params.maxTokens ?? 1000,
+            signal: context.signal,
         });
         context.onRequestSuccess();
 

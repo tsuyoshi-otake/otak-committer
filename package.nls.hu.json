@@ -21,7 +21,7 @@
   "config.openaiBaseUrl": "Base URL for an OpenAI-compatible pass-through gateway that preserves model IDs and the current Chat Completions request format.",
   "config.reasoningEffort": "OpenAI gondolkodasi szint (hatassal van a valasz minosegere es lateniciajara)",
   "config.reasoningEffort.none": "Nincs gondolkodas (leggyorsabb, legalacsonyabb minoseg)",
-  "config.reasoningEffort.low": "Alacsony gondolkodas (gyors, jo minoseg) - Ajanlott",
+  "config.reasoningEffort.low": "Alacsony gondolkodas (gyors, jo minoseg)",
   "config.reasoningEffort.medium": "Kozepes gondolkodas (kiegyensulyozott)",
   "config.reasoningEffort.high": "Magas gondolkodas (leglassabb, legmagasabb minoseg)",
   "config.maxInputTokens": "Maximalis bemeneti tokenek az AI feldolgozashoz (alapertelmezett: 200K)",

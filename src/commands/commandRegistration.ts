@@ -1,6 +1,19 @@
 import * as vscode from 'vscode';
 import { CommandRegistry } from './CommandRegistry.js';
 import type { StatusBarManager } from '../ui/StatusBarManager.js';
+import { restartLatest } from '../utils/restartLatest.js';
+import { singleFlight } from '../utils/singleFlight.js';
+import { getSourceControlRootPath } from '../services/git.repository.js';
+
+/**
+ * Log that a command was ignored because its previous run has not finished.
+ *
+ * @param commandId - The ignored command
+ */
+async function logDuplicateRun(commandId: string): Promise<void> {
+    const { Logger } = await import('../infrastructure/logging/Logger.js');
+    Logger.getInstance().info(`${commandId} is already running; ignoring the duplicate request`);
+}
 
 /**
  * Register all extension commands with the command registry
@@ -17,21 +30,14 @@ export function registerAllCommands(
     context: vscode.ExtensionContext,
     statusBar: StatusBarManager,
 ): void {
-    // Track active commit generation request for cancellation
-    let activeCommitAbortController: AbortController | undefined;
-
-    // Commit message generation
+    // Commit message generation: a new click cancels the running request and
+    // starts once that run has finished undoing its staging, so the new run
+    // never reads an index the old run is still changing
     registry.register({
         id: 'otak-committer.generateMessage',
         title: 'Generate Commit Message',
         category: 'otak-committer',
-        handler: async () => {
-            // Cancel previous request if still running
-            if (activeCommitAbortController) {
-                activeCommitAbortController.abort();
-                activeCommitAbortController = undefined;
-            }
-
+        handler: restartLatest(async (signal: AbortSignal, sourceControl?: unknown) => {
             if (statusBar.isPublicRepo && !statusBar.isPublicRepoWarningSuppressed()) {
                 const { t } = await import('../i18n/index.js');
                 const choice = await vscode.window.showWarningMessage(
@@ -45,46 +51,45 @@ export function registerAllCommands(
                 } else if (choice !== t('buttons.yes')) {
                     return;
                 }
-            }
-
-            const abortController = new AbortController();
-            activeCommitAbortController = abortController;
-
-            try {
-                const { CommitCommand } = await import('./CommitCommand.js');
-                const command = new CommitCommand(context);
-                await command.execute(abortController.signal);
-            } finally {
-                // Only clear if this is still the active controller
-                if (activeCommitAbortController === abortController) {
-                    activeCommitAbortController = undefined;
+                if (signal.aborted) {
+                    return;
                 }
             }
-        },
+
+            const { CommitCommand } = await import('./CommitCommand.js');
+            const command = new CommitCommand(context);
+            await command.execute(signal, getSourceControlRootPath(sourceControl));
+        }),
     });
 
-    // PR generation
+    // PR generation: one run at a time, so two flows never share the preview and API quota
     registry.register({
         id: 'otak-committer.generatePR',
         title: 'Generate Pull Request',
         category: 'otak-committer',
-        handler: async () => {
-            const { PRCommand } = await import('./PRCommand.js');
-            const command = new PRCommand(context);
-            await command.execute();
-        },
+        handler: singleFlight(
+            async () => {
+                const { PRCommand } = await import('./PRCommand.js');
+                const command = new PRCommand(context);
+                await command.execute();
+            },
+            () => void logDuplicateRun('otak-committer.generatePR'),
+        ),
     });
 
-    // Issue generation
+    // Issue generation: one run at a time, for the same reason as PR generation
     registry.register({
         id: 'otak-committer.generateIssue',
         title: 'Generate Issue',
         category: 'otak-committer',
-        handler: async () => {
-            const { IssueCommand } = await import('./IssueCommand.js');
-            const command = new IssueCommand(context);
-            await command.execute();
-        },
+        handler: singleFlight(
+            async () => {
+                const { IssueCommand } = await import('./IssueCommand.js');
+                const command = new IssueCommand(context);
+                await command.execute();
+            },
+            () => void logDuplicateRun('otak-committer.generateIssue'),
+        ),
     });
 
     registry.register({
