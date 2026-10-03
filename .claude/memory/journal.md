@@ -147,3 +147,12 @@
   - The repository is public with 0 forks.
   - This journal had a local user path (the VSIX location); it was replaced with `~/tmp/…`.
 - Learning: rules.md [release] (updated) and [release-tools-audit].
+- Post-publish (commit 16b8691):
+  - CI passed on 16b8691. Security Scan failed, but the failure predates this change: since 2026-09-20 the root lockfile's dev dependencies (brace-expansion, braces, mocha's js-yaml) fail `npm audit --audit-level=high` (#6, #8). The release-tools audit is separate and reports 0.
+  - Dispatch run 37106208701 (`gh workflow run release.yml --ref main -f tag=v2.18.0`):
+    - All three jobs succeeded.
+    - Marketplace logged "Version 2.18.0 is already published. Skipping publish."
+    - Open VSX logged "Published odangoo.otak-committer v2.18.0".
+    - All 6 audit lines reported 0 vulnerabilities.
+  - The Open VSX API kept returning 2.16.11 for about 90 seconds after "Published" and returned 2.18.0 at t+97s. A check made right after publishing is not proof the release failed.
+  - The independent rubric-verifier passed C10 and C11. The Open VSX VSIX is identical to the local build: same size (1,240,585 bytes), same `extension.js` and `package.json` sha256, and the same 43 files.
