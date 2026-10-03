@@ -18,8 +18,8 @@
     "minimatch": ">=10.2.3",
     "diff": ">=8.0.3",
     "serialize-javascript": ">=7.0.3",
-    "brace-expansion": ">=5.0.8",
-    "js-yaml": "^4.3.0",
+    "brace-expansion": ">=5.0.12",
+    "js-yaml": "^4.3.2",
     "form-data": ">=4.0.6"
   },
   "engines": {
@@ -302,7 +302,7 @@
     "@types/vscode": "^1.90.0",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
-    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-cli": "^0.0.15",
     "@vscode/test-electron": "^2.4.1",
     "esbuild": "^0.25.10",
     "eslint": "^10.0.2",

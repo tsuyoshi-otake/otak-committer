@@ -156,3 +156,30 @@
     - All 6 audit lines reported 0 vulnerabilities.
   - The Open VSX API kept returning 2.16.11 for about 90 seconds after "Published" and returned 2.18.0 at t+97s. A check made right after publishing is not proof the release failed.
   - The independent rubric-verifier passed C10 and C11. The Open VSX VSIX is identical to the local build: same size (1,240,585 bytes), same `extension.js` and `package.json` sha256, and the same 43 files.
+
+## 2026-10-03 — Security Scan: dev-dependency advisories (#6)
+
+- Symptom: Security Scan has failed on every push and weekly run since 2026-09-20 (latest: run 37108284037 on 8f1fa00). Its `npm audit --audit-level=high` step reports 6 vulnerabilities (5 high, 1 moderate). CodeQL passes.
+- Root cause: new advisories appeared after the #6 overrides were set:
+  - brace-expansion 5.0.8 needs 5.0.12 (GHSA-rgw5, -6j4f, -qhr7, -q2hr; most published 2026-09-29).
+  - mocha's nested js-yaml 4.3.0 needs 4.3.2 (GHSA-5p4m, -2883).
+  - braces ≤3.0.3 has no fixed version (GHSA-vfj7, 2026-09-18). It came only from chokidar 3.6.0, used by `@vscode/test-cli` 0.0.12.
+  - @humanfs/node 0.16.6 needs 0.16.8 (moderate, GHSA-p498).
+  - All of these are dev-only.
+- Fix:
+  - `overrides`: `brace-expansion` raised to `>=5.0.12`, `js-yaml` to `^4.3.2`.
+  - `@vscode/test-cli` raised to `^0.0.15`, which uses chokidar 5 and so pulls in no braces.
+  - Lockfile regenerated with `npm install --package-lock-only --ignore-scripts --before=<7 days ago>`, then `npm update @humanfs/node` with the same flags. Result: 8 packages added, 25 removed, 20 changed.
+  - Knock-on version changes: mocha 11.7.5→11.8.0 (test-cli 0.0.15 needs ^11.7.6), c8 10→11, test-exclude 7→8.
+  - The other contributor's uncommitted `package.json` and `package-lock.json` edits stay unstaged. Their working-tree lockfile was regenerated the same way and differs from the staged one only by their 3 lines.
+- Verification:
+  - Staged tree (`checkout-index` to a scratch folder):
+    - `npm ci`, then `npm audit --audit-level=high`: 0 vulnerabilities.
+    - `npm ls` shows no braces.
+    - compile, `lint:ci` and `test:unit` pass (500 passing).
+    - `npm test` host suite: 498 passing. The first attempt matched the [host-tests] window-closed signature and was rerun.
+  - `vscode-test --list-configuration` still reads `.vscode-test.mjs`.
+  - `age-check.mjs`: 347 packages, all 7 or more days old; newest is string-width 8.3.0 (2026-09-24).
+  - Node 20: only test-cli 0.0.15 declares a newer Node (>=22). That gives an EBADENGINE warning, not an error, and CI never runs test-cli.
+- `age-check.mjs` fix: it reported "no publish time" for npm aliases such as `string-width-cjs`, because it looked packages up by install path. It now takes the registry name from `resolved`.
+- Learning: rules.md [deps-audit].
