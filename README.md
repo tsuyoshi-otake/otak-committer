@@ -128,7 +128,7 @@ Uses VS Code's built-in GitHub authentication. Sign in or out through the Accoun
 | `otakCommitter.customMessage` | `""` | Custom AI instructions (optional) |
 | `otakCommitter.useEmoji` | `false` | Enable emoji prefixes |
 | `otakCommitter.emojiStyle` | `github` | Emoji format (`github` or `unicode`) |
-| `otakCommitter.openaiBaseUrl` | `""` | OpenAI pass-through gateway base URL (optional) |
+| `otakCommitter.openaiBaseUrl` | `""` | Alternative OpenAI-compatible endpoint base URL (optional) |
 | `otakCommitter.reasoningEffort` | `high` | AI reasoning depth (`none`, `low`, `medium`, `high`); Tier 3 chunk summaries always use `low` |
 | `otakCommitter.maxInputTokens` | `200000` | Maximum input tokens for diff analysis (1,000–922,000) |
 | `otakCommitter.useBulletList` | `true` | Format the commit message body as a bullet list |
@@ -137,11 +137,11 @@ Uses VS Code's built-in GitHub authentication. Sign in or out through the Accoun
 
 The extension UI language follows your VS Code display language (`Configure Display Language` command). Supported UI locales: `en`, `ja`, `ko`, `vi`, `fr`, `de`, `es`, `pt`, `zh-cn`, `zh-tw`, `it`, `cs`, `hu`, `bg`, `tr`, `pl`, `ru`, `th`, `hi`, `bn`, `jv`, `ta`, `my`, `ar`, `he`. Other locales fall back to English.
 
-### OpenAI Models and Gateway
+### OpenAI Models and Compatible Endpoints
 
 All OpenAI operations — commit message generation, Tier 3 large-diff summaries, pull request generation, and generic chat/issue operations — use `gpt-6-luna` by default.
 
-By default, requests use `https://api.openai.com/v1`. To route validation and generation through an OpenAI pass-through gateway, set `otakCommitter.openaiBaseUrl` in VS Code settings. If that setting is empty, the extension checks `OPENAI_BASE_URL` and then falls back to the official endpoint:
+By default, requests use `https://api.openai.com/v1`. You can use another OpenAI-compatible endpoint by setting `otakCommitter.openaiBaseUrl` in VS Code settings. If that setting is empty, the extension checks `OPENAI_BASE_URL` and then falls back to the official endpoint:
 
 ```json
 {
