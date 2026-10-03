@@ -234,3 +234,30 @@
   - Fix: the pattern now targets the real risks: reading `getConfiguration('http')`, a standalone `agent:`, `fetch:` or `request: {` option, and the old log text.
   - Check: the narrowed pattern flags HEAD's 5 offending lines (import, settings read, log, `request: {`, `agent:`) and prints nothing for the new tree.
 - Commits: b75f392 (proxy client, dependency removal, Workspace Trust); the invisible-Unicode scan and this entry are in the commit that follows it.
+
+## 2026-10-03 — #8 pushed, CI green, issue closed; workspace cleanup
+
+- Pushed `5a9ac38..975e220` to main:
+  - b75f392 and b8495df (#8)
+  - bad6107: README wording for `openaiBaseUrl`, the user's own edit
+  - 975e220: ignore `.claude/goal-loop/` and `.codex/goal-loop/`; track `.codex/memory/rules.md`
+- Before the push:
+  - The outgoing diff had no emails, `C:\Users` paths or tokens.
+  - Author and committer are `tsuyoshi-otake` for every commit.
+  - The goal-loop rubrics were left out because they reference local scratch paths, and the repository is public.
+- Verification on 975e220:
+  - CI run 37126021575 passed.
+    - Unit tests: 507 passing, 15 pending.
+    - Host tests on windows-latest and ubuntu-latest: 482 passing, 17 pending. The proxy test passed on both.
+    - Repository scan: 423 files. Shipped-artifact scan: 30 files. Both reported 0 findings.
+  - Security Scan run 37126021577 passed.
+- Closed #8 as completed, with a comment.
+  - The comment says the repository-owned CONNECT transport in the issue summary (and in Codex's earlier comment) was not adopted, and why.
+  - It maps each acceptance criterion to evidence. The C2 transport coverage criterion is marked not applicable.
+- Fail → investigate → verify: the Write tool decoded an escaped surrogate-pair example in the comment draft into a real U+E0100.
+  - Running `check-invisible-unicode.mjs` on the draft flagged it at 46:49.
+  - The line was rewritten without backslashes. The draft and the posted comment, read back from GitHub, both scan clean.
+- Cleanup:
+  - Removed 17 compiled files in `out/` whose TypeScript source no longer exists. These were the cause of the 529 vs 522 unit-test count.
+  - Removed this session's scratch under `~/tmp`, about 6.7 MB: issue8-backup, proxyprobe, otak-committer-release, secscan, and the run logs.
+- Learning: [tool-escapes] now also covers text drafted for GitHub.
