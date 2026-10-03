@@ -1,6 +1,7 @@
 import * as path from 'path';
 import Mocha from 'mocha';
 import { glob } from 'glob';
+import * as vscode from 'vscode';
 
 export async function run(): Promise<void> {
     // Create the mocha test with configuration for both unit and property-based tests
@@ -39,11 +40,31 @@ export async function run(): Promise<void> {
 
         console.log(`Found ${files.length} test file(s)`);
 
+        // glob does not fix the file order, so a test that leaves
+        // getConfiguration replaced breaks a different later file on each run.
+        // Restore it after every test and fail the run, naming the leaking test.
+        const realGetConfiguration = vscode.workspace.getConfiguration;
+        const configurationLeaks: string[] = [];
+        mocha.suite.afterEach(function () {
+            if (vscode.workspace.getConfiguration !== realGetConfiguration) {
+                (vscode.workspace as any).getConfiguration = realGetConfiguration;
+                const title = this.currentTest?.fullTitle() ?? 'unknown test';
+                configurationLeaks.push(title);
+                console.error(`Test left vscode.workspace.getConfiguration replaced: ${title}`);
+            }
+        });
+
         return new Promise<void>((resolve, reject) => {
             try {
                 // Run the mocha test
                 mocha.run((failures: number) => {
-                    if (failures > 0) {
+                    if (configurationLeaks.length > 0) {
+                        reject(
+                            new Error(
+                                `Tests left vscode.workspace.getConfiguration replaced: ${configurationLeaks.join('; ')}`,
+                            ),
+                        );
+                    } else if (failures > 0) {
                         reject(new Error(`${failures} tests failed.`));
                     } else {
                         resolve();

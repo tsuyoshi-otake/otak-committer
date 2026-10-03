@@ -1,9 +1,15 @@
 import * as assert from 'assert';
-import * as vscode from 'vscode';
 import { StorageManager } from '../StorageManager';
-import { createFailingStorageContext } from './storageTestHelpers';
+import { createFailingStorageContext, mockWorkspaceConfiguration } from './storageTestHelpers';
 
 suite('StorageManager Error Handling', () => {
+    let restoreConfiguration: (() => void) | undefined;
+
+    teardown(() => {
+        restoreConfiguration?.();
+        restoreConfiguration = undefined;
+    });
+
     test('should return undefined when getApiKey encounters errors', async () => {
         const failingContext = createFailingStorageContext({
             secretGet: async () => {
@@ -30,13 +36,11 @@ suite('StorageManager Error Handling', () => {
             },
         });
 
-        (vscode.workspace as any).getConfiguration = () => ({
-            get: () => undefined,
+        restoreConfiguration = mockWorkspaceConfiguration(new Map(), {
             update: async () => {
                 throw new Error('Configuration failed');
             },
             has: () => false,
-            inspect: () => undefined,
         });
 
         const manager = new StorageManager(failingContext);
@@ -71,13 +75,11 @@ suite('StorageManager Error Handling', () => {
             },
         });
 
-        (vscode.workspace as any).getConfiguration = () => ({
-            get: () => undefined,
+        restoreConfiguration = mockWorkspaceConfiguration(new Map(), {
             update: async () => {
                 throw new Error('Configuration delete failed');
             },
             has: () => false,
-            inspect: () => undefined,
         });
 
         const manager = new StorageManager(failingContext);

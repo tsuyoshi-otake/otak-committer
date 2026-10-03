@@ -11,12 +11,17 @@ suite('StorageManager Migration Scenarios', () => {
     let storage: StorageTestContext;
     let manager: StorageManager;
     let configData: Map<string, any>;
+    let restoreConfiguration: () => void;
 
     setup(() => {
         storage = createStorageTestContext();
         configData = new Map();
-        mockWorkspaceConfiguration(configData);
+        restoreConfiguration = mockWorkspaceConfiguration(configData);
         manager = new StorageManager(storage.context);
+    });
+
+    teardown(() => {
+        restoreConfiguration();
     });
 
     test('should detect when migration is not needed', async () => {

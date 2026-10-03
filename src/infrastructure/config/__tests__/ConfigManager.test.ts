@@ -16,6 +16,7 @@ suite('ConfigManager', () => {
     let configManager: ConfigManager;
     let mockConfigData: Map<string, any>;
     let mockConfiguration: vscode.WorkspaceConfiguration;
+    let originalGetConfig: typeof vscode.workspace.getConfiguration;
 
     setup(() => {
         // Initialize mock data storage
@@ -46,7 +47,7 @@ suite('ConfigManager', () => {
         } as any;
 
         // Mock vscode.workspace.getConfiguration
-        const originalGetConfig = vscode.workspace.getConfiguration;
+        originalGetConfig = vscode.workspace.getConfiguration;
         (vscode.workspace as any).getConfiguration = (section?: string) => {
             if (section === 'otakCommitter') {
                 return mockConfiguration;
@@ -58,8 +59,9 @@ suite('ConfigManager', () => {
     });
 
     teardown(() => {
-        // Clean up mock data
+        // Clean up mock data and give later test files the real configuration API
         mockConfigData.clear();
+        (vscode.workspace as any).getConfiguration = originalGetConfig;
     });
 
     suite('Configuration Get Operations', () => {

@@ -10,10 +10,16 @@ import {
 suite('StorageManager Storage Failure Handling', () => {
     let storage: StorageTestContext;
     let manager: StorageManager;
+    let restoreConfiguration: (() => void) | undefined;
 
     setup(() => {
         storage = createStorageTestContext();
         manager = new StorageManager(storage.context);
+    });
+
+    teardown(() => {
+        restoreConfiguration?.();
+        restoreConfiguration = undefined;
     });
 
     test('should not retrieve from legacy backup when SecretStorage content is missing', async () => {
@@ -60,7 +66,7 @@ suite('StorageManager Storage Failure Handling', () => {
     test('should not use legacy storage when SecretStorage is unavailable', async () => {
         const configData = new Map<string, any>();
         configData.set('otakCommitter.openaiApiKey', 'sk-legacy-fallback-key');
-        mockWorkspaceConfiguration(configData, { has: () => false });
+        restoreConfiguration = mockWorkspaceConfiguration(configData, { has: () => false });
 
         const failingContext = createFailingStorageContext({
             secretGet: async () => {
@@ -83,7 +89,7 @@ suite('StorageManager Storage Failure Handling', () => {
 
     test('should reject and not write plaintext fallback when SecretStorage fails', async () => {
         const configData = new Map<string, any>();
-        mockWorkspaceConfiguration(configData, {
+        restoreConfiguration = mockWorkspaceConfiguration(configData, {
             has: () => false,
             update: async (_key, value, fullKey) => {
                 configData.set(fullKey, value);

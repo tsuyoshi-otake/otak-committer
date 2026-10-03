@@ -68,10 +68,21 @@ export function createFailingStorageContext(
     } as any;
 }
 
+/**
+ * Replace `vscode.workspace.getConfiguration` with a map-backed fake.
+ *
+ * The replacement is global to the extension host, so callers must call the
+ * returned function in `teardown`; otherwise later test files see this fake.
+ *
+ * @param configData - Backing store keyed by full setting name
+ * @param options - Overrides for `update` and `has`
+ * @returns A function that puts back the implementation seen before this call
+ */
 export function mockWorkspaceConfiguration(
     configData: Map<string, any>,
     options: MockWorkspaceConfigurationOptions = {},
-): void {
+): () => void {
+    const previous = vscode.workspace.getConfiguration;
     (vscode.workspace as any).getConfiguration = (section?: string) => {
         return {
             get: (key: string) => configData.get(toFullConfigKey(section, key)),
@@ -95,6 +106,9 @@ export function mockWorkspaceConfiguration(
             },
             inspect: () => undefined,
         };
+    };
+    return () => {
+        (vscode.workspace as any).getConfiguration = previous;
     };
 }
 
